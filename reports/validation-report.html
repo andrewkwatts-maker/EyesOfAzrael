@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eyes of Azrael - Validation Report</title>
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a25;
+            --text-primary: #e8e6e3;
+            --text-secondary: #a0a0a0;
+            --accent-gold: #c9a227;
+            --accent-purple: #8b7fff;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --border: #2a2a35;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--accent-gold);
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .timestamp {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .health-score {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            border: 4px solid;
+        }
+
+        .score-circle.success {
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .score-circle.warning {
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .score-circle.error {
+            border-color: var(--error);
+            color: var(--error);
+        }
+
+        .score-circle span {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+
+        .card h3 {
+            color: var(--accent-purple);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: bold;
+        }
+
+        .stat-value.success { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        .stat-value.error { color: var(--error); }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        section h2 {
+            color: var(--accent-gold);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-gold);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-card);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            color: var(--accent-purple);
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        tr.success td:last-child { color: var(--success); }
+        tr.warning td:last-child { color: var(--warning); }
+        tr.error td:last-child { color: var(--error); }
+
+        td.score {
+            font-weight: bold;
+        }
+
+        code {
+            background: var(--bg-secondary);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        footer {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            .health-score {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 0.9rem;
+            }
+
+            th, td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Eyes of Azrael</h1>
+            <p class="subtitle">Validation Report</p>
+            <p class="timestamp">Generated: Jan 9, 2026, 08:18 AM</p>
+        </header>
+
+        <div class="health-score">
+            <div class="score-circle error">
+                63%
+                <span>Health Score</span>
+            </div>
+        </div>
+
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Schema Validation</h3>
+                
+                    <div class="stat-row">
+                        <span class="stat-label">Total Assets</span>
+                        <span class="stat-value">948</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Valid</span>
+                        <span class="stat-value success">674</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Invalid</span>
+                        <span class="stat-value error">274</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Pass Rate</span>
+                        <span class="stat-value warning">71%</span>
+                    </div>
+                
+            </div>
+
+            <div class="card">
+                <h3>Rendering Validation</h3>
+                
+                    <div class="stat-row">
+                        <span class="stat-label">Total Assets</span>
+                        <span class="stat-value">948</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Renderable</span>
+                        <span class="stat-value success">797</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Unrenderable</span>
+                        <span class="stat-value error">151</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Render Rate</span>
+                        <span class="stat-value warning">84%</span>
+                    </div>
+                
+            </div>
+
+            <div class="card">
+                <h3>Link Validation</h3>
+                
+                    <div class="stat-row">
+                        <span class="stat-label">Total Links</span>
+                        <span class="stat-value">2411</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Valid</span>
+                        <span class="stat-value success">737</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Broken</span>
+                        <span class="stat-value error">1674</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Link Integrity</span>
+                        <span class="stat-value error">31%</span>
+                    </div>
+                
+            </div>
+        </div>
+
+        
+        <section>
+            <h2>Schema Validation by Collection</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Collection</th>
+                        <th>Total</th>
+                        <th>Valid</th>
+                        <th>Invalid</th>
+                        <th>Errors</th>
+                        <th>Warnings</th>
+                        <th>Pass Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                <tr class="warning">
+                    <td>deities</td>
+                    <td>257</td>
+                    <td>200</td>
+                    <td>57</td>
+                    <td>111</td>
+                    <td>19</td>
+                    <td class="score">78%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>creatures</td>
+                    <td>81</td>
+                    <td>68</td>
+                    <td>13</td>
+                    <td>37</td>
+                    <td>0</td>
+                    <td class="score">84%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>heroes</td>
+                    <td>69</td>
+                    <td>58</td>
+                    <td>11</td>
+                    <td>33</td>
+                    <td>11</td>
+                    <td class="score">84%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>items</td>
+                    <td>184</td>
+                    <td>140</td>
+                    <td>44</td>
+                    <td>132</td>
+                    <td>0</td>
+                    <td class="score">76%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>places</td>
+                    <td>61</td>
+                    <td>48</td>
+                    <td>13</td>
+                    <td>39</td>
+                    <td>0</td>
+                    <td class="score">79%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>herbs</td>
+                    <td>38</td>
+                    <td>0</td>
+                    <td>38</td>
+                    <td>58</td>
+                    <td>0</td>
+                    <td class="score">0%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>rituals</td>
+                    <td>31</td>
+                    <td>20</td>
+                    <td>11</td>
+                    <td>33</td>
+                    <td>0</td>
+                    <td class="score">65%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>texts</td>
+                    <td>41</td>
+                    <td>36</td>
+                    <td>5</td>
+                    <td>15</td>
+                    <td>0</td>
+                    <td class="score">88%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>symbols</td>
+                    <td>15</td>
+                    <td>14</td>
+                    <td>1</td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td class="score">93%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>archetypes</td>
+                    <td>58</td>
+                    <td>0</td>
+                    <td>58</td>
+                    <td>58</td>
+                    <td>0</td>
+                    <td class="score">0%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>cosmology</td>
+                    <td>79</td>
+                    <td>63</td>
+                    <td>16</td>
+                    <td>44</td>
+                    <td>0</td>
+                    <td class="score">80%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>mythologies</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>concepts</td>
+                    <td>22</td>
+                    <td>15</td>
+                    <td>7</td>
+                    <td>21</td>
+                    <td>22</td>
+                    <td class="score">68%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>magic</td>
+                    <td>12</td>
+                    <td>12</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>12</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </section>
+        
+
+        
+        <section>
+            <h2>Rendering Validation by Collection</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Collection</th>
+                        <th>Total</th>
+                        <th>Renderable</th>
+                        <th>Unrenderable</th>
+                        <th>Errors</th>
+                        <th>Render Rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                <tr class="success">
+                    <td>deities</td>
+                    <td>257</td>
+                    <td>238</td>
+                    <td>19</td>
+                    <td>19</td>
+                    <td class="score">93%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>creatures</td>
+                    <td>81</td>
+                    <td>65</td>
+                    <td>16</td>
+                    <td>20</td>
+                    <td class="score">80%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>heroes</td>
+                    <td>69</td>
+                    <td>58</td>
+                    <td>11</td>
+                    <td>11</td>
+                    <td class="score">84%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>items</td>
+                    <td>184</td>
+                    <td>140</td>
+                    <td>44</td>
+                    <td>44</td>
+                    <td class="score">76%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>places</td>
+                    <td>61</td>
+                    <td>48</td>
+                    <td>13</td>
+                    <td>13</td>
+                    <td class="score">79%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>herbs</td>
+                    <td>38</td>
+                    <td>28</td>
+                    <td>10</td>
+                    <td>10</td>
+                    <td class="score">74%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>rituals</td>
+                    <td>31</td>
+                    <td>20</td>
+                    <td>11</td>
+                    <td>11</td>
+                    <td class="score">65%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>texts</td>
+                    <td>41</td>
+                    <td>36</td>
+                    <td>5</td>
+                    <td>5</td>
+                    <td class="score">88%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>symbols</td>
+                    <td>15</td>
+                    <td>14</td>
+                    <td>1</td>
+                    <td>1</td>
+                    <td class="score">93%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>archetypes</td>
+                    <td>58</td>
+                    <td>58</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="warning">
+                    <td>cosmology</td>
+                    <td>79</td>
+                    <td>65</td>
+                    <td>14</td>
+                    <td>14</td>
+                    <td class="score">82%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>mythologies</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>concepts</td>
+                    <td>22</td>
+                    <td>15</td>
+                    <td>7</td>
+                    <td>7</td>
+                    <td class="score">68%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>magic</td>
+                    <td>12</td>
+                    <td>12</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </section>
+        
+
+        
+        <section>
+            <h2>Link Validation by Collection</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Collection</th>
+                        <th>Total Links</th>
+                        <th>Valid</th>
+                        <th>Broken</th>
+                        <th>External</th>
+                        <th>Integrity</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                <tr class="error">
+                    <td>deities</td>
+                    <td>917</td>
+                    <td>277</td>
+                    <td>640</td>
+                    <td>0</td>
+                    <td class="score">30%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>creatures</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td>1</td>
+                    <td>0</td>
+                    <td class="score">0%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>heroes</td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td>3</td>
+                    <td>0</td>
+                    <td class="score">0%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>items</td>
+                    <td>780</td>
+                    <td>343</td>
+                    <td>437</td>
+                    <td>0</td>
+                    <td class="score">44%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>places</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>herbs</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>rituals</td>
+                    <td>13</td>
+                    <td>13</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>texts</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>symbols</td>
+                    <td>41</td>
+                    <td>14</td>
+                    <td>27</td>
+                    <td>0</td>
+                    <td class="score">34%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>archetypes</td>
+                    <td>558</td>
+                    <td>27</td>
+                    <td>531</td>
+                    <td>0</td>
+                    <td class="score">5%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>cosmology</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>mythologies</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="success">
+                    <td>concepts</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td>0</td>
+                    <td class="score">100%</td>
+                </tr>
+            
+                <tr class="error">
+                    <td>magic</td>
+                    <td>98</td>
+                    <td>63</td>
+                    <td>35</td>
+                    <td>0</td>
+                    <td class="score">64%</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </section>
+        
+
+        
+        <section>
+            <h2>Top Broken Link Targets</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Target</th>
+                        <th>References</th>
+                        <th>Referenced By</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                <tr>
+                    <td><code>Sky Father</code></td>
+                    <td>13</td>
+                    <td>archetypes/cosmic-creator, archetypes/culture-hero, archetypes/divine-smith...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Cosmic Creator</code></td>
+                    <td>12</td>
+                    <td>archetypes/archetypes, archetypes/death, archetypes/earth-mother...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>aaron</code></td>
+                    <td>11</td>
+                    <td>items/ark-of-covenant, items/ark-of-covenant, items/frankincense...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>yhwh</code></td>
+                    <td>11</td>
+                    <td>items/ark-of-covenant, items/ark-of-covenant, items/frankincense...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Earth Mother</code></td>
+                    <td>11</td>
+                    <td>archetypes/archetypes, archetypes/cosmic-creator, archetypes/death...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Trickster</code></td>
+                    <td>11</td>
+                    <td>archetypes/cosmic-creator, archetypes/culture-hero, archetypes/death...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>⚔️
+                Odin
+                Norse</code></td>
+                    <td>9</td>
+                    <td>deities/brahma, deities/dyaus, deities/enki...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Dying God</code></td>
+                    <td>9</td>
+                    <td>archetypes/culture-hero, archetypes/death, archetypes/great-goddess...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Culture Hero</code></td>
+                    <td>8</td>
+                    <td>archetypes/archetypes, archetypes/divine-smith, archetypes/journey-archetypes...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Death Deity</code></td>
+                    <td>8</td>
+                    <td>archetypes/cosmic-creator, archetypes/dying-god, archetypes/earth-mother...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Threshold Guardian</code></td>
+                    <td>8</td>
+                    <td>archetypes/deity-archetypes, archetypes/journey-archetypes, archetypes/place-archetypes...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>War God</code></td>
+                    <td>8</td>
+                    <td>archetypes/divine-smith, archetypes/great-goddess, archetypes/love...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Creation Myth</code></td>
+                    <td>7</td>
+                    <td>deities/an, deities/enlil, deities/jade-emperor...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Death God</code></td>
+                    <td>7</td>
+                    <td>archetypes/archetypes, archetypes/journey-archetypes, archetypes/place-archetypes...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>Afterlife</code></td>
+                    <td>6</td>
+                    <td>deities/guan-yu, deities/hel, deities/jade-emperor...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>dharma</code></td>
+                    <td>6</td>
+                    <td>deities/vishnu, deities/vishnu, deities/vishnu...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>/mythos/greek/corpus-search.html?term=homer+odyssey</code></td>
+                    <td>6</td>
+                    <td>items/aegis, items/ambrosia, items/caduceus...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>/mythos/greek/corpus-search.html?term=apollodorus</code></td>
+                    <td>6</td>
+                    <td>items/aegis, items/ambrosia, items/golden-fleece...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>/mythos/greek/corpus-search.html?term=homer+iliad</code></td>
+                    <td>6</td>
+                    <td>items/ambrosia, items/caduceus, items/helm-of-darkness...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>🌀 All Elements Elemental archetypes index</code></td>
+                    <td>6</td>
+                    <td>archetypes/air, archetypes/chaos-void, archetypes/divine-light...</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </section>
+        
+
+        
+        <section>
+            <h2>Common Schema Errors</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Occurrences</th>
+                        <th>Examples</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    
+                <tr>
+                    <td><code>id</code></td>
+                    <td>147</td>
+                    <td>deities/unknown, deities/unknown...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>name</code></td>
+                    <td>147</td>
+                    <td>deities/unknown, deities/unknown...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>type</code></td>
+                    <td>147</td>
+                    <td>deities/unknown, deities/unknown...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>mythology</code></td>
+                    <td>84</td>
+                    <td>deities/an, deities/avalokiteshvara...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>attributes</code></td>
+                    <td>18</td>
+                    <td>deities/aengus, deities/baldr...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>preparation</code></td>
+                    <td>16</td>
+                    <td>herbs/buddhist_preparations, herbs/greek_laurel...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>sources</code></td>
+                    <td>13</td>
+                    <td>deities/baldr, deities/chinese_dragon-kings...</td>
+                </tr>
+            
+                <tr>
+                    <td><code>properties</code></td>
+                    <td>12</td>
+                    <td>herbs/buddhist_bodhi, herbs/buddhist_lotus...</td>
+                </tr>
+            
+                </tbody>
+            </table>
+        </section>
+        
+
+        <footer>
+            <p>Eyes of Azrael Validation System</p>
+            <p>Report generated automatically</p>
+        </footer>
+    </div>
+</body>
+</html>

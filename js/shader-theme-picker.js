@@ -30,27 +30,36 @@
 
     // Map theme names to shader files
     const SHADER_MAPPING = {
-        day: 'day',
+        // Featured themes
         night: 'night',
+        cosmic: 'cosmic',
+        sacred: 'night',        // Uses night shader with sacred colors
+        golden: 'light',        // Uses light shader with golden colors
+        ocean: 'water',         // Uses water shader
         fire: 'fire',
+        // Light themes
+        day: 'day',
+        light: 'light',
+        air: 'air',
+        order: 'order',
+        // Elemental themes
         water: 'water',
         earth: 'earth',
-        air: 'air',
+        storm: 'storm',
+        // Cosmic themes
         celestial: 'night',
         abyssal: 'dark',
         chaos: 'chaos',
-        order: 'order',
         aurora: 'aurora',
-        storm: 'storm',
-        cosmic: 'cosmic',
-        void: 'dark',
-        light: 'light'
+        void: 'dark'
     };
 
     // Theme categories for organization
     const THEME_CATEGORIES = [
-        { key: 'cosmic', label: 'Cosmic Themes', icon: '' },
-        { key: 'element', label: 'Elemental Themes', icon: '' }
+        { key: 'featured', label: 'Featured Themes', icon: '⭐' },
+        { key: 'cosmic', label: 'Cosmic Themes', icon: '🌌' },
+        { key: 'element', label: 'Elemental Themes', icon: '🌍' },
+        { key: 'light', label: 'Light Themes', icon: '☀️' }
     ];
 
     // Light themes (for system preference detection)
@@ -58,21 +67,28 @@
 
     // Theme preview colors (for thumbnail generation)
     const THEME_PREVIEW_COLORS = {
+        // Featured themes (6 primary themes)
         night: { bg: '#0a0e27', primary: '#8b7fff', secondary: '#ff7eb6' },
-        day: { bg: '#ffffff', primary: '#2563eb', secondary: '#7c3aed' },
+        cosmic: { bg: '#010104', primary: '#a855f7', secondary: '#ec4899' },
+        sacred: { bg: '#0f0a1e', primary: '#7c3aed', secondary: '#a855f7' },
+        golden: { bg: '#1a1408', primary: '#f59e0b', secondary: '#d97706' },
+        ocean: { bg: '#0a1929', primary: '#0891b2', secondary: '#0284c7' },
         fire: { bg: '#1a0a0a', primary: '#dc2626', secondary: '#ea580c' },
+        // Light themes
+        day: { bg: '#ffffff', primary: '#2563eb', secondary: '#7c3aed' },
+        light: { bg: '#fffbeb', primary: '#f59e0b', secondary: '#fbbf24' },
+        air: { bg: '#f0f9ff', primary: '#0ea5e9', secondary: '#38bdf8' },
+        order: { bg: '#f8fafc', primary: '#1e40af', secondary: '#0891b2' },
+        // Elemental themes
         water: { bg: '#0a1929', primary: '#0891b2', secondary: '#0284c7' },
         earth: { bg: '#0f1810', primary: '#15803d', secondary: '#65a30d' },
-        air: { bg: '#f0f9ff', primary: '#0ea5e9', secondary: '#38bdf8' },
+        storm: { bg: '#0f1419', primary: '#6366f1', secondary: '#8b5cf6' },
+        // Cosmic themes
         celestial: { bg: '#0f0a1e', primary: '#7c3aed', secondary: '#a855f7' },
         abyssal: { bg: '#000000', primary: '#6366f1', secondary: '#8b5cf6' },
         chaos: { bg: '#18181b', primary: '#e11d48', secondary: '#a855f7' },
-        order: { bg: '#f8fafc', primary: '#1e40af', secondary: '#0891b2' },
         aurora: { bg: '#0a0e1a', primary: '#10b981', secondary: '#8b5cf6' },
-        storm: { bg: '#0f1419', primary: '#6366f1', secondary: '#8b5cf6' },
-        cosmic: { bg: '#010104', primary: '#a855f7', secondary: '#ec4899' },
-        void: { bg: '#000000', primary: '#6366f1', secondary: '#8b5cf6' },
-        light: { bg: '#fffbeb', primary: '#f59e0b', secondary: '#fbbf24' }
+        void: { bg: '#000000', primary: '#6366f1', secondary: '#8b5cf6' }
     };
 
     // Default theme configuration (fallback if config fails to load)
@@ -606,12 +622,94 @@
     function cycleToNextTheme() {
         if (!themeConfig || !themeConfig.themes) return;
 
-        const themeKeys = Object.keys(themeConfig.themes);
-        const currentIndex = themeKeys.indexOf(currentTheme);
-        const nextIndex = (currentIndex + 1) % themeKeys.length;
-        const nextTheme = themeKeys[nextIndex];
+        // Cycle through featured themes first, then all themes
+        const featuredThemes = themeConfig.featuredThemes || ['night', 'cosmic', 'sacred', 'golden', 'ocean', 'fire'];
+        const currentIndex = featuredThemes.indexOf(currentTheme);
+
+        let nextTheme;
+        if (currentIndex >= 0) {
+            // Currently on a featured theme, cycle through featured
+            const nextIndex = (currentIndex + 1) % featuredThemes.length;
+            nextTheme = featuredThemes[nextIndex];
+        } else {
+            // Not on a featured theme, jump to first featured theme
+            nextTheme = featuredThemes[0];
+        }
 
         applyTheme(nextTheme, true);
+    }
+
+    // =========================================
+    // THEME PREVIEW (Hover Preview)
+    // =========================================
+
+    let previewTimeout = null;
+    let isPreviewActive = false;
+    let previewedTheme = null;
+
+    /**
+     * Preview theme on hover (shows colors without saving)
+     * @param {string} themeName - Theme to preview
+     */
+    function previewTheme(themeName) {
+        if (!themeConfig || !themeConfig.themes || !themeConfig.themes[themeName]) return;
+        if (previewedTheme === themeName) return;
+
+        // Clear any pending preview timeout
+        if (previewTimeout) {
+            clearTimeout(previewTimeout);
+        }
+
+        // Debounce preview to avoid rapid changes
+        previewTimeout = setTimeout(() => {
+            const theme = themeConfig.themes[themeName];
+            const root = document.documentElement;
+
+            // Apply preview colors with a preview class
+            root.classList.add('theme-preview-active');
+
+            // Apply CSS color variables for preview
+            if (theme.colors) {
+                Object.entries(theme.colors).forEach(([key, value]) => {
+                    root.style.setProperty(`--color-${key}`, value);
+                });
+            }
+
+            // Set preview data attribute
+            root.setAttribute('data-theme-preview', themeName);
+
+            previewedTheme = themeName;
+            isPreviewActive = true;
+        }, 100); // 100ms debounce
+    }
+
+    /**
+     * Cancel theme preview and restore current theme
+     */
+    function cancelPreview() {
+        if (previewTimeout) {
+            clearTimeout(previewTimeout);
+            previewTimeout = null;
+        }
+
+        if (!isPreviewActive) return;
+
+        const root = document.documentElement;
+        root.classList.remove('theme-preview-active');
+        root.removeAttribute('data-theme-preview');
+
+        // Restore current theme colors
+        if (themeConfig && themeConfig.themes && themeConfig.themes[currentTheme]) {
+            const theme = themeConfig.themes[currentTheme];
+            if (theme.colors) {
+                Object.entries(theme.colors).forEach(([key, value]) => {
+                    root.style.setProperty(`--color-${key}`, value);
+                });
+            }
+        }
+
+        previewedTheme = null;
+        isPreviewActive = false;
     }
 
     // =========================================
@@ -688,7 +786,7 @@
         // Handle theme selection
         dropdown.addEventListener('click', (e) => {
             const option = e.target.closest('.theme-option');
-            if (option) {
+            if (option && option.dataset.theme) {
                 const themeName = option.dataset.theme;
                 applyTheme(themeName, true);
                 closeDropdown();
@@ -700,6 +798,37 @@
                 e.stopPropagation();
                 toggleShaders();
                 updateDropdownContent();
+            }
+        });
+
+        // Handle theme preview on hover
+        dropdown.addEventListener('mouseenter', (e) => {
+            const option = e.target.closest('.theme-option');
+            if (option && option.dataset.theme) {
+                previewTheme(option.dataset.theme);
+            }
+        }, true);
+
+        dropdown.addEventListener('mouseleave', (e) => {
+            const option = e.target.closest('.theme-option');
+            if (option && option.dataset.theme) {
+                cancelPreview();
+            }
+        }, true);
+
+        // Use event delegation for hover preview
+        dropdown.addEventListener('mouseover', (e) => {
+            const option = e.target.closest('.theme-option');
+            if (option && option.dataset.theme && !option.classList.contains('shader-toggle')) {
+                previewTheme(option.dataset.theme);
+            }
+        });
+
+        dropdown.addEventListener('mouseout', (e) => {
+            const option = e.target.closest('.theme-option');
+            const relatedTarget = e.relatedTarget?.closest('.theme-option');
+            if (option && !relatedTarget) {
+                cancelPreview();
             }
         });
 
@@ -752,10 +881,13 @@
                 const isActive = theme.key === currentTheme;
                 const hasShader = SHADER_MAPPING[theme.key] ? true : false;
                 const preview = generateThemePreview(theme.key);
+                const featuredThemes = themeConfig.featuredThemes || ['night', 'cosmic', 'sacred', 'golden', 'ocean', 'fire'];
+                const isFeatured = featuredThemes.includes(theme.key);
 
                 html += `
                     <button class="theme-option ${isActive ? 'active' : ''}"
                             data-theme="${theme.key}"
+                            data-featured="${isFeatured}"
                             role="menuitemradio"
                             aria-checked="${isActive}"
                             title="${theme.description || theme.name}">
@@ -1004,15 +1136,27 @@
     // =========================================
 
     window.ShaderThemePicker = {
+        // Theme management
         setTheme: (themeName) => applyTheme(themeName, true),
         getCurrentTheme: () => currentTheme,
         getAvailableThemes: () => themeConfig ? Object.keys(themeConfig.themes) : [],
+        getFeaturedThemes: () => themeConfig?.featuredThemes || ['night', 'cosmic', 'sacred', 'golden', 'ocean', 'fire'],
         getThemeInfo: (themeName) => themeConfig?.themes?.[themeName] || null,
+        cycleTheme: () => cycleToNextTheme(),
+
+        // Theme preview
+        previewTheme: (themeName) => previewTheme(themeName),
+        cancelPreview: () => cancelPreview(),
+
+        // Shaders
         toggleShaders: () => toggleShaders(),
         getShadersEnabled: () => shadersEnabled,
-        cycleTheme: () => cycleToNextTheme(),
+
+        // State
         isInitialized: () => isInitialized,
         isLightTheme: () => LIGHT_THEMES.includes(currentTheme),
+
+        // System preference
         respectSystemPreference: (respect) => {
             respectSystemPref = respect;
             saveSystemPrefRespect(respect);
@@ -1020,11 +1164,54 @@
                 applyTheme(getSystemPreferredTheme(), true);
             }
         },
+        getSystemPreference: () => getSystemColorScheme(),
+
+        // Status
         getShaderStatus: () => {
             if (shaderManager) {
                 return shaderManager.getStatus ? shaderManager.getStatus() : { enabled: shadersEnabled };
             }
             return { enabled: false, supported: false };
+        },
+
+        // Entity-type accent colors
+        getEntityTypeAccent: (entityType) => {
+            const ENTITY_ACCENTS = {
+                deity: { color: '#f59e0b', rgb: '245, 158, 11' },      // Golden amber
+                hero: { color: '#3b82f6', rgb: '59, 130, 246' },       // Heroic blue
+                creature: { color: '#10b981', rgb: '16, 185, 129' },   // Nature green
+                item: { color: '#8b5cf6', rgb: '139, 92, 246' },       // Magical purple
+                place: { color: '#06b6d4', rgb: '6, 182, 212' },       // Sacred cyan
+                text: { color: '#d97706', rgb: '217, 119, 6' },        // Scroll amber
+                ritual: { color: '#dc2626', rgb: '220, 38, 38' },      // Ritual red
+                herb: { color: '#22c55e', rgb: '34, 197, 94' },        // Herb green
+                archetype: { color: '#ec4899', rgb: '236, 72, 153' },  // Archetype pink
+                symbol: { color: '#7c3aed', rgb: '124, 58, 237' },     // Symbol violet
+                mythology: { color: '#8b7fff', rgb: '139, 127, 255' }  // Theme primary
+            };
+            return ENTITY_ACCENTS[entityType?.toLowerCase()] || ENTITY_ACCENTS.mythology;
+        },
+
+        // Mythology accent colors
+        getMythologyAccent: (mythologyId) => {
+            const MYTHOLOGY_ACCENTS = {
+                greek: { color: '#DAA520', rgb: '218, 165, 32' },
+                norse: { color: '#4682B4', rgb: '70, 130, 180' },
+                egyptian: { color: '#CD853F', rgb: '205, 133, 63' },
+                hindu: { color: '#FF6347', rgb: '255, 99, 71' },
+                buddhist: { color: '#FFD700', rgb: '255, 215, 0' },
+                chinese: { color: '#DC143C', rgb: '220, 20, 60' },
+                japanese: { color: '#C41E3A', rgb: '196, 30, 58' },
+                celtic: { color: '#228B22', rgb: '34, 139, 34' },
+                roman: { color: '#800080', rgb: '128, 0, 128' },
+                babylonian: { color: '#CD853F', rgb: '205, 133, 63' },
+                mayan: { color: '#40E0D0', rgb: '64, 224, 208' },
+                aztec: { color: '#40E0D0', rgb: '64, 224, 208' },
+                yoruba: { color: '#DAA520', rgb: '218, 165, 32' },
+                slavic: { color: '#2F4F2F', rgb: '47, 79, 47' },
+                persian: { color: '#9932CC', rgb: '153, 50, 204' }
+            };
+            return MYTHOLOGY_ACCENTS[mythologyId?.toLowerCase()] || { color: '#8b7fff', rgb: '139, 127, 255' };
         }
     };
 

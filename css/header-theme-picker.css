@@ -237,6 +237,126 @@ body.theme-transitioning * {
     }
 }
 
+/* ============================================
+   THEME PREVIEW SWATCHES
+   ============================================ */
+
+/* Theme color swatch */
+.theme-preview {
+    display: flex;
+    gap: 2px;
+    width: 28px;
+    height: 18px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.theme-preview-color {
+    flex: 1;
+    min-width: 8px;
+}
+
+.theme-preview-bg {
+    flex: 1.5;
+}
+
+.theme-preview-primary {
+    flex: 1;
+}
+
+.theme-preview-secondary {
+    flex: 1;
+}
+
+/* Featured theme indicator */
+.theme-option[data-featured="true"]::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 60%;
+    background: linear-gradient(180deg, var(--color-accent, #ffd93d), var(--color-primary, #8b7fff));
+    border-radius: 0 2px 2px 0;
+    opacity: 0.8;
+}
+
+/* Theme option hover preview enhancement */
+.theme-option:hover .theme-preview {
+    transform: scale(1.1);
+    transition: transform 0.15s ease;
+}
+
+/* Active theme checkmark animation */
+.theme-option.active .theme-check {
+    animation: checkBounce 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes checkBounce {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* Theme category icons */
+.theme-category-label::before {
+    margin-right: 0.25rem;
+}
+
+/* Featured themes get special styling */
+.theme-category[data-category="featured"] .theme-option {
+    padding-left: 1.25rem;
+}
+
+.theme-category[data-category="featured"] .theme-category-label {
+    color: var(--color-accent, #ffd93d);
+}
+
+/* System preference indicator */
+.system-pref-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem 0.25rem;
+    font-size: 0.8rem;
+    color: var(--color-text-muted, #6c757d);
+    background: rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.3);
+    border-radius: 6px;
+}
+
+.system-pref-indicator svg {
+    width: 14px;
+    height: 14px;
+    opacity: 0.7;
+}
+
+/* Theme description tooltip */
+.theme-option[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.4rem 0.6rem;
+    background: rgba(0, 0, 0, 0.9);
+    color: var(--color-text-primary, #f8f9fa);
+    font-size: 0.75rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0;
+    animation: tooltipFadeIn 0.2s 0.5s forwards;
+    pointer-events: none;
+}
+
+@keyframes tooltipFadeIn {
+    to { opacity: 1; }
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .theme-dropdown {

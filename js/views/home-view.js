@@ -612,8 +612,8 @@ class HomeView {
                 <div class="mythology-card-icon" style="color: ${borderColor};">
                     ${mythology.icon || '📖'}
                 </div>
-                <h3 class="mythology-card-title">${mythology.name}</h3>
-                <p class="mythology-card-description">${mythology.description}</p>
+                <h3 class="mythology-card-title card-title-truncate">${mythology.name}</h3>
+                <p class="mythology-card-description card-desc-truncate">${mythology.description}</p>
                 <div class="mythology-card-arrow" style="color: ${borderColor};">→</div>
             </a>
         `;

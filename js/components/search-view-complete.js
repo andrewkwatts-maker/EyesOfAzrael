@@ -319,41 +319,114 @@ class SearchViewComplete {
     }
 
     /**
-     * Generate no results HTML
+     * Generate no results HTML - Enhanced with tips and better suggestions
      */
     getNoResultsHTML() {
         const suggestions = this.getSuggestions();
+        const spellingHint = this.getSpellingHint(this.state.query);
+        const relatedMythologies = this.getRelatedMythologies(this.state.query);
+
         return `
-            <div class="no-results">
+            <div class="no-results no-results-enhanced">
                 <div class="no-results-visual">
-                    <svg class="no-results-icon" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <path d="M21 21l-4.35-4.35"></path>
-                        <path d="M8 8l6 6M14 8l-6 6" stroke-width="2"></path>
-                    </svg>
+                    <div class="no-results-icon-animated">\u{1F50E}</div>
                 </div>
-                <h3 class="no-results-title">No results found for "${this.escapeHtml(this.state.query)}"</h3>
-                <p class="no-results-hint">Try different keywords or clear filters</p>
+                <h3 class="no-results-title">No results found for "<span class="no-results-query">${this.escapeHtml(this.state.query)}</span>"</h3>
+                <p class="no-results-hint">We couldn't find any matches. Try one of these options:</p>
+
+                ${spellingHint ? `
+                    <div class="no-results-spelling">
+                        <p>Did you mean: <button class="spelling-suggestion" data-query="${this.escapeHtml(spellingHint)}">${this.escapeHtml(spellingHint)}</button>?</p>
+                    </div>
+                ` : ''}
+
+                <div class="no-results-tips">
+                    <p class="no-results-tips-title">Search Tips</p>
+                    <ul class="no-results-tips-list">
+                        <li>Check spelling and try alternate names</li>
+                        <li>Use broader terms (e.g., "god" instead of "deity of thunder")</li>
+                        <li>Try searching by mythology (e.g., "Greek" or "Norse")</li>
+                        <li>Remove filters to expand your search</li>
+                    </ul>
+                </div>
+
                 <div class="no-results-actions">
                     <button id="clear-all-filters-btn" class="btn-primary">
-                        Clear Filters
+                        <span>\u{2716}</span> Clear All Filters
                     </button>
                     <button id="try-again-btn" class="btn-secondary">
-                        Modify Search
+                        <span>\u{270F}\uFE0F</span> Modify Search
                     </button>
                 </div>
-                ${suggestions.length > 0 ? `
-                    <div class="related-suggestions">
-                        <p class="suggestions-label">You might like:</p>
-                        <div class="suggestion-chips">
-                            ${suggestions.map(s => `
-                                <button class="suggestion-chip" data-query="${this.escapeHtml(s)}">${this.escapeHtml(s)}</button>
+
+                ${relatedMythologies.length > 0 ? `
+                    <div class="no-results-suggestions no-results-mythologies">
+                        <p class="suggestions-title">\u{1F30D} Browse by Mythology</p>
+                        <div class="suggestion-buttons">
+                            ${relatedMythologies.map(m => `
+                                <button class="suggestion-btn mythology-btn" data-mythology="${m.id}">${m.name}</button>
                             `).join('')}
                         </div>
                     </div>
                 ` : ''}
+
+                ${suggestions.length > 0 ? `
+                    <div class="no-results-suggestions">
+                        <p class="suggestions-title">\u{1F31F} Popular Searches</p>
+                        <div class="suggestion-buttons">
+                            ${suggestions.map(s => `
+                                <button class="suggestion-btn" data-query="${this.escapeHtml(s)}">${this.escapeHtml(s)}</button>
+                            `).join('')}
+                        </div>
+                    </div>
+                ` : ''}
+
+                <div class="no-results-browse">
+                    <p class="suggestions-title">\u{1F3AF} Browse Categories</p>
+                    <div class="suggestion-buttons category-buttons">
+                        <button class="suggestion-btn" data-category="deities">\u2728 Deities</button>
+                        <button class="suggestion-btn" data-category="heroes">\u2694\uFE0F Heroes</button>
+                        <button class="suggestion-btn" data-category="creatures">\u{1F432} Creatures</button>
+                        <button class="suggestion-btn" data-category="places">\u{1F3DB}\uFE0F Places</button>
+                        <button class="suggestion-btn" data-category="items">\u{1F48E} Items</button>
+                    </div>
+                </div>
             </div>
         `;
+    }
+
+    /**
+     * Get spelling hint for misspelled queries
+     */
+    getSpellingHint(query) {
+        // Common misspellings mapping
+        const corrections = {
+            'zues': 'Zeus', 'zoos': 'Zeus', 'zeuss': 'Zeus',
+            'odan': 'Odin', 'odinn': 'Odin',
+            'thor': 'Thor', 'thore': 'Thor',
+            'aphrodight': 'Aphrodite', 'afrodite': 'Aphrodite',
+            'athene': 'Athena', 'athenea': 'Athena',
+            'posieden': 'Poseidon', 'posiden': 'Poseidon',
+            'anubus': 'Anubis', 'annubis': 'Anubis',
+            'rah': 'Ra', 'raa': 'Ra',
+            'sheva': 'Shiva', 'shivu': 'Shiva',
+            'budda': 'Buddha', 'budah': 'Buddha',
+            'herculese': 'Heracles', 'hercules': 'Heracles',
+            'persues': 'Perseus', 'persius': 'Perseus'
+        };
+
+        const lowerQuery = query.toLowerCase();
+        return corrections[lowerQuery] || null;
+    }
+
+    /**
+     * Get related mythologies for the query
+     */
+    getRelatedMythologies(query) {
+        const lowerQuery = query.toLowerCase();
+
+        // Return top mythologies if no specific match
+        return this.mythologies.slice(0, 5);
     }
 
     /**
@@ -924,23 +997,60 @@ class SearchViewComplete {
     }
 
     /**
-     * Initialize no results handlers
+     * Initialize no results handlers - Enhanced with more click targets
      */
     initNoResultsHandlers() {
+        // Clear filters button
         document.getElementById('clear-all-filters-btn')?.addEventListener('click', () => {
             this.clearFilters();
         });
 
+        // Modify search / try again button
         document.getElementById('try-again-btn')?.addEventListener('click', () => {
             this.elements.searchInput.focus();
             this.elements.searchInput.select();
         });
 
+        // Spelling suggestion
+        document.querySelectorAll('.spelling-suggestion').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const query = btn.dataset.query;
+                this.elements.searchInput.value = query;
+                this.performSearch(query);
+            });
+        });
+
+        // Suggestion chips (old format)
         document.querySelectorAll('.suggestion-chip').forEach(chip => {
             chip.addEventListener('click', () => {
                 const query = chip.dataset.query;
                 this.elements.searchInput.value = query;
                 this.performSearch(query);
+            });
+        });
+
+        // Suggestion buttons (new format) - query-based
+        document.querySelectorAll('.suggestion-btn[data-query]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const query = btn.dataset.query;
+                this.elements.searchInput.value = query;
+                this.performSearch(query);
+            });
+        });
+
+        // Mythology buttons - navigate to mythology
+        document.querySelectorAll('.mythology-btn[data-mythology]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mythology = btn.dataset.mythology;
+                window.location.hash = `#/mythology/${mythology}`;
+            });
+        });
+
+        // Category buttons - navigate to browse category
+        document.querySelectorAll('.suggestion-btn[data-category]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const category = btn.dataset.category;
+                window.location.hash = `#/browse/${category}`;
             });
         });
     }

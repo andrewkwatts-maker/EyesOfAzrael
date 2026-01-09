@@ -775,18 +775,47 @@ class HeaderNavController {
         // Update desktop nav links
         document.querySelectorAll('.nav-link').forEach(link => {
             const href = link.getAttribute('href');
-            const isActive = currentHash.startsWith(href) && href !== '#/';
+            const isActive = this._isRouteActive(href, currentHash);
             link.classList.toggle('active', isActive);
+            link.setAttribute('aria-current', isActive ? 'page' : 'false');
         });
 
         // Update mobile nav links
         document.querySelectorAll('.mobile-nav-link').forEach(link => {
             const href = link.getAttribute('href');
             if (href) {
-                const isActive = currentHash.startsWith(href) && href !== '#/';
+                const isActive = this._isRouteActive(href, currentHash);
                 link.classList.toggle('active', isActive);
+                link.setAttribute('aria-current', isActive ? 'page' : 'false');
             }
         });
+
+        // Update footer navigation links
+        document.querySelectorAll('.footer-section-link').forEach(link => {
+            const href = link.getAttribute('href');
+            if (href) {
+                const isActive = this._isRouteActive(href, currentHash);
+                link.setAttribute('aria-current', isActive ? 'page' : 'false');
+            }
+        });
+    }
+
+    /**
+     * Check if a route is currently active
+     * @param {string} href - Link href
+     * @param {string} currentHash - Current location hash
+     * @returns {boolean} True if route is active
+     */
+    _isRouteActive(href, currentHash) {
+        if (!href) return false;
+
+        // Home route special case
+        if (href === '#/' || href === '#') {
+            return currentHash === '#/' || currentHash === '#' || currentHash === '';
+        }
+
+        // Check if current hash starts with href (for nested routes)
+        return currentHash.startsWith(href) && href.length > 2;
     }
 
     /**

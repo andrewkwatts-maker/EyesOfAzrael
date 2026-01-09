@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Submissions - Admin Panel - Eyes of Azrael</title>
+
+    <!-- Core Styles -->
+    <link rel="stylesheet" href="../themes/theme-base.css">
+    <link rel="stylesheet" href="../css/submission-workflow.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Config and Auth -->
+    <script src="../firebase-config.js"></script>
+    <script src="../js/firebase-init.js"></script>
+    <script src="../js/submission-workflow.js"></script>
+
+    <style>
+        :root {
+            --color-bg-dark: #0a0a0a;
+            --color-bg-medium: #1a1a2e;
+            --color-bg-light: #16213e;
+            --color-primary: #9370DB;
+            --color-secondary: #DAA520;
+            --color-accent: #64ffda;
+            --color-text: #e0e0e0;
+            --color-text-muted: #a0a0a0;
+            --color-success: #22c55e;
+            --color-warning: #fbbf24;
+            --color-danger: #ef4444;
+            --color-info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Lato', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--color-bg-dark) 0%, var(--color-bg-medium) 50%, var(--color-bg-light) 100%);
+            color: var(--color-text);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .admin-header {
+            background: linear-gradient(135deg, rgba(147, 112, 219, 0.15), rgba(218, 165, 32, 0.1));
+            border-bottom: 2px solid rgba(147, 112, 219, 0.3);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .header-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-title h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.75rem;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-badge {
+            background: var(--color-danger);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        /* Main Container */
+        .admin-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: rgba(147, 112, 219, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .stat-card.pending { border-color: rgba(251, 191, 36, 0.5); }
+        .stat-card.approved { border-color: rgba(34, 197, 94, 0.5); }
+        .stat-card.rejected { border-color: rgba(239, 68, 68, 0.5); }
+
+        .stat-value {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card.pending .stat-value {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+        }
+        .stat-card.approved .stat-value {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            -webkit-background-clip: text;
+        }
+        .stat-card.rejected .stat-value {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            -webkit-background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin-top: 0.5rem;
+        }
+
+        /* Filters Panel */
+        .filters-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.2);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filters-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(147, 112, 219, 0.2);
+            border-radius: 8px;
+            color: var(--color-text);
+            font-size: 0.9375rem;
+            transition: border-color 0.2s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary), #7c3aed);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(147, 112, 219, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--color-success), #16a34a);
+            color: white;
+        }
+
+        .btn-success:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--color-danger), #dc2626);
+            color: white;
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(147, 112, 219, 0.15);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            color: var(--color-primary);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(147, 112, 219, 0.25);
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.8125rem;
+        }
+
+        /* Submissions List */
+        .submissions-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Submission Card */
+        .submission-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(147, 112, 219, 0.2);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .submission-card:hover {
+            border-color: rgba(147, 112, 219, 0.4);
+        }
+
+        .submission-card.expanded {
+            border-color: var(--color-primary);
+        }
+
+        .submission-header {
+            padding: 1.5rem;
+            display: flex;
+            gap: 1.5rem;
+            cursor: pointer;
+        }
+
+        .submission-icon {
+            width: 80px;
+            height: 80px;
+            background: rgba(147, 112, 219, 0.1);
+            border: 2px solid rgba(147, 112, 219, 0.3);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+
+        .submission-icon svg {
+            width: 60px;
+            height: 60px;
+        }
+
+        .submission-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .submission-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.25rem;
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .submission-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.75rem;
+            background: rgba(147, 112, 219, 0.15);
+            border: 1px solid rgba(147, 112, 219, 0.3);
+            border-radius: 999px;
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+        }
+
+        .meta-badge.type { background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); }
+        .meta-badge.mythology { background: rgba(218, 165, 32, 0.15); border-color: rgba(218, 165, 32, 0.3); }
+
+        .submission-description {
+            font-size: 0.9375rem;
+            color: var(--color-text-muted);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .submission-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.375rem 1rem;
+            border-radius: 999px;
+            font-size: 0.8125rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending {
+            background: rgba(251, 191, 36, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.4);
+        }
+
+        .status-badge.approved {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        .status-badge.rejected {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .submission-date {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+
+        /* Expanded Content */
+        .submission-expanded {
+            display: none;
+            border-top: 2px solid rgba(147, 112, 219, 0.2);
+        }
+
+        .submission-card.expanded .submission-expanded {
+            display: block;
+        }
+
+        .submission-details {
+            padding: 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .submission-details {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .detail-section {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .detail-section h4 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9375rem;
+            color: var(--color-primary);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(147, 112, 219, 0.2);
+        }
+
+        .detail-content {
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .detail-list {
+            list-style: none;
+        }
+
+        .detail-list li {
+            padding: 0.375rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.875rem;
+        }
+
+        .detail-list li:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--color-text-muted);
+            margin-right: 0.5rem;
+        }
+
+        .detail-value {
+            color: var(--color-text);
+        }
+
+        /* Submission Actions */
+        .submission-actions {
+            padding: 1.5rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 2px solid rgba(147, 112, 219, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .action-note {
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+        }
+
+        /* Quick Review Panel */
+        .review-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .review-panel textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(147, 112, 219, 0.2);
+            border-radius: 8px;
+            color: var(--color-text);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            resize: vertical;
+            margin-bottom: 1rem;
+        }
+
+        .review-panel textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        /* Loading & Empty States */
+        .loading-state,
+        .empty-state,
+        .error-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .loading-spinner {
+            font-size: 3rem;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            opacity: 0.5;
+            margin-bottom: 1rem;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--color-bg-medium);
+            border: 2px solid var(--color-primary);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid rgba(147, 112, 219, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.25rem;
+            color: var(--color-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--color-text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--color-text);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 2px solid rgba(147, 112, 219, 0.2);
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        /* Form Elements in Modal */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--color-text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-group textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(147, 112, 219, 0.2);
+            border-radius: 8px;
+            color: var(--color-text);
+            font-family: inherit;
+            font-size: 0.9375rem;
+            resize: vertical;
+        }
+
+        /* Bulk Actions Bar */
+        .bulk-actions-bar {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid var(--color-primary);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .bulk-actions-bar.active {
+            display: flex;
+        }
+
+        .bulk-count {
+            font-weight: 600;
+            color: var(--color-primary);
+        }
+
+        /* Submitter Info */
+        .submitter-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.8125rem;
+            color: var(--color-text-muted);
+        }
+
+        .submitter-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(147, 112, 219, 0.2);
+        }
+
+        /* JSON Preview */
+        .json-preview {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 300px;
+            overflow: auto;
+            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+            font-size: 0.75rem;
+            white-space: pre-wrap;
+            color: var(--color-text-muted);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .admin-header {
+                padding: 1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .admin-container {
+                padding: 1rem;
+            }
+
+            .filters-row {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .submission-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .submission-status {
+                flex-direction: row;
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .submission-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-content">
+            <div class="header-title">
+                <h1>Submission Review</h1>
+                <span class="header-badge" id="pending-count">0 Pending</span>
+            </div>
+            <div class="header-actions">
+                <a href="../index.html" class="btn btn-secondary">
+                    <span>&#8592;</span> Back to Site
+                </a>
+                <button class="btn btn-secondary" id="refresh-btn">
+                    <span>&#x21bb;</span> Refresh
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="admin-container">
+        <!-- Stats -->
+        <section class="stats-grid">
+            <div class="stat-card pending">
+                <div class="stat-value" id="stat-pending">-</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="stat-today">-</div>
+                <div class="stat-label">Submitted Today</div>
+            </div>
+            <div class="stat-card approved">
+                <div class="stat-value" id="stat-approved">-</div>
+                <div class="stat-label">Approved Total</div>
+            </div>
+            <div class="stat-card rejected">
+                <div class="stat-value" id="stat-rejected">-</div>
+                <div class="stat-label">Rejected Total</div>
+            </div>
+        </section>
+
+        <!-- Filters -->
+        <section class="filters-panel">
+            <div class="filters-row">
+                <div class="filter-group">
+                    <label>Status</label>
+                    <select id="filter-status">
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="">All Statuses</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Content Type</label>
+                    <select id="filter-type">
+                        <option value="">All Types</option>
+                        <option value="deity">Deity</option>
+                        <option value="hero">Hero</option>
+                        <option value="creature">Creature</option>
+                        <option value="item">Artifact</option>
+                        <option value="place">Place</option>
+                        <option value="concept">Concept</option>
+                        <option value="magic">Magic System</option>
+                        <option value="ritual">Ritual</option>
+                        <option value="text">Sacred Text</option>
+                        <option value="symbol">Symbol</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Mythology</label>
+                    <select id="filter-mythology">
+                        <option value="">All Mythologies</option>
+                        <option value="greek">Greek</option>
+                        <option value="roman">Roman</option>
+                        <option value="norse">Norse</option>
+                        <option value="egyptian">Egyptian</option>
+                        <option value="celtic">Celtic</option>
+                        <option value="hindu">Hindu</option>
+                        <option value="buddhist">Buddhist</option>
+                        <option value="christian">Christian</option>
+                        <option value="jewish">Jewish</option>
+                        <option value="islamic">Islamic</option>
+                        <option value="japanese">Japanese</option>
+                        <option value="chinese">Chinese</option>
+                        <option value="sumerian">Sumerian</option>
+                        <option value="aztec">Aztec</option>
+                        <option value="mayan">Mayan</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Sort By</label>
+                    <select id="filter-sort">
+                        <option value="desc">Newest First</option>
+                        <option value="asc">Oldest First</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" id="apply-filters">
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Submissions List -->
+        <section class="submissions-container" id="submissions-container">
+            <div class="loading-state">
+                <div class="loading-spinner">&#x23F3;</div>
+                <p>Loading submissions...</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bulk Actions Bar -->
+    <div class="bulk-actions-bar" id="bulk-actions-bar">
+        <span class="bulk-count"><span id="bulk-count">0</span> selected</span>
+        <button class="btn btn-success btn-sm" id="bulk-approve">
+            <span>&#10003;</span> Approve All
+        </button>
+        <button class="btn btn-danger btn-sm" id="bulk-reject">
+            <span>&#10005;</span> Reject All
+        </button>
+        <button class="btn btn-secondary btn-sm" id="clear-selection">
+            Clear
+        </button>
+    </div>
+
+    <!-- Rejection Modal -->
+    <div class="modal-overlay" id="reject-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Reject Submission</h2>
+                <button class="modal-close" data-close>&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="reject-submission-name" style="margin-bottom: 1rem; color: var(--color-primary);"></p>
+                <div class="form-group">
+                    <label>Rejection Reason (sent to user)</label>
+                    <textarea id="rejection-reason" placeholder="Explain why this submission is being rejected and what changes would be needed..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close>Cancel</button>
+                <button class="btn btn-danger" id="confirm-reject">Reject Submission</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Details Modal -->
+    <div class="modal-overlay" id="details-modal">
+        <div class="modal" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Submission Details</h2>
+                <button class="modal-close" data-close>&times;</button>
+            </div>
+            <div class="modal-body" id="details-modal-body">
+                <!-- Populated dynamically -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-close>Close</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let submissions = [];
+        let selectedSubmissions = new Set();
+        let currentSubmissionId = null;
+        let isAdmin = false;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            await initializeAdmin();
+        });
+
+        async function initializeAdmin() {
+            try {
+                // Wait for Firebase auth
+                await new Promise((resolve, reject) => {
+                    const timeout = setTimeout(() => reject(new Error('Auth timeout')), 10000);
+                    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
+                        clearTimeout(timeout);
+                        unsubscribe();
+                        resolve(user);
+                    });
+                });
+
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    alert('Please sign in to access the admin panel');
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                // Check admin role
+                const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+                if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                    alert('Admin access required');
+                    window.location.href = '../index.html';
+                    return;
+                }
+
+                isAdmin = true;
+                await loadStats();
+                await loadSubmissions();
+                attachEventListeners();
+
+            } catch (error) {
+                console.error('Init error:', error);
+                showError('Failed to initialize: ' + error.message);
+            }
+        }
+
+        function attachEventListeners() {
+            // Refresh button
+            document.getElementById('refresh-btn').addEventListener('click', async () => {
+                await loadStats();
+                await loadSubmissions();
+            });
+
+            // Apply filters
+            document.getElementById('apply-filters').addEventListener('click', loadSubmissions);
+
+            // Filter changes
+            ['filter-status', 'filter-type', 'filter-mythology', 'filter-sort'].forEach(id => {
+                document.getElementById(id).addEventListener('change', loadSubmissions);
+            });
+
+            // Bulk actions
+            document.getElementById('bulk-approve').addEventListener('click', bulkApprove);
+            document.getElementById('bulk-reject').addEventListener('click', bulkReject);
+            document.getElementById('clear-selection').addEventListener('click', clearSelection);
+
+            // Modal close buttons
+            document.querySelectorAll('[data-close]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+                });
+            });
+
+            // Confirm reject
+            document.getElementById('confirm-reject').addEventListener('click', confirmReject);
+        }
+
+        async function loadStats() {
+            try {
+                const db = firebase.firestore();
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayTimestamp = firebase.firestore.Timestamp.fromDate(today);
+
+                const [pending, approved, rejected, todaySubmissions] = await Promise.all([
+                    db.collection('submissions').where('status', '==', 'pending').get(),
+                    db.collection('submissions').where('status', '==', 'approved').get(),
+                    db.collection('submissions').where('status', '==', 'rejected').get(),
+                    db.collection('submissions').where('submittedAt', '>=', todayTimestamp).get()
+                ]);
+
+                document.getElementById('stat-pending').textContent = pending.size;
+                document.getElementById('stat-approved').textContent = approved.size;
+                document.getElementById('stat-rejected').textContent = rejected.size;
+                document.getElementById('stat-today').textContent = todaySubmissions.size;
+                document.getElementById('pending-count').textContent = `${pending.size} Pending`;
+
+            } catch (error) {
+                console.error('Stats error:', error);
+            }
+        }
+
+        async function loadSubmissions() {
+            const container = document.getElementById('submissions-container');
+            container.innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner">&#x23F3;</div>
+                    <p>Loading submissions...</p>
+                </div>
+            `;
+
+            try {
+                const db = firebase.firestore();
+                const status = document.getElementById('filter-status').value;
+                const type = document.getElementById('filter-type').value;
+                const mythology = document.getElementById('filter-mythology').value;
+                const sortOrder = document.getElementById('filter-sort').value;
+
+                let query = db.collection('submissions');
+
+                if (status) {
+                    query = query.where('status', '==', status);
+                }
+                if (type) {
+                    query = query.where('type', '==', type);
+                }
+                if (mythology) {
+                    query = query.where('mythology', '==', mythology);
+                }
+
+                query = query.orderBy('submittedAt', sortOrder).limit(50);
+
+                const snapshot = await query.get();
+                submissions = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                if (submissions.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">&#128234;</div>
+                            <h3>No Submissions Found</h3>
+                            <p>No submissions match your current filters.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = submissions.map(sub => renderSubmissionCard(sub)).join('');
+                attachCardListeners();
+
+            } catch (error) {
+                console.error('Load error:', error);
+                showError('Failed to load submissions: ' + error.message);
+            }
+        }
+
+        function renderSubmissionCard(submission) {
+            const date = submission.submittedAt?.toDate?.() || new Date();
+            const dateStr = date.toLocaleDateString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+            });
+
+            const data = submission.data || {};
+            const icon = data.svgIcon || data.icon || getTypeIcon(submission.type);
+
+            return `
+                <article class="submission-card" data-id="${submission.id}">
+                    <div class="submission-header">
+                        <div class="submission-icon">
+                            ${data.svgIcon ? data.svgIcon : `<span>${icon}</span>`}
+                        </div>
+                        <div class="submission-info">
+                            <h3 class="submission-title">${escapeHtml(submission.entityName || 'Untitled')}</h3>
+                            <div class="submission-meta">
+                                <span class="meta-badge type">${capitalize(submission.type)}</span>
+                                <span class="meta-badge mythology">${capitalize(submission.mythology || 'Unknown')}</span>
+                                <div class="submitter-info">
+                                    ${submission.submittedByAvatar ? `<img src="${submission.submittedByAvatar}" alt="" class="submitter-avatar">` : ''}
+                                    <span>${escapeHtml(submission.submittedByName || 'Anonymous')}</span>
+                                </div>
+                            </div>
+                            <p class="submission-description">${escapeHtml(data.shortDescription || '')}</p>
+                        </div>
+                        <div class="submission-status">
+                            <span class="status-badge ${submission.status}">${capitalize(submission.status)}</span>
+                            <span class="submission-date">${dateStr}</span>
+                        </div>
+                    </div>
+
+                    <div class="submission-expanded">
+                        <div class="submission-details">
+                            <div class="detail-section">
+                                <h4>Full Description</h4>
+                                <div class="detail-content">${escapeHtml(data.longDescription || 'No description provided')}</div>
+                            </div>
+                            <div class="detail-section">
+                                <h4>Details</h4>
+                                <ul class="detail-list">
+                                    ${data.primaryMythology ? `<li><span class="detail-label">Primary Mythology:</span><span class="detail-value">${capitalize(data.primaryMythology)}</span></li>` : ''}
+                                    ${data.domains ? `<li><span class="detail-label">Domains:</span><span class="detail-value">${Array.isArray(data.domains) ? data.domains.join(', ') : data.domains}</span></li>` : ''}
+                                    ${data.tags?.length ? `<li><span class="detail-label">Tags:</span><span class="detail-value">${data.tags.join(', ')}</span></li>` : ''}
+                                    ${data.sources?.length ? `<li><span class="detail-label">Sources:</span><span class="detail-value">${data.sources.length} provided</span></li>` : ''}
+                                </ul>
+                            </div>
+                        </div>
+
+                        ${submission.status === 'rejected' && submission.rejectionReason ? `
+                            <div style="padding: 0 1.5rem 1.5rem;">
+                                <div class="detail-section" style="border-left: 4px solid var(--color-danger);">
+                                    <h4 style="color: var(--color-danger);">Rejection Reason</h4>
+                                    <div class="detail-content">${escapeHtml(submission.rejectionReason)}</div>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        <div class="submission-actions">
+                            <div class="action-buttons">
+                                ${submission.status === 'pending' ? `
+                                    <button class="btn btn-success" data-action="approve" data-id="${submission.id}">
+                                        <span>&#10003;</span> Approve
+                                    </button>
+                                    <button class="btn btn-danger" data-action="reject" data-id="${submission.id}">
+                                        <span>&#10005;</span> Reject
+                                    </button>
+                                ` : ''}
+                                <button class="btn btn-secondary" data-action="view-json" data-id="${submission.id}">
+                                    View Full Data
+                                </button>
+                            </div>
+                            <span class="action-note">ID: ${submission.id}</span>
+                        </div>
+                    </div>
+                </article>
+            `;
+        }
+
+        function attachCardListeners() {
+            // Card expansion
+            document.querySelectorAll('.submission-header').forEach(header => {
+                header.addEventListener('click', (e) => {
+                    if (e.target.closest('button')) return;
+                    const card = header.closest('.submission-card');
+                    card.classList.toggle('expanded');
+                });
+            });
+
+            // Action buttons
+            document.querySelectorAll('[data-action="approve"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    approveSubmission(btn.dataset.id);
+                });
+            });
+
+            document.querySelectorAll('[data-action="reject"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showRejectModal(btn.dataset.id);
+                });
+            });
+
+            document.querySelectorAll('[data-action="view-json"]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    showDetailsModal(btn.dataset.id);
+                });
+            });
+        }
+
+        async function approveSubmission(id) {
+            if (!confirm('Approve this submission and publish it?')) return;
+
+            try {
+                const result = await window.submissionWorkflow.approveSubmission(id);
+                alert(`Approved! Published to ${result.entityCollection}`);
+                await loadStats();
+                await loadSubmissions();
+            } catch (error) {
+                alert('Failed to approve: ' + error.message);
+            }
+        }
+
+        function showRejectModal(id) {
+            currentSubmissionId = id;
+            const submission = submissions.find(s => s.id === id);
+            document.getElementById('reject-submission-name').textContent =
+                `Rejecting: ${submission?.entityName || 'Unknown'}`;
+            document.getElementById('rejection-reason').value = '';
+            document.getElementById('reject-modal').classList.add('active');
+        }
+
+        async function confirmReject() {
+            const reason = document.getElementById('rejection-reason').value.trim();
+            if (!reason) {
+                alert('Please provide a rejection reason');
+                return;
+            }
+
+            try {
+                await window.submissionWorkflow.rejectSubmission(currentSubmissionId, reason);
+                document.getElementById('reject-modal').classList.remove('active');
+                alert('Submission rejected');
+                await loadStats();
+                await loadSubmissions();
+            } catch (error) {
+                alert('Failed to reject: ' + error.message);
+            }
+        }
+
+        function showDetailsModal(id) {
+            const submission = submissions.find(s => s.id === id);
+            if (!submission) return;
+
+            const body = document.getElementById('details-modal-body');
+            body.innerHTML = `
+                <h3 style="color: var(--color-primary); margin-bottom: 1rem;">${escapeHtml(submission.entityName)}</h3>
+                <div class="json-preview">${JSON.stringify(submission.data, null, 2)}</div>
+            `;
+            document.getElementById('details-modal').classList.add('active');
+        }
+
+        async function bulkApprove() {
+            if (selectedSubmissions.size === 0) return;
+            if (!confirm(`Approve ${selectedSubmissions.size} submissions?`)) return;
+
+            try {
+                const results = await window.submissionWorkflow.bulkApprove(Array.from(selectedSubmissions));
+                alert(`Approved: ${results.success.length}\nFailed: ${results.failed.length}`);
+                clearSelection();
+                await loadStats();
+                await loadSubmissions();
+            } catch (error) {
+                alert('Bulk approve failed: ' + error.message);
+            }
+        }
+
+        async function bulkReject() {
+            if (selectedSubmissions.size === 0) return;
+            const reason = prompt('Rejection reason for all selected submissions:');
+            if (!reason) return;
+
+            try {
+                const results = await window.submissionWorkflow.bulkReject(Array.from(selectedSubmissions), reason);
+                alert(`Rejected: ${results.success.length}\nFailed: ${results.failed.length}`);
+                clearSelection();
+                await loadStats();
+                await loadSubmissions();
+            } catch (error) {
+                alert('Bulk reject failed: ' + error.message);
+            }
+        }
+
+        function clearSelection() {
+            selectedSubmissions.clear();
+            updateBulkActionsBar();
+        }
+
+        function updateBulkActionsBar() {
+            const bar = document.getElementById('bulk-actions-bar');
+            const count = document.getElementById('bulk-count');
+            count.textContent = selectedSubmissions.size;
+            bar.classList.toggle('active', selectedSubmissions.size > 0);
+        }
+
+        function showError(message) {
+            const container = document.getElementById('submissions-container');
+            container.innerHTML = `
+                <div class="error-state">
+                    <div class="empty-icon">&#x26A0;</div>
+                    <h3>Error</h3>
+                    <p>${escapeHtml(message)}</p>
+                    <button class="btn btn-primary" onclick="loadSubmissions()">Try Again</button>
+                </div>
+            `;
+        }
+
+        function getTypeIcon(type) {
+            const icons = {
+                deity: '&#9889;',
+                hero: '&#128481;',
+                creature: '&#128009;',
+                item: '&#9876;',
+                place: '&#127963;',
+                concept: '&#128173;',
+                magic: '&#128302;',
+                ritual: '&#128293;',
+                text: '&#128220;',
+                symbol: '&#10024;'
+            };
+            return icons[type] || '&#10024;';
+        }
+
+        function capitalize(str) {
+            if (!str) return '';
+            return str.charAt(0).toUpperCase() + str.slice(1).replace(/-/g, ' ');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

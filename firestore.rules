@@ -875,6 +875,107 @@ service cloud.firestore {
       allow update, delete: if isAdminEmail();
     }
 
+    // ===== DISCUSSIONS COLLECTION =====
+    // Path: /discussions/{assetId}/comments/{commentId}
+    // Reddit-style threaded discussions for assets
+    // Requires corpus search query validation
+
+    match /discussions/{assetId} {
+      // Anyone can read discussion metadata
+      allow read: if true;
+
+      // Allow creating discussion document (for vote aggregation)
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+
+      // Comments subcollection
+      match /comments/{commentId} {
+        function isValidComment() {
+          return request.resource.data.keys().hasAll(['content', 'authorId', 'authorName', 'assetId', 'createdAt'])
+                 && request.resource.data.content is string
+                 && request.resource.data.content.size() >= 10
+                 && request.resource.data.content.size() <= 5000
+                 && request.resource.data.authorId == request.auth.uid
+                 && request.resource.data.assetId == assetId;
+        }
+
+        function hasCorpusQuery() {
+          // Corpus query is required for top-level comments (not replies)
+          return request.resource.data.parentId != null
+                 || (request.resource.data.corpusQuery != null
+                     && request.resource.data.corpusQuery.term is string
+                     && request.resource.data.corpusQuery.term.size() >= 3);
+        }
+
+        // Anyone can read comments
+        allow read: if true;
+
+        // Authenticated users can create comments with corpus validation
+        allow create: if isAuthenticated()
+                      && isValidComment()
+                      && hasCorpusQuery()
+                      && request.resource.data.netVotes == 0
+                      && request.resource.data.upvoteCount == 0
+                      && request.resource.data.downvoteCount == 0;
+
+        // Owner can update their own comments (but not vote counts)
+        allow update: if isOwner(resource.data.authorId)
+                      && request.resource.data.authorId == resource.data.authorId
+                      && request.resource.data.netVotes == resource.data.netVotes
+                      && request.resource.data.upvoteCount == resource.data.upvoteCount
+                      && request.resource.data.downvoteCount == resource.data.downvoteCount;
+
+        // Owner or moderator can delete comments
+        allow delete: if isOwner(resource.data.authorId) || isModerator();
+
+        // Votes subcollection for comments
+        match /votes/{voteUserId} {
+          allow read: if true;
+          allow write: if isAuthenticated()
+                       && request.auth.uid == voteUserId
+                       && request.resource.data.value in [1, -1];
+        }
+      }
+
+      // Rate limiting for discussions - max 5 comments per minute per user
+      match /rate_limits/{userId} {
+        allow read: if isAuthenticated() && request.auth.uid == userId;
+        allow write: if false; // Only Cloud Functions manage rate limits
+      }
+    }
+
+    // ===== CORPUS QUERIES COLLECTION =====
+    // Path: /corpus_queries/{queryId}
+    // Store and track corpus search queries for validation
+
+    match /corpus_queries/{queryId} {
+      function isValidQuery() {
+        return request.resource.data.keys().hasAll(['label', 'queryType', 'query'])
+               && request.resource.data.label is string
+               && request.resource.data.queryType in ['github', 'firebase', 'combined'];
+      }
+
+      // Anyone can read queries (for reuse)
+      allow read: if true;
+
+      // Authenticated users can save queries
+      allow create: if isAuthenticated()
+                    && isValidQuery()
+                    && (request.resource.data.userId == null
+                        || request.resource.data.userId == request.auth.uid);
+
+      // Owner can update their own queries, standard queries are admin-only
+      allow update: if isAuthenticated()
+                    && (resource.data.userId == request.auth.uid
+                        || (resource.data.isStandard == true && isAdminEmail()))
+                    && request.resource.data.userId == resource.data.userId;
+
+      // Owner can delete their own queries
+      allow delete: if isAuthenticated()
+                    && resource.data.userId == request.auth.uid
+                    && resource.data.isStandard != true;
+    }
+
     // ===== DEFAULT FALLBACK FOR UNDEFINED COLLECTIONS =====
     // Allow read access to any collection not explicitly defined above
     // This is useful for new collections during development

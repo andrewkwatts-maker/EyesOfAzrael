@@ -261,7 +261,7 @@
             const sourceLabel = this.getSourceLabel();
 
             return `
-                <article class="entity-card entity-card--compact glass-card ${sourceClass}"
+                <article class="entity-card entity-card--compact glass-card card-strict-height ${sourceClass}"
                      data-entity-id="${this.escapeAttr(this.entityId)}"
                      data-entity-type="${this.escapeAttr(this.entityType)}"
                      data-mythology="${this.escapeAttr(mythologyLower)}"
@@ -278,7 +278,7 @@
                         <!-- Header with Icon and Title -->
                         <div class="entity-card__header">
                             <div class="entity-card__icon" aria-hidden="true">${iconContent}</div>
-                            <h2 class="entity-card__title">
+                            <h2 class="entity-card__title card-title-truncate" aria-label="${this.escapeAttr(this.data.name)}">
                                 <a href="${this.getEntityUrl()}" class="entity-card__title-link">
                                     ${this.escapeHtml(this.data.name)}
                                 </a>
@@ -287,9 +287,9 @@
 
                         ${this.renderAuthorBadge()}
 
-                        <!-- Description (max 3 lines via CSS) -->
+                        <!-- Description (max 3 lines via CSS with strict truncation) -->
                         ${this.data.shortDescription ? `
-                            <p class="entity-card__description">${this.escapeHtml(this.data.shortDescription)}</p>
+                            <p class="entity-card__description card-desc-truncate" aria-label="${this.escapeAttr(this.data.shortDescription)}">${this.escapeHtml(this.data.shortDescription)}</p>
                         ` : ''}
 
                         <!-- Metadata Pills -->

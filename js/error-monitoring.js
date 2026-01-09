@@ -17,10 +17,18 @@ export function initErrorMonitoring() {
     return;
   }
 
+  // Get Sentry DSN from global config or skip initialization
+  // Configure by setting window.SENTRY_DSN before loading this module
+  const sentryDsn = window.SENTRY_DSN || window.EOA_CONFIG?.sentryDsn;
+
+  if (!sentryDsn || sentryDsn === 'YOUR_SENTRY_DSN_HERE') {
+    console.log('[Error Monitoring] Sentry DSN not configured, skipping initialization');
+    return;
+  }
+
   try {
     Sentry.init({
-      // TODO: Replace with your Sentry DSN from dashboard
-      dsn: 'YOUR_SENTRY_DSN_HERE',
+      dsn: sentryDsn,
 
       // Environment detection
       environment: window.location.hostname.includes('staging') ? 'staging' : 'production',

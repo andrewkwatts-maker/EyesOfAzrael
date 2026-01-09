@@ -2599,6 +2599,399 @@ html {
    PRINT STYLES
    ============================================ */
 
+/* ============================================
+   COLLAPSIBLE SECTIONS FOR MOBILE
+   Accordion-style expandable content sections
+   ============================================ */
+
+.collapsible-section {
+    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.4);
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.4);
+}
+
+.collapsible-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    cursor: pointer;
+    min-height: var(--touch-target-preferred, 48px);
+    transition: background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.collapsible-header:active {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+}
+
+.collapsible-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary, #f8f9fa);
+    margin: 0;
+}
+
+.collapsible-icon {
+    width: 24px;
+    height: 24px;
+    color: var(--color-text-secondary, #adb5bd);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+}
+
+.collapsible-section.expanded .collapsible-icon {
+    transform: rotate(180deg);
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsible-section.expanded .collapsible-content {
+    max-height: 2000px; /* Large enough for most content */
+}
+
+.collapsible-body {
+    padding: 0 1.25rem 1.25rem;
+}
+
+/* Mobile-specific collapsible adjustments */
+@media (max-width: 640px) {
+    .collapsible-section {
+        border-radius: 10px;
+        margin-bottom: 0.625rem;
+    }
+
+    .collapsible-header {
+        padding: 0.875rem 1rem;
+    }
+
+    .collapsible-title {
+        font-size: 0.9375rem;
+    }
+
+    .collapsible-body {
+        padding: 0 1rem 1rem;
+    }
+}
+
+/* ============================================
+   CARD STACKING ON MOBILE
+   Horizontal scroll with snap points
+   ============================================ */
+
+@media (max-width: 640px) {
+    /* Horizontal scroll container for card stacks */
+    .card-stack-container {
+        display: flex;
+        overflow-x: auto;
+        overflow-y: hidden;
+        gap: 12px;
+        padding: 0.5rem 1rem 1rem;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .card-stack-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .card-stack-container > * {
+        flex: 0 0 auto;
+        width: 280px;
+        max-width: 85vw;
+        scroll-snap-align: start;
+    }
+
+    /* Featured cards can be full-width stack */
+    .featured-card-stack .card {
+        width: 100%;
+        max-width: none;
+    }
+
+    /* Entity card stack - show partial next card */
+    .entity-card-stack > .entity-card,
+    .entity-card-stack > .universal-grid-card {
+        flex: 0 0 280px;
+        max-width: calc(100vw - 48px);
+    }
+
+    /* Mythology card stack */
+    .mythology-card-stack > .mythology-card {
+        flex: 0 0 260px;
+        max-width: calc(100vw - 48px);
+    }
+
+    /* Show scroll indicators */
+    .card-stack-container::after {
+        content: '';
+        flex: 0 0 1rem;
+    }
+}
+
+/* ============================================
+   MOBILE BACK BUTTON HANDLING
+   Visual back button for SPA navigation
+   ============================================ */
+
+.mobile-back-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch-target-preferred, 48px);
+    height: var(--touch-target-preferred, 48px);
+    background: transparent;
+    border: none;
+    color: var(--color-text-primary, #f8f9fa);
+    cursor: pointer;
+    border-radius: 10px;
+    transition: background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-back-btn:active {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+}
+
+.mobile-back-btn svg {
+    width: 24px;
+    height: 24px;
+}
+
+@media (max-width: 640px) {
+    /* Show back button on detail pages */
+    .has-back-button .mobile-back-btn {
+        display: flex;
+    }
+
+    /* Adjust header layout when back button is present */
+    .has-back-button .header-container {
+        padding-left: 0.5rem;
+    }
+
+    .has-back-button .header-logo {
+        display: none;
+    }
+}
+
+/* ============================================
+   FAST TOUCH RESPONSE
+   Optimizations for instant touch feedback
+   ============================================ */
+
+@media (pointer: coarse) {
+    /* Disable 300ms tap delay on interactive elements */
+    button,
+    .btn,
+    a,
+    .card,
+    .nav-link,
+    .menu-item,
+    input[type="button"],
+    input[type="submit"],
+    [role="button"] {
+        touch-action: manipulation;
+    }
+
+    /* Remove hover delay for immediate feedback */
+    .card,
+    .entity-card,
+    .mythology-card,
+    .landing-category-card,
+    .bottom-nav-item {
+        -webkit-tap-highlight-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+    }
+
+    /* Faster transitions on touch devices */
+    .btn,
+    .card,
+    .entity-card,
+    .nav-link {
+        transition-duration: 0.15s !important;
+    }
+
+    /* Active state feedback */
+    .btn:active,
+    .card:active,
+    .entity-card:active,
+    .nav-link:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* ============================================
+   LAZY LOADING IMAGES
+   Placeholder and fade-in for lazy loaded images
+   ============================================ */
+
+img[loading="lazy"] {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+img[loading="lazy"].loaded,
+img[loading="lazy"]:not([src=""]) {
+    opacity: 1;
+}
+
+/* Placeholder background for lazy images */
+.lazy-image-container {
+    position: relative;
+    background: linear-gradient(
+        135deg,
+        rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8),
+        rgba(var(--color-bg-secondary-rgb, 21, 26, 53), 0.8)
+    );
+    overflow: hidden;
+}
+
+.lazy-image-container::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.05) 50%,
+        transparent 100%
+    );
+    animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(100%);
+    }
+}
+
+.lazy-image-container img.loaded + .image-placeholder {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* ============================================
+   MINIMAL ANIMATIONS ON MOBILE
+   Reduced animation complexity for performance
+   ============================================ */
+
+@media (max-width: 640px) and (hover: none) {
+    /* Disable complex animations on mobile touch devices */
+    .hero-background-glow,
+    .card::before,
+    .card::after,
+    .landing-category-card::before,
+    .landing-category-card::after {
+        animation: none !important;
+    }
+
+    /* Simplify hover effects */
+    .card:hover::before,
+    .card:hover::after {
+        display: none;
+    }
+
+    /* Remove parallax effects */
+    [data-parallax],
+    .parallax {
+        transform: none !important;
+    }
+
+    /* Disable heavy box shadows */
+    .card,
+    .entity-card,
+    .modal-content {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+    }
+}
+
+/* Battery saver mode detection */
+@media (prefers-reduced-motion: reduce) {
+    /* Already handled above, but extra safety */
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ============================================
+   ENHANCED TOUCH FEEDBACK STATES
+   Visual feedback for touch interactions
+   ============================================ */
+
+@media (pointer: coarse) {
+    /* Touch highlight effect */
+    .touch-highlight {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .touch-highlight::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+            circle at var(--touch-x, 50%) var(--touch-y, 50%),
+            rgba(var(--color-primary-rgb, 139, 127, 255), 0.2),
+            transparent 70%
+        );
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+    }
+
+    .touch-highlight:active::after {
+        opacity: 1;
+    }
+
+    /* Long press indicator */
+    .long-press-enabled {
+        position: relative;
+    }
+
+    .long-press-enabled::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 2px solid transparent;
+        border-radius: inherit;
+        transition: border-color 0.3s ease;
+        pointer-events: none;
+    }
+
+    .long-press-enabled.long-pressing::before {
+        border-color: var(--color-primary, #8b7fff);
+        animation: longPressRing 0.5s ease;
+    }
+
+    @keyframes longPressRing {
+        0% {
+            transform: scale(1);
+            opacity: 0.5;
+        }
+        100% {
+            transform: scale(1.05);
+            opacity: 1;
+        }
+    }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+
 @media print {
     /* Hide navigation and interactive elements */
     .site-header,
@@ -2610,7 +3003,9 @@ html {
     #breadcrumb-nav,
     .bottom-nav,
     .fab,
-    .hamburger-menu-btn {
+    .hamburger-menu-btn,
+    .mobile-context-menu,
+    .pull-to-refresh-indicator {
         display: none !important;
     }
 

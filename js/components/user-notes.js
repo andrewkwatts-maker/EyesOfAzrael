@@ -1127,16 +1127,45 @@ class UserNotesComponent {
     /**
      * Handle report
      */
-    handleReport(noteId) {
+    async handleReport(noteId) {
         if (!this.currentUser) {
             this.showToast('Please sign in to report', 'info');
             return;
         }
 
+        const note = this.notes.find(n => n.id === noteId);
+        if (!note) {
+            this.showToast('Note not found', 'error');
+            return;
+        }
+
         // Show report confirmation
-        if (confirm('Report this note for inappropriate content?')) {
-            this.showToast('Note reported. Thank you for helping keep our community safe.', 'success');
-            // TODO: Integrate with moderation system
+        if (confirm('Report this note for inappropriate content?\n\nReports are reviewed by moderators. False reports may result in account restrictions.')) {
+            try {
+                // Submit report to contentReports collection
+                const db = this.notesService?.db || firebase.firestore();
+                await db.collection('contentReports').add({
+                    contentType: 'user_note',
+                    contentId: noteId,
+                    entityCollection: this.entityCollection,
+                    entityId: this.entityId,
+                    reportedBy: this.currentUser.uid,
+                    reportedByEmail: this.currentUser.email,
+                    reportedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    status: 'pending',
+                    content: {
+                        id: noteId,
+                        authorId: note.userId,
+                        authorName: note.userName || 'Anonymous',
+                        contentPreview: (note.content || '').substring(0, 200)
+                    }
+                });
+
+                this.showToast('Note reported. Thank you for helping keep our community safe.', 'success');
+            } catch (error) {
+                console.error('Error reporting note:', error);
+                this.showToast('Failed to submit report. Please try again.', 'error');
+            }
         }
     }
 

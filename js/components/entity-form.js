@@ -893,6 +893,9 @@ class EntityForm {
             return;
         }
 
+        // Integrate with FormUtils if available
+        this.initializeFormUtils();
+
         // Form submission
         this.form.addEventListener('submit', (e) => this.handleSubmit(e));
 
@@ -2438,6 +2441,94 @@ class EntityForm {
 
         // Remove ripple after animation
         setTimeout(() => ripple.remove(), 600);
+    }
+
+    /**
+     * Initialize FormUtils integration
+     * Enhances form with validation, tooltips, and improved UX
+     */
+    initializeFormUtils() {
+        // Check if FormUtils is available
+        if (typeof window.FormUtils === 'undefined') {
+            console.log('[EntityForm] FormUtils not available, using built-in validation');
+            return;
+        }
+
+        const FormUtils = window.FormUtils;
+
+        // Add field tooltips for fields with helpText
+        this.schema.fields.forEach(field => {
+            if (field.helpText) {
+                const fieldEl = this.form.querySelector(`[name="${field.name}"], #field-${field.name}`);
+                if (fieldEl) {
+                    try {
+                        FormUtils.addFieldTooltip(fieldEl, field.helpText);
+                    } catch (e) {
+                        console.warn(`[EntityForm] Could not add tooltip for ${field.name}:`, e);
+                    }
+                }
+            }
+        });
+
+        // Build validation rules from schema
+        const validationRules = {};
+        this.schema.fields.forEach(field => {
+            const rules = {};
+
+            if (field.required) {
+                rules.required = true;
+                rules.requiredMessage = `${field.label} is required`;
+            }
+
+            if (field.maxLength) {
+                rules.maxLength = field.maxLength;
+            }
+
+            if (field.pattern) {
+                rules.pattern = field.pattern;
+                rules.patternMessage = `Please enter a valid ${field.label.toLowerCase()}`;
+            }
+
+            if (field.type === 'email') {
+                rules.email = true;
+            }
+
+            if (Object.keys(rules).length > 0) {
+                validationRules[field.name] = rules;
+            }
+        });
+
+        // Create FormValidator instance
+        try {
+            const validator = new FormUtils.FormValidator(this.form, {
+                validateOnBlur: true,
+                validateOnInput: true,
+                showSuccessState: true,
+                scrollToError: true,
+                debounceMs: 400
+            });
+
+            validator.addRules(validationRules);
+            this.form._validator = validator;
+            this.formValidator = validator;
+
+            console.log('[EntityForm] FormUtils validator initialized');
+        } catch (e) {
+            console.warn('[EntityForm] Could not initialize FormUtils validator:', e);
+        }
+
+        // Initialize enhanced draft manager
+        try {
+            this.enhancedDraftManager = new FormUtils.DraftManager(this.form, {
+                storageKey: `entity_draft_${this.collection}_${this.entityId || 'new'}`,
+                autoSaveInterval: 30000,
+                showIndicator: true,
+                excludeFields: ['image']
+            });
+            console.log('[EntityForm] FormUtils draft manager initialized');
+        } catch (e) {
+            console.warn('[EntityForm] Could not initialize FormUtils draft manager:', e);
+        }
     }
 }
 

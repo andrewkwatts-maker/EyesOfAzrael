@@ -488,7 +488,7 @@
             const iconContent = this.renderIconWithFallback(entity.icon, this.config.icon, entity.name);
 
             return `
-                <div class="entity-card universal-grid-card"
+                <div class="entity-card universal-grid-card card-strict-height"
                      data-entity-id="${this.escapeAttr(entity.id)}"
                      data-entity-type="${this.escapeAttr(this.entityType)}"
                      data-mythology="${this.escapeAttr(mythologyLower)}"
@@ -503,7 +503,7 @@
                     </div>
 
                     <div class="grid-card-body">
-                        <h3 class="grid-card-title">
+                        <h3 class="grid-card-title card-title-truncate" aria-label="${this.escapeAttr(entity.name || entity.title)}">
                             <a href="${this.escapeAttr(this.sanitizeUrl(this.getEntityUrl(entity)) || '#')}">${this.escapeHtml(entity.name || entity.title)}</a>
                         </h3>
 
@@ -513,7 +513,7 @@
                         </div>
 
                         ${entity.shortDescription ? `
-                            <p class="grid-card-description">${this.escapeHtml(this.truncateText(entity.shortDescription, 120))}</p>
+                            <p class="grid-card-description card-desc-truncate" aria-label="${this.escapeAttr(entity.shortDescription)}">${this.escapeHtml(this.truncateText(entity.shortDescription, 120))}</p>
                         ` : ''}
 
                         ${this.renderGridCardFields(entity)}
@@ -693,7 +693,7 @@
 
                     <div class="list-item-content">
                         <div class="list-item-header">
-                            <h3 class="list-item-title">
+                            <h3 class="list-item-title card-title-truncate" aria-label="${this.escapeAttr(entity.name || entity.title)}">
                                 <a href="${this.escapeAttr(this.sanitizeUrl(this.getEntityUrl(entity)) || '#')}">${this.escapeHtml(entity.name || entity.title)}</a>
                             </h3>
                             <div class="list-item-badges">
@@ -703,7 +703,7 @@
                         </div>
 
                         ${entity.shortDescription ? `
-                            <p class="list-item-description">${this.escapeHtml(this.truncateText(entity.shortDescription, 150))}</p>
+                            <p class="list-item-description card-desc-truncate" aria-label="${this.escapeAttr(entity.shortDescription)}">${this.escapeHtml(this.truncateText(entity.shortDescription, 150))}</p>
                         ` : ''}
 
                         ${this.renderListItemFields(entity)}

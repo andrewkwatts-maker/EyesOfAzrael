@@ -49,6 +49,10 @@ class BrowseCategoryView {
         this.useVirtualScrolling = true; // Auto-enable for 100+ items
         this.visibleRange = { start: 0, end: 24 };
 
+        // Infinite scroll
+        this.infiniteScrollObserver = null;
+        this.isLoadingMore = false;
+
         // Debounce timers
         this.searchTimeout = null;
         this.scrollTimeout = null;
@@ -485,6 +489,9 @@ class BrowseCategoryView {
 
                 <!-- Pagination Controls -->
                 <div class="pagination-controls" id="paginationControls"></div>
+
+                <!-- Compare Tray (floating) -->
+                ${this.getCompareTrayHTML()}
             </div>
 
             ${this.getStyles()}
@@ -757,25 +764,68 @@ class BrowseCategoryView {
             ? '' // No badge for standard content
             : `<span class="user-content-badge" title="Created by ${entity.userId || 'community contributor'}">Community</span>`;
 
+        // Check if entity is in comparison
+        const isInCompare = typeof CompareView !== 'undefined' && CompareView.isInComparison
+            ? CompareView.isInComparison(entity.id, this.category)
+            : false;
+
+        // Check if entity is favorited (from localStorage)
+        const favorites = this.getFavorites();
+        const isFavorited = favorites.includes(`${this.category}:${entity.id}`);
+
         return `
             <a href="#/entity/${this.category}/${entity.mythology}/${entity.id}"
-               class="entity-card ${entity.isStandard ? '' : 'entity-card-community'}"
+               class="entity-card card-strict-height ${entity.isStandard ? '' : 'entity-card-community'}"
                data-entity-id="${entity.id}"
                data-mythology="${entity.mythology}"
                data-entity-type="${this.category.replace(/s$/, '')}"
+               data-collection="${this.category}"
                data-name="${entity.name.toLowerCase()}"
                role="article"
                aria-label="${this.escapeHtml(entity.name)} - ${this.capitalize(entity.mythology)} ${this.category.replace(/s$/, '')}">
                 ${badgeHTML}
+
+                <!-- Quick Actions -->
+                <div class="entity-card-actions" role="toolbar" aria-label="Quick actions">
+                    <button type="button"
+                            class="quick-action-btn action-favorite ${isFavorited ? 'active' : ''}"
+                            data-action="favorite"
+                            data-entity-id="${entity.id}"
+                            data-collection="${this.category}"
+                            title="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}"
+                            aria-label="${isFavorited ? 'Remove from favorites' : 'Add to favorites'}"
+                            aria-pressed="${isFavorited}">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="${isFavorited ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                        </svg>
+                    </button>
+                    <button type="button"
+                            class="quick-action-btn action-compare ${isInCompare ? 'active' : ''}"
+                            data-action="compare"
+                            data-entity-id="${entity.id}"
+                            data-collection="${this.category}"
+                            data-entity='${JSON.stringify({id: entity.id, name: entity.name, mythology: entity.mythology, icon: entity.icon, type: entity.type || this.category}).replace(/'/g, "&apos;")}'
+                            title="${isInCompare ? 'In comparison' : 'Add to compare'}"
+                            aria-label="${isInCompare ? 'Already in comparison' : 'Add to compare'}"
+                            aria-pressed="${isInCompare}">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                    </button>
+                </div>
+
                 <div class="entity-card-header">
                     ${iconHTML}
                     <div class="entity-card-info">
-                        <h3 class="entity-card__name">${this.escapeHtml(entity.name)}</h3>
+                        <h3 class="entity-card__name card-title-truncate" aria-label="${this.escapeHtml(entity.name)}">${this.escapeHtml(entity.name)}</h3>
                         <span class="entity-card__mythology">${this.capitalize(entity.mythology)}</span>
                     </div>
                 </div>
 
-                <p class="entity-card__description">
+                <p class="entity-card__description card-desc-truncate" aria-label="${this.escapeHtml(description)}">
                     ${this.escapeHtml(description)}
                 </p>
 
@@ -814,6 +864,180 @@ class BrowseCategoryView {
                 </div>
             </a>
         `;
+    }
+
+    /**
+     * Get favorites from localStorage
+     */
+    getFavorites() {
+        try {
+            const stored = localStorage.getItem('eoa_favorites');
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    /**
+     * Toggle favorite status
+     */
+    toggleFavorite(entityId, collection) {
+        const favorites = this.getFavorites();
+        const key = `${collection}:${entityId}`;
+        const index = favorites.indexOf(key);
+
+        if (index > -1) {
+            favorites.splice(index, 1);
+        } else {
+            favorites.push(key);
+        }
+
+        try {
+            localStorage.setItem('eoa_favorites', JSON.stringify(favorites));
+        } catch (e) {
+            console.error('[Browse View] Failed to save favorites:', e);
+        }
+
+        return index === -1; // Returns true if now favorited
+    }
+
+    /**
+     * Get compare tray HTML
+     */
+    getCompareTrayHTML() {
+        const compareEntities = this.getCompareEntities();
+        const count = compareEntities.length;
+
+        if (count === 0) return '';
+
+        return `
+            <div class="compare-tray-floating" id="compareTray" role="complementary" aria-label="Compare tray">
+                <div class="compare-tray-header">
+                    <span class="compare-tray-title">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="7" height="7"/>
+                            <rect x="14" y="3" width="7" height="7"/>
+                            <rect x="14" y="14" width="7" height="7"/>
+                            <rect x="3" y="14" width="7" height="7"/>
+                        </svg>
+                        Compare (${count}/3)
+                    </span>
+                    <button class="compare-tray-close" onclick="document.getElementById('compareTray').classList.toggle('collapsed')" aria-label="Toggle compare tray">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="compare-tray-entities">
+                    ${compareEntities.map(entity => `
+                        <div class="compare-tray-entity" data-id="${entity.id}" data-collection="${entity._collection}">
+                            <span class="tray-entity-name">${this.truncateDescription(entity.name, 15)}</span>
+                            <button class="tray-entity-remove" onclick="window.BrowseCategoryView && window.BrowseCategoryView.removeFromCompare && window.BrowseCategoryView.removeFromCompare('${entity.id}', '${entity._collection}')" title="Remove from compare">
+                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                                </svg>
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="compare-tray-actions">
+                    ${count >= 2 ? `
+                        <a href="#/compare" class="compare-tray-btn compare-now">
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            Compare Now
+                        </a>
+                    ` : `
+                        <span class="compare-tray-hint">Add ${2 - count} more to compare</span>
+                    `}
+                    <button class="compare-tray-btn compare-clear" onclick="window.BrowseCategoryView && window.BrowseCategoryView.clearCompare && window.BrowseCategoryView.clearCompare()">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Get entities in compare list
+     */
+    getCompareEntities() {
+        try {
+            const stored = sessionStorage.getItem('eoa_compare_entities');
+            return stored ? JSON.parse(stored) : [];
+        } catch (e) {
+            return [];
+        }
+    }
+
+    /**
+     * Remove entity from compare (static method for onclick handlers)
+     */
+    static removeFromCompare(entityId, collection) {
+        try {
+            const stored = sessionStorage.getItem('eoa_compare_entities');
+            if (stored) {
+                let entities = JSON.parse(stored);
+                entities = entities.filter(e => !(e.id === entityId && e._collection === collection));
+                sessionStorage.setItem('eoa_compare_entities', JSON.stringify(entities));
+
+                // Update UI
+                const tray = document.getElementById('compareTray');
+                if (tray) {
+                    if (entities.length === 0) {
+                        tray.remove();
+                    } else {
+                        // Update count
+                        const title = tray.querySelector('.compare-tray-title');
+                        if (title) {
+                            title.innerHTML = `
+                                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="3" y="3" width="7" height="7"/>
+                                    <rect x="14" y="3" width="7" height="7"/>
+                                    <rect x="14" y="14" width="7" height="7"/>
+                                    <rect x="3" y="14" width="7" height="7"/>
+                                </svg>
+                                Compare (${entities.length}/3)
+                            `;
+                        }
+                        // Remove entity element
+                        const entityEl = tray.querySelector(`[data-id="${entityId}"][data-collection="${collection}"]`);
+                        if (entityEl) entityEl.remove();
+
+                        // Update compare button
+                        const compareBtn = document.querySelector(`[data-entity-id="${entityId}"][data-action="compare"]`);
+                        if (compareBtn) {
+                            compareBtn.classList.remove('active');
+                            compareBtn.setAttribute('aria-pressed', 'false');
+                        }
+                    }
+                }
+            }
+        } catch (e) {
+            console.error('[Browse View] Failed to remove from compare:', e);
+        }
+    }
+
+    /**
+     * Clear all entities from compare
+     */
+    static clearCompare() {
+        try {
+            sessionStorage.removeItem('eoa_compare_entities');
+
+            // Remove tray
+            const tray = document.getElementById('compareTray');
+            if (tray) tray.remove();
+
+            // Update all compare buttons
+            document.querySelectorAll('.action-compare.active').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-pressed', 'false');
+            });
+        } catch (e) {
+            console.error('[Browse View] Failed to clear compare:', e);
+        }
     }
 
     /**
@@ -921,6 +1145,7 @@ class BrowseCategoryView {
 
     /**
      * Render icon based on its type (inline SVG, URL, or emoji)
+     * Includes lazy loading for images with placeholder
      * @param {string} icon - The icon value
      * @param {string} entityName - Entity name for alt text
      * @returns {string} HTML string for the icon
@@ -946,7 +1171,22 @@ class BrowseCategoryView {
                       /\.(svg|png|jpg|jpeg|webp|gif)$/i.test(iconTrimmed);
 
         if (isUrl) {
-            return `<img src="${this.escapeHtml(iconTrimmed)}" alt="${this.escapeHtml(entityName)} icon" class="entity-icon" loading="lazy" />`;
+            // Use lazy loading with placeholder and fallback
+            return `
+                <div class="entity-icon entity-icon-img-wrapper">
+                    <div class="entity-icon-placeholder loading-shimmer">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                            <circle cx="12" cy="12" r="10"/>
+                        </svg>
+                    </div>
+                    <img src="${this.escapeHtml(iconTrimmed)}"
+                         alt="${this.escapeHtml(entityName)} icon"
+                         class="entity-icon-img"
+                         loading="lazy"
+                         decoding="async"
+                         onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none'"
+                         onerror="this.style.display='none'" />
+                </div>`;
         }
 
         // Otherwise, treat as emoji or text
@@ -1062,6 +1302,213 @@ class BrowseCategoryView {
         const container = document.getElementById('entityContainer');
         if (container && this.entities.length > 50) {
             container.addEventListener('scroll', () => this.handleScroll());
+        }
+
+        // Quick action buttons on entity cards (delegated)
+        this.setupQuickActionListeners();
+
+        // Pull-to-refresh support for mobile
+        this.setupPullToRefresh();
+
+        // Add context menu support to entity cards
+        this.setupMobileContextMenus();
+    }
+
+    /**
+     * Setup pull-to-refresh for mobile
+     */
+    setupPullToRefresh() {
+        document.addEventListener('pull-to-refresh', async () => {
+            console.log('[Browse View] Pull-to-refresh triggered');
+            await this.handleRefresh();
+        });
+    }
+
+    /**
+     * Handle pull-to-refresh
+     */
+    async handleRefresh() {
+        try {
+            // Show refreshing state
+            const header = document.querySelector('.browse-header');
+            if (header) {
+                header.classList.add('refreshing');
+            }
+
+            // Reload entities
+            await this.loadEntities();
+
+            // Re-apply filters and update grid
+            this.applyFilters();
+            this.updateStats();
+
+            // Show success
+            this.showToast('Content refreshed', 'success');
+
+            // Remove refreshing state
+            if (header) {
+                header.classList.remove('refreshing');
+            }
+        } catch (error) {
+            console.error('[Browse View] Refresh error:', error);
+            this.showToast('Failed to refresh', 'error');
+        }
+    }
+
+    /**
+     * Setup context menus for entity cards on mobile
+     */
+    setupMobileContextMenus() {
+        // Add context menu data to entity cards
+        const cards = document.querySelectorAll('.entity-card, .browse-entity-card');
+        cards.forEach(card => {
+            if (!card.dataset.contextMenu) {
+                card.dataset.contextMenu = 'entity';
+
+                // Create context menu items based on entity type
+                const entityId = card.dataset.entityId || card.dataset.id;
+                const collection = card.dataset.collection || this.category;
+
+                card.dataset.contextMenuItems = JSON.stringify([
+                    { icon: '&#128279;', label: 'Copy Link', action: 'copy-link' },
+                    { icon: '&#128203;', label: 'Share', action: 'share' },
+                    { icon: '&#11088;', label: 'Add to Favorites', action: 'favorite' },
+                    { icon: '&#128065;', label: 'Quick View', action: 'quick-view' },
+                    { icon: '&#9878;', label: 'Add to Compare', action: 'compare' }
+                ]);
+
+                // Add touch-ripple class for visual feedback
+                card.classList.add('touch-ripple');
+            }
+        });
+
+        // Listen for context menu events
+        document.addEventListener('add-to-favorites', (e) => {
+            const card = e.target.closest('[data-entity-id]');
+            if (card) {
+                const entityId = card.dataset.entityId;
+                const collection = card.dataset.collection || this.category;
+                this.toggleFavorite(entityId, collection);
+                this.showToast('Added to favorites', 'success');
+            }
+        });
+
+        document.addEventListener('compare', (e) => {
+            const card = e.target.closest('[data-entity-id]');
+            if (card) {
+                const entityId = card.dataset.entityId;
+                const collection = card.dataset.collection || this.category;
+                window.location.hash = `#/compare/${collection}:${entityId}`;
+            }
+        });
+    }
+
+    /**
+     * Setup delegated event listeners for quick action buttons
+     */
+    setupQuickActionListeners() {
+        const grid = document.getElementById('entityGrid');
+        if (!grid) return;
+
+        grid.addEventListener('click', (e) => {
+            // Check if clicked on a quick action button
+            const actionBtn = e.target.closest('.quick-action-btn');
+            if (!actionBtn) return;
+
+            // Prevent navigation
+            e.preventDefault();
+            e.stopPropagation();
+
+            const action = actionBtn.dataset.action;
+            const entityId = actionBtn.dataset.entityId;
+            const collection = actionBtn.dataset.collection;
+
+            if (action === 'favorite') {
+                this.handleFavoriteAction(actionBtn, entityId, collection);
+            } else if (action === 'compare') {
+                this.handleCompareAction(actionBtn, entityId, collection);
+            }
+        });
+    }
+
+    /**
+     * Handle favorite button click
+     */
+    handleFavoriteAction(btn, entityId, collection) {
+        const isFavorited = this.toggleFavorite(entityId, collection);
+
+        // Update button state with animation
+        btn.classList.toggle('active', isFavorited);
+        btn.setAttribute('aria-pressed', isFavorited);
+        btn.setAttribute('title', isFavorited ? 'Remove from favorites' : 'Add to favorites');
+        btn.setAttribute('aria-label', isFavorited ? 'Remove from favorites' : 'Add to favorites');
+
+        // Update SVG fill
+        const svg = btn.querySelector('svg');
+        if (svg) {
+            svg.setAttribute('fill', isFavorited ? 'currentColor' : 'none');
+        }
+
+        // Add pulse animation
+        btn.classList.add('action-pulse');
+        setTimeout(() => btn.classList.remove('action-pulse'), 400);
+
+        // Show toast notification
+        this.showToast(
+            isFavorited ? 'Added to favorites' : 'Removed from favorites',
+            isFavorited ? 'success' : 'info'
+        );
+    }
+
+    /**
+     * Handle compare button click
+     */
+    handleCompareAction(btn, entityId, collection) {
+        // Get entity data from button
+        const entityData = JSON.parse(btn.dataset.entity || '{}');
+
+        // Check if CompareView is available
+        if (typeof CompareView === 'undefined' || !CompareView.addToComparison) {
+            // Fallback: navigate to compare page
+            window.location.hash = `#/compare/${collection}:${entityId}`;
+            return;
+        }
+
+        // Check current state
+        const isInCompare = CompareView.isInComparison(entityId, collection);
+
+        if (isInCompare) {
+            // Navigate to compare page
+            window.location.hash = '#/compare';
+            return;
+        }
+
+        // Add to comparison
+        const added = CompareView.addToComparison(entityData, collection);
+
+        if (added) {
+            // Update button state
+            btn.classList.add('active');
+            btn.setAttribute('aria-pressed', 'true');
+            btn.setAttribute('title', 'In comparison');
+            btn.setAttribute('aria-label', 'Already in comparison');
+
+            // Add pulse animation
+            btn.classList.add('action-pulse');
+            setTimeout(() => btn.classList.remove('action-pulse'), 400);
+        }
+    }
+
+    /**
+     * Show toast notification
+     */
+    showToast(message, type = 'info') {
+        if (window.showToast) {
+            window.showToast(message, type);
+        } else if (window.ToastManager) {
+            window.ToastManager.show(message, type);
+        } else {
+            console.log(`[${type.toUpperCase()}] ${message}`);
         }
     }
 
@@ -1346,15 +1793,59 @@ class BrowseCategoryView {
                 loadMoreBtn.setAttribute('data-handler-attached', 'true');
                 loadMoreBtn.addEventListener('click', () => this.loadMoreEntities());
             }
+
+            // Setup infinite scroll observer
+            this.setupInfiniteScroll(loadMoreContainer);
         } else {
             loadMoreContainer.style.display = 'none';
+            // Disconnect observer if exists
+            if (this.infiniteScrollObserver) {
+                this.infiniteScrollObserver.disconnect();
+            }
         }
     }
 
     /**
-     * Load more entities (for Load More button)
+     * Setup infinite scroll using IntersectionObserver
+     */
+    setupInfiniteScroll(target) {
+        // Check if user prefers infinite scroll (default: true)
+        const infiniteScrollEnabled = localStorage.getItem('browse-infinite-scroll') !== 'false';
+        if (!infiniteScrollEnabled) return;
+
+        // Disconnect existing observer
+        if (this.infiniteScrollObserver) {
+            this.infiniteScrollObserver.disconnect();
+        }
+
+        // Create new observer
+        this.infiniteScrollObserver = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !this.isLoadingMore) {
+                        this.loadMoreEntities();
+                    }
+                });
+            },
+            {
+                root: null,
+                rootMargin: '200px', // Load more 200px before reaching the bottom
+                threshold: 0
+            }
+        );
+
+        // Observe the load more container
+        this.infiniteScrollObserver.observe(target);
+    }
+
+    /**
+     * Load more entities (for Load More button and infinite scroll)
      */
     loadMoreEntities() {
+        // Prevent duplicate loads
+        if (this.isLoadingMore) return;
+        this.isLoadingMore = true;
+
         const loadMoreBtn = document.getElementById('loadMoreBtn');
         const loadMoreSpinner = document.getElementById('loadMoreSpinner');
 
@@ -1362,24 +1853,44 @@ class BrowseCategoryView {
         if (loadMoreBtn) loadMoreBtn.style.display = 'none';
         if (loadMoreSpinner) loadMoreSpinner.style.display = 'flex';
 
-        // Simulate loading delay for smooth UX
+        // Small delay for smooth UX
         setTimeout(() => {
             this.currentPage++;
 
             const grid = document.getElementById('entityGrid');
-            if (!grid) return;
+            if (!grid) {
+                this.isLoadingMore = false;
+                return;
+            }
 
             // Calculate new entities to add
             const start = (this.currentPage - 1) * this.itemsPerPage;
             const end = start + this.itemsPerPage;
             const newEntities = this.filteredEntities.slice(start, end);
 
-            // Append new cards
-            const newCardsHTML = newEntities.map(entity => this.getEntityCardHTML(entity)).join('');
-            grid.insertAdjacentHTML('beforeend', newCardsHTML);
+            // Append new cards with staggered fade-in animation
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newEntities.map(entity => this.getEntityCardHTML(entity)).join('');
+
+            const newCards = Array.from(tempDiv.children);
+            newCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                grid.appendChild(card);
+
+                // Staggered animation
+                setTimeout(() => {
+                    card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 50);
+            });
 
             // Update displayed entities array
             this.displayedEntities = this.filteredEntities.slice(0, end);
+
+            // Reset loading flag
+            this.isLoadingMore = false;
 
             // Update load more button
             this.updateLoadMoreButton();
@@ -2126,6 +2637,113 @@ class BrowseCategoryView {
                     transform: translateY(0);
                 }
 
+                .entity-card:hover .entity-card-actions {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+
+                /* ==========================================
+                   Entity Card Quick Actions
+                   ========================================== */
+                .entity-card-actions {
+                    position: absolute;
+                    top: 0.75rem;
+                    right: 0.75rem;
+                    display: flex;
+                    gap: 0.375rem;
+                    z-index: 10;
+                    opacity: 0;
+                    transform: translateY(-8px);
+                    transition: all 0.2s ease;
+                }
+
+                /* Show actions on touch devices */
+                @media (hover: none) {
+                    .entity-card-actions {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .quick-action-btn {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 32px;
+                    height: 32px;
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.9);
+                    backdrop-filter: blur(8px);
+                    border: 1.5px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+                    border-radius: var(--radius-md, 0.5rem);
+                    color: var(--color-text-secondary);
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+
+                .quick-action-btn:hover {
+                    background: rgba(var(--color-primary-rgb), 0.2);
+                    border-color: rgba(var(--color-primary-rgb), 0.5);
+                    color: var(--color-primary);
+                    transform: scale(1.1);
+                }
+
+                .quick-action-btn:active {
+                    transform: scale(0.95);
+                }
+
+                .quick-action-btn.active {
+                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                    border-color: transparent;
+                    color: white;
+                }
+
+                .quick-action-btn.active:hover {
+                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+                    transform: scale(1.1);
+                }
+
+                .action-favorite.active {
+                    background: linear-gradient(135deg, #ef4444, #f97316);
+                }
+
+                .action-compare.active {
+                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                }
+
+                /* Pulse animation for action feedback */
+                @keyframes action-pulse {
+                    0% { transform: scale(1); }
+                    50% { transform: scale(1.2); }
+                    100% { transform: scale(1); }
+                }
+
+                .action-pulse {
+                    animation: action-pulse 0.4s ease;
+                }
+
+                .quick-action-btn svg {
+                    width: 18px;
+                    height: 18px;
+                    flex-shrink: 0;
+                }
+
+                /* Compact density adjustments */
+                .density-compact .entity-card-actions {
+                    top: 0.5rem;
+                    right: 0.5rem;
+                    gap: 0.25rem;
+                }
+
+                .density-compact .quick-action-btn {
+                    width: 28px;
+                    height: 28px;
+                }
+
+                .density-compact .quick-action-btn svg {
+                    width: 14px;
+                    height: 14px;
+                }
+
                 .entity-card:focus {
                     outline: 3px solid var(--color-primary);
                     outline-offset: 2px;
@@ -2181,6 +2799,76 @@ class BrowseCategoryView {
                 .density-detailed img.entity-icon {
                     width: 3rem;
                     height: 3rem;
+                }
+
+                /* Lazy loading image wrapper */
+                .entity-icon-img-wrapper {
+                    position: relative;
+                    width: 2.5rem;
+                    height: 2.5rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+
+                .density-compact .entity-icon-img-wrapper {
+                    width: 2rem;
+                    height: 2rem;
+                }
+
+                .density-detailed .entity-icon-img-wrapper {
+                    width: 3rem;
+                    height: 3rem;
+                }
+
+                .entity-icon-placeholder {
+                    position: absolute;
+                    inset: 0;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: var(--radius-md, 0.5rem);
+                    background: rgba(var(--color-primary-rgb), 0.1);
+                }
+
+                .entity-icon-img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                }
+
+                .entity-icon-img.loaded {
+                    opacity: 1;
+                }
+
+                /* Loading shimmer animation */
+                .loading-shimmer {
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .loading-shimmer::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(
+                        90deg,
+                        transparent,
+                        rgba(var(--color-primary-rgb), 0.15),
+                        transparent
+                    );
+                    animation: shimmer 1.5s infinite;
+                }
+
+                @keyframes shimmer {
+                    100% {
+                        left: 100%;
+                    }
                 }
 
                 .entity-card-info {
@@ -2999,6 +3687,200 @@ class BrowseCategoryView {
                     .filter-chip,
                     .density-btn {
                         border-width: 3px;
+                    }
+                }
+
+                /* ==========================================
+                   Floating Compare Tray
+                   ========================================== */
+                .compare-tray-floating {
+                    position: fixed;
+                    bottom: 1rem;
+                    right: 1rem;
+                    z-index: 1000;
+                    min-width: 280px;
+                    max-width: 360px;
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.95);
+                    backdrop-filter: blur(16px);
+                    -webkit-backdrop-filter: blur(16px);
+                    border: 1.5px solid rgba(var(--color-primary-rgb), 0.4);
+                    border-radius: var(--radius-xl, 1rem);
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
+                                0 0 20px rgba(var(--color-primary-rgb), 0.2);
+                    animation: tray-slide-in 0.3s ease;
+                    overflow: hidden;
+                }
+
+                @keyframes tray-slide-in {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                .compare-tray-floating.collapsed .compare-tray-entities,
+                .compare-tray-floating.collapsed .compare-tray-actions {
+                    display: none;
+                }
+
+                .compare-tray-floating.collapsed .compare-tray-close svg {
+                    transform: rotate(180deg);
+                }
+
+                .compare-tray-header {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0.75rem 1rem;
+                    background: linear-gradient(135deg,
+                        rgba(var(--color-primary-rgb), 0.2),
+                        rgba(var(--color-secondary-rgb), 0.15));
+                    border-bottom: 1px solid rgba(var(--color-border-rgb), 0.2);
+                }
+
+                .compare-tray-title {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    font-weight: var(--font-semibold, 600);
+                    font-size: var(--font-size-sm, 0.875rem);
+                    color: var(--color-text-primary);
+                }
+
+                .compare-tray-title svg {
+                    color: var(--color-primary);
+                }
+
+                .compare-tray-close {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 28px;
+                    height: 28px;
+                    background: transparent;
+                    border: none;
+                    border-radius: var(--radius-md, 0.5rem);
+                    color: var(--color-text-secondary);
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+
+                .compare-tray-close:hover {
+                    background: rgba(var(--color-primary-rgb), 0.2);
+                    color: var(--color-primary);
+                }
+
+                .compare-tray-close svg {
+                    transition: transform 0.2s ease;
+                }
+
+                .compare-tray-entities {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0.5rem;
+                    padding: 0.75rem 1rem;
+                }
+
+                .compare-tray-entity {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0.5rem 0.75rem;
+                    background: rgba(var(--color-surface-rgb), 0.5);
+                    border: 1px solid rgba(var(--color-border-rgb), 0.2);
+                    border-radius: var(--radius-md, 0.5rem);
+                }
+
+                .tray-entity-name {
+                    font-size: var(--font-size-sm, 0.875rem);
+                    color: var(--color-text-primary);
+                    font-weight: var(--font-medium, 500);
+                }
+
+                .tray-entity-remove {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 24px;
+                    height: 24px;
+                    background: transparent;
+                    border: none;
+                    border-radius: var(--radius-sm, 0.25rem);
+                    color: var(--color-text-tertiary);
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                }
+
+                .tray-entity-remove:hover {
+                    background: rgba(239, 68, 68, 0.2);
+                    color: #ef4444;
+                }
+
+                .compare-tray-actions {
+                    display: flex;
+                    gap: 0.5rem;
+                    padding: 0.75rem 1rem;
+                    border-top: 1px solid rgba(var(--color-border-rgb), 0.2);
+                }
+
+                .compare-tray-btn {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.375rem;
+                    padding: 0.5rem 0.75rem;
+                    border-radius: var(--radius-md, 0.5rem);
+                    font-size: var(--font-size-sm, 0.875rem);
+                    font-weight: var(--font-medium, 500);
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    text-decoration: none;
+                }
+
+                .compare-tray-btn.compare-now {
+                    background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+                    color: white;
+                    border: none;
+                }
+
+                .compare-tray-btn.compare-now:hover {
+                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+                    transform: translateY(-1px);
+                }
+
+                .compare-tray-btn.compare-clear {
+                    background: transparent;
+                    border: 1px solid rgba(var(--color-border-rgb), 0.3);
+                    color: var(--color-text-secondary);
+                }
+
+                .compare-tray-btn.compare-clear:hover {
+                    background: rgba(239, 68, 68, 0.1);
+                    border-color: rgba(239, 68, 68, 0.3);
+                    color: #ef4444;
+                }
+
+                .compare-tray-hint {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: var(--font-size-sm, 0.875rem);
+                    color: var(--color-text-tertiary);
+                }
+
+                /* Mobile tray positioning */
+                @media (max-width: 640px) {
+                    .compare-tray-floating {
+                        left: 0.5rem;
+                        right: 0.5rem;
+                        bottom: 0.5rem;
+                        max-width: none;
                     }
                 }
             </style>

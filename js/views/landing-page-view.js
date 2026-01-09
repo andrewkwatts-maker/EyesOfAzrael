@@ -540,33 +540,78 @@ class LandingPageView {
     getLandingHTML() {
         return `
             <div class="landing-page-view">
-                <!-- Hero Section -->
+                <!-- Hero Section - Enhanced with animated background and quick search -->
                 <section class="landing-hero-section" role="banner">
                     <div class="hero-background-glow" aria-hidden="true"></div>
+                    <div class="hero-particles" aria-hidden="true">
+                        <div class="particle particle-1"></div>
+                        <div class="particle particle-2"></div>
+                        <div class="particle particle-3"></div>
+                        <div class="particle particle-4"></div>
+                        <div class="particle particle-5"></div>
+                    </div>
+                    <div class="hero-sacred-geometry" aria-hidden="true">
+                        <svg class="sacred-svg" viewBox="0 0 200 200" width="400" height="400">
+                            <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.1"/>
+                            <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>
+                            <circle cx="100" cy="100" r="40" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
+                            <polygon points="100,20 170,140 30,140" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.1"/>
+                            <polygon points="100,180 30,60 170,60" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.1"/>
+                        </svg>
+                    </div>
                     <div class="hero-content-wrapper">
                         <div class="hero-icon-display" aria-hidden="true">
                             <span class="hero-eye-icon">&#128065;</span>
                             <div class="hero-icon-ring"></div>
+                            <div class="hero-icon-ring hero-icon-ring-outer"></div>
                         </div>
                         <h1 class="landing-hero-title">
                             <span class="title-line title-line-1">Eyes of</span>
                             <span class="title-line title-line-2">Azrael</span>
                         </h1>
                         <p class="landing-hero-subtitle">
-                            Explore the myths, legends, and sacred traditions of humanity
+                            Unveil the Sacred Wisdom of Ancient Worlds
                         </p>
                         <p class="landing-hero-description">
-                            Journey through 6000+ years of mythology, from ancient Sumer to modern traditions.
-                            Discover deities, heroes, creatures, sacred texts, and mystical practices from cultures across the globe.
+                            Journey through 6000+ years of mythology, from the ziggurats of Sumer to the sacred groves of the Celts.
+                            Discover divine beings, legendary heroes, mythical creatures, and the timeless wisdom that shaped civilizations.
                         </p>
+
+                        <!-- Quick Search -->
+                        <div class="hero-search-container">
+                            <form class="hero-search-form" role="search" aria-label="Search mythology database">
+                                <div class="hero-search-input-wrapper">
+                                    <span class="hero-search-icon" aria-hidden="true">&#128269;</span>
+                                    <input type="search"
+                                           class="hero-search-input"
+                                           id="heroSearchInput"
+                                           placeholder="Search deities, creatures, myths..."
+                                           autocomplete="off"
+                                           aria-label="Search mythology database">
+                                    <button type="submit" class="hero-search-btn" aria-label="Search">
+                                        <span class="btn-text">Search</span>
+                                        <span class="btn-arrow">&#8594;</span>
+                                    </button>
+                                </div>
+                                <div class="hero-search-suggestions" aria-live="polite">
+                                    <span class="search-suggestion-label">Popular:</span>
+                                    <a href="#/browse/deities?q=zeus" class="search-suggestion-tag">Zeus</a>
+                                    <a href="#/browse/creatures?q=dragon" class="search-suggestion-tag">Dragons</a>
+                                    <a href="#/browse/heroes?q=hercules" class="search-suggestion-tag">Hercules</a>
+                                    <a href="#/mythologies/norse" class="search-suggestion-tag">Norse</a>
+                                    <a href="#/browse/items?q=excalibur" class="search-suggestion-tag">Excalibur</a>
+                                </div>
+                            </form>
+                        </div>
+
                         <div class="landing-hero-actions">
                             <a href="#/mythologies" class="landing-btn landing-btn-primary">
                                 <span class="btn-icon">&#127963;</span>
                                 <span class="btn-text">Explore Mythologies</span>
                             </a>
                             <a href="#/search" class="landing-btn landing-btn-secondary">
-                                <span class="btn-icon">&#128269;</span>
-                                <span class="btn-text">Browse All Content</span>
+                                <span class="btn-icon">&#128218;</span>
+                                <span class="btn-text">Browse Database</span>
                             </a>
                         </div>
                     </div>
@@ -600,32 +645,126 @@ class LandingPageView {
                     </div>
                 </section>
 
+                <!-- Stats & Social Proof Section -->
+                <section class="landing-stats-section" id="stats-section">
+                    <h2 class="landing-section-header">
+                        <span class="landing-section-icon">&#128202;</span>
+                        Our Growing Collection
+                    </h2>
+                    <p class="landing-section-subtitle">
+                        A living encyclopedia of world mythology
+                    </p>
+                    <div class="landing-stats-grid">
+                        <div class="landing-stat-card" style="--stat-index: 0;">
+                            <div class="stat-icon">&#127760;</div>
+                            <div class="stat-number" id="stat-mythologies">22+</div>
+                            <div class="stat-label">Mythologies</div>
+                            <div class="stat-description">World traditions</div>
+                        </div>
+                        <div class="landing-stat-card" style="--stat-index: 1;">
+                            <div class="stat-icon">&#128081;</div>
+                            <div class="stat-number" id="stat-deities">500+</div>
+                            <div class="stat-label">Deities</div>
+                            <div class="stat-description">Divine beings</div>
+                        </div>
+                        <div class="landing-stat-card" style="--stat-index: 2;">
+                            <div class="stat-icon">&#128009;</div>
+                            <div class="stat-number" id="stat-creatures">350+</div>
+                            <div class="stat-label">Creatures</div>
+                            <div class="stat-description">Mythical beasts</div>
+                        </div>
+                        <div class="landing-stat-card" style="--stat-index: 3;">
+                            <div class="stat-icon">&#9876;</div>
+                            <div class="stat-number" id="stat-items">200+</div>
+                            <div class="stat-label">Artifacts</div>
+                            <div class="stat-description">Sacred objects</div>
+                        </div>
+                        <div class="landing-stat-card" style="--stat-index: 4;">
+                            <div class="stat-icon">&#128220;</div>
+                            <div class="stat-number" id="stat-texts">150+</div>
+                            <div class="stat-label">Sacred Texts</div>
+                            <div class="stat-description">Ancient writings</div>
+                        </div>
+                        <div class="landing-stat-card" style="--stat-index: 5;">
+                            <div class="stat-icon">&#128101;</div>
+                            <div class="stat-number" id="stat-contributors">1000+</div>
+                            <div class="stat-label">Contributors</div>
+                            <div class="stat-description">Community members</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Recent Additions Section -->
+                <section class="landing-recent-section" id="recent-additions-section" style="display: none;">
+                    <h2 class="landing-section-header">
+                        <span class="landing-section-icon">&#9200;</span>
+                        Recently Added
+                    </h2>
+                    <p class="landing-section-subtitle">
+                        Fresh discoveries from our community
+                    </p>
+                    <div class="landing-recent-grid" id="recent-additions-grid">
+                        <!-- Recent additions will be dynamically loaded here -->
+                    </div>
+                    <div class="landing-section-cta">
+                        <a href="#/search?sort=newest" class="landing-btn landing-btn-outline">
+                            <span class="btn-icon">&#128196;</span>
+                            <span class="btn-text">View All Recent</span>
+                        </a>
+                    </div>
+                </section>
+
                 <!-- Features Section -->
                 <section class="landing-features-section">
                     <h2 class="landing-section-header">
                         <span class="landing-section-icon">&#10024;</span>
-                        Database Features
+                        Discover & Explore
                     </h2>
+                    <p class="landing-section-subtitle">
+                        Powerful tools for mythology research
+                    </p>
                     <div class="landing-features-grid">
                         <div class="landing-feature-card" style="--feature-index: 0;">
                             <div class="landing-feature-icon">&#128218;</div>
                             <h3>Comprehensive Database</h3>
-                            <p>Thousands of entities across 22+ mythological traditions</p>
+                            <p>Thousands of entities across 22+ mythological traditions from every corner of the world</p>
                         </div>
                         <div class="landing-feature-card" style="--feature-index: 1;">
                             <div class="landing-feature-icon">&#128279;</div>
                             <h3>Cross-Cultural Links</h3>
-                            <p>Discover connections between different traditions</p>
+                            <p>Discover fascinating connections and parallels between different mythological traditions</p>
                         </div>
                         <div class="landing-feature-card" style="--feature-index: 2;">
                             <div class="landing-feature-icon">&#128269;</div>
                             <h3>Advanced Search</h3>
-                            <p>Find entities by name, type, mythology, or attributes</p>
+                            <p>Find entities by name, type, mythology, attributes, or relationships with powerful filtering</p>
                         </div>
                         <div class="landing-feature-card" style="--feature-index: 3;">
                             <div class="landing-feature-icon">&#9878;</div>
                             <h3>Compare Traditions</h3>
-                            <p>Side-by-side comparison of entities and concepts</p>
+                            <p>Side-by-side comparison of deities, heroes, and concepts across different cultures</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Community CTA Section -->
+                <section class="landing-cta-section">
+                    <div class="cta-content-wrapper">
+                        <div class="cta-icon">&#128640;</div>
+                        <h2 class="cta-title">Join Our Community</h2>
+                        <p class="cta-description">
+                            Become part of a growing community of mythology enthusiasts, scholars, and storytellers.
+                            Contribute your knowledge, discuss ancient wisdom, and help preserve humanity's sacred heritage.
+                        </p>
+                        <div class="cta-actions">
+                            <a href="#/signup" class="landing-btn landing-btn-primary cta-btn">
+                                <span class="btn-icon">&#9734;</span>
+                                <span class="btn-text">Get Started Free</span>
+                            </a>
+                            <a href="#/about" class="landing-btn landing-btn-ghost cta-btn">
+                                <span class="btn-text">Learn More</span>
+                                <span class="btn-arrow">&#8594;</span>
+                            </a>
                         </div>
                     </div>
                 </section>
@@ -1410,6 +1549,371 @@ class LandingPageView {
                     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
                 }
 
+                /* === Hero Search Container === */
+                .hero-search-container {
+                    max-width: 650px;
+                    margin: 0 auto 32px;
+                    position: relative;
+                    z-index: 2;
+                }
+
+                .hero-search-form {
+                    width: 100%;
+                }
+
+                .hero-search-input-wrapper {
+                    display: flex;
+                    align-items: center;
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.9);
+                    backdrop-filter: blur(20px);
+                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+                    border-radius: 16px;
+                    padding: 4px 4px 4px 20px;
+                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                    box-shadow:
+                        0 8px 32px rgba(0, 0, 0, 0.2),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+                }
+
+                .hero-search-input-wrapper:focus-within {
+                    border-color: var(--color-primary, #8b7fff);
+                    box-shadow:
+                        0 8px 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3),
+                        0 0 0 4px rgba(var(--color-primary-rgb, 139, 127, 255), 0.1),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                }
+
+                .hero-search-icon {
+                    font-size: 1.25rem;
+                    color: var(--color-text-secondary, #9ca3af);
+                    margin-right: 12px;
+                    flex-shrink: 0;
+                }
+
+                .hero-search-input {
+                    flex: 1;
+                    background: transparent;
+                    border: none;
+                    color: var(--color-text-primary, #f8f9fa);
+                    font-size: 1.1rem;
+                    font-family: inherit;
+                    padding: 14px 12px 14px 0;
+                    outline: none;
+                    min-width: 0;
+                }
+
+                .hero-search-input::placeholder {
+                    color: var(--color-text-muted, #6c757d);
+                }
+
+                .hero-search-btn {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    background: linear-gradient(135deg, var(--color-primary, #8b7fff), #a78bfa);
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    padding: 14px 24px;
+                    font-size: 1rem;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    white-space: nowrap;
+                }
+
+                .hero-search-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+                }
+
+                .hero-search-btn .btn-arrow {
+                    transition: transform 0.2s ease;
+                }
+
+                .hero-search-btn:hover .btn-arrow {
+                    transform: translateX(4px);
+                }
+
+                .hero-search-suggestions {
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    margin-top: 16px;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
+
+                .search-suggestion-label {
+                    font-size: 0.875rem;
+                    color: var(--color-text-secondary, #9ca3af);
+                }
+
+                .search-suggestion-tag {
+                    font-size: 0.8rem;
+                    color: var(--color-text-secondary, #9ca3af);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    text-decoration: none;
+                    transition: all 0.2s ease;
+                }
+
+                .search-suggestion-tag:hover {
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+                    color: var(--color-primary, #8b7fff);
+                }
+
+                /* === Hero Particles Animation === */
+                .hero-particles {
+                    position: absolute;
+                    inset: 0;
+                    overflow: hidden;
+                    pointer-events: none;
+                }
+
+                .particle {
+                    position: absolute;
+                    width: 4px;
+                    height: 4px;
+                    background: var(--color-primary, #8b7fff);
+                    border-radius: 50%;
+                    opacity: 0.4;
+                    animation: particleFloat 15s infinite ease-in-out;
+                }
+
+                .particle-1 { left: 10%; top: 20%; animation-delay: 0s; }
+                .particle-2 { left: 30%; top: 60%; animation-delay: 3s; }
+                .particle-3 { left: 60%; top: 15%; animation-delay: 6s; }
+                .particle-4 { left: 80%; top: 50%; animation-delay: 9s; }
+                .particle-5 { left: 50%; top: 80%; animation-delay: 12s; }
+
+                @keyframes particleFloat {
+                    0%, 100% {
+                        transform: translate(0, 0) scale(1);
+                        opacity: 0.4;
+                    }
+                    25% {
+                        transform: translate(20px, -30px) scale(1.2);
+                        opacity: 0.7;
+                    }
+                    50% {
+                        transform: translate(-10px, 20px) scale(0.8);
+                        opacity: 0.3;
+                    }
+                    75% {
+                        transform: translate(30px, 10px) scale(1.1);
+                        opacity: 0.6;
+                    }
+                }
+
+                /* === Sacred Geometry Background === */
+                .hero-sacred-geometry {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    pointer-events: none;
+                    opacity: 0.3;
+                    color: var(--color-primary, #8b7fff);
+                    animation: sacredRotate 60s linear infinite;
+                }
+
+                @keyframes sacredRotate {
+                    from { transform: translate(-50%, -50%) rotate(0deg); }
+                    to { transform: translate(-50%, -50%) rotate(360deg); }
+                }
+
+                .hero-icon-ring-outer {
+                    inset: -20px !important;
+                    animation-delay: 1s !important;
+                }
+
+                /* === Stats Section === */
+                .landing-stats-section {
+                    margin: 80px 0;
+                    padding: 48px 0;
+                }
+
+                .landing-stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                    gap: 20px;
+                    margin-top: 32px;
+                }
+
+                .landing-stat-card {
+                    text-align: center;
+                    padding: 28px 20px;
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.5);
+                    backdrop-filter: blur(12px);
+                    border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.3);
+                    border-radius: 16px;
+                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+                    opacity: 0;
+                    animation: statCardFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+                    animation-delay: calc(var(--stat-index, 0) * 0.1s);
+                }
+
+                @keyframes statCardFadeIn {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px) scale(0.95);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0) scale(1);
+                    }
+                }
+
+                .landing-stat-card:hover {
+                    transform: translateY(-4px);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+                    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+                }
+
+                .stat-icon {
+                    font-size: 2rem;
+                    margin-bottom: 12px;
+                    filter: drop-shadow(0 2px 8px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3));
+                }
+
+                .stat-number {
+                    font-size: 2.5rem;
+                    font-weight: 800;
+                    background: linear-gradient(135deg, var(--color-primary, #8b7fff), var(--color-secondary, #fbbf24));
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    line-height: 1.2;
+                    margin-bottom: 4px;
+                }
+
+                .stat-label {
+                    font-size: 1rem;
+                    font-weight: 600;
+                    color: var(--color-text-primary, #f8f9fa);
+                    margin-bottom: 4px;
+                }
+
+                .stat-description {
+                    font-size: 0.8rem;
+                    color: var(--color-text-secondary, #9ca3af);
+                }
+
+                /* === Recent Additions Section === */
+                .landing-recent-section {
+                    margin-bottom: 64px;
+                }
+
+                .landing-recent-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                    gap: 16px;
+                    margin-top: 24px;
+                }
+
+                .landing-section-cta {
+                    text-align: center;
+                    margin-top: 32px;
+                }
+
+                /* === CTA Section === */
+                .landing-cta-section {
+                    margin: 80px 0 40px;
+                    padding: 64px 32px;
+                    background: linear-gradient(135deg,
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.15),
+                        rgba(var(--color-secondary-rgb, 251, 191, 36), 0.1));
+                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.25);
+                    border-radius: 28px;
+                    text-align: center;
+                    position: relative;
+                    overflow: hidden;
+                }
+
+                .landing-cta-section::before {
+                    content: '';
+                    position: absolute;
+                    inset: -50%;
+                    background: radial-gradient(circle at 30% 30%, rgba(var(--color-primary-rgb, 139, 127, 255), 0.1), transparent 60%);
+                    animation: ctaGlow 15s ease-in-out infinite;
+                }
+
+                @keyframes ctaGlow {
+                    0%, 100% { transform: translate(0, 0); }
+                    50% { transform: translate(5%, 5%); }
+                }
+
+                .cta-content-wrapper {
+                    position: relative;
+                    z-index: 1;
+                }
+
+                .cta-icon {
+                    font-size: 3rem;
+                    margin-bottom: 20px;
+                    filter: drop-shadow(0 4px 16px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4));
+                }
+
+                .cta-title {
+                    font-size: clamp(1.75rem, 4vw, 2.5rem);
+                    font-weight: 700;
+                    margin-bottom: 16px;
+                    background: linear-gradient(135deg, var(--color-primary, #8b7fff), var(--color-secondary, #fbbf24));
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+
+                .cta-description {
+                    font-size: clamp(1rem, 2vw, 1.125rem);
+                    color: var(--color-text-secondary, #9ca3af);
+                    max-width: 600px;
+                    margin: 0 auto 32px;
+                    line-height: 1.7;
+                }
+
+                .cta-actions {
+                    display: flex;
+                    gap: 16px;
+                    justify-content: center;
+                    flex-wrap: wrap;
+                }
+
+                .landing-btn-outline {
+                    background: transparent;
+                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
+                    color: var(--color-primary, #8b7fff);
+                }
+
+                .landing-btn-outline:hover {
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+                    border-color: var(--color-primary, #8b7fff);
+                    transform: translateY(-3px);
+                }
+
+                .landing-btn-ghost {
+                    background: transparent;
+                    border: none;
+                    color: var(--color-text-secondary, #9ca3af);
+                    padding: 14px 20px;
+                }
+
+                .landing-btn-ghost:hover {
+                    color: var(--color-primary, #8b7fff);
+                }
+
+                .landing-btn-ghost .btn-arrow {
+                    transition: transform 0.2s ease;
+                }
+
+                .landing-btn-ghost:hover .btn-arrow {
+                    transform: translateX(4px);
+                }
+
                 /* === Featured Entities Section === */
                 .landing-featured-section {
                     margin-bottom: 64px;
@@ -1454,6 +1958,99 @@ class LandingPageView {
                 }
 
                 /* === Responsive Design - Production Quality === */
+
+                /* Mobile search adjustments */
+                @media (max-width: 600px) {
+                    .hero-search-input-wrapper {
+                        flex-direction: column;
+                        padding: 12px;
+                        gap: 8px;
+                    }
+
+                    .hero-search-icon {
+                        display: none;
+                    }
+
+                    .hero-search-input {
+                        width: 100%;
+                        padding: 12px;
+                        text-align: center;
+                    }
+
+                    .hero-search-btn {
+                        width: 100%;
+                        justify-content: center;
+                        padding: 14px 20px;
+                    }
+
+                    .hero-search-suggestions {
+                        gap: 6px;
+                    }
+
+                    .search-suggestion-tag {
+                        font-size: 0.75rem;
+                        padding: 3px 10px;
+                    }
+                }
+
+                /* Stats responsive */
+                @media (max-width: 767px) {
+                    .landing-stats-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 12px;
+                    }
+
+                    .landing-stat-card {
+                        padding: 20px 16px;
+                    }
+
+                    .stat-icon {
+                        font-size: 1.5rem;
+                    }
+
+                    .stat-number {
+                        font-size: 1.75rem;
+                    }
+
+                    .stat-label {
+                        font-size: 0.9rem;
+                    }
+
+                    .stat-description {
+                        font-size: 0.75rem;
+                    }
+
+                    .landing-cta-section {
+                        padding: 40px 20px;
+                        margin: 40px 0 20px;
+                    }
+
+                    .cta-icon {
+                        font-size: 2.5rem;
+                    }
+
+                    .cta-actions {
+                        flex-direction: column;
+                        align-items: center;
+                    }
+
+                    .cta-btn {
+                        width: 100%;
+                        max-width: 280px;
+                    }
+                }
+
+                @media (min-width: 768px) and (max-width: 1023px) {
+                    .landing-stats-grid {
+                        grid-template-columns: repeat(3, 1fr);
+                    }
+                }
+
+                @media (min-width: 1024px) {
+                    .landing-stats-grid {
+                        grid-template-columns: repeat(6, 1fr);
+                    }
+                }
 
                 /* Extra Small Mobile (320px - 479px) - 2 columns */
                 @media (max-width: 479px) {
@@ -1984,16 +2581,25 @@ class LandingPageView {
     getAssetTypeCardHTML(type, index = 0) {
         const truncatedDescription = this.truncateText(type.description, 100);
 
+        // Context menu data for long-press on mobile
+        const contextMenuItems = JSON.stringify([
+            { icon: '&#128279;', label: 'Copy Link', action: 'copy-link' },
+            { icon: '&#128203;', label: 'Share', action: 'share' },
+            { icon: '&#11088;', label: 'Add to Favorites', action: 'favorite' }
+        ]).replace(/"/g, '&quot;');
+
         return `
             <a href="${type.route}"
-               class="landing-category-card"
+               class="landing-category-card touch-ripple"
                data-type="${type.id}"
+               data-context-menu="category"
+               data-context-menu-items="${contextMenuItems}"
                style="--card-color: ${type.color}; --card-index: ${index};"
                aria-label="${type.name} - ${truncatedDescription}"
                tabindex="0">
                 ${this.renderIconHTML(type.icon, type.id, 'landing-category-icon')}
-                <h3 class="landing-category-name">${type.name}</h3>
-                <p class="landing-category-description">${truncatedDescription}</p>
+                <h3 class="landing-category-name card-title-truncate">${type.name}</h3>
+                <p class="landing-category-description card-desc-truncate">${truncatedDescription}</p>
             </a>
         `;
     }
@@ -2017,10 +2623,124 @@ class LandingPageView {
                     card.click();
                 }
             });
+
+            // Listen for custom context menu events
+            card.addEventListener('add-to-favorites', (e) => {
+                const type = card.dataset.type;
+                console.log('[Landing Page] Adding to favorites:', type);
+                // Could integrate with a favorites service here
+                this.showToast(`Added ${type} to favorites`);
+            });
+
+            card.addEventListener('quick-view', (e) => {
+                const type = card.dataset.type;
+                console.log('[Landing Page] Quick view:', type);
+                // Could show a modal preview here
+            });
+        });
+
+        // Hero search form handling
+        const searchForm = document.querySelector('.hero-search-form');
+        const searchInput = document.getElementById('heroSearchInput');
+        if (searchForm && searchInput) {
+            searchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const query = searchInput.value.trim();
+                if (query) {
+                    window.location.hash = `#/search?q=${encodeURIComponent(query)}`;
+                }
+            });
+
+            // Enter key handling
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    searchForm.dispatchEvent(new Event('submit'));
+                }
+            });
+        }
+
+        // Listen for pull-to-refresh event
+        document.addEventListener('pull-to-refresh', async () => {
+            console.log('[Landing Page] Pull-to-refresh triggered');
+            await this.handleRefresh();
         });
 
         // Load featured entities if database is available
         this.loadFeaturedEntities();
+
+        // Load recent additions
+        this.loadRecentAdditions();
+
+        // Load real stats from database
+        this.loadStats();
+
+        // Mark images as loaded for lazy loading
+        this.initLazyImages();
+    }
+
+    /**
+     * Handle pull-to-refresh
+     */
+    async handleRefresh() {
+        try {
+            // Reload featured entities
+            await this.loadFeaturedEntities();
+
+            // Show success feedback
+            this.showToast('Content refreshed');
+        } catch (error) {
+            console.error('[Landing Page] Refresh error:', error);
+            this.showToast('Failed to refresh');
+        }
+    }
+
+    /**
+     * Initialize lazy loading for images
+     */
+    initLazyImages() {
+        const images = document.querySelectorAll('.landing-category-icon[loading="lazy"]');
+        images.forEach(img => {
+            if (img.complete) {
+                img.classList.add('loaded');
+            } else {
+                img.addEventListener('load', () => {
+                    img.classList.add('loaded');
+                });
+                img.addEventListener('error', () => {
+                    img.classList.add('loaded'); // Still show, fallback will handle it
+                });
+            }
+        });
+    }
+
+    /**
+     * Show toast notification
+     */
+    showToast(message) {
+        // Use mobile gestures toast if available, otherwise create simple one
+        if (window.mobileGestures && window.mobileGestures.showToast) {
+            window.mobileGestures.showToast(message);
+        } else {
+            const toast = document.createElement('div');
+            toast.className = 'simple-toast';
+            toast.textContent = message;
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 80px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: rgba(26, 31, 58, 0.95);
+                color: #f8f9fa;
+                padding: 0.875rem 1.5rem;
+                border-radius: 12px;
+                font-size: 0.9375rem;
+                z-index: 10002;
+                animation: fadeIn 0.3s ease;
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
     }
 
     /**
@@ -2094,11 +2814,152 @@ class LandingPageView {
                style="--card-color: var(--color-primary, #8b7fff); --card-index: ${index};"
                aria-label="${name}${mythology ? ' - ' + mythology : ''}">
                 ${this.renderIconHTML(icon, entity.type, 'landing-category-icon')}
-                <h3 class="landing-category-name">${this.escapeHTML(name)}</h3>
+                <h3 class="landing-category-name card-title-truncate">${this.escapeHTML(name)}</h3>
                 ${mythology ? `<span class="landing-featured-mythology">${this.escapeHTML(mythology)}</span>` : ''}
-                ${description ? `<p class="landing-category-description">${this.escapeHTML(description)}</p>` : ''}
+                ${description ? `<p class="landing-category-description card-desc-truncate">${this.escapeHTML(description)}</p>` : ''}
             </a>
         `;
+    }
+
+    /**
+     * Load stats from database and update the display
+     */
+    async loadStats() {
+        if (!this.db) {
+            console.log('[Landing Page] No database available for stats');
+            return;
+        }
+
+        try {
+            const collections = ['mythologies', 'deities', 'creatures', 'items', 'texts'];
+            const statElements = {
+                'mythologies': document.getElementById('stat-mythologies'),
+                'deities': document.getElementById('stat-deities'),
+                'creatures': document.getElementById('stat-creatures'),
+                'items': document.getElementById('stat-items'),
+                'texts': document.getElementById('stat-texts')
+            };
+
+            // Load counts for each collection
+            for (const collection of collections) {
+                try {
+                    const snapshot = await this.db.collection(collection).get();
+                    const count = snapshot.size;
+                    const el = statElements[collection];
+                    if (el && count > 0) {
+                        // Animate number counting up
+                        this.animateNumber(el, count);
+                    }
+                } catch (err) {
+                    console.warn(`[Landing Page] Could not get ${collection} count:`, err.message);
+                }
+            }
+
+            console.log('[Landing Page] Stats loaded');
+        } catch (error) {
+            console.warn('[Landing Page] Could not load stats:', error.message);
+        }
+    }
+
+    /**
+     * Animate a number counting up
+     * @param {HTMLElement} element - Element to update
+     * @param {number} target - Target number
+     */
+    animateNumber(element, target) {
+        const duration = 1500;
+        const startTime = performance.now();
+        const startValue = 0;
+
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Ease out cubic for smooth deceleration
+            const easeOut = 1 - Math.pow(1 - progress, 3);
+            const current = Math.floor(startValue + (target - startValue) * easeOut);
+
+            element.textContent = current.toLocaleString() + '+';
+
+            if (progress < 1) {
+                requestAnimationFrame(animate);
+            } else {
+                element.textContent = target.toLocaleString() + '+';
+            }
+        };
+
+        requestAnimationFrame(animate);
+    }
+
+    /**
+     * Load recent additions and display them
+     */
+    async loadRecentAdditions() {
+        const recentSection = document.getElementById('recent-additions-section');
+        const recentGrid = document.getElementById('recent-additions-grid');
+
+        if (!recentSection || !recentGrid || !this.db) {
+            console.log('[Landing Page] Recent additions section not available or no database');
+            return;
+        }
+
+        try {
+            const recentEntities = [];
+            const collections = ['deities', 'creatures', 'heroes', 'items'];
+
+            // Try to get recently added entities from various collections
+            for (const collectionName of collections) {
+                try {
+                    const ref = this.db.collection(collectionName)
+                        .orderBy('createdAt', 'desc')
+                        .limit(2);
+                    const snapshot = await ref.get();
+
+                    snapshot.forEach(doc => {
+                        recentEntities.push({
+                            id: doc.id,
+                            type: collectionName,
+                            ...doc.data()
+                        });
+                    });
+                } catch (err) {
+                    // Some collections might not have createdAt, try without ordering
+                    try {
+                        const ref = this.db.collection(collectionName).limit(2);
+                        const snapshot = await ref.get();
+                        snapshot.forEach(doc => {
+                            recentEntities.push({
+                                id: doc.id,
+                                type: collectionName,
+                                ...doc.data()
+                            });
+                        });
+                    } catch (innerErr) {
+                        console.warn(`[Landing Page] Could not load recent ${collectionName}`);
+                    }
+                }
+            }
+
+            if (recentEntities.length > 0) {
+                // Sort by createdAt if available, limit to 8
+                const sorted = recentEntities
+                    .sort((a, b) => {
+                        const aTime = a.createdAt?.toMillis?.() || 0;
+                        const bTime = b.createdAt?.toMillis?.() || 0;
+                        return bTime - aTime;
+                    })
+                    .slice(0, 8);
+
+                recentGrid.innerHTML = sorted.map((entity, index) =>
+                    this.getFeaturedEntityCardHTML(entity, index)
+                ).join('');
+                recentSection.style.display = 'block';
+                console.log('[Landing Page] Loaded', sorted.length, 'recent additions');
+            }
+        } catch (error) {
+            console.warn('[Landing Page] Could not load recent additions:', error.message);
+            recentSection.style.display = 'none';
+        }
     }
 }
 

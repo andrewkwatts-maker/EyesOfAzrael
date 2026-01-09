@@ -837,6 +837,11 @@ class SPANavigation {
         // Announce loading state
         this._announceLoading(true, 'Loading page content');
 
+        // Dispatch navigation-start event for loading indicators
+        document.dispatchEvent(new CustomEvent('navigation-start', {
+            detail: { path, timestamp: Date.now() }
+        }));
+
         // Track page view
         if (window.AnalyticsManager) {
             window.AnalyticsManager.trackPageView(path);
