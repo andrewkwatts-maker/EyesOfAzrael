@@ -1,0 +1,1835 @@
+/**
+ * Suggested Edit Diff Component Styles
+ * Wiki-style edit suggestion UI for Eyes of Azrael
+ *
+ * Sections:
+ * 1. Container & Layout
+ * 2. Header & Navigation
+ * 3. Edit Form
+ * 4. Diff View (Side-by-side & Inline)
+ * 5. Edit List & Cards
+ * 6. Voting UI
+ * 7. Merge/Reject Controls
+ * 8. History Timeline
+ * 9. Modals & Overlays
+ * 10. Badges & Status
+ * 11. Animations & Transitions
+ * 12. Responsive Design
+ * 13. Accessibility
+ */
+
+/* ===========================================
+   CSS CUSTOM PROPERTIES
+   =========================================== */
+
+:root {
+  /* Primary colors */
+  --sed-primary: #8b7fff;
+  --sed-primary-hover: #a599ff;
+  --sed-primary-glow: rgba(139, 127, 255, 0.3);
+
+  /* Status colors */
+  --sed-success: #10b981;
+  --sed-success-bg: rgba(16, 185, 129, 0.15);
+  --sed-warning: #f59e0b;
+  --sed-warning-bg: rgba(245, 158, 11, 0.15);
+  --sed-danger: #ef4444;
+  --sed-danger-bg: rgba(239, 68, 68, 0.15);
+  --sed-info: #3b82f6;
+  --sed-info-bg: rgba(59, 130, 246, 0.15);
+
+  /* Diff colors */
+  --sed-diff-added-bg: rgba(16, 185, 129, 0.15);
+  --sed-diff-added-border: rgba(16, 185, 129, 0.4);
+  --sed-diff-added-text: #34d399;
+  --sed-diff-removed-bg: rgba(239, 68, 68, 0.15);
+  --sed-diff-removed-border: rgba(239, 68, 68, 0.4);
+  --sed-diff-removed-text: #f87171;
+
+  /* Surface colors */
+  --sed-bg-primary: rgba(26, 31, 58, 0.95);
+  --sed-bg-secondary: rgba(255, 255, 255, 0.05);
+  --sed-bg-tertiary: rgba(255, 255, 255, 0.03);
+  --sed-border-color: rgba(255, 255, 255, 0.12);
+  --sed-border-focus: rgba(139, 127, 255, 0.5);
+
+  /* Text colors */
+  --sed-text-primary: #f3f4f6;
+  --sed-text-secondary: #9ca3af;
+  --sed-text-muted: #6b7280;
+
+  /* Spacing */
+  --sed-spacing-xs: 0.25rem;
+  --sed-spacing-sm: 0.5rem;
+  --sed-spacing-md: 1rem;
+  --sed-spacing-lg: 1.5rem;
+  --sed-spacing-xl: 2rem;
+
+  /* Border radius */
+  --sed-radius-sm: 6px;
+  --sed-radius-md: 10px;
+  --sed-radius-lg: 16px;
+
+  /* Transitions */
+  --sed-transition-fast: 150ms;
+  --sed-transition-normal: 250ms;
+  --sed-transition-slow: 400ms;
+  --sed-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --sed-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+
+/* ===========================================
+   SECTION 1: CONTAINER & LAYOUT
+   =========================================== */
+
+.sed-container {
+  background: var(--sed-bg-primary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-lg);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.sed-content {
+  padding: var(--sed-spacing-md);
+  min-height: 300px;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+/* Custom scrollbar */
+.sed-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sed-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+}
+
+.sed-content::-webkit-scrollbar-thumb {
+  background: rgba(139, 127, 255, 0.3);
+  border-radius: 3px;
+}
+
+.sed-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 127, 255, 0.5);
+}
+
+
+/* ===========================================
+   SECTION 2: HEADER & NAVIGATION
+   =========================================== */
+
+.sed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sed-spacing-md) var(--sed-spacing-lg);
+  background: linear-gradient(135deg, rgba(139, 127, 255, 0.1), rgba(99, 102, 241, 0.1));
+  border-bottom: 1px solid var(--sed-border-color);
+}
+
+.sed-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-md);
+}
+
+.sed-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--sed-text-primary);
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+}
+
+.sed-title-icon {
+  display: flex;
+  color: var(--sed-primary);
+}
+
+.sed-count-badge {
+  padding: 0.25rem 0.75rem;
+  background: var(--sed-bg-secondary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--sed-text-secondary);
+}
+
+.sed-header-actions {
+  display: flex;
+  gap: var(--sed-spacing-sm);
+}
+
+.sed-back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+  padding: var(--sed-spacing-sm) var(--sed-spacing-md);
+  background: transparent;
+  border: none;
+  color: var(--sed-text-secondary);
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: color var(--sed-transition-fast) var(--sed-easing);
+}
+
+.sed-back-btn:hover {
+  color: var(--sed-primary);
+}
+
+.sed-back-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+
+/* ===========================================
+   SECTION 3: BUTTONS
+   =========================================== */
+
+.sed-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sed-spacing-sm);
+  padding: 0.6rem 1rem;
+  border: 1.5px solid transparent;
+  border-radius: var(--sed-radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--sed-transition-fast) var(--sed-easing);
+  white-space: nowrap;
+}
+
+.sed-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sed-btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sed-btn-sm {
+  padding: 0.4rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+/* Primary Button */
+.sed-btn-primary {
+  background: linear-gradient(135deg, var(--sed-primary), #6366f1);
+  border-color: var(--sed-primary);
+  color: white;
+}
+
+.sed-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, var(--sed-primary-hover), #818cf8);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--sed-primary-glow);
+}
+
+/* Secondary Button */
+.sed-btn-secondary {
+  background: var(--sed-bg-secondary);
+  border-color: var(--sed-border-color);
+  color: var(--sed-text-secondary);
+}
+
+.sed-btn-secondary:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--sed-primary);
+  color: var(--sed-primary);
+}
+
+/* Ghost Button */
+.sed-btn-ghost {
+  background: transparent;
+  border-color: var(--sed-border-color);
+  color: var(--sed-text-secondary);
+}
+
+.sed-btn-ghost:hover:not(:disabled) {
+  background: var(--sed-bg-secondary);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--sed-text-primary);
+}
+
+/* Success Button */
+.sed-btn-success {
+  background: var(--sed-success-bg);
+  border-color: rgba(16, 185, 129, 0.4);
+  color: var(--sed-success);
+}
+
+.sed-btn-success:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: var(--sed-success);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+/* Warning Button */
+.sed-btn-warning {
+  background: var(--sed-warning-bg);
+  border-color: rgba(245, 158, 11, 0.4);
+  color: var(--sed-warning);
+}
+
+.sed-btn-warning:hover:not(:disabled) {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: var(--sed-warning);
+}
+
+/* Danger Button */
+.sed-btn-danger {
+  background: var(--sed-danger-bg);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: var(--sed-danger);
+}
+
+.sed-btn-danger:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: var(--sed-danger);
+}
+
+
+/* ===========================================
+   SECTION 4: EDIT FORM
+   =========================================== */
+
+.sed-form-container {
+  animation: sedFadeIn var(--sed-transition-normal) var(--sed-easing);
+}
+
+.sed-form-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-md);
+  margin-bottom: var(--sed-spacing-lg);
+  padding-bottom: var(--sed-spacing-md);
+  border-bottom: 1px solid var(--sed-border-color);
+}
+
+.sed-form-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--sed-text-primary);
+}
+
+.sed-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sed-spacing-lg);
+}
+
+.sed-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sed-spacing-sm);
+}
+
+.sed-label {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--sed-text-secondary);
+}
+
+.sed-required {
+  color: var(--sed-danger);
+}
+
+/* Input styles */
+.sed-input,
+.sed-select,
+.sed-textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--sed-bg-secondary);
+  border: 1.5px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-md);
+  color: var(--sed-text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  transition: all var(--sed-transition-fast) var(--sed-easing);
+}
+
+.sed-input:focus,
+.sed-select:focus,
+.sed-textarea:focus {
+  outline: none;
+  border-color: var(--sed-primary);
+  box-shadow: 0 0 0 3px var(--sed-primary-glow);
+}
+
+.sed-input::placeholder,
+.sed-textarea::placeholder {
+  color: var(--sed-text-muted);
+}
+
+.sed-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+}
+
+.sed-select option {
+  background: #1a1f3a;
+  color: var(--sed-text-primary);
+}
+
+.sed-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.sed-input-wrapper {
+  position: relative;
+}
+
+.sed-input-hint {
+  font-size: 0.75rem;
+  color: var(--sed-text-muted);
+  margin-top: var(--sed-spacing-xs);
+}
+
+.sed-char-count {
+  font-size: 0.75rem;
+  color: var(--sed-text-muted);
+  text-align: right;
+}
+
+/* Original value display */
+.sed-original-value {
+  padding: var(--sed-spacing-md);
+  background: var(--sed-bg-tertiary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-md);
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.sed-value-display {
+  margin: 0;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  color: var(--sed-text-secondary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Citation container */
+.sed-citation-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sed-spacing-sm);
+}
+
+/* Preview container */
+.sed-preview-container {
+  padding: var(--sed-spacing-md);
+  background: var(--sed-bg-tertiary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-md);
+  min-height: 80px;
+}
+
+.sed-preview-placeholder {
+  color: var(--sed-text-muted);
+  font-size: 0.875rem;
+  text-align: center;
+  padding: var(--sed-spacing-lg);
+}
+
+.sed-mini-diff {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-md);
+  flex-wrap: wrap;
+}
+
+.sed-mini-diff-removed {
+  padding: 0.5rem 1rem;
+  background: var(--sed-diff-removed-bg);
+  border-left: 3px solid var(--sed-diff-removed-border);
+  border-radius: var(--sed-radius-sm);
+  color: var(--sed-diff-removed-text);
+  text-decoration: line-through;
+  font-size: 0.875rem;
+}
+
+.sed-mini-diff-added {
+  padding: 0.5rem 1rem;
+  background: var(--sed-diff-added-bg);
+  border-left: 3px solid var(--sed-diff-added-border);
+  border-radius: var(--sed-radius-sm);
+  color: var(--sed-diff-added-text);
+  font-size: 0.875rem;
+}
+
+.sed-mini-diff-arrow {
+  color: var(--sed-text-muted);
+  display: flex;
+}
+
+/* Form actions */
+.sed-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sed-spacing-md);
+  padding-top: var(--sed-spacing-md);
+  border-top: 1px solid var(--sed-border-color);
+}
+
+
+/* ===========================================
+   SECTION 5: DIFF VIEW
+   =========================================== */
+
+.sed-diff-container {
+  animation: sedFadeIn var(--sed-transition-normal) var(--sed-easing);
+}
+
+.sed-diff-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-md);
+  margin-bottom: var(--sed-spacing-lg);
+  padding-bottom: var(--sed-spacing-md);
+  border-bottom: 1px solid var(--sed-border-color);
+}
+
+.sed-diff-title h4 {
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  color: var(--sed-text-primary);
+}
+
+.sed-diff-meta {
+  font-size: 0.8rem;
+  color: var(--sed-text-muted);
+}
+
+.sed-diff-mode-toggle {
+  display: flex;
+  margin-left: auto;
+  background: var(--sed-bg-secondary);
+  border-radius: var(--sed-radius-md);
+  padding: 3px;
+}
+
+.sed-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--sed-radius-sm);
+  color: var(--sed-text-muted);
+  cursor: pointer;
+  transition: all var(--sed-transition-fast) var(--sed-easing);
+}
+
+.sed-toggle-btn:hover {
+  color: var(--sed-text-secondary);
+}
+
+.sed-toggle-btn.active {
+  background: var(--sed-primary);
+  color: white;
+}
+
+/* Side-by-side diff panels */
+.sed-diff-content {
+  margin-bottom: var(--sed-spacing-lg);
+}
+
+.sed-diff-panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sed-spacing-md);
+}
+
+.sed-diff-panel {
+  background: var(--sed-bg-tertiary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-md);
+  overflow: hidden;
+}
+
+.sed-diff-panel-header {
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--sed-border-color);
+}
+
+.sed-diff-panel-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sed-diff-original .sed-diff-panel-label {
+  color: var(--sed-diff-removed-text);
+}
+
+.sed-diff-proposed .sed-diff-panel-label {
+  color: var(--sed-diff-added-text);
+}
+
+.sed-diff-panel-content {
+  padding: var(--sed-spacing-sm);
+  max-height: 400px;
+  overflow-y: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+}
+
+/* Diff lines */
+.sed-diff-lines {
+  display: flex;
+  flex-direction: column;
+}
+
+.sed-diff-line {
+  display: flex;
+  padding: 2px 8px;
+  border-radius: 2px;
+  min-height: 1.4em;
+}
+
+.sed-diff-line.sed-diff-removed {
+  background: var(--sed-diff-removed-bg);
+}
+
+.sed-diff-line.sed-diff-added {
+  background: var(--sed-diff-added-bg);
+}
+
+.sed-line-num {
+  min-width: 32px;
+  padding-right: 12px;
+  color: var(--sed-text-muted);
+  user-select: none;
+  text-align: right;
+  font-size: 0.75rem;
+}
+
+.sed-line-content {
+  flex: 1;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.sed-diff-removed .sed-line-content {
+  color: var(--sed-diff-removed-text);
+}
+
+.sed-diff-added .sed-line-content {
+  color: var(--sed-diff-added-text);
+}
+
+/* Inline unified diff */
+.sed-diff-unified {
+  background: var(--sed-bg-tertiary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-md);
+  padding: var(--sed-spacing-sm);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 0.85rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.sed-diff-inline .sed-diff-line {
+  padding: 4px 8px;
+}
+
+.sed-line-prefix {
+  width: 20px;
+  font-weight: bold;
+  color: var(--sed-text-muted);
+  user-select: none;
+}
+
+.sed-diff-removed .sed-line-prefix {
+  color: var(--sed-diff-removed-text);
+}
+
+.sed-diff-added .sed-line-prefix {
+  color: var(--sed-diff-added-text);
+}
+
+/* Edit details */
+.sed-edit-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sed-spacing-md);
+  margin-bottom: var(--sed-spacing-lg);
+}
+
+.sed-detail-section {
+  padding: var(--sed-spacing-md);
+  background: var(--sed-bg-secondary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-md);
+}
+
+.sed-detail-section h5 {
+  margin: 0 0 var(--sed-spacing-sm) 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--sed-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+}
+
+.sed-reason-text {
+  margin: 0;
+  color: var(--sed-text-primary);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Citation section */
+.sed-citation-section {
+  border-left: 3px solid var(--sed-info);
+}
+
+.sed-citation-quote {
+  margin: var(--sed-spacing-sm) 0;
+  padding: var(--sed-spacing-sm) var(--sed-spacing-md);
+  background: var(--sed-bg-tertiary);
+  border-radius: var(--sed-radius-sm);
+  font-style: italic;
+  color: var(--sed-text-primary);
+  font-size: 0.9rem;
+}
+
+.sed-citation-source {
+  display: block;
+  color: var(--sed-text-muted);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+
+/* ===========================================
+   SECTION 6: EDIT LIST & CARDS
+   =========================================== */
+
+.sed-list-container {
+  animation: sedFadeIn var(--sed-transition-normal) var(--sed-easing);
+}
+
+.sed-list-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sed-spacing-md);
+  margin-bottom: var(--sed-spacing-lg);
+  padding-bottom: var(--sed-spacing-md);
+  border-bottom: 1px solid var(--sed-border-color);
+}
+
+.sed-filter-group,
+.sed-sort-group {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+}
+
+.sed-filter-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--sed-text-muted);
+}
+
+.sed-filter-buttons {
+  display: flex;
+  background: var(--sed-bg-secondary);
+  border-radius: var(--sed-radius-md);
+  padding: 3px;
+}
+
+.sed-filter-btn {
+  padding: 0.4rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-radius: var(--sed-radius-sm);
+  color: var(--sed-text-muted);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--sed-transition-fast) var(--sed-easing);
+}
+
+.sed-filter-btn:hover {
+  color: var(--sed-text-secondary);
+}
+
+.sed-filter-btn.active {
+  background: var(--sed-primary);
+  color: white;
+}
+
+.sed-sort-select {
+  padding: 0.4rem 2rem 0.4rem 0.75rem;
+  font-size: 0.8rem;
+}
+
+/* Edit list */
+.sed-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sed-spacing-md);
+}
+
+/* Edit card */
+.sed-edit-card {
+  display: flex;
+  gap: var(--sed-spacing-md);
+  padding: var(--sed-spacing-md);
+  background: var(--sed-bg-secondary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-md);
+  transition: all var(--sed-transition-fast) var(--sed-easing);
+}
+
+.sed-edit-card:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.sed-edit-card.sed-status-approved {
+  border-left: 3px solid var(--sed-success);
+}
+
+.sed-edit-card.sed-status-rejected {
+  border-left: 3px solid var(--sed-danger);
+  opacity: 0.7;
+}
+
+/* Card vote section */
+.sed-card-vote-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 48px;
+}
+
+.sed-vote-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 28px;
+  background: transparent;
+  border: 1.5px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-sm);
+  color: var(--sed-text-muted);
+  cursor: pointer;
+  transition: all var(--sed-transition-fast) var(--sed-easing);
+}
+
+.sed-vote-btn:hover:not(:disabled) {
+  background: var(--sed-bg-secondary);
+}
+
+.sed-vote-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sed-vote-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sed-vote-up:hover:not(:disabled) {
+  border-color: var(--sed-success);
+  color: var(--sed-success);
+}
+
+.sed-vote-up.active {
+  background: var(--sed-success-bg);
+  border-color: var(--sed-success);
+  color: var(--sed-success);
+}
+
+.sed-vote-down:hover:not(:disabled) {
+  border-color: var(--sed-danger);
+  color: var(--sed-danger);
+}
+
+.sed-vote-down.active {
+  background: var(--sed-danger-bg);
+  border-color: var(--sed-danger);
+  color: var(--sed-danger);
+}
+
+.sed-vote-count {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--sed-text-secondary);
+}
+
+.sed-vote-count.positive {
+  color: var(--sed-success);
+}
+
+.sed-vote-count.negative {
+  color: var(--sed-danger);
+}
+
+/* Card content */
+.sed-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.sed-card-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sed-spacing-sm);
+  margin-bottom: var(--sed-spacing-sm);
+}
+
+.sed-field-badge {
+  padding: 0.2rem 0.6rem;
+  background: var(--sed-primary-glow);
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--sed-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sed-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-md);
+  margin-bottom: var(--sed-spacing-sm);
+  font-size: 0.8rem;
+}
+
+.sed-author {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+  color: var(--sed-text-secondary);
+}
+
+.sed-author-avatar {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.sed-date {
+  color: var(--sed-text-muted);
+}
+
+.sed-card-summary {
+  margin: 0 0 var(--sed-spacing-sm);
+  font-size: 0.9rem;
+  color: var(--sed-text-primary);
+  line-height: 1.4;
+}
+
+/* Card preview */
+.sed-card-preview {
+  margin-bottom: var(--sed-spacing-sm);
+}
+
+.sed-preview-change {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+}
+
+.sed-preview-label {
+  color: var(--sed-text-muted);
+  font-weight: 500;
+}
+
+.sed-preview-removed {
+  color: var(--sed-diff-removed-text);
+  text-decoration: line-through;
+  background: var(--sed-diff-removed-bg);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--sed-radius-sm);
+}
+
+.sed-preview-added {
+  color: var(--sed-diff-added-text);
+  background: var(--sed-diff-added-bg);
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--sed-radius-sm);
+}
+
+.sed-preview-arrow {
+  color: var(--sed-text-muted);
+  display: flex;
+}
+
+.sed-preview-arrow svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* Card actions */
+.sed-card-actions {
+  display: flex;
+  gap: var(--sed-spacing-sm);
+  flex-wrap: wrap;
+}
+
+
+/* ===========================================
+   SECTION 7: VOTING UI (Large)
+   =========================================== */
+
+.sed-voting-section {
+  padding: var(--sed-spacing-lg);
+  background: var(--sed-bg-secondary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-md);
+  margin-bottom: var(--sed-spacing-lg);
+}
+
+.sed-voting-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sed-spacing-md);
+}
+
+.sed-voting-header h5 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--sed-text-secondary);
+}
+
+.sed-voting-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sed-spacing-xl);
+  padding: var(--sed-spacing-md) 0;
+}
+
+.sed-vote-btn-large {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+  padding: var(--sed-spacing-md) var(--sed-spacing-xl);
+  background: var(--sed-bg-tertiary);
+  border: 2px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-md);
+  color: var(--sed-text-muted);
+  cursor: pointer;
+  transition: all var(--sed-transition-normal) var(--sed-easing);
+}
+
+.sed-vote-btn-large:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.sed-vote-btn-large:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sed-vote-btn-large svg {
+  width: 24px;
+  height: 24px;
+}
+
+.sed-vote-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.sed-vote-btn-large.sed-vote-up:hover:not(:disabled) {
+  border-color: var(--sed-success);
+  background: var(--sed-success-bg);
+  color: var(--sed-success);
+}
+
+.sed-vote-btn-large.sed-vote-up.active {
+  border-color: var(--sed-success);
+  background: var(--sed-success);
+  color: white;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.sed-vote-btn-large.sed-vote-down:hover:not(:disabled) {
+  border-color: var(--sed-danger);
+  background: var(--sed-danger-bg);
+  color: var(--sed-danger);
+}
+
+.sed-vote-btn-large.sed-vote-down.active {
+  border-color: var(--sed-danger);
+  background: var(--sed-danger);
+  color: white;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.sed-vote-display {
+  text-align: center;
+}
+
+.sed-vote-total {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--sed-text-primary);
+  line-height: 1;
+}
+
+.sed-vote-total.positive {
+  color: var(--sed-success);
+}
+
+.sed-vote-total.negative {
+  color: var(--sed-danger);
+}
+
+.sed-vote-breakdown {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sed-spacing-sm);
+  margin-top: var(--sed-spacing-sm);
+  font-size: 0.75rem;
+  color: var(--sed-text-muted);
+}
+
+.sed-vote-breakdown svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Auto-approve progress */
+.sed-auto-approve-progress {
+  margin-top: var(--sed-spacing-lg);
+  text-align: center;
+}
+
+.sed-progress-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: var(--sed-spacing-sm);
+}
+
+.sed-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--sed-primary), var(--sed-success));
+  border-radius: 3px;
+  transition: width var(--sed-transition-slow) var(--sed-easing);
+}
+
+.sed-progress-fill.complete {
+  background: var(--sed-success);
+}
+
+.sed-progress-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sed-spacing-sm);
+  font-size: 0.8rem;
+  color: var(--sed-text-muted);
+}
+
+.sed-progress-label svg {
+  width: 14px;
+  height: 14px;
+  color: var(--sed-success);
+}
+
+
+/* ===========================================
+   SECTION 8: MERGE/REJECT CONTROLS
+   =========================================== */
+
+.sed-mod-controls {
+  padding: var(--sed-spacing-lg);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08), rgba(255, 107, 107, 0.08));
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--sed-radius-md);
+}
+
+.sed-mod-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+  margin: 0 0 var(--sed-spacing-md) 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--sed-warning);
+}
+
+.sed-mod-title svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sed-mod-actions {
+  display: flex;
+  gap: var(--sed-spacing-md);
+  flex-wrap: wrap;
+}
+
+.sed-mod-resolved {
+  background: var(--sed-bg-secondary);
+  border-color: var(--sed-border-color);
+}
+
+.sed-mod-status {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--sed-text-secondary);
+}
+
+.sed-reject-reason {
+  margin-top: var(--sed-spacing-md);
+  padding: var(--sed-spacing-md);
+  background: var(--sed-danger-bg);
+  border-left: 3px solid var(--sed-danger);
+  border-radius: var(--sed-radius-sm);
+  font-size: 0.85rem;
+  color: var(--sed-diff-removed-text);
+}
+
+
+/* ===========================================
+   SECTION 9: HISTORY TIMELINE
+   =========================================== */
+
+.sed-history-container {
+  animation: sedFadeIn var(--sed-transition-normal) var(--sed-easing);
+}
+
+.sed-history-header {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-md);
+  margin-bottom: var(--sed-spacing-lg);
+  padding-bottom: var(--sed-spacing-md);
+  border-bottom: 1px solid var(--sed-border-color);
+}
+
+.sed-history-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--sed-text-primary);
+}
+
+.sed-history-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.sed-history-item {
+  display: flex;
+  gap: var(--sed-spacing-md);
+  position: relative;
+}
+
+.sed-history-timeline-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 20px;
+}
+
+.sed-history-dot {
+  width: 12px;
+  height: 12px;
+  background: var(--sed-bg-secondary);
+  border: 2px solid var(--sed-primary);
+  border-radius: 50%;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.sed-history-latest .sed-history-dot {
+  background: var(--sed-primary);
+  box-shadow: 0 0 12px var(--sed-primary-glow);
+}
+
+.sed-history-line {
+  width: 2px;
+  flex: 1;
+  background: var(--sed-border-color);
+  margin-top: 4px;
+}
+
+.sed-history-content {
+  flex: 1;
+  padding-bottom: var(--sed-spacing-lg);
+}
+
+.sed-history-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--sed-spacing-sm);
+}
+
+.sed-history-field {
+  font-weight: 600;
+  color: var(--sed-primary);
+  font-size: 0.85rem;
+}
+
+.sed-history-date {
+  font-size: 0.75rem;
+  color: var(--sed-text-muted);
+}
+
+.sed-history-author {
+  display: flex;
+  align-items: center;
+  gap: var(--sed-spacing-sm);
+  margin-bottom: var(--sed-spacing-sm);
+  font-size: 0.85rem;
+  color: var(--sed-text-secondary);
+}
+
+.sed-history-approved {
+  color: var(--sed-text-muted);
+  font-size: 0.75rem;
+}
+
+.sed-history-diff {
+  padding: var(--sed-spacing-sm);
+  background: var(--sed-bg-tertiary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-sm);
+  margin-bottom: var(--sed-spacing-sm);
+}
+
+.sed-history-change {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sed-spacing-xs);
+}
+
+.sed-change-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--sed-text-muted);
+  text-transform: uppercase;
+}
+
+.sed-change-from {
+  color: var(--sed-diff-removed-text);
+  font-size: 0.8rem;
+  text-decoration: line-through;
+}
+
+.sed-change-to {
+  color: var(--sed-diff-added-text);
+  font-size: 0.8rem;
+}
+
+.sed-history-actions {
+  display: flex;
+  gap: var(--sed-spacing-sm);
+}
+
+
+/* ===========================================
+   SECTION 10: MODALS & OVERLAYS
+   =========================================== */
+
+.sed-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: var(--sed-spacing-md);
+  animation: sedFadeIn var(--sed-transition-fast) var(--sed-easing);
+}
+
+.sed-modal-content {
+  width: 100%;
+  max-width: 400px;
+  background: var(--sed-bg-primary);
+  border: 1px solid var(--sed-border-color);
+  border-radius: var(--sed-radius-lg);
+  padding: var(--sed-spacing-lg);
+  animation: sedSlideUp var(--sed-transition-normal) var(--sed-bounce);
+}
+
+.sed-modal-content h4 {
+  margin: 0 0 var(--sed-spacing-lg) 0;
+  font-size: 1.1rem;
+  color: var(--sed-text-primary);
+}
+
+.sed-modal-actions {
+  display: flex;
+  gap: var(--sed-spacing-md);
+  margin-top: var(--sed-spacing-lg);
+}
+
+.sed-modal-actions .sed-btn {
+  flex: 1;
+}
+
+
+/* ===========================================
+   SECTION 11: BADGES & STATUS
+   =========================================== */
+
+.sed-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.sed-badge-verified {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--sed-success);
+}
+
+.sed-badge-info {
+  background: var(--sed-info-bg);
+  color: var(--sed-info);
+}
+
+.sed-badge-auto-approve {
+  background: var(--sed-success-bg);
+  color: var(--sed-success);
+}
+
+.sed-badge svg {
+  width: 10px;
+  height: 10px;
+}
+
+/* Status badges */
+.sed-status-badge {
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sed-status-badge.sed-status-pending {
+  background: var(--sed-warning-bg);
+  color: var(--sed-warning);
+}
+
+.sed-status-badge.sed-status-approved {
+  background: var(--sed-success-bg);
+  color: var(--sed-success);
+}
+
+.sed-status-badge.sed-status-rejected {
+  background: var(--sed-danger-bg);
+  color: var(--sed-danger);
+}
+
+
+/* ===========================================
+   SECTION 12: EMPTY STATE
+   =========================================== */
+
+.sed-empty-state {
+  text-align: center;
+  padding: var(--sed-spacing-xl) var(--sed-spacing-md);
+}
+
+.sed-empty-icon {
+  color: var(--sed-text-muted);
+  opacity: 0.5;
+  margin-bottom: var(--sed-spacing-md);
+}
+
+.sed-empty-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.sed-empty-text {
+  margin: 0 0 var(--sed-spacing-md);
+  color: var(--sed-text-muted);
+  font-size: 0.9rem;
+}
+
+
+/* ===========================================
+   SECTION 13: TOAST NOTIFICATIONS
+   =========================================== */
+
+.sed-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  padding: 0.75rem 1.5rem;
+  background: rgba(17, 24, 39, 0.95);
+  color: white;
+  border-radius: var(--sed-radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  z-index: 10001;
+  opacity: 0;
+  visibility: hidden;
+  transition: all var(--sed-transition-normal) var(--sed-bounce);
+}
+
+.sed-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.sed-toast-success {
+  background: rgba(16, 185, 129, 0.95);
+}
+
+.sed-toast-error {
+  background: rgba(239, 68, 68, 0.95);
+}
+
+.sed-toast-warning {
+  background: rgba(245, 158, 11, 0.95);
+  color: #1a1a1a;
+}
+
+.sed-toast-info {
+  background: rgba(59, 130, 246, 0.95);
+}
+
+
+/* ===========================================
+   SECTION 14: ANIMATIONS
+   =========================================== */
+
+@keyframes sedFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes sedSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes sedPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes sedShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+
+/* ===========================================
+   SECTION 15: RESPONSIVE DESIGN
+   =========================================== */
+
+@media (max-width: 768px) {
+  .sed-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sed-spacing-md);
+  }
+
+  .sed-header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .sed-diff-panels {
+    grid-template-columns: 1fr;
+  }
+
+  .sed-voting-controls {
+    gap: var(--sed-spacing-md);
+  }
+
+  .sed-vote-btn-large {
+    padding: var(--sed-spacing-sm) var(--sed-spacing-md);
+  }
+
+  .sed-vote-total {
+    font-size: 1.5rem;
+  }
+
+  .sed-mod-actions {
+    flex-direction: column;
+  }
+
+  .sed-edit-card {
+    flex-direction: column;
+  }
+
+  .sed-card-vote-section {
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    padding-bottom: var(--sed-spacing-sm);
+    border-bottom: 1px solid var(--sed-border-color);
+    margin-bottom: var(--sed-spacing-sm);
+  }
+
+  .sed-list-controls {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sed-filter-group,
+  .sed-sort-group {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .sed-filter-buttons {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 480px) {
+  .sed-content {
+    padding: var(--sed-spacing-sm);
+  }
+
+  .sed-header {
+    padding: var(--sed-spacing-sm) var(--sed-spacing-md);
+  }
+
+  .sed-btn-text {
+    display: none;
+  }
+
+  .sed-btn {
+    padding: 0.6rem;
+  }
+
+  .sed-card-actions {
+    justify-content: center;
+  }
+
+  .sed-card-actions .sed-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .sed-voting-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .sed-vote-display {
+    width: 100%;
+    order: -1;
+    margin-bottom: var(--sed-spacing-md);
+  }
+
+  .sed-modal-content {
+    padding: var(--sed-spacing-md);
+  }
+
+  .sed-diff-header {
+    flex-wrap: wrap;
+  }
+
+  .sed-diff-mode-toggle {
+    margin-left: 0;
+    margin-top: var(--sed-spacing-sm);
+  }
+}
+
+
+/* ===========================================
+   SECTION 16: ACCESSIBILITY
+   =========================================== */
+
+/* Focus states */
+.sed-btn:focus-visible,
+.sed-input:focus-visible,
+.sed-select:focus-visible,
+.sed-textarea:focus-visible,
+.sed-vote-btn:focus-visible,
+.sed-filter-btn:focus-visible,
+.sed-toggle-btn:focus-visible {
+  outline: 2px solid var(--sed-primary);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .sed-container,
+  .sed-btn,
+  .sed-vote-btn,
+  .sed-edit-card,
+  .sed-toast,
+  .sed-modal,
+  .sed-modal-content {
+    animation: none !important;
+    transition: opacity var(--sed-transition-fast) !important;
+  }
+
+  .sed-progress-fill {
+    transition: none !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .sed-container {
+    border-width: 2px;
+  }
+
+  .sed-btn {
+    border-width: 2px;
+  }
+
+  .sed-edit-card {
+    border-width: 2px;
+  }
+
+  .sed-input,
+  .sed-select,
+  .sed-textarea {
+    border-width: 2px;
+  }
+
+  .sed-vote-btn {
+    border-width: 2px;
+  }
+}
+
+/* Screen reader only */
+.sed-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+
+/* ===========================================
+   SECTION 17: PRINT STYLES
+   =========================================== */
+
+@media print {
+  .sed-container {
+    background: white;
+    color: black;
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  .sed-btn,
+  .sed-vote-btn,
+  .sed-header-actions,
+  .sed-mod-controls,
+  .sed-card-actions,
+  .sed-history-actions,
+  .sed-list-controls {
+    display: none !important;
+  }
+
+  .sed-diff-removed {
+    background: #ffcccc !important;
+    color: #990000 !important;
+  }
+
+  .sed-diff-added {
+    background: #ccffcc !important;
+    color: #006600 !important;
+  }
+
+  .sed-toast {
+    display: none !important;
+  }
+}

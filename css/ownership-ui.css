@@ -1,0 +1,1223 @@
+/**
+ * Ownership UI Styles
+ * Eyes of Azrael Project
+ *
+ * Styles for:
+ * - Ownership Status Banner (owned, unclaimed, pending)
+ * - Claim Modal
+ * - Claim Management Panel
+ * - Countdown Timer
+ * - Transfer Confirmation Dialogs
+ */
+
+/* ============================================
+   CSS CUSTOM PROPERTIES
+   ============================================ */
+
+:root {
+    --ownership-primary: var(--color-primary, #8b7fff);
+    --ownership-primary-hover: #7966ff;
+    --ownership-success: #10b981;
+    --ownership-success-bg: rgba(16, 185, 129, 0.1);
+    --ownership-warning: #f59e0b;
+    --ownership-warning-bg: rgba(245, 158, 11, 0.1);
+    --ownership-danger: #ef4444;
+    --ownership-danger-bg: rgba(239, 68, 68, 0.1);
+    --ownership-info: #3b82f6;
+    --ownership-info-bg: rgba(59, 130, 246, 0.1);
+
+    --ownership-surface: rgba(255, 255, 255, 0.03);
+    --ownership-surface-hover: rgba(255, 255, 255, 0.06);
+    --ownership-border: rgba(255, 255, 255, 0.1);
+    --ownership-border-accent: rgba(139, 127, 255, 0.3);
+
+    --ownership-text-primary: var(--color-text-primary, #f8f9fa);
+    --ownership-text-secondary: var(--color-text-secondary, #adb5bd);
+    --ownership-text-muted: #6c757d;
+}
+
+/* ============================================
+   OWNERSHIP STATUS BANNER
+   ============================================ */
+
+.ownership-banner {
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.ownership-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    background: var(--ownership-surface);
+    border: 1px solid var(--ownership-border);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+/* Banner States */
+.ownership-banner-unclaimed {
+    border-color: var(--ownership-warning);
+    background: var(--ownership-warning-bg);
+}
+
+.ownership-banner-owned {
+    border-color: var(--ownership-border-accent);
+}
+
+.ownership-banner-owner {
+    border-color: var(--ownership-success);
+    background: var(--ownership-success-bg);
+}
+
+.ownership-banner-error {
+    border-color: var(--ownership-danger);
+    background: var(--ownership-danger-bg);
+}
+
+/* Banner Icon */
+.ownership-banner-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245, 158, 11, 0.15);
+    border-radius: 12px;
+    color: var(--ownership-warning);
+}
+
+.ownership-banner-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.ownership-banner-icon.owner-icon {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--ownership-success);
+}
+
+.ownership-banner-icon.error-icon {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--ownership-danger);
+}
+
+/* Banner Info */
+.ownership-banner-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ownership-banner-status {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--ownership-text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.ownership-banner-description {
+    font-size: 0.85rem;
+    color: var(--ownership-text-secondary);
+    line-height: 1.5;
+}
+
+.ownership-since {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--ownership-text-muted);
+}
+
+/* Owner Info Display */
+.ownership-banner-owner-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 1;
+}
+
+.owner-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--ownership-border-accent);
+    object-fit: cover;
+}
+
+.owner-avatar-placeholder {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ownership-primary), #9333ea);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+}
+
+.owner-details {
+    flex: 1;
+    min-width: 0;
+}
+
+.owner-name {
+    font-weight: 500;
+    color: var(--ownership-text-primary);
+}
+
+/* Pending Claims Indicator */
+.pending-claims-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.35rem 0.75rem;
+    background: var(--ownership-warning-bg);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--ownership-warning);
+    width: fit-content;
+}
+
+.claims-badge {
+    background: var(--ownership-warning);
+    color: white;
+    padding: 0.1rem 0.5rem;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+/* Banner Actions */
+.ownership-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-shrink: 0;
+}
+
+.btn-claim-ownership,
+.btn-submit-claim,
+.btn-manage-claims {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1.25rem;
+    background: var(--ownership-primary);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-claim-ownership:hover,
+.btn-submit-claim:hover,
+.btn-manage-claims:hover {
+    background: var(--ownership-primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(139, 127, 255, 0.3);
+}
+
+.btn-claim-ownership svg,
+.btn-submit-claim svg,
+.btn-manage-claims svg {
+    width: 18px;
+    height: 18px;
+}
+
+.btn-release-ownership {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    background: transparent;
+    color: var(--ownership-text-secondary);
+    border: 1px solid var(--ownership-border);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-release-ownership:hover {
+    background: var(--ownership-danger-bg);
+    border-color: var(--ownership-danger);
+    color: var(--ownership-danger);
+}
+
+.btn-release-ownership svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Claim Pending Badge */
+.claim-pending-badge {
+    padding: 0.5rem 1rem;
+    background: var(--ownership-info-bg);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--ownership-info);
+}
+
+/* Contribution Requirement Display */
+.contribution-requirement {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.5rem 1rem;
+    background: var(--ownership-surface);
+    border-radius: 10px;
+    font-size: 0.8rem;
+}
+
+.score-info {
+    color: var(--ownership-text-secondary);
+    font-weight: 500;
+}
+
+.requirement-text {
+    color: var(--ownership-text-muted);
+}
+
+/* ============================================
+   COUNTDOWN TIMER
+   ============================================ */
+
+.ownership-countdown {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    width: fit-content;
+}
+
+.countdown-label {
+    font-size: 0.75rem;
+    color: var(--ownership-text-muted);
+}
+
+.countdown-timer {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ownership-warning);
+    font-family: monospace;
+}
+
+.countdown-timer.countdown-urgent {
+    color: var(--ownership-danger);
+    animation: countdownPulse 1s ease-in-out infinite;
+}
+
+.countdown-timer.countdown-complete {
+    color: var(--ownership-success);
+}
+
+@keyframes countdownPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* ============================================
+   LOADING SKELETON
+   ============================================ */
+
+.ownership-banner-loading {
+    opacity: 0.6;
+}
+
+.ownership-banner-skeleton {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.skeleton-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(90deg, var(--ownership-surface) 25%, var(--ownership-surface-hover) 50%, var(--ownership-surface) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+}
+
+.skeleton-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.skeleton-line {
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--ownership-surface) 25%, var(--ownership-surface-hover) 50%, var(--ownership-surface) 75%);
+    background-size: 200% 100%;
+    animation: skeletonShimmer 1.5s infinite;
+}
+
+.skeleton-line-short {
+    width: 30%;
+}
+
+.skeleton-line-long {
+    width: 60%;
+}
+
+@keyframes skeletonShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ============================================
+   CLAIM MODAL CONTENT
+   ============================================ */
+
+.ownership-claim-modal .modal-content {
+    max-width: 650px;
+}
+
+/* Direct Claim Content */
+.claim-direct-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.claim-info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--ownership-info-bg);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 12px;
+}
+
+.claim-info-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(59, 130, 246, 0.15);
+    border-radius: 12px;
+    color: var(--ownership-info);
+}
+
+.claim-info-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.claim-info-text h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+    color: var(--ownership-text-primary);
+}
+
+.claim-info-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ownership-text-secondary);
+    line-height: 1.5;
+}
+
+/* Ownership Terms */
+.ownership-terms {
+    padding: 1.25rem;
+    background: var(--ownership-surface);
+    border: 1px solid var(--ownership-border);
+    border-radius: 12px;
+}
+
+.ownership-terms h4 {
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    color: var(--ownership-text-primary);
+}
+
+.terms-list {
+    margin: 0 0 1.25rem;
+    padding-left: 1.25rem;
+    color: var(--ownership-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.8;
+}
+
+.terms-list li {
+    margin-bottom: 0.25rem;
+}
+
+.ownership-terms.compact {
+    padding: 1rem;
+    background: transparent;
+    border: none;
+}
+
+.ownership-terms.compact h4 {
+    display: none;
+}
+
+.terms-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    color: var(--ownership-text-secondary);
+}
+
+.terms-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--ownership-primary);
+    cursor: pointer;
+}
+
+/* Claim Request Content */
+.claim-request-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Current Owner Info */
+.current-owner-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--ownership-surface);
+    border-radius: 10px;
+}
+
+.current-owner-info .label {
+    font-size: 0.85rem;
+    color: var(--ownership-text-muted);
+}
+
+.owner-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.owner-avatar-small {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--ownership-border-accent);
+}
+
+.owner-avatar-placeholder-small {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ownership-primary), #9333ea);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: white;
+}
+
+/* Contribution Score Section */
+.contribution-score-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1.25rem;
+    background: var(--ownership-surface);
+    border: 1px solid var(--ownership-border);
+    border-radius: 12px;
+}
+
+.score-display {
+    text-align: center;
+    padding: 0 1.5rem;
+    border-right: 1px solid var(--ownership-border);
+}
+
+.score-display .score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--ownership-primary), #9333ea);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.score-display .score-label {
+    font-size: 0.75rem;
+    color: var(--ownership-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.score-requirements {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.requirement {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.requirement svg {
+    width: 18px;
+    height: 18px;
+}
+
+.requirement.met {
+    color: var(--ownership-success);
+}
+
+.requirement.not-met {
+    color: var(--ownership-danger);
+}
+
+.contributor-rank {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--ownership-text-secondary);
+}
+
+.rank-badge {
+    padding: 0.2rem 0.5rem;
+    background: var(--ownership-primary);
+    color: white;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* Contribution History Section */
+.contribution-history-section,
+.top-contributors-section {
+    padding: 1rem;
+    background: var(--ownership-surface);
+    border-radius: 10px;
+}
+
+.contribution-history-section h4,
+.top-contributors-section h4 {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    color: var(--ownership-text-secondary);
+}
+
+.contribution-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.contribution-item-small {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.contribution-item-small .contribution-type {
+    color: var(--ownership-text-primary);
+    flex: 1;
+}
+
+.contribution-item-small .contribution-weight {
+    color: var(--ownership-success);
+    font-weight: 600;
+}
+
+.contribution-item-small .contribution-date {
+    color: var(--ownership-text-muted);
+    font-size: 0.75rem;
+}
+
+/* Contributors List */
+.contributors-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.contributor-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+.contributor-item.is-current-user {
+    background: var(--ownership-info-bg);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.contributor-item .contributor-rank {
+    width: 28px;
+    color: var(--ownership-text-muted);
+    font-weight: 600;
+}
+
+.contributor-item .contributor-name {
+    flex: 1;
+    color: var(--ownership-text-primary);
+}
+
+.contributor-item .contributor-score {
+    color: var(--ownership-text-secondary);
+    font-weight: 500;
+}
+
+/* Claim Reason Section */
+.claim-reason-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.claim-reason-section h4 {
+    margin: 0;
+    font-size: 0.95rem;
+    color: var(--ownership-text-primary);
+}
+
+.claim-reason-input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--ownership-surface);
+    border: 1px solid var(--ownership-border);
+    border-radius: 10px;
+    color: var(--ownership-text-primary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+    transition: border-color 0.2s ease;
+}
+
+.claim-reason-input:focus {
+    outline: none;
+    border-color: var(--ownership-primary);
+}
+
+.claim-reason-input::placeholder {
+    color: var(--ownership-text-muted);
+}
+
+.textarea-hint {
+    font-size: 0.8rem;
+    color: var(--ownership-text-muted);
+}
+
+/* Insufficient Score Notice */
+.insufficient-score-notice {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: var(--ownership-warning-bg);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: 12px;
+}
+
+.insufficient-score-notice .notice-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(245, 158, 11, 0.15);
+    border-radius: 10px;
+    color: var(--ownership-warning);
+}
+
+.insufficient-score-notice .notice-icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.insufficient-score-notice .notice-text strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--ownership-text-primary);
+}
+
+.insufficient-score-notice .notice-text p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ownership-text-secondary);
+    line-height: 1.5;
+}
+
+/* ============================================
+   CLAIM MANAGEMENT PANEL
+   ============================================ */
+
+.ownership-management-modal .modal-content {
+    max-width: 700px;
+}
+
+.claims-management-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Claim Card */
+.claim-card {
+    padding: 1.25rem;
+    background: var(--ownership-surface);
+    border: 1px solid var(--ownership-border);
+    border-radius: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.claim-card:hover {
+    border-color: var(--ownership-border-accent);
+}
+
+.claim-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+/* Claimant Info */
+.claimant-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.claimant-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--ownership-border-accent);
+    object-fit: cover;
+}
+
+.claimant-avatar-placeholder {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--ownership-primary), #9333ea);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
+}
+
+.claimant-details .claimant-name {
+    font-weight: 600;
+    color: var(--ownership-text-primary);
+    margin-bottom: 0.15rem;
+}
+
+.claimant-details .claim-submitted {
+    font-size: 0.8rem;
+    color: var(--ownership-text-muted);
+}
+
+/* Claim Score Badge */
+.claim-card .claim-score {
+    text-align: center;
+    padding: 0.5rem 0.75rem;
+    background: var(--ownership-success-bg);
+    border-radius: 10px;
+}
+
+.claim-card .claim-score .score-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ownership-success);
+    line-height: 1;
+}
+
+.claim-card .claim-score .score-label {
+    font-size: 0.7rem;
+    color: var(--ownership-text-muted);
+    text-transform: uppercase;
+}
+
+/* Claim Reason */
+.claim-reason {
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.claim-reason strong {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--ownership-text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.claim-reason p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--ownership-text-secondary);
+    line-height: 1.5;
+}
+
+/* Claim Card Actions */
+.claim-card-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-approve-claim,
+.btn-deny-claim {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-approve-claim {
+    background: var(--ownership-success);
+    color: white;
+    border: none;
+}
+
+.btn-approve-claim:hover {
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-deny-claim {
+    background: transparent;
+    color: var(--ownership-danger);
+    border: 1px solid var(--ownership-danger);
+}
+
+.btn-deny-claim:hover {
+    background: var(--ownership-danger);
+    color: white;
+}
+
+.btn-approve-claim svg,
+.btn-deny-claim svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* No Claims Message */
+.no-claims-message {
+    text-align: center;
+    padding: 3rem 2rem;
+}
+
+.no-claims-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--ownership-success-bg);
+    border-radius: 50%;
+    color: var(--ownership-success);
+}
+
+.no-claims-icon svg {
+    width: 32px;
+    height: 32px;
+}
+
+.no-claims-message h3 {
+    margin: 0 0 0.5rem;
+    color: var(--ownership-text-primary);
+}
+
+.no-claims-message p {
+    margin: 0;
+    color: var(--ownership-text-secondary);
+}
+
+/* Deny Reason Input */
+.deny-reason-input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--ownership-surface);
+    border: 1px solid var(--ownership-border);
+    border-radius: 10px;
+    color: var(--ownership-text-primary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+    margin: 1rem 0 1.5rem;
+    transition: border-color 0.2s ease;
+}
+
+.deny-reason-input:focus {
+    outline: none;
+    border-color: var(--ownership-primary);
+}
+
+.deny-reason-input::placeholder {
+    color: var(--ownership-text-muted);
+}
+
+/* ============================================
+   NOTIFICATIONS
+   ============================================ */
+
+.ownership-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: rgba(26, 31, 58, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+    z-index: 10001;
+    transform: translateX(120%);
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.ownership-notification.show {
+    transform: translateX(0);
+}
+
+.ownership-notification .notification-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.ownership-notification .notification-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.ownership-notification .notification-message {
+    font-size: 0.9rem;
+    color: var(--ownership-text-primary);
+}
+
+/* Notification Types */
+.ownership-notification-success .notification-icon {
+    background: var(--ownership-success-bg);
+    color: var(--ownership-success);
+}
+
+.ownership-notification-error .notification-icon {
+    background: var(--ownership-danger-bg);
+    color: var(--ownership-danger);
+}
+
+.ownership-notification-warning .notification-icon {
+    background: var(--ownership-warning-bg);
+    color: var(--ownership-warning);
+}
+
+.ownership-notification-info .notification-icon {
+    background: var(--ownership-info-bg);
+    color: var(--ownership-info);
+}
+
+/* ============================================
+   LOADING SPINNER
+   ============================================ */
+
+.loading-spinner-small {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spinnerRotate 0.6s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spinnerRotate {
+    to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+    .ownership-banner-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .ownership-banner-owner-info {
+        width: 100%;
+    }
+
+    .ownership-banner-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .ownership-banner-actions > * {
+        width: 100%;
+    }
+
+    .btn-claim-ownership,
+    .btn-submit-claim,
+    .btn-manage-claims {
+        justify-content: center;
+    }
+
+    .contribution-score-section {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .score-display {
+        padding: 0 0 1rem;
+        border-right: none;
+        border-bottom: 1px solid var(--ownership-border);
+        width: 100%;
+    }
+
+    .score-requirements {
+        align-items: center;
+    }
+
+    .claim-card-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .claim-card .claim-score {
+        align-self: flex-start;
+    }
+
+    .claim-card-actions {
+        flex-direction: column;
+    }
+
+    .ownership-notification {
+        left: 20px;
+        right: 20px;
+        top: auto;
+        bottom: 20px;
+        transform: translateY(120%);
+    }
+
+    .ownership-notification.show {
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 480px) {
+    .ownership-banner-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+    }
+
+    .ownership-banner-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .owner-avatar,
+    .owner-avatar-placeholder {
+        width: 40px;
+        height: 40px;
+    }
+
+    .btn-claim-ownership,
+    .btn-submit-claim,
+    .btn-manage-claims {
+        padding: 0.55rem 1rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================
+   REDUCED MOTION
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+    .ownership-notification,
+    .countdown-timer,
+    .skeleton-icon,
+    .skeleton-line,
+    .loading-spinner-small {
+        transition: none !important;
+        animation: none !important;
+    }
+}
+
+/* ============================================
+   HIGH CONTRAST MODE
+   ============================================ */
+
+@media (prefers-contrast: high) {
+    .ownership-banner-content {
+        border-width: 2px;
+    }
+
+    .btn-claim-ownership,
+    .btn-submit-claim,
+    .btn-manage-claims,
+    .btn-approve-claim {
+        border: 2px solid currentColor;
+    }
+
+    .claim-card {
+        border-width: 2px;
+    }
+}

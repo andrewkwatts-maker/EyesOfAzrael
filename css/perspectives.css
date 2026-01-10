@@ -1,0 +1,1740 @@
+/**
+ * Perspectives System CSS
+ * Reddit-style community perspectives with premium styling
+ *
+ * Features:
+ * - Card styling with quote marks
+ * - Citation highlight styling
+ * - Thread indentation with visual connectors
+ * - Reaction pills
+ * - Verified badge styling
+ * - Dark/light theme support
+ * - Responsive design
+ * - Accessibility focus states
+ */
+
+/* ==================== CSS Variables ==================== */
+
+:root {
+    /* Perspective colors */
+    --perspective-bg: rgba(255, 255, 255, 0.03);
+    --perspective-bg-hover: rgba(255, 255, 255, 0.05);
+    --perspective-border: rgba(255, 255, 255, 0.1);
+    --perspective-border-hover: rgba(255, 255, 255, 0.15);
+
+    /* Thread lines */
+    --thread-line-color: rgba(255, 255, 255, 0.12);
+    --thread-line-hover: rgba(139, 92, 246, 0.4);
+    --thread-indent: 28px;
+    --thread-indent-mobile: 20px;
+
+    /* Vote colors */
+    --perspective-upvote: #10b981;
+    --perspective-upvote-hover: #34d399;
+    --perspective-upvote-bg: rgba(16, 185, 129, 0.1);
+    --perspective-downvote: #ef4444;
+    --perspective-downvote-hover: #f87171;
+    --perspective-downvote-bg: rgba(239, 68, 68, 0.1);
+    --perspective-vote-neutral: rgba(255, 255, 255, 0.5);
+
+    /* Reaction colors */
+    --reaction-agree: #10b981;
+    --reaction-disagree: #f59e0b;
+    --reaction-insightful: #8b5cf6;
+
+    /* Citation colors */
+    --citation-bg: rgba(139, 92, 246, 0.08);
+    --citation-border: rgba(139, 92, 246, 0.25);
+    --citation-text: #a78bfa;
+    --citation-quote-color: rgba(139, 92, 246, 0.3);
+
+    /* Verification badge */
+    --verified-color: #10b981;
+    --verified-bg: rgba(16, 185, 129, 0.1);
+
+    /* Transitions */
+    --perspective-transition-fast: 150ms ease;
+    --perspective-transition-normal: 250ms ease;
+    --perspective-transition-slow: 350ms ease;
+}
+
+/* Light theme overrides */
+[data-theme="light"] {
+    --perspective-bg: rgba(0, 0, 0, 0.02);
+    --perspective-bg-hover: rgba(0, 0, 0, 0.04);
+    --perspective-border: rgba(0, 0, 0, 0.08);
+    --perspective-border-hover: rgba(0, 0, 0, 0.12);
+    --thread-line-color: rgba(0, 0, 0, 0.08);
+    --thread-line-hover: rgba(139, 92, 246, 0.5);
+    --perspective-vote-neutral: rgba(0, 0, 0, 0.4);
+    --citation-bg: rgba(139, 92, 246, 0.06);
+    --citation-quote-color: rgba(139, 92, 246, 0.2);
+}
+
+
+/* ==================== Main Container ==================== */
+
+.perspectives-system {
+    margin: 2rem 0;
+    font-family: var(--font-family, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+}
+
+
+/* ==================== Header ==================== */
+
+.perspectives-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--perspective-border);
+}
+
+.perspectives-title-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.perspectives-icon {
+    width: 24px;
+    height: 24px;
+    stroke: var(--accent-primary, #8b5cf6);
+}
+
+.perspectives-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+}
+
+.perspectives-count {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.perspectives-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.perspectives-sort-select,
+.perspectives-filter-select {
+    padding: 0.5rem 2rem 0.5rem 0.75rem;
+    font-size: 0.8125rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--perspective-border);
+    border-radius: 6px;
+    color: var(--text-primary, #fff);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.5)' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.5rem center;
+    transition: border-color var(--perspective-transition-fast);
+}
+
+.perspectives-sort-select:hover,
+.perspectives-filter-select:hover,
+.perspectives-sort-select:focus,
+.perspectives-filter-select:focus {
+    border-color: var(--accent-primary, #8b5cf6);
+    outline: none;
+}
+
+.perspectives-collapse-all-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--perspective-border);
+    border-radius: 6px;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+    cursor: pointer;
+    transition: all var(--perspective-transition-fast);
+}
+
+.perspectives-collapse-all-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--accent-primary, #8b5cf6);
+    color: var(--accent-primary, #8b5cf6);
+}
+
+.perspectives-collapse-all-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+
+/* ==================== Form Container ==================== */
+
+.perspectives-form-container {
+    margin-bottom: 1.5rem;
+}
+
+.perspective-form {
+    padding: 1.25rem;
+    background: var(--perspective-bg);
+    border: 1px solid var(--perspective-border);
+    border-radius: 12px;
+}
+
+.perspective-form.logged-out {
+    padding: 1rem;
+}
+
+.perspective-form-header {
+    margin-bottom: 1rem;
+}
+
+.perspective-user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.perspective-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.perspective-user-avatar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+}
+
+.perspective-login-prompt {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px dashed rgba(139, 92, 246, 0.3);
+    border-radius: 8px;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.perspective-login-prompt svg {
+    width: 20px;
+    height: 20px;
+    stroke: var(--accent-primary, #8b5cf6);
+}
+
+.perspective-login-btn {
+    margin-left: auto;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #fff;
+    background: var(--accent-primary, #8b5cf6);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background var(--perspective-transition-fast);
+}
+
+.perspective-login-btn:hover {
+    background: #7c3aed;
+}
+
+
+/* ==================== Form Fields ==================== */
+
+.perspective-submit-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.perspective-submit-form .form-label {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    margin-bottom: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary, #fff);
+}
+
+.perspective-submit-form .corpus-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.perspective-submit-form .required-indicator {
+    color: var(--perspective-downvote);
+}
+
+.perspective-submit-form .form-input {
+    width: 100%;
+    padding: 0.75rem;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    color: var(--text-primary, #fff);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--perspective-border);
+    border-radius: 8px;
+    transition: border-color var(--perspective-transition-fast);
+}
+
+.perspective-submit-form .form-input:focus {
+    border-color: var(--accent-primary, #8b5cf6);
+    outline: none;
+}
+
+.perspective-submit-form .form-input::placeholder {
+    color: var(--text-secondary, rgba(255, 255, 255, 0.4));
+}
+
+.perspective-submit-form .textarea-wrapper {
+    position: relative;
+}
+
+.perspective-submit-form .form-textarea {
+    width: 100%;
+    padding: 0.75rem;
+    padding-bottom: 1.75rem;
+    font-family: inherit;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-primary, #fff);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--perspective-border);
+    border-radius: 8px;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color var(--perspective-transition-fast);
+}
+
+.perspective-submit-form .form-textarea:focus {
+    border-color: var(--accent-primary, #8b5cf6);
+    outline: none;
+}
+
+.perspective-submit-form .form-textarea::placeholder {
+    color: var(--text-secondary, rgba(255, 255, 255, 0.4));
+}
+
+.perspective-submit-form .char-count {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.4));
+}
+
+.perspective-submit-form .char-count.near-limit {
+    color: #f59e0b;
+}
+
+.perspective-submit-form .char-count.over-limit {
+    color: var(--perspective-downvote);
+}
+
+.perspective-submit-form .form-hint {
+    margin: 0.25rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+
+/* ==================== Corpus Input ==================== */
+
+.perspective-submit-form .corpus-input-wrapper {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.perspective-submit-form .corpus-input-wrapper .form-input {
+    flex: 1;
+}
+
+.perspective-submit-form .corpus-search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    padding: 0;
+    background: var(--accent-primary, #8b5cf6);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: background var(--perspective-transition-fast);
+}
+
+.perspective-submit-form .corpus-search-btn:hover {
+    background: #7c3aed;
+}
+
+.perspective-submit-form .corpus-search-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.perspective-submit-form .corpus-search-btn.loading {
+    background: var(--perspective-border);
+    pointer-events: none;
+}
+
+.perspective-submit-form .corpus-search-btn.loading svg {
+    animation: perspectiveSpin 0.8s linear infinite;
+}
+
+@keyframes perspectiveSpin {
+    to { transform: rotate(360deg); }
+}
+
+
+/* ==================== Corpus Preview ==================== */
+
+.corpus-preview-container {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--citation-bg);
+    border: 1px solid var(--citation-border);
+    border-radius: 8px;
+}
+
+.corpus-results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.corpus-results-count {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--citation-text);
+}
+
+.corpus-results-close {
+    display: flex;
+    padding: 0.25rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+    cursor: pointer;
+    transition: color var(--perspective-transition-fast);
+}
+
+.corpus-results-close:hover {
+    color: var(--text-primary, #fff);
+}
+
+.corpus-results-close svg {
+    width: 16px;
+    height: 16px;
+}
+
+.corpus-results-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.corpus-result-item {
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+}
+
+.corpus-result-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.375rem;
+}
+
+.corpus-result-source {
+    padding: 0.125rem 0.375rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 3px;
+    color: #fff;
+}
+
+.corpus-result-source.github {
+    background: #238636;
+}
+
+.corpus-result-source.firebase {
+    background: #ff9800;
+}
+
+.corpus-result-source.unknown {
+    background: #6b7280;
+}
+
+.corpus-result-title {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--text-primary, #fff);
+}
+
+.corpus-result-context {
+    font-size: 0.8125rem;
+    line-height: 1.5;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.corpus-results-more {
+    margin: 0.5rem 0 0;
+    font-size: 0.75rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+.corpus-no-results {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    text-align: center;
+}
+
+.corpus-no-results svg {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.5rem;
+    stroke: var(--text-secondary, rgba(255, 255, 255, 0.4));
+}
+
+.corpus-no-results p {
+    margin: 0;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+
+/* ==================== Validation ==================== */
+
+.validation-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.validate-citation-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary, #fff);
+    background: rgba(139, 92, 246, 0.2);
+    border: 1px solid var(--accent-primary, #8b5cf6);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--perspective-transition-fast);
+    position: relative;
+}
+
+.validate-citation-btn:hover {
+    background: rgba(139, 92, 246, 0.3);
+}
+
+.validate-citation-btn .btn-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.validate-citation-btn .btn-loading {
+    display: none;
+}
+
+.validate-citation-btn.loading .btn-text,
+.validate-citation-btn.loading .btn-icon {
+    visibility: hidden;
+}
+
+.validate-citation-btn.loading .btn-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.validation-status {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
+    flex: 1;
+}
+
+.validation-status.valid {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.validation-status.invalid {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.validation-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+.validation-status.valid .validation-icon {
+    color: var(--perspective-upvote);
+}
+
+.validation-status.invalid .validation-icon {
+    color: var(--perspective-downvote);
+}
+
+.validation-message {
+    font-size: 0.875rem;
+    color: var(--text-primary, rgba(255, 255, 255, 0.9));
+    flex: 1;
+}
+
+.validation-score {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+
+/* ==================== Preview ==================== */
+
+.preview-container {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--perspective-border);
+    border-radius: 8px;
+}
+
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.preview-title {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.preview-close-btn {
+    display: flex;
+    padding: 0.25rem;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+    cursor: pointer;
+    transition: color var(--perspective-transition-fast);
+}
+
+.preview-close-btn:hover {
+    color: var(--text-primary, #fff);
+}
+
+.preview-close-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.preview-content {
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-primary, rgba(255, 255, 255, 0.9));
+}
+
+.preview-perspective-title {
+    margin: 0 0 0.75rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+}
+
+
+/* ==================== Form Actions ==================== */
+
+.perspective-submit-form .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.preview-toggle-btn,
+.submit-perspective-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--perspective-transition-fast);
+    position: relative;
+}
+
+.preview-toggle-btn {
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+    background: transparent;
+    border: 1px solid var(--perspective-border);
+}
+
+.preview-toggle-btn:hover {
+    color: var(--text-primary, #fff);
+    border-color: var(--text-secondary);
+}
+
+.submit-perspective-btn {
+    color: #fff;
+    background: var(--accent-primary, #8b5cf6);
+    border: none;
+}
+
+.submit-perspective-btn:hover:not(:disabled) {
+    background: #7c3aed;
+}
+
+.submit-perspective-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.submit-perspective-btn .btn-icon {
+    width: 16px;
+    height: 16px;
+}
+
+.submit-perspective-btn .btn-loading {
+    display: none;
+}
+
+.submit-perspective-btn.loading .btn-text,
+.submit-perspective-btn.loading .btn-icon {
+    visibility: hidden;
+}
+
+.submit-perspective-btn.loading .btn-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    animation: perspectiveSpin 0.8s linear infinite;
+}
+
+
+/* ==================== Form Error ==================== */
+
+.form-error {
+    padding: 0.75rem 1rem;
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #fca5a5;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+}
+
+
+/* ==================== Perspectives List ==================== */
+
+.perspectives-list {
+    min-height: 100px;
+}
+
+.perspectives-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 2rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.perspectives-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--perspective-border);
+    border-top-color: var(--accent-primary, #8b5cf6);
+    border-radius: 50%;
+    animation: perspectiveSpin 0.8s linear infinite;
+}
+
+
+/* ==================== Empty State ==================== */
+
+.perspectives-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.perspectives-empty .empty-illustration svg {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 1rem;
+    stroke: var(--text-secondary, rgba(255, 255, 255, 0.4));
+}
+
+.perspectives-empty .empty-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+}
+
+.perspectives-empty .empty-subtitle {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+
+/* ==================== Load More ==================== */
+
+.perspectives-load-more-container {
+    margin-top: 1.5rem;
+}
+
+.perspectives-load-more-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--accent-primary, #8b5cf6);
+    background: transparent;
+    border: 1px solid var(--accent-primary, #8b5cf6);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all var(--perspective-transition-fast);
+    position: relative;
+}
+
+.perspectives-load-more-btn:hover {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.perspectives-load-more-btn .btn-loading {
+    display: none;
+}
+
+.perspectives-load-more-btn.loading .btn-text {
+    visibility: hidden;
+}
+
+.perspectives-load-more-btn.loading .btn-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: absolute;
+}
+
+
+/* ==================== Perspective Card ==================== */
+
+.perspective-card {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    position: relative;
+}
+
+.perspective-card.root {
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: var(--perspective-bg);
+    border: 1px solid var(--perspective-border);
+    border-radius: 12px;
+    transition: border-color var(--perspective-transition-fast);
+}
+
+.perspective-card.root:hover {
+    border-color: var(--perspective-border-hover);
+}
+
+/* Nested thread indentation with lines */
+.perspective-card.nested {
+    margin-left: var(--thread-indent);
+    padding-left: 1rem;
+    border-left: 2px solid var(--thread-line-color);
+}
+
+.perspective-card.nested:hover {
+    border-left-color: var(--thread-line-hover);
+}
+
+/* Depth-based indentation */
+.perspective-card[data-depth="1"] { margin-left: var(--thread-indent); }
+.perspective-card[data-depth="2"] { margin-left: calc(var(--thread-indent) * 2); }
+.perspective-card[data-depth="3"] { margin-left: calc(var(--thread-indent) * 3); }
+.perspective-card[data-depth="4"] { margin-left: calc(var(--thread-indent) * 4); }
+.perspective-card[data-depth="5"] { margin-left: calc(var(--thread-indent) * 5); }
+
+/* Collapsed state */
+.perspective-card.collapsed .perspective-title,
+.perspective-card.collapsed .perspective-content,
+.perspective-card.collapsed .perspective-citation,
+.perspective-card.collapsed .perspective-actions,
+.perspective-card.collapsed .perspective-reply-form-container,
+.perspective-card.collapsed .perspective-replies,
+.perspective-card.collapsed .perspective-expand-btn {
+    display: none;
+}
+
+
+/* ==================== Vote Column ==================== */
+
+.perspective-vote-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    min-width: 32px;
+}
+
+.perspective-vote-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    color: var(--perspective-vote-neutral);
+    cursor: pointer;
+    transition: all var(--perspective-transition-fast);
+}
+
+.perspective-vote-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.perspective-vote-btn:hover {
+    background: var(--perspective-bg-hover);
+}
+
+.perspective-vote-btn.upvote:hover,
+.perspective-vote-btn.upvote.active {
+    color: var(--perspective-upvote);
+    background: var(--perspective-upvote-bg);
+}
+
+.perspective-vote-btn.downvote:hover,
+.perspective-vote-btn.downvote.active {
+    color: var(--perspective-downvote);
+    background: var(--perspective-downvote-bg);
+}
+
+.perspective-vote-btn:focus-visible {
+    outline: 2px solid var(--accent-primary, #8b5cf6);
+    outline-offset: 2px;
+}
+
+.perspective-vote-count {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+    line-height: 1;
+}
+
+.perspective-vote-count.positive {
+    color: var(--perspective-upvote);
+}
+
+.perspective-vote-count.negative {
+    color: var(--perspective-downvote);
+}
+
+
+/* ==================== Perspective Main Content ==================== */
+
+.perspective-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.perspective-header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.perspective-collapse-btn {
+    padding: 0.125rem 0.25rem;
+    font-family: monospace;
+    font-size: 0.75rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+    background: transparent;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: color var(--perspective-transition-fast);
+}
+
+.perspective-collapse-btn:hover {
+    color: var(--accent-primary, #8b5cf6);
+}
+
+.perspective-author {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.perspective-author-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.perspective-author-avatar.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.625rem;
+    font-weight: 600;
+    color: #fff;
+    background: linear-gradient(135deg, #8b5cf6, #6366f1);
+}
+
+.perspective-author-name {
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+}
+
+.perspective-verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--verified-color);
+    background: var(--verified-bg);
+    border-radius: 4px;
+}
+
+.perspective-verified-badge svg {
+    width: 12px;
+    height: 12px;
+}
+
+.perspective-separator {
+    color: var(--text-secondary, rgba(255, 255, 255, 0.3));
+}
+
+.perspective-time {
+    color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+.perspective-collapsed-info {
+    font-size: 0.75rem;
+    font-style: italic;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.4));
+}
+
+
+/* ==================== Perspective Title & Content ==================== */
+
+.perspective-title {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    line-height: 1.4;
+}
+
+.perspective-content {
+    margin-bottom: 0.75rem;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    color: var(--text-primary, rgba(255, 255, 255, 0.9));
+    word-wrap: break-word;
+    overflow: hidden;
+}
+
+.perspective-content:not(.expanded) {
+    max-height: 200px;
+    mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+
+.perspective-content.expanded {
+    max-height: none;
+    mask-image: none;
+    -webkit-mask-image: none;
+}
+
+.perspective-content a {
+    color: var(--accent-primary, #8b5cf6);
+    text-decoration: none;
+}
+
+.perspective-content a:hover {
+    text-decoration: underline;
+}
+
+.perspective-content strong {
+    font-weight: 600;
+}
+
+.perspective-content em {
+    font-style: italic;
+}
+
+.perspective-content blockquote {
+    margin: 0.75rem 0;
+    padding: 0.5rem 0 0.5rem 1rem;
+    border-left: 3px solid var(--citation-border);
+    color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+    font-style: italic;
+}
+
+.perspective-expand-btn {
+    padding: 0.25rem 0.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--accent-primary, #8b5cf6);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: color var(--perspective-transition-fast);
+}
+
+.perspective-expand-btn:hover {
+    color: #7c3aed;
+    text-decoration: underline;
+}
+
+
+/* ==================== Citation Block ==================== */
+
+.perspective-citation {
+    position: relative;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--citation-bg);
+    border: 1px solid var(--citation-border);
+    border-radius: 8px;
+}
+
+/* Decorative quote marks */
+.perspective-citation::before {
+    content: '\201C';
+    position: absolute;
+    top: -0.25rem;
+    left: 0.5rem;
+    font-size: 2rem;
+    font-family: Georgia, serif;
+    color: var(--citation-quote-color);
+    line-height: 1;
+}
+
+.citation-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.citation-icon {
+    width: 14px;
+    height: 14px;
+    stroke: var(--citation-text);
+}
+
+.citation-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--citation-text);
+}
+
+.citation-query {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+    font-size: 0.8125rem;
+}
+
+.citation-query-label {
+    font-weight: 500;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.citation-query-text {
+    font-style: italic;
+    color: var(--citation-text);
+}
+
+.citation-result-count {
+    font-size: 0.75rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+.citation-sources {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+}
+
+.citation-source {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.citation-source-badge {
+    padding: 0.0625rem 0.25rem;
+    font-size: 0.5625rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    border-radius: 2px;
+    color: #fff;
+}
+
+.citation-source-badge.github {
+    background: #238636;
+}
+
+.citation-source-badge.firebase {
+    background: #ff9800;
+}
+
+.citation-source-title {
+    color: var(--text-primary, rgba(255, 255, 255, 0.8));
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* ==================== Actions & Reactions ==================== */
+
+.perspective-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.perspective-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all var(--perspective-transition-fast);
+}
+
+.perspective-action-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.perspective-action-btn:hover {
+    color: var(--text-primary, #fff);
+    background: var(--perspective-bg-hover);
+}
+
+.perspective-action-btn.delete-btn:hover {
+    color: var(--perspective-downvote);
+    background: var(--perspective-downvote-bg);
+}
+
+.perspective-reactions {
+    display: flex;
+    gap: 0.375rem;
+    margin-left: auto;
+}
+
+.reaction-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.375rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid transparent;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all var(--perspective-transition-fast);
+}
+
+.reaction-btn svg {
+    width: 14px;
+    height: 14px;
+}
+
+.reaction-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--perspective-border);
+}
+
+.reaction-btn[data-reaction="agree"]:hover,
+.reaction-btn[data-reaction="agree"].active {
+    color: var(--reaction-agree);
+    background: rgba(16, 185, 129, 0.1);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.reaction-btn[data-reaction="disagree"]:hover,
+.reaction-btn[data-reaction="disagree"].active {
+    color: var(--reaction-disagree);
+    background: rgba(245, 158, 11, 0.1);
+    border-color: rgba(245, 158, 11, 0.3);
+}
+
+.reaction-btn[data-reaction="insightful"]:hover,
+.reaction-btn[data-reaction="insightful"].active {
+    color: var(--reaction-insightful);
+    background: rgba(139, 92, 246, 0.1);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.reaction-count {
+    min-width: 12px;
+    text-align: center;
+}
+
+
+/* ==================== Reply Form ==================== */
+
+.perspective-reply-form-container {
+    margin-top: 0.75rem;
+}
+
+.perspective-reply-form {
+    padding: 1rem;
+    background: var(--perspective-bg-hover);
+    border-radius: 8px;
+}
+
+.reply-form-header {
+    margin-bottom: 0.5rem;
+}
+
+.reply-to-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.reply-textarea {
+    width: 100%;
+    padding: 0.625rem;
+    margin-bottom: 0.5rem;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--text-primary, #fff);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--perspective-border);
+    border-radius: 6px;
+    resize: vertical;
+    min-height: 60px;
+}
+
+.reply-textarea:focus {
+    border-color: var(--accent-primary, #8b5cf6);
+    outline: none;
+}
+
+.reply-corpus-group {
+    display: flex;
+    gap: 0.375rem;
+    margin-bottom: 0.5rem;
+}
+
+.reply-corpus-input {
+    flex: 1;
+    padding: 0.5rem;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    color: var(--text-primary, #fff);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--perspective-border);
+    border-radius: 6px;
+}
+
+.reply-corpus-input:focus {
+    border-color: var(--accent-primary, #8b5cf6);
+    outline: none;
+}
+
+.reply-corpus-search-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    padding: 0;
+    background: var(--accent-primary, #8b5cf6);
+    border: none;
+    border-radius: 6px;
+    color: #fff;
+    cursor: pointer;
+}
+
+.reply-corpus-search-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+.reply-corpus-preview {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--citation-bg);
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.corpus-found {
+    color: var(--perspective-upvote);
+}
+
+.reply-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.reply-cancel-btn,
+.reply-submit-btn {
+    padding: 0.5rem 0.875rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--perspective-transition-fast);
+}
+
+.reply-cancel-btn {
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+    background: transparent;
+    border: 1px solid var(--perspective-border);
+}
+
+.reply-cancel-btn:hover {
+    color: var(--text-primary, #fff);
+    border-color: var(--text-secondary);
+}
+
+.reply-submit-btn {
+    color: #fff;
+    background: var(--accent-primary, #8b5cf6);
+    border: none;
+    position: relative;
+}
+
+.reply-submit-btn:hover:not(:disabled) {
+    background: #7c3aed;
+}
+
+.reply-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.reply-submit-btn .btn-loading {
+    display: none;
+}
+
+.reply-submit-btn.loading .btn-text {
+    visibility: hidden;
+}
+
+.reply-submit-btn.loading .btn-loading {
+    display: flex;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+
+/* ==================== Replies Container ==================== */
+
+.perspective-replies {
+    margin-top: 0.75rem;
+}
+
+
+/* ==================== Toast Notification ==================== */
+
+.perspectives-toast {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    padding: 0.75rem 1.25rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #fff;
+    background: #1f2937;
+    border-radius: 8px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    visibility: hidden;
+    transition: all var(--perspective-transition-normal);
+    z-index: 9999;
+}
+
+.perspectives-toast.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+    visibility: visible;
+}
+
+
+/* ==================== Error State ==================== */
+
+.perspectives-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 1rem;
+    text-align: center;
+}
+
+.perspectives-error svg {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.75rem;
+    stroke: var(--perspective-downvote);
+}
+
+.perspectives-error p {
+    margin: 0 0 1rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.perspectives-retry-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--accent-primary, #8b5cf6);
+    background: transparent;
+    border: 1px solid var(--accent-primary, #8b5cf6);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all var(--perspective-transition-fast);
+}
+
+.perspectives-retry-btn:hover {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 768px) {
+    .perspectives-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .perspectives-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .perspectives-sort-select,
+    .perspectives-filter-select {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .perspective-card[data-depth="1"],
+    .perspective-card[data-depth="2"],
+    .perspective-card[data-depth="3"],
+    .perspective-card[data-depth="4"],
+    .perspective-card[data-depth="5"] {
+        margin-left: var(--thread-indent-mobile);
+    }
+
+    .perspective-vote-column {
+        min-width: 28px;
+    }
+
+    .perspective-vote-btn {
+        width: 24px;
+        height: 24px;
+    }
+
+    .perspective-vote-btn svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .perspective-header {
+        font-size: 0.75rem;
+    }
+
+    .perspective-author-avatar {
+        width: 20px;
+        height: 20px;
+    }
+
+    .perspective-title {
+        font-size: 0.9375rem;
+    }
+
+    .perspective-content {
+        font-size: 0.875rem;
+    }
+
+    .perspective-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .perspective-reactions {
+        margin-left: 0;
+    }
+
+    .perspective-submit-form .form-actions {
+        flex-direction: column;
+    }
+
+    .preview-toggle-btn,
+    .submit-perspective-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+/* ==================== Accessibility ==================== */
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Focus visible for keyboard navigation */
+.perspective-vote-btn:focus-visible,
+.perspective-action-btn:focus-visible,
+.reaction-btn:focus-visible,
+.perspectives-sort-select:focus-visible,
+.perspectives-filter-select:focus-visible,
+.perspective-submit-form .form-input:focus-visible,
+.perspective-submit-form .form-textarea:focus-visible,
+.submit-perspective-btn:focus-visible,
+.validate-citation-btn:focus-visible {
+    outline: 2px solid var(--accent-primary, #8b5cf6);
+    outline-offset: 2px;
+}
+
+/* Reduce motion preference */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+
+/* ==================== Print Styles ==================== */
+
+@media print {
+    .perspectives-system {
+        background: white;
+        color: black;
+    }
+
+    .perspectives-form-container,
+    .perspectives-controls,
+    .perspective-vote-column,
+    .perspective-actions,
+    .perspectives-load-more-container {
+        display: none !important;
+    }
+
+    .perspective-card.root {
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+    }
+}

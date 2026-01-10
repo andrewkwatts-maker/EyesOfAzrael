@@ -1,0 +1,355 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://eyesofazrael.com/schemas/connection.schema.json",
+  "title": "Standardized Connection Schema",
+  "description": "Defines the canonical format for all entity connections and relationships in Eyes of Azrael",
+  "version": "1.0.0",
+
+  "definitions": {
+    "entityReference": {
+      "type": "object",
+      "description": "Canonical format for referencing another entity",
+      "required": ["id", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9_-]+$",
+          "description": "Unique identifier of the referenced entity (kebab-case)"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200,
+          "description": "Display name of the referenced entity"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["deity", "hero", "creature", "item", "place", "text", "ritual", "symbol", "herb", "cosmology", "concept", "event", "archetype", "magic", "mythology"],
+          "description": "Type/category of the referenced entity"
+        },
+        "mythology": {
+          "type": "string",
+          "description": "Mythology the referenced entity belongs to"
+        },
+        "relationship": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "description": "Description of the relationship (e.g., 'father', 'wielder', 'creator')"
+        },
+        "relationshipType": {
+          "$ref": "#/definitions/relationshipType",
+          "description": "Categorized relationship type"
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Additional context about the relationship"
+        },
+        "icon": {
+          "type": "string",
+          "description": "Icon/emoji for the referenced entity"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "relationshipType": {
+      "type": "string",
+      "description": "Standardized relationship types",
+      "enum": [
+        "parent", "father", "mother",
+        "child", "son", "daughter",
+        "sibling", "brother", "sister",
+        "spouse", "consort", "lover",
+        "offspring", "ancestor", "descendant",
+        "ally", "enemy", "rival",
+        "companion", "friend",
+        "servant", "master",
+        "worshipper", "devotee",
+        "mentor", "student", "teacher",
+        "creator", "creation", "created_by",
+        "slayer", "victim", "slain_by",
+        "aspect", "avatar", "incarnation",
+        "syncretism", "equivalent",
+        "parallel", "derived", "influenced",
+        "contrasts", "similar", "related",
+        "historical", "thematic", "symbolic",
+        "wielder", "wielded_by",
+        "ruler", "ruled_by",
+        "guardian", "guarded_by",
+        "associated", "linked", "connected",
+        "origin", "destination",
+        "contains", "contained_in",
+        "member", "group",
+        "other"
+      ]
+    },
+
+    "familyTree": {
+      "type": "object",
+      "description": "Standardized family tree structure",
+      "properties": {
+        "parents": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" },
+          "description": "Parent entities"
+        },
+        "children": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" },
+          "description": "Child entities"
+        },
+        "siblings": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" },
+          "description": "Sibling entities"
+        },
+        "consorts": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" },
+          "description": "Spouse/consort entities"
+        },
+        "ancestors": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" },
+          "description": "Ancestor entities beyond parents"
+        },
+        "descendants": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" },
+          "description": "Descendant entities beyond children"
+        },
+        "notes": {
+          "type": "string",
+          "description": "Additional notes about family relationships"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "relatedEntities": {
+      "type": "object",
+      "description": "Categorized related entities",
+      "properties": {
+        "deities": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "heroes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "creatures": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "places": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "texts": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "rituals": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "symbols": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "herbs": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "concepts": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "cosmology": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "events": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "archetypes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "magic": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        },
+        "mythologies": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/entityReference" }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "corpusSearch": {
+      "type": "object",
+      "description": "Corpus search query structure",
+      "properties": {
+        "canonical": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Primary search terms"
+        },
+        "variants": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Alternative names/spellings"
+        },
+        "epithets": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Titles and epithets"
+        },
+        "domains": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Domain-related terms"
+        },
+        "symbols": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Associated symbol terms"
+        },
+        "places": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Associated place names"
+        },
+        "concepts": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Related concept terms"
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "sourceReference": {
+      "type": "object",
+      "description": "Source/citation format",
+      "required": ["title"],
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "author": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "excerpt": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 1000
+        },
+        "source": {
+          "type": "string",
+          "maxLength": 300
+        },
+        "pages": {
+          "type": "string",
+          "maxLength": 50
+        },
+        "type": {
+          "type": "string",
+          "enum": ["primary", "secondary", "archaeological", "literary", "academic"]
+        }
+      }
+    }
+  },
+
+  "legacyFormats": {
+    "description": "Documentation of legacy formats that need migration",
+    "stringArray": {
+      "example": ["Zeus", "Hera", "Poseidon"],
+      "migrateTo": "entityReference array with id derived from name"
+    },
+    "linkObject": {
+      "example": { "name": "Zeus", "link": "../greek/deities/zeus.html" },
+      "migrateTo": "entityReference with id extracted from link"
+    },
+    "flatFamily": {
+      "example": { "parents": "Odin and Frigg", "children": "Thor, Balder" },
+      "migrateTo": "familyTree with parsed entityReference arrays"
+    },
+    "snakeCaseFields": {
+      "example": ["related_deities", "associated_places"],
+      "migrateTo": "relatedEntities object with categorized arrays"
+    }
+  },
+
+  "standardFields": {
+    "description": "Canonical field names that should be used",
+    "connections": {
+      "family": "For family tree relationships (parents, children, siblings, consorts)",
+      "relatedEntities": "For categorized entity connections (deities, heroes, creatures, etc.)",
+      "allies": "Array of ally entityReferences",
+      "enemies": "Array of enemy entityReferences",
+      "corpusSearch": "For search query structure"
+    },
+    "deprecated": {
+      "related_deities": "Use relatedEntities.deities",
+      "related_heroes": "Use relatedEntities.heroes",
+      "related_creatures": "Use relatedEntities.creatures",
+      "related_items": "Use relatedEntities.items",
+      "related_places": "Use relatedEntities.places",
+      "related_texts": "Use relatedEntities.texts",
+      "associated_deities": "Use relatedEntities.deities",
+      "associated_places": "Use relatedEntities.places",
+      "associated_heroes": "Use relatedEntities.heroes",
+      "mythology_links": "Use relatedEntities.mythologies",
+      "relatedArchetypes": "Use relatedEntities.archetypes",
+      "relatedDeities": "Use relatedEntities.deities"
+    }
+  },
+
+  "type": "object",
+  "properties": {
+    "family": { "$ref": "#/definitions/familyTree" },
+    "relatedEntities": { "$ref": "#/definitions/relatedEntities" },
+    "allies": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/entityReference" }
+    },
+    "enemies": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/entityReference" }
+    },
+    "corpusSearch": { "$ref": "#/definitions/corpusSearch" },
+    "primarySources": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/sourceReference" }
+    },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/sourceReference" }
+    }
+  }
+}
