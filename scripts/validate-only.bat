@@ -1,24 +1,20 @@
 @echo off
 REM ============================================================================
-REM Eyes of Azrael - Master Validation Script
-REM Runs all validation scripts and generates comprehensive reports
+REM Eyes of Azrael - Quick Validation Script
+REM Runs validation checks only (steps 4-9) without download/backup/fix
 REM ============================================================================
 REM
-REM This script performs a complete validation pipeline:
-REM   1. Download and backup assets
-REM   2. Check for duplicate assets
-REM   3. Run schema fixer (dry-run mode)
-REM   4. Validate connections
-REM   5. Analyze broken links
-REM   6. Validate cross-links
-REM   7. Validate mythology links
-REM   8. Find non-compliant assets
-REM   9. Generate validation summary
-REM  10. Display final summary with compliance percentage
+REM This script performs quick validation using existing downloaded assets:
+REM   1. Validate connections
+REM   2. Analyze broken links
+REM   3. Validate cross-links
+REM   4. Validate mythology links
+REM   5. Find non-compliant assets
+REM   6. Generate validation summary
 REM
 REM Usage:
-REM   run-all-validations.bat           - Run full validation suite
-REM   run-all-validations.bat --help    - Show help
+REM   validate-only.bat           - Run quick validation
+REM   validate-only.bat --help    - Show help
 REM
 REM ============================================================================
 
@@ -27,14 +23,13 @@ setlocal enabledelayedexpansion
 set SCRIPT_DIR=%~dp0
 set PROJECT_DIR=%SCRIPT_DIR%..
 set ASSETS_DIR=%PROJECT_DIR%\firebase-assets-downloaded
-set BACKUP_DIR=%PROJECT_DIR%\backups
 set REPORTS_DIR=%SCRIPT_DIR%reports
 
-REM Track overall status
+REM Track status
 set OVERALL_STATUS=0
 set PASSED_STEPS=0
 set FAILED_STEPS=0
-set TOTAL_STEPS=10
+set TOTAL_STEPS=6
 set FAILED_NAMES=
 
 REM Show help if requested
@@ -45,53 +40,53 @@ goto start_validation
 :show_help
 echo.
 echo ============================================================================
-echo Eyes of Azrael - Master Validation Suite
+echo Eyes of Azrael - Quick Validation Script
 echo ============================================================================
 echo.
 echo Usage:
-echo   run-all-validations.bat [options]
+echo   validate-only.bat [options]
 echo.
 echo Options:
 echo   --help, -h    Show this help message
 echo.
-echo This script performs the following validation steps:
-echo   1. Download and backup assets from Firebase
-echo   2. Check for duplicate assets
-echo   3. Run schema fixer in dry-run mode
-echo   4. Validate connection schema
-echo   5. Analyze broken link patterns
-echo   6. Validate cross-links
-echo   7. Validate mythology-specific links
-echo   8. Find non-compliant assets
-echo   9. Generate validation summary
-echo  10. Display final summary with compliance percentage
+echo This script performs quick validation:
+echo   1. Validate connection schema
+echo   2. Analyze broken link patterns
+echo   3. Validate cross-links
+echo   4. Validate mythology-specific links
+echo   5. Find non-compliant assets
+echo   6. Generate validation summary
 echo.
-echo Reports are saved to: %REPORTS_DIR%
-echo Backups are saved to: %BACKUP_DIR%
+echo NOTE: This script uses existing downloaded assets.
+echo Run run-all-validations.bat for full validation with download/backup.
 echo.
 echo Related scripts:
-echo   fix-and-validate.bat   - Fix issues then validate
-echo   validate-only.bat      - Quick validation (steps 4-9)
-echo   push-validated.bat     - Validate and push to Firebase
+echo   run-all-validations.bat  - Full validation with download
+echo   fix-and-validate.bat     - Fix issues then validate
+echo   push-validated.bat       - Validate and push to Firebase
 echo.
 exit /b 0
 
 :start_validation
 echo ============================================================================
-echo Eyes of Azrael - Master Validation Suite
+echo Eyes of Azrael - Quick Validation Script
 echo ============================================================================
 echo.
 echo Started: %date% %time%
 echo.
 
-REM Create directories if not exists
+REM Check if assets directory exists
+if not exist "%ASSETS_DIR%" (
+    echo [ERROR] Assets directory not found: %ASSETS_DIR%
+    echo Please run run-all-validations.bat first to download assets.
+    pause
+    exit /b 1
+)
+
+REM Create reports directory if not exists
 if not exist "%REPORTS_DIR%" (
     echo [Setup] Creating reports directory...
     mkdir "%REPORTS_DIR%"
-)
-if not exist "%BACKUP_DIR%" (
-    echo [Setup] Creating backups directory...
-    mkdir "%BACKUP_DIR%"
 )
 
 REM Check if Node.js is installed
@@ -105,67 +100,14 @@ if errorlevel 1 (
 
 echo [Info] Node.js version:
 node --version
+echo [Info] Using assets from: %ASSETS_DIR%
 echo.
 
 REM ============================================================================
-REM Step 1: Download and Backup Assets
+REM Step 1: Validate Connection Schema
 REM ============================================================================
 echo ============================================================================
-echo [Step 1/%TOTAL_STEPS%] Downloading assets and creating backup...
-echo [%time%]
-echo ============================================================================
-node "%SCRIPT_DIR%download-and-backup.js"
-if %ERRORLEVEL% NEQ 0 (
-    echo [WARNING] Asset download/backup had issues
-    set /a FAILED_STEPS+=1
-    set FAILED_NAMES=!FAILED_NAMES! Download
-) else (
-    echo [PASSED] Asset download and backup complete
-    set /a PASSED_STEPS+=1
-)
-echo.
-
-REM ============================================================================
-REM Step 2: Check for Duplicate Assets
-REM ============================================================================
-echo ============================================================================
-echo [Step 2/%TOTAL_STEPS%] Checking for duplicate assets...
-echo [%time%]
-echo ============================================================================
-node "%SCRIPT_DIR%check-duplicate-assets.js" "%ASSETS_DIR%"
-if %ERRORLEVEL% NEQ 0 (
-    echo [WARNING] Duplicate assets found - see report
-    set /a FAILED_STEPS+=1
-    set FAILED_NAMES=!FAILED_NAMES! Duplicates
-) else (
-    echo [PASSED] No duplicate assets found
-    set /a PASSED_STEPS+=1
-)
-echo.
-
-REM ============================================================================
-REM Step 3: Run Schema Fixer (Dry-Run Mode)
-REM ============================================================================
-echo ============================================================================
-echo [Step 3/%TOTAL_STEPS%] Running schema fixer (dry-run mode)...
-echo [%time%]
-echo ============================================================================
-node "%SCRIPT_DIR%fix-schema-issues.js" --dry-run
-if %ERRORLEVEL% NEQ 0 (
-    echo [WARNING] Schema issues detected - run fix-and-validate.bat to apply fixes
-    set /a FAILED_STEPS+=1
-    set FAILED_NAMES=!FAILED_NAMES! Schema
-) else (
-    echo [PASSED] Schema validation passed
-    set /a PASSED_STEPS+=1
-)
-echo.
-
-REM ============================================================================
-REM Step 4: Validate Connection Schema
-REM ============================================================================
-echo ============================================================================
-echo [Step 4/%TOTAL_STEPS%] Validating connection schema...
+echo [Step 1/%TOTAL_STEPS%] Validating connection schema...
 echo [%time%]
 echo ============================================================================
 node "%SCRIPT_DIR%validate-connections.js" "%ASSETS_DIR%"
@@ -180,10 +122,10 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 
 REM ============================================================================
-REM Step 5: Analyze Broken Links
+REM Step 2: Analyze Broken Links
 REM ============================================================================
 echo ============================================================================
-echo [Step 5/%TOTAL_STEPS%] Analyzing broken link patterns...
+echo [Step 2/%TOTAL_STEPS%] Analyzing broken link patterns...
 echo [%time%]
 echo ============================================================================
 node "%SCRIPT_DIR%analyze-broken-links.js"
@@ -198,10 +140,10 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 
 REM ============================================================================
-REM Step 6: Validate Cross-Links
+REM Step 3: Validate Cross-Links
 REM ============================================================================
 echo ============================================================================
-echo [Step 6/%TOTAL_STEPS%] Validating cross-links...
+echo [Step 3/%TOTAL_STEPS%] Validating cross-links...
 echo [%time%]
 echo ============================================================================
 node "%SCRIPT_DIR%validate-cross-links.js"
@@ -216,10 +158,10 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 
 REM ============================================================================
-REM Step 7: Validate Mythology Links
+REM Step 4: Validate Mythology Links
 REM ============================================================================
 echo ============================================================================
-echo [Step 7/%TOTAL_STEPS%] Validating mythology-specific links...
+echo [Step 4/%TOTAL_STEPS%] Validating mythology-specific links...
 echo [%time%]
 echo ============================================================================
 node "%SCRIPT_DIR%validate-mythology-links.js" "%ASSETS_DIR%"
@@ -234,10 +176,10 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 
 REM ============================================================================
-REM Step 8: Find Non-Compliant Assets
+REM Step 5: Find Non-Compliant Assets
 REM ============================================================================
 echo ============================================================================
-echo [Step 8/%TOTAL_STEPS%] Finding non-compliant assets...
+echo [Step 5/%TOTAL_STEPS%] Finding non-compliant assets...
 echo [%time%]
 echo ============================================================================
 if exist "%SCRIPT_DIR%find-non-compliant-assets.js" (
@@ -257,10 +199,10 @@ if exist "%SCRIPT_DIR%find-non-compliant-assets.js" (
 echo.
 
 REM ============================================================================
-REM Step 9: Generate Validation Summary
+REM Step 6: Generate Validation Summary
 REM ============================================================================
 echo ============================================================================
-echo [Step 9/%TOTAL_STEPS%] Generating validation summary...
+echo [Step 6/%TOTAL_STEPS%] Generating validation summary...
 echo [%time%]
 echo ============================================================================
 node "%SCRIPT_DIR%generate-validation-summary.js"
@@ -275,19 +217,12 @@ if %ERRORLEVEL% NEQ 0 (
 echo.
 
 REM ============================================================================
-REM Step 10: Display Final Summary
+REM Summary
 REM ============================================================================
-echo ============================================================================
-echo [Step 10/%TOTAL_STEPS%] Final Summary
-echo [%time%]
-echo ============================================================================
-echo.
-
-REM Calculate compliance percentage
 set /a COMPLIANCE_PCT=(PASSED_STEPS * 100) / TOTAL_STEPS
 
 echo ============================================================================
-echo                     VALIDATION COMPLETE
+echo                  QUICK VALIDATION COMPLETE
 echo ============================================================================
 echo.
 echo   Completed: %date% %time%
@@ -305,17 +240,7 @@ if %FAILED_STEPS% GTR 0 (
     set OVERALL_STATUS=1
 )
 
-echo   Reports Location:
-echo   -----------------
-echo   %REPORTS_DIR%
-echo.
-echo   Key Reports:
-echo   ------------
-echo   - connection-validation-summary.md
-echo   - duplicate-assets-report.json
-echo   - broken-link-patterns.json
-echo   - mythology-links-report.json
-echo   - validation-summary.json
+echo   Reports Location: %REPORTS_DIR%
 echo.
 
 if %COMPLIANCE_PCT% GEQ 90 (
@@ -325,14 +250,11 @@ if %COMPLIANCE_PCT% GEQ 90 (
 ) else if %COMPLIANCE_PCT% GEQ 50 (
     echo   Status: FAIR - Several issues need attention
 ) else (
-    echo   Status: NEEDS WORK - Multiple issues require fixes
+    echo   Status: NEEDS WORK - Run fix-and-validate.bat to apply fixes
 )
 
 echo.
 echo ============================================================================
-echo Run fix-and-validate.bat to apply fixes and re-validate
-echo ============================================================================
-echo.
 
 pause
 exit /b %OVERALL_STATUS%
