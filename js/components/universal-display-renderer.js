@@ -243,9 +243,15 @@ class UniversalDisplayRenderer {
             return this._renderEmptyFieldState('No items available');
         }
 
+        // Sanitize items - filter nulls and convert objects to readable strings
+        const sanitizedItems = this._sanitizeArrayItems(items);
+        if (sanitizedItems.length === 0) {
+            return this._renderEmptyFieldState('No items available');
+        }
+
         const uniqueId = `pills-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-        const visibleItems = items.slice(0, maxVisible);
-        const hiddenItems = items.slice(maxVisible);
+        const visibleItems = sanitizedItems.slice(0, maxVisible);
+        const hiddenItems = sanitizedItems.slice(maxVisible);
         const hasOverflow = hiddenItems.length > 0;
 
         let html = `<div class="pills-container ${pillClass}" data-pills-id="${uniqueId}">`;
@@ -253,7 +259,7 @@ class UniversalDisplayRenderer {
         // Render visible pills
         html += `<div class="pills-visible">`;
         visibleItems.forEach(item => {
-            html += `<span class="pill">${this.escapeHtml(String(item))}</span>`;
+            html += `<span class="pill">${this.escapeHtml(item)}</span>`;
         });
 
         // Add "+N more" button if overflow
@@ -274,7 +280,7 @@ class UniversalDisplayRenderer {
         if (hasOverflow) {
             html += `<div class="pills-hidden" data-pills-hidden="${uniqueId}" aria-hidden="true">`;
             hiddenItems.forEach(item => {
-                html += `<span class="pill">${this.escapeHtml(String(item))}</span>`;
+                html += `<span class="pill">${this.escapeHtml(item)}</span>`;
             });
             html += `
                 <button class="pill pill-less"
@@ -354,11 +360,29 @@ class UniversalDisplayRenderer {
             showType = true
         } = options;
 
+        // Check if reference is unverified/broken
+        const isUnverified = this._isUnverifiedReference(entityRef);
+
         // Handle string ID reference
         if (typeof entityRef === 'string') {
+            // Skip completely empty references
+            if (!entityRef || entityRef.trim() === '') return '';
+
             const parts = entityRef.split('_');
             const name = parts.length > 1 ? parts.slice(1).join(' ') : entityRef;
             const formattedName = this.formatLabel(name);
+
+            // Render unverified reference differently
+            if (isUnverified) {
+                return `
+                    <span class="related-entity-link format-${format} unverified-reference"
+                          title="This reference could not be verified">
+                        ${showIcon ? '<span class="link-icon">⚠️</span>' : ''}
+                        <span class="link-name">${this.escapeHtml(formattedName)}</span>
+                        <span class="unverified-badge">unverified</span>
+                    </span>
+                `;
+            }
 
             return `
                 <a href="#/${this.escapeAttr(entityRef)}"
@@ -380,12 +404,40 @@ class UniversalDisplayRenderer {
                 icon = ''
             } = entityRef;
 
+            // Skip empty references
+            if (!id && !name) return '';
+
             const href = mythology && entityType && id
                 ? `#/mythology/${this.escapeAttr(mythology)}/${this.escapeAttr(entityType)}/${this.escapeAttr(id)}`
                 : `#/${this.escapeAttr(id)}`;
 
             const typeIcon = showIcon ? this.getEntityTypeIcon(entityType) : '';
             const displayName = name || this.formatLabel(id);
+
+            // Handle unverified object references
+            if (isUnverified) {
+                if (format === 'mini-card') {
+                    return `
+                        <span class="related-entity-card unverified-reference"
+                              title="This reference could not be verified"
+                              data-entity-id="${this.escapeAttr(id)}"
+                              data-entity-type="${this.escapeAttr(entityType)}">
+                            <span class="mini-card-icon">⚠️</span>
+                            <span class="mini-card-content">
+                                <span class="mini-card-name">${this.escapeHtml(displayName)}</span>
+                                <span class="unverified-badge">unverified</span>
+                            </span>
+                        </span>
+                    `;
+                }
+                return `
+                    <span class="related-entity-link unverified-reference"
+                          title="This reference could not be verified">
+                        ⚠️ ${this.escapeHtml(displayName)}
+                        <span class="unverified-badge">unverified</span>
+                    </span>
+                `;
+            }
 
             if (format === 'mini-card') {
                 return `
@@ -1228,6 +1280,60 @@ class UniversalDisplayRenderer {
             return '';
         }
         return url;
+    }
+
+    /**
+     * Sanitize array items for safe rendering
+     * Filters nulls, handles objects, and ensures strings
+     * @param {Array} items - Array of items to sanitize
+     * @returns {string[]} Array of sanitized string items
+     */
+    _sanitizeArrayItems(items) {
+        if (!Array.isArray(items)) return [];
+
+        return items
+            .filter(item => item != null) // Remove null/undefined
+            .map(item => {
+                // Already a string
+                if (typeof item === 'string') {
+                    return item.trim();
+                }
+                // Object - try to extract meaningful value
+                if (typeof item === 'object') {
+                    // Entity reference with name
+                    if (item.name) return String(item.name);
+                    // Entity reference with id
+                    if (item.id) return this.formatLabel(String(item.id));
+                    // Has a label or title
+                    if (item.label) return String(item.label);
+                    if (item.title) return String(item.title);
+                    // Fallback - don't show [object Object]
+                    return null;
+                }
+                // Primitive (number, boolean)
+                return String(item);
+            })
+            .filter(item => item != null && item.length > 0); // Remove empty strings and nulls
+    }
+
+    /**
+     * Check if an entity reference is unverified/broken
+     * @param {Object|string} entityRef - Entity reference to check
+     * @returns {boolean} True if unverified
+     */
+    _isUnverifiedReference(entityRef) {
+        if (!entityRef) return true;
+
+        if (typeof entityRef === 'string') {
+            return entityRef.includes('_unverified') || entityRef === '';
+        }
+
+        if (typeof entityRef === 'object') {
+            const id = entityRef.id || '';
+            return id.includes('_unverified') || id === '' || entityRef._unverified === true;
+        }
+
+        return false;
     }
 
     /**
