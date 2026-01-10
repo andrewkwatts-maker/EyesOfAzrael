@@ -1,6 +1,6 @@
 # Validation Summary Report
 
-**Generated:** 2026-01-10T06:06:35.711Z
+**Generated:** 2026-01-10T07:08:07.871Z
 
 **Overall Health:** FAIR
 **Overall Score:** 0%
@@ -11,12 +11,12 @@
 
 | Metric | Score |
 |--------|-------|
-| Connection Compliance | 23.91%% |
+| Connection Compliance | 24.03%% |
 | Mythology Link Health | 0% |
 
 ## Warnings
 
-- **broken_links**: 1418 broken entity links (marked as _unverified)
+- **broken_links**: 1337 broken entity links (marked as _unverified)
 
 ## Report Details
 
@@ -34,8 +34,8 @@
 | Metric | Value |
 |--------|-------|
 | Total Assets | 803 |
-| Compliance Rate | 23.91%% |
-| Broken Links | 1418 |
+| Compliance Rate | 24.03%% |
+| Broken Links | 1337 |
 | Legacy Fields | 0 |
 
 ### Mythology Links
