@@ -50,10 +50,12 @@ class VoteService {
     /**
      * @param {firebase.firestore.Firestore} db - Firestore instance
      * @param {firebase.auth.Auth} auth - Firebase Auth instance
+     * @param {VotingControversyService} controversyService - Optional enhanced voting service
      */
-    constructor(db, auth) {
+    constructor(db, auth, controversyService = null) {
         this.db = db;
         this.auth = auth;
+        this.controversyService = controversyService || window.votingControversyService;
 
         // Rate limiting: max 100 votes per minute
         this.votesInLastMinute = 0;
@@ -66,6 +68,28 @@ class VoteService {
         // Debounce real-time updates (max 1 update per 2 seconds per item)
         this.updateDebounceTimers = new Map();
         this.debounceDelay = 2000;
+
+        // Configuration for controversy integration
+        this.useControversyService = true; // Enable enhanced voting when available
+    }
+
+    /**
+     * Get the controversy service (lazy initialization)
+     * @returns {VotingControversyService|null}
+     */
+    getControversyService() {
+        if (!this.controversyService && window.votingControversyService) {
+            this.controversyService = window.votingControversyService;
+        }
+        return this.controversyService;
+    }
+
+    /**
+     * Enable or disable controversy service integration
+     * @param {boolean} enabled - Whether to use enhanced voting
+     */
+    setControversyServiceEnabled(enabled) {
+        this.useControversyService = enabled;
     }
 
     /**
@@ -558,6 +582,209 @@ class VoteService {
 
         this.updateDebounceTimers.forEach(timer => clearTimeout(timer));
         this.updateDebounceTimers.clear();
+
+        // Also cleanup controversy service
+        const controversyService = this.getControversyService();
+        if (controversyService) {
+            controversyService.cleanup();
+        }
+    }
+
+    // ==================== CONTROVERSY SERVICE INTEGRATION ====================
+
+    /**
+     * Get enhanced vote counts with controversy data
+     * Uses VotingControversyService if available, falls back to basic counts
+     * @param {string} itemId - Item ID
+     * @param {string} itemType - 'assets' or 'notes'
+     * @returns {Promise<Object>} Vote counts with controversy
+     */
+    async getEnhancedVoteCounts(itemId, itemType) {
+        const controversyService = this.getControversyService();
+
+        if (this.useControversyService && controversyService) {
+            const result = await controversyService.getVoteCounts(itemId);
+            if (result.success) {
+                return {
+                    success: true,
+                    upvotes: result.upvotes,
+                    downvotes: result.downvotes,
+                    total: result.score,
+                    weightedScore: result.weightedScore,
+                    controversyScore: result.controversyScore,
+                    isControversial: result.isControversial,
+                    totalEngagement: result.totalEngagement,
+                    trendingScore: result.trendingScore
+                };
+            }
+        }
+
+        // Fallback to basic vote counts
+        return this.getVoteCounts(itemId, itemType);
+    }
+
+    /**
+     * Check if an item is controversial
+     * @param {string} itemId - Item ID
+     * @param {string} itemType - 'assets' or 'notes'
+     * @returns {Promise<boolean>}
+     */
+    async isControversial(itemId, itemType) {
+        const controversyService = this.getControversyService();
+
+        if (this.useControversyService && controversyService) {
+            return await controversyService.isControversial(itemId);
+        }
+
+        // Fallback: calculate from basic counts
+        const counts = await this.getVoteCounts(itemId, itemType);
+        if (!counts.success) return false;
+
+        const { upvotes, downvotes } = counts;
+        const total = upvotes + downvotes;
+        if (total < 5) return false;
+
+        const ratio = Math.min(upvotes, downvotes) / Math.max(upvotes, downvotes);
+        return ratio >= 0.7;
+    }
+
+    /**
+     * Get controversial items
+     * @param {string} itemType - 'assets' or 'notes'
+     * @param {number} limit - Max results
+     * @returns {Promise<Array>}
+     */
+    async getControversialItems(itemType, limit = 10) {
+        const controversyService = this.getControversyService();
+
+        if (this.useControversyService && controversyService) {
+            return await controversyService.getMostControversial(itemType, limit);
+        }
+
+        // Fallback to getMostContested
+        return this.getMostContested(itemType, limit);
+    }
+
+    /**
+     * Get trending items
+     * @param {string} itemType - 'assets' or 'notes'
+     * @param {string} timeWindow - 'hour', 'day', 'week', 'month'
+     * @param {number} limit - Max results
+     * @returns {Promise<Array>}
+     */
+    async getTrendingItems(itemType, timeWindow = 'day', limit = 20) {
+        const controversyService = this.getControversyService();
+
+        if (this.useControversyService && controversyService) {
+            return await controversyService.getTrendingAssets(timeWindow, itemType, limit);
+        }
+
+        // Fallback to most upvoted
+        const result = await this.getMostUpvoted(itemType, limit);
+        return result.success ? result.items : [];
+    }
+
+    /**
+     * Get vote history for an item
+     * @param {string} itemId - Item ID
+     * @param {string} itemType - 'assets' or 'notes'
+     * @returns {Promise<Object>}
+     */
+    async getVoteHistory(itemId, itemType) {
+        const controversyService = this.getControversyService();
+
+        if (this.useControversyService && controversyService) {
+            return await controversyService.getVoteHistory(itemId);
+        }
+
+        // Fallback: return basic info
+        const counts = await this.getVoteCounts(itemId, itemType);
+        return {
+            success: counts.success,
+            history: [],
+            detailedHistory: [],
+            summary: {
+                upvotes: counts.upvotes || 0,
+                downvotes: counts.downvotes || 0,
+                score: counts.total || 0
+            }
+        };
+    }
+
+    /**
+     * Get controversy badge for an item
+     * @param {string} itemId - Item ID
+     * @returns {Promise<Object|null>}
+     */
+    async getControversyBadge(itemId) {
+        const controversyService = this.getControversyService();
+
+        if (this.useControversyService && controversyService) {
+            return await controversyService.getControversyBadge(itemId);
+        }
+
+        return null;
+    }
+
+    /**
+     * Render controversy badge HTML
+     * @param {Object} badge - Badge info
+     * @returns {string} HTML string
+     */
+    renderControversyBadge(badge) {
+        const controversyService = this.getControversyService();
+
+        if (controversyService && badge) {
+            return controversyService.renderBadgeHTML(badge);
+        }
+
+        return '';
+    }
+
+    /**
+     * Subscribe to real-time controversy updates
+     * @param {string} itemId - Item ID
+     * @param {Function} callback - Callback function
+     * @returns {Function} Unsubscribe function
+     */
+    subscribeToControversy(itemId, callback) {
+        const controversyService = this.getControversyService();
+
+        if (this.useControversyService && controversyService) {
+            return controversyService.subscribeToVotes(itemId, callback);
+        }
+
+        // Fallback to basic subscription
+        return this.subscribeToVotes(itemId, 'assets', (data) => {
+            callback({
+                ...data,
+                controversyScore: 0,
+                isControversial: false
+            });
+        });
+    }
+
+    /**
+     * Calculate controversy score (0-1)
+     * @param {number} upvotes - Upvote count
+     * @param {number} downvotes - Downvote count
+     * @returns {number} Controversy score
+     */
+    calculateControversyScore(upvotes, downvotes) {
+        const controversyService = this.getControversyService();
+
+        if (controversyService) {
+            return controversyService.calculateControversy(upvotes, downvotes);
+        }
+
+        // Fallback calculation
+        const total = upvotes + downvotes;
+        if (total === 0) return 0;
+        if (upvotes === 0 || downvotes === 0) return 0;
+
+        const balance = Math.min(upvotes, downvotes) / Math.max(upvotes, downvotes);
+        const engagementFactor = Math.min(1, Math.log10(total + 1) / 3);
+        return Math.min(1, balance * engagementFactor);
     }
 
     // ==================== PRIVATE METHODS ====================
@@ -681,4 +908,41 @@ if (typeof window !== 'undefined') {
  *      const { itemId, newVotes, userVote } = event.detail;
  *      console.log('Vote updated:', itemId, newVotes);
  *    });
+ *
+ * ==================== CONTROVERSY INTEGRATION ====================
+ *
+ * 9. Get enhanced vote counts with controversy:
+ *    const counts = await voteService.getEnhancedVoteCounts('assetId123', 'assets');
+ *    console.log('Controversy score:', counts.controversyScore);
+ *    console.log('Is controversial:', counts.isControversial);
+ *
+ * 10. Check if item is controversial:
+ *     if (await voteService.isControversial('assetId123', 'assets')) {
+ *       console.log('This item is controversial!');
+ *     }
+ *
+ * 11. Get controversial items:
+ *     const controversial = await voteService.getControversialItems('assets', 10);
+ *
+ * 12. Get trending items:
+ *     const trending = await voteService.getTrendingItems('assets', 'day', 20);
+ *
+ * 13. Get vote history:
+ *     const history = await voteService.getVoteHistory('assetId123', 'assets');
+ *     console.log('Vote trends:', history.history);
+ *
+ * 14. Get controversy badge:
+ *     const badge = await voteService.getControversyBadge('assetId123');
+ *     if (badge) {
+ *       document.querySelector('.badge').innerHTML = voteService.renderControversyBadge(badge);
+ *     }
+ *
+ * 15. Subscribe to controversy updates:
+ *     const unsubscribe = voteService.subscribeToControversy('assetId123', (data) => {
+ *       console.log('Controversy:', data.controversyScore);
+ *     });
+ *
+ * 16. Calculate controversy score:
+ *     const score = voteService.calculateControversyScore(100, 95);
+ *     console.log('Controversy:', score); // ~0.9 (very controversial)
  */

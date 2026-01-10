@@ -13,6 +13,24 @@ rules_version = '2';
  * - DDoS protection via Firebase App Check
  * - Spam prevention
  *
+ * REDDIT-STYLE FEATURES (v2.0):
+ * - Asset Ownership: /assetOwnership/{assetId} with claims and contributions
+ * - Deleted Assets: /deletedAssets/{assetId} for soft-delete with notices
+ * - Vote Aggregates: /voteAggregates/{entityId} (Cloud Functions managed)
+ * - Enhanced Votes: /votes/{entityId}/userVotes/{userId} with rate limiting
+ * - User Rate Limits: /userRateLimits/{userId}/actions/{action}
+ * - Contributions: /contributions/{contribId} (global tracking)
+ * - User Stats: /userStats/{userId} (public profiles)
+ * - Leaderboards: /leaderboards/{boardId}/entries/{entryId}
+ * - Suggested Edits: /suggestedEdits/{editId} (wiki-style)
+ * - Edit History: /editHistory/{historyId}
+ *
+ * HELPER FUNCTIONS:
+ * - isOwnerOrAdmin(assetId): Check asset ownership or admin status
+ * - hasContributed(assetId, userId): Check if user contributed to asset
+ * - rateLimitCheck(userId, action, limit): Validate rate limits
+ * - hasActiveClaim(assetId, userId): Check for pending ownership claims
+ *
  * DEPLOYMENT:
  *   firebase deploy --only firestore:rules
  */
@@ -59,6 +77,39 @@ service cloud.firestore {
     // Query size validation
     function isQuerySizeValid(maxLimit) {
       return !request.query.limit.hasOnly([]) && request.query.limit <= maxLimit;
+    }
+
+    // ===== REDDIT-STYLE FEATURE HELPER FUNCTIONS =====
+
+    // Check if user is the asset owner or an admin
+    function isOwnerOrAdmin(assetId) {
+      let ownership = get(/databases/$(database)/documents/assetOwnership/$(assetId));
+      return isAdminEmail() || (isAuthenticated() && ownership.data.ownerId == request.auth.uid);
+    }
+
+    // Check if user has contributed to an asset
+    function hasContributed(assetId, userId) {
+      return exists(/databases/$(database)/documents/assetOwnership/$(assetId)/contributions/$(userId));
+    }
+
+    // Rate limit check helper - validates against user's daily action count
+    // Returns true if user is within rate limit (can perform action)
+    // Note: Actual enforcement requires Cloud Functions to increment counters
+    function rateLimitCheck(userId, action, limit) {
+      let rateLimitDoc = get(/databases/$(database)/documents/userRateLimits/$(userId)/actions/$(action));
+      let today = request.time.toMillis() / 86400000; // Days since epoch
+      // If no rate limit doc exists, or it's from a different day, user is within limit
+      // If doc exists and is from today, check if count is under limit
+      return !exists(/databases/$(database)/documents/userRateLimits/$(userId)/actions/$(action))
+             || rateLimitDoc.data.day != today
+             || rateLimitDoc.data.count < limit;
+    }
+
+    // Check if user has an active claim on an asset
+    function hasActiveClaim(assetId, userId) {
+      let claims = get(/databases/$(database)/documents/assetOwnership/$(assetId)/claims/$(userId));
+      return exists(/databases/$(database)/documents/assetOwnership/$(assetId)/claims/$(userId))
+             && claims.data.status == 'pending';
     }
 
     // ===== USERS COLLECTION =====
@@ -974,6 +1025,285 @@ service cloud.firestore {
       allow delete: if isAuthenticated()
                     && resource.data.userId == request.auth.uid
                     && resource.data.isStandard != true;
+    }
+
+    // ===== ASSET OWNERSHIP COLLECTION =====
+    // Path: /assetOwnership/{assetId}
+    // Reddit-style asset ownership and claiming system
+
+    match /assetOwnership/{assetId} {
+      // Anyone can read ownership info (for displaying owner badges)
+      allow read: if true;
+
+      // Only Cloud Functions can create/update/delete ownership records
+      // This prevents manipulation of ownership data
+      allow create, update, delete: if false;
+
+      // ===== CLAIMS SUBCOLLECTION =====
+      // Path: /assetOwnership/{assetId}/claims/{claimId}
+      // Users can claim ownership of assets
+
+      match /claims/{claimId} {
+        function isValidClaim() {
+          return request.resource.data.keys().hasAll(['userId', 'assetId', 'status', 'createdAt', 'reason'])
+                 && request.resource.data.userId == request.auth.uid
+                 && request.resource.data.assetId == assetId
+                 && request.resource.data.status == 'pending'
+                 && request.resource.data.reason is string
+                 && request.resource.data.reason.size() >= 20
+                 && request.resource.data.reason.size() <= 2000;
+        }
+
+        // Claim owner, asset owner, or admin can read claims
+        allow read: if isAuthenticated()
+                    && (resource.data.userId == request.auth.uid
+                        || isOwnerOrAdmin(assetId)
+                        || isAdminEmail());
+
+        // Authenticated users can create claims (one active claim per user per asset)
+        allow create: if isAuthenticated()
+                      && isValidClaim()
+                      && !hasActiveClaim(assetId, request.auth.uid);
+
+        // Only admin can approve/deny claims (update status)
+        allow update: if isAdminEmail()
+                      && request.resource.data.userId == resource.data.userId
+                      && request.resource.data.assetId == resource.data.assetId;
+
+        // Claim owner can withdraw their pending claim
+        allow delete: if isAuthenticated()
+                      && resource.data.userId == request.auth.uid
+                      && resource.data.status == 'pending';
+      }
+
+      // ===== CONTRIBUTIONS SUBCOLLECTION =====
+      // Path: /assetOwnership/{assetId}/contributions/{contribId}
+      // Track who has contributed to each asset (for leaderboards)
+
+      match /contributions/{contribId} {
+        // Anyone can read contributions (for leaderboards and attribution)
+        allow read: if true;
+
+        // Only Cloud Functions can create/update/delete contribution records
+        allow create, update, delete: if false;
+      }
+    }
+
+    // ===== DELETED ASSETS COLLECTION =====
+    // Path: /deletedAssets/{assetId}
+    // Soft-deleted assets with deletion notices
+
+    match /deletedAssets/{assetId} {
+      function isValidDeletedAsset() {
+        return request.resource.data.keys().hasAll(['originalAssetId', 'assetType', 'deletedBy', 'deletedAt', 'reason'])
+               && request.resource.data.originalAssetId == assetId
+               && request.resource.data.reason is string;
+      }
+
+      // Anyone can read deleted assets (to show deletion notice)
+      allow read: if true;
+
+      // Asset owner or admin can create deletion record
+      allow create: if isAuthenticated()
+                    && isValidDeletedAsset()
+                    && (isOwnerOrAdmin(assetId) || isAdminEmail());
+
+      // Asset owner or admin can update deletion info
+      allow update: if isAuthenticated()
+                    && (isOwnerOrAdmin(assetId) || isAdminEmail())
+                    && request.resource.data.originalAssetId == resource.data.originalAssetId;
+
+      // Only admin can restore (delete the deletion record)
+      allow delete: if isAdminEmail();
+    }
+
+    // ===== VOTE AGGREGATES COLLECTION =====
+    // Path: /voteAggregates/{entityId}
+    // Aggregated vote counts (managed by Cloud Functions)
+
+    match /voteAggregates/{entityId} {
+      // Anyone can read vote aggregates
+      allow read: if true;
+
+      // Only Cloud Functions can write vote aggregates
+      allow create, update, delete: if false;
+    }
+
+    // ===== ENHANCED VOTES COLLECTION =====
+    // Path: /votes/{entityId}/userVotes/{odId}
+    // Per-user votes with rate limiting
+
+    match /votes/{entityId} {
+      // Anyone can read aggregated vote data
+      allow read: if true;
+
+      // Allow creating vote document if it doesn't exist
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+
+      match /userVotes/{odId} {
+        function isValidVote() {
+          return request.resource.data.keys().hasAll(['userId', 'entityId', 'value', 'createdAt'])
+                 && request.resource.data.userId == request.auth.uid
+                 && request.resource.data.entityId == entityId
+                 && request.resource.data.value in [1, -1];
+        }
+
+        // Anyone can read individual votes
+        allow read: if true;
+
+        // Rate limited voting: max 100 votes per day per user
+        // User can only create their own votes
+        allow create: if isAuthenticated()
+                      && isValidVote()
+                      && request.auth.uid == odId
+                      && rateLimitCheck(request.auth.uid, 'vote', 100);
+
+        // User can update their own vote
+        allow update: if isAuthenticated()
+                      && resource.data.userId == request.auth.uid
+                      && request.auth.uid == odId
+                      && isValidVote();
+
+        // User can delete their own vote
+        allow delete: if isAuthenticated()
+                      && resource.data.userId == request.auth.uid;
+      }
+    }
+
+    // ===== USER RATE LIMITS COLLECTION =====
+    // Path: /userRateLimits/{userId}/actions/{action}
+    // Track rate limits per user per action type
+
+    match /userRateLimits/{userId} {
+      // Users can read their own rate limits
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+
+      // Only Cloud Functions can write rate limits
+      allow create, update, delete: if false;
+
+      match /actions/{action} {
+        // Users can read their own action counts
+        allow read: if isAuthenticated() && request.auth.uid == userId;
+
+        // Only Cloud Functions can write action counts
+        allow create, update, delete: if false;
+      }
+    }
+
+    // ===== CONTRIBUTIONS COLLECTION =====
+    // Path: /contributions/{contribId}
+    // Global contribution tracking
+
+    match /contributions/{contribId} {
+      // Contribution owner or admin can read
+      allow read: if isAuthenticated()
+                  && (resource.data.userId == request.auth.uid || isAdminEmail());
+
+      // Only Cloud Functions can write contributions
+      allow create, update, delete: if false;
+    }
+
+    // ===== USER STATS COLLECTION =====
+    // Path: /userStats/{userId}
+    // Aggregated user statistics (public profiles)
+
+    match /userStats/{userId} {
+      // Anyone can read user stats (for public profiles)
+      allow read: if true;
+
+      // Only Cloud Functions can write user stats
+      allow create, update, delete: if false;
+    }
+
+    // ===== LEADERBOARDS COLLECTION =====
+    // Path: /leaderboards/{boardId}
+    // Various leaderboards (contributions, votes, reputation, etc.)
+
+    match /leaderboards/{boardId} {
+      // Anyone can read leaderboards
+      allow read: if true;
+
+      // Only Cloud Functions can write leaderboards
+      allow create, update, delete: if false;
+
+      // Leaderboard entries subcollection
+      match /entries/{entryId} {
+        // Anyone can read leaderboard entries
+        allow read: if true;
+
+        // Only Cloud Functions can write entries
+        allow create, update, delete: if false;
+      }
+    }
+
+    // ===== SUGGESTED EDITS COLLECTION =====
+    // Path: /suggestedEdits/{editId}
+    // Wiki-style edit suggestions from users
+
+    match /suggestedEdits/{editId} {
+      function isValidSuggestedEdit() {
+        return request.resource.data.keys().hasAll(['entityId', 'entityType', 'entityCollection', 'authorId', 'status', 'diff', 'summary', 'createdAt'])
+               && request.resource.data.authorId == request.auth.uid
+               && request.resource.data.status in ['pending', 'approved', 'rejected']
+               && request.resource.data.summary is string
+               && request.resource.data.summary.size() >= 10
+               && request.resource.data.summary.size() <= 500
+               && request.resource.data.diff is map;
+      }
+
+      // Anyone can read suggested edits (for transparency)
+      allow read: if true;
+
+      // Authenticated users can create suggested edits
+      allow create: if isAuthenticated()
+                    && isValidSuggestedEdit()
+                    && request.resource.data.status == 'pending';
+
+      // Edit author can update before approval, admin can update any
+      allow update: if isAuthenticated()
+                    && ((resource.data.authorId == request.auth.uid
+                         && resource.data.status == 'pending'
+                         && request.resource.data.authorId == resource.data.authorId
+                         && request.resource.data.status == 'pending')
+                        || isAdminEmail());
+
+      // Edit author or admin can delete
+      allow delete: if isAuthenticated()
+                    && (resource.data.authorId == request.auth.uid || isAdminEmail());
+
+      // Comments on suggested edits
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if isAuthenticated()
+                      && request.resource.data.authorId == request.auth.uid
+                      && request.resource.data.content is string
+                      && request.resource.data.content.size() >= 3
+                      && request.resource.data.content.size() <= 2000;
+        allow update: if isOwner(resource.data.authorId)
+                      && request.resource.data.authorId == resource.data.authorId;
+        allow delete: if isOwner(resource.data.authorId) || isAdminEmail();
+      }
+
+      // Votes on suggested edits
+      match /votes/{voteUserId} {
+        allow read: if true;
+        allow write: if isAuthenticated()
+                     && request.auth.uid == voteUserId
+                     && request.resource.data.value in [1, -1];
+      }
+    }
+
+    // ===== EDIT HISTORY COLLECTION =====
+    // Path: /editHistory/{historyId}
+    // Complete history of all edits made to entities
+
+    match /editHistory/{historyId} {
+      // Anyone can read edit history (for transparency)
+      allow read: if true;
+
+      // Only Cloud Functions can write edit history
+      allow create, update, delete: if false;
     }
 
     // ===== DEFAULT FALLBACK FOR UNDEFINED COLLECTIONS =====
