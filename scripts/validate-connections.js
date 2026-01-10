@@ -13,11 +13,45 @@
  */
 
 const fs = require('fs').promises;
+const fsSync = require('fs');
 const path = require('path');
 
 class ConnectionValidator {
+  findAssetsPath() {
+    // Prefer firebase-assets-downloaded in project root
+    const projectDir = path.join(__dirname, '..');
+    const mainAssetsPath = path.join(projectDir, 'firebase-assets-downloaded');
+
+    if (fsSync.existsSync(path.join(mainAssetsPath, 'deities'))) {
+      return mainAssetsPath;
+    }
+
+    // Fallback to backups directory
+    const backupsDir = path.join(projectDir, 'backups');
+
+    try {
+      const dirs = fsSync.readdirSync(backupsDir);
+      const assetDirs = dirs
+        .filter(d => d.startsWith('firebase-assets'))
+        .sort()
+        .reverse();
+
+      for (const dir of assetDirs) {
+        const fullPath = path.join(backupsDir, dir);
+        const deitiesPath = path.join(fullPath, 'deities');
+        if (fsSync.existsSync(deitiesPath)) {
+          return fullPath;
+        }
+      }
+    } catch (e) {
+      // Fallback
+    }
+
+    return path.join(backupsDir, 'firebase-assets-pre-enrichment');
+  }
+
   constructor(options = {}) {
-    this.assetsPath = options.assetsPath || path.join(__dirname, '..', 'backups', 'firebase-assets-pre-enrichment');
+    this.assetsPath = options.assetsPath || this.findAssetsPath();
     this.allAssets = new Map(); // id -> asset
     this.assetsByType = new Map(); // type -> [assets]
     this.assetsByMythology = new Map(); // mythology -> [assets]
@@ -343,14 +377,27 @@ class ConnectionValidator {
         type: 'INVALID_RELATED_ENTITIES',
         assetId: asset.id,
         assetName: asset.name,
-        message: 'relatedEntities must be an object',
+        message: 'relatedEntities must be an object or array',
         severity: 'error'
       });
       return issues;
     }
 
+    // Handle array format: [{ type, name, id, relationship }]
+    if (Array.isArray(related)) {
+      issues.push(...this.validateEntityReferences(asset, 'relatedEntities', related));
+      return issues;
+    }
+
+    // Handle object format: { deities: [], heroes: [], ... }
+    const validCategories = [
+      ...this.validEntityTypes,
+      'symbols', 'events', 'deities', 'heroes', 'creatures',
+      'items', 'places', 'texts', 'rituals', 'concepts', 'archetypes'
+    ];
+
     for (const [category, entities] of Object.entries(related)) {
-      if (!this.validEntityTypes.includes(category) && category !== 'symbols' && category !== 'events') {
+      if (!validCategories.includes(category)) {
         const issue = {
           type: 'INVALID_ENTITY_CATEGORY',
           assetId: asset.id,
@@ -518,7 +565,8 @@ class ConnectionValidator {
     }
 
     // Validate that referenced entity exists (if we have an id)
-    if (ref.id) {
+    // Skip validation for entities marked as _unverified (intentionally referencing non-existent entities)
+    if (ref.id && !ref._unverified) {
       const targetExists = this.allAssets.has(ref.id);
       if (!targetExists) {
         const issue = {
@@ -823,6 +871,12 @@ class ConnectionValidator {
     const reportDir = path.join(__dirname, 'reports');
     await fs.mkdir(reportDir, { recursive: true });
 
+    // Count warnings by type
+    const warningsByType = {};
+    this.results.warnings.forEach(w => {
+      warningsByType[w.type] = (warningsByType[w.type] || 0) + 1;
+    });
+
     const report = {
       timestamp: new Date().toISOString(),
       summary: {
@@ -840,6 +894,7 @@ class ConnectionValidator {
         invalidCorpusSearches: this.results.invalidCorpusSearches.length,
         legacyFieldsFound: Object.keys(this.results.legacyFieldUsage).length
       },
+      warningsByType,
       legacyFieldUsage: this.results.legacyFieldUsage,
       issuesByType: this.results.issuesByType,
       brokenLinks: this.results.brokenLinks.slice(0, 100),
@@ -847,6 +902,7 @@ class ConnectionValidator {
       invalidCorpusSearches: this.results.invalidCorpusSearches.slice(0, 50),
       formatIssues: this.results.formatIssues.slice(0, 100),
       schemaViolations: this.results.schemaViolations.slice(0, 100),
+      warnings: this.results.warnings.slice(0, 100),
       errors: this.results.errors.slice(0, 50)
     };
 
@@ -945,12 +1001,17 @@ class ConnectionValidator {
 // Main execution
 async function main() {
   const args = process.argv.slice(2);
-  const assetsPath = args[0] || path.join(__dirname, '..', 'backups', 'firebase-assets-pre-enrichment');
+  const options = {};
+
+  // Only set assetsPath if explicitly provided
+  if (args[0] && !args[0].startsWith('--')) {
+    options.assetsPath = args[0];
+  }
 
   console.log('Connection Validator');
   console.log('====================');
 
-  const validator = new ConnectionValidator({ assetsPath });
+  const validator = new ConnectionValidator(options);
 
   try {
     await validator.loadAllAssets();
