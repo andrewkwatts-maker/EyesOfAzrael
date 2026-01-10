@@ -1,89 +1,96 @@
+/**
+ * Analyze broken link patterns to understand how to fix them
+ */
+
 const fs = require('fs');
 const path = require('path');
 
-/**
- * Analyze broken links to categorize error patterns
- */
-function analyzeBrokenLinks() {
-  const brokenLinksPath = path.join(__dirname, '../reports/broken-links.json');
-  const data = JSON.parse(fs.readFileSync(brokenLinksPath, 'utf8'));
+const reportPath = path.join(__dirname, 'reports', 'connection-validation-report.json');
+const report = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
 
-  const patterns = {
-    prefix_underscore: [],
-    contains_newline: [],
-    contains_colon: [],
-    contains_parentheses: [],
-    contains_spaces: [],
+// Analyze broken link patterns
+const patterns = {
+    containsRelationship: [],
+    textInsteadOfId: [],
+    validLooking: [],
     other: []
-  };
+};
 
-  const assetCounts = {};
+const relationshipWords = ['mother', 'father', 'sister', 'brother', 'wife', 'husband', 'son', 'daughter', 'half-', 'through', 'consort'];
+const descriptionIndicators = ['none', 'various', 'prominently', 'named', 'mythology', 'associated', 'connected', 'related', 'unknown', 'unclear'];
 
-  data.links.forEach(link => {
-    const id = link.targetId;
-    const assetId = link.assetId;
+report.brokenLinks.forEach(link => {
+    const id = link.targetId || '';
+    const name = link.targetName || '';
 
-    // Count broken links per asset
-    assetCounts[assetId] = (assetCounts[assetId] || 0) + 1;
-
-    // Categorize the error
-    let category;
-    if (id.startsWith('_')) {
-      category = 'prefix_underscore';
-    } else if (id.includes('\n')) {
-      category = 'contains_newline';
-    } else if (id.includes(':')) {
-      category = 'contains_colon';
-    } else if (id.includes('(') && id.includes(')')) {
-      category = 'contains_parentheses';
-    } else if (id.includes(' ')) {
-      category = 'contains_spaces';
-    } else {
-      category = 'other';
+    if (relationshipWords.some(w => id.toLowerCase().includes(w))) {
+        patterns.containsRelationship.push({ id, name, source: link.assetId, field: link.field });
     }
+    else if (descriptionIndicators.some(w => id.toLowerCase().includes(w)) || id.length > 40) {
+        patterns.textInsteadOfId.push({ id, name, source: link.assetId, field: link.field });
+    }
+    else if (id.match(/^[a-z][a-z0-9_-]+$/i) && id.length < 40) {
+        patterns.validLooking.push({ id, name, source: link.assetId, field: link.field });
+    }
+    else {
+        patterns.other.push({ id, name, source: link.assetId, field: link.field });
+    }
+});
 
-    patterns[category].push({
-      assetId: link.assetId,
-      targetId: id,
-      field: link.field,
-      mythology: link.assetMythology
-    });
-  });
+console.log('=== Broken Link Pattern Analysis ===\n');
+console.log('Total broken links:', report.brokenLinks.length, '\n');
 
-  console.log('\n=== BROKEN LINK ANALYSIS ===\n');
-  console.log(`Total broken links: ${data.count}\n`);
+console.log('Contains relationship words:', patterns.containsRelationship.length);
+patterns.containsRelationship.slice(0, 8).forEach(p => {
+    console.log('   ', p.id, 'from', p.source);
+});
 
-  console.log('Error Pattern Distribution:');
-  Object.keys(patterns).forEach(pattern => {
-    console.log(`  ${pattern}: ${patterns[pattern].length}`);
-  });
+console.log('\nText instead of ID:', patterns.textInsteadOfId.length);
+patterns.textInsteadOfId.slice(0, 8).forEach(p => {
+    console.log('   ', p.id, 'from', p.source);
+});
 
-  console.log('\nTop 10 Assets with Most Broken Links:');
-  const sortedAssets = Object.entries(assetCounts)
+console.log('\nValid looking IDs:', patterns.validLooking.length);
+patterns.validLooking.slice(0, 15).forEach(p => {
+    console.log('   ', p.id, 'from', p.source);
+});
+
+console.log('\nOther patterns:', patterns.other.length);
+patterns.other.slice(0, 8).forEach(p => {
+    console.log('   ', p.id, 'from', p.source);
+});
+
+// Count by source asset
+const bySource = {};
+report.brokenLinks.forEach(link => {
+    bySource[link.assetId] = (bySource[link.assetId] || 0) + 1;
+});
+
+const topSources = Object.entries(bySource)
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 10);
-  sortedAssets.forEach(([assetId, count]) => {
-    console.log(`  ${assetId}: ${count} broken links`);
-  });
+    .slice(0, 20);
 
-  console.log('\nSample Broken IDs by Category:');
-  Object.keys(patterns).forEach(category => {
-    if (patterns[category].length > 0) {
-      console.log(`\n${category} (${patterns[category].length} total):`);
-      patterns[category].slice(0, 5).forEach(item => {
-        console.log(`  "${item.targetId}" (from ${item.assetId})`);
-      });
-    }
-  });
+console.log('\n=== Assets with most broken links ===');
+topSources.forEach(([id, count]) => {
+    console.log(' ', id + ':', count, 'broken links');
+});
 
-  // Save detailed analysis
-  const analysisPath = path.join(__dirname, '../reports/broken-links-analysis.json');
-  fs.writeFileSync(analysisPath, JSON.stringify({
-    totalBroken: data.count,
-    patterns,
-    assetCounts
-  }, null, 2));
-  console.log(`\nDetailed analysis saved to ${analysisPath}`);
-}
+// Save patterns
+fs.writeFileSync(
+    path.join(__dirname, 'reports', 'broken-link-patterns.json'),
+    JSON.stringify({
+        summary: {
+            total: report.brokenLinks.length,
+            containsRelationship: patterns.containsRelationship.length,
+            textInsteadOfId: patterns.textInsteadOfId.length,
+            validLooking: patterns.validLooking.length,
+            other: patterns.other.length
+        },
+        containsRelationship: patterns.containsRelationship,
+        textInsteadOfId: patterns.textInsteadOfId,
+        validLooking: patterns.validLooking,
+        other: patterns.other
+    }, null, 2)
+);
 
-analyzeBrokenLinks();
+console.log('\nPatterns saved to scripts/reports/broken-link-patterns.json');
