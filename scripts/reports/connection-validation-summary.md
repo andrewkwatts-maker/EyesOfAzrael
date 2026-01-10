@@ -1,19 +1,19 @@
 # Connection Validation Report
 
-**Generated:** 2026-01-10T06:57:01.188Z
+**Generated:** 2026-01-10T07:08:01.620Z
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Total Assets | 803 |
-| Total Connections | 2320 |
+| Total Connections | 2329 |
 | Compliant Assets | 193 |
 | Non-Compliant Assets | 610 |
 | Compliance Rate | 24.03% |
-| Total Errors | 1339 |
-| Total Warnings | 2232 |
-| Broken Links | 1339 |
+| Total Errors | 1337 |
+| Total Warnings | 2226 |
+| Broken Links | 1337 |
 | Invalid URLs | 0 |
 | Legacy Fields Found | 0 |
 
@@ -21,7 +21,7 @@
 
 | Type | Issue Count | Assets Affected |
 |------|-------------|------------------|
-| deity | 9183 | 197 |
+| deity | 9175 | 197 |
 | hero | 358 | 31 |
 | creature | 177 | 29 |
 | item | 767 | 140 |
@@ -40,7 +40,7 @@
 ## Recommendations
 
 1. **Migrate Legacy Fields**: Update 0 legacy field names to standardized equivalents
-2. **Fix Broken Links**: Resolve 1339 references to non-existent entities
+2. **Fix Broken Links**: Resolve 1337 references to non-existent entities
 3. **Standardize References**: Convert string references to entityReference objects with id and name
 4. **Validate URLs**: Fix 0 invalid URL formats
 5. **Review Corpus Searches**: Check 0 invalid corpus search configurations
