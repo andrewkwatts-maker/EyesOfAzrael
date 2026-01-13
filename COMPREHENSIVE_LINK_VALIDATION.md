@@ -1,51 +1,51 @@
 # Comprehensive Link Validation Report
 
-**Generated:** 2025-12-29T01:49:15.212Z
+**Generated:** 2026-01-11T02:41:15.165Z
 
-**Total Links:** 737
+**Total Links:** 771
 
-**Unique URLs:** 737
+**Unique URLs:** 771
 
 
 ## Summary
 
 | Status | Count | Percentage |
 |--------|-------|------------|
-| ✅ OK | 8 | 1.1% |
-| ❌ Broken | 729 | 98.9% |
+| ✅ OK | 19 | 2.5% |
+| ❌ Broken | 752 | 97.5% |
 | ⏳ Coming Soon | 0 | 0.0% |
 
 
 ## Broken Links by Category
 
 
-### MISSING ROUTE (729 issues)
+### MISSING ROUTE (750 issues)
 
 | URL | Type | Priority | Sources | Fix |
 |-----|------|----------|---------|-----|
-| `#angels-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#devas-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#yazatas-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#amesha-spentas-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#apsaras-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#gandharvas-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#valkyries-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#houris-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#fravashis-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#dakinis-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#shen-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#aeons-section` | unknown | critical | archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
-| `#hierogamy` | unknown | critical | archetypes\sky-father\index.html | Add route pattern to spa-navigation.js |
+| `#angels-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#devas-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#yazatas-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#amesha-spentas-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#apsaras-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#gandharvas-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#valkyries-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#houris-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#fravashis-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#dakinis-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#shen-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#aeons-section` | unknown | critical | archetypes\celestial\index.html, _recovered-html\archetypes\celestial\index.html | Add route pattern to spa-navigation.js |
+| `#hierogamy` | unknown | critical | archetypes\sky-father\index.html, _recovered-html\archetypes\sky-father\index.html | Add route pattern to spa-navigation.js |
 | `#/guidelines` | unknown | critical | components\content-filter-toggle.html | Add route pattern to spa-navigation.js |
-| `#overview` | unknown | critical | components\nav.html, herbalism\universal\sage.html (+1) | Add route pattern to spa-navigation.js |
-| `#history` | unknown | critical | components\nav.html | Add route pattern to spa-navigation.js |
-| `#mythology` | unknown | critical | components\nav.html, herbalism\traditions\norse\barley-hops.html (+3) | Add route pattern to spa-navigation.js |
-| `#creation` | unknown | critical | components\nav.html | Add route pattern to spa-navigation.js |
-| `#heroes` | unknown | critical | components\nav.html | Add route pattern to spa-navigation.js |
-| `#monsters` | unknown | critical | components\nav.html | Add route pattern to spa-navigation.js |
-| `#references` | unknown | critical | components\nav.html | Add route pattern to spa-navigation.js |
-| `#section` | unknown | critical | components\nav.html | Add route pattern to spa-navigation.js |
-| `#main-content` | unknown | critical | components\page-template.html, index-dynamic.html (+1) | Add route pattern to spa-navigation.js |
+| `#overview` | unknown | critical | components\nav.html, herbalism\universal\sage.html (+12) | Add route pattern to spa-navigation.js |
+| `#history` | unknown | critical | components\nav.html, _recovered-html\components\nav.html | Add route pattern to spa-navigation.js |
+| `#mythology` | unknown | critical | components\nav.html, herbalism\traditions\norse\barley-hops.html (+17) | Add route pattern to spa-navigation.js |
+| `#creation` | unknown | critical | components\nav.html, _recovered-html\components\nav.html | Add route pattern to spa-navigation.js |
+| `#heroes` | unknown | critical | components\nav.html, _recovered-html\components\nav.html | Add route pattern to spa-navigation.js |
+| `#monsters` | unknown | critical | components\nav.html, _recovered-html\components\nav.html | Add route pattern to spa-navigation.js |
+| `#references` | unknown | critical | components\nav.html, _recovered-html\components\nav.html | Add route pattern to spa-navigation.js |
+| `#section` | unknown | critical | components\nav.html, _recovered-html\components\nav.html | Add route pattern to spa-navigation.js |
+| `#main-content` | unknown | critical | components\page-template.html, corpus-explorer.html (+11) | Add route pattern to spa-navigation.js |
 | `#features` | unknown | critical | COSMOLOGY_DIAGRAM_EXAMPLES.html | Add route pattern to spa-navigation.js |
 | `#yggdrasil` | unknown | critical | COSMOLOGY_DIAGRAM_EXAMPLES.html | Add route pattern to spa-navigation.js |
 | `#tree-of-life` | unknown | critical | COSMOLOGY_DIAGRAM_EXAMPLES.html | Add route pattern to spa-navigation.js |
@@ -725,45 +725,85 @@
 | `#L669` | unknown | critical | coverage\compare-view.js.html, coverage\js\components\compare-view.js.html (+2) | Add route pattern to spa-navigation.js |
 | `#L670` | unknown | critical | coverage\compare-view.js.html, coverage\js\components\compare-view.js.html (+2) | Add route pattern to spa-navigation.js |
 | `#L671` | unknown | critical | coverage\compare-view.js.html, coverage\js\components\compare-view.js.html (+2) | Add route pattern to spa-navigation.js |
-| `#sacred-plants` | unknown | critical | herbalism\traditions\buddhist\index.html, herbalism\traditions\hindu\index.html | Add route pattern to spa-navigation.js |
-| `#meditation` | unknown | critical | herbalism\traditions\buddhist\index.html | Add route pattern to spa-navigation.js |
-| `#ayurveda` | unknown | critical | herbalism\traditions\hindu\index.html | Add route pattern to spa-navigation.js |
-| `#temple` | unknown | critical | herbalism\traditions\jewish\index.html | Add route pattern to spa-navigation.js |
-| `#biblical` | unknown | critical | herbalism\traditions\jewish\index.html | Add route pattern to spa-navigation.js |
-| `#historical` | unknown | critical | herbalism\traditions\norse\barley-hops.html | Add route pattern to spa-navigation.js |
-| `#preparation` | unknown | critical | herbalism\traditions\norse\barley-hops.html, herbalism\universal\sage.html | Add route pattern to spa-navigation.js |
-| `#modern` | unknown | critical | herbalism\traditions\norse\barley-hops.html, herbalism\universal\soma.html | Add route pattern to spa-navigation.js |
-| `#sacred-trees` | unknown | critical | herbalism\traditions\norse\index.html | Add route pattern to spa-navigation.js |
-| `#ritual-plants` | unknown | critical | herbalism\traditions\norse\index.html | Add route pattern to spa-navigation.js |
-| `#sacred-resins` | unknown | critical | herbalism\universal\index.html | Add route pattern to spa-navigation.js |
-| `#purification` | unknown | critical | herbalism\universal\index.html | Add route pattern to spa-navigation.js |
-| `#visionary` | unknown | critical | herbalism\universal\index.html | Add route pattern to spa-navigation.js |
-| `#traditions` | unknown | critical | herbalism\universal\sage.html, herbalism\universal\soma.html | Add route pattern to spa-navigation.js |
-| `#medicinal` | unknown | critical | herbalism\universal\sage.html | Add route pattern to spa-navigation.js |
-| `#magical` | unknown | critical | herbalism\universal\sage.html | Add route pattern to spa-navigation.js |
-| `#safety` | unknown | critical | herbalism\universal\sage.html | Add route pattern to spa-navigation.js |
-| `#identity` | unknown | critical | herbalism\universal\soma.html | Add route pattern to spa-navigation.js |
-| `#candidates` | unknown | critical | herbalism\universal\soma.html | Add route pattern to spa-navigation.js |
-| `#symbolism` | unknown | critical | herbalism\universal\soma.html, mythos\greek\deities\prometheus.html | Add route pattern to spa-navigation.js |
-| `#attributes` | unknown | critical | mythos\greek\deities\poseidon.html, mythos\greek\deities\prometheus.html (+1) | Add route pattern to spa-navigation.js |
-| `#relationships` | unknown | critical | mythos\greek\deities\poseidon.html, mythos\greek\deities\prometheus.html (+1) | Add route pattern to spa-navigation.js |
-| `#worship` | unknown | critical | mythos\greek\deities\poseidon.html, mythos\greek\deities\zeus.html | Add route pattern to spa-navigation.js |
-| `#tricksters` | unknown | critical | mythos\native_american\spirits\index.html | Add route pattern to spa-navigation.js |
-| `#creators` | unknown | critical | mythos\native_american\spirits\index.html | Add route pattern to spa-navigation.js |
-| `#sky-spirits` | unknown | critical | mythos\native_american\spirits\index.html | Add route pattern to spa-navigation.js |
-| `#sacred-beings` | unknown | critical | mythos\native_american\spirits\index.html | Add route pattern to spa-navigation.js |
+| `#sacred-plants` | unknown | critical | herbalism\traditions\buddhist\index.html, herbalism\traditions\hindu\index.html (+2) | Add route pattern to spa-navigation.js |
+| `#meditation` | unknown | critical | herbalism\traditions\buddhist\index.html, _recovered-html\herbalism\traditions\buddhist\index.html | Add route pattern to spa-navigation.js |
+| `#ayurveda` | unknown | critical | herbalism\traditions\hindu\index.html, _recovered-html\herbalism\traditions\hindu\index.html | Add route pattern to spa-navigation.js |
+| `#temple` | unknown | critical | herbalism\traditions\jewish\index.html, _recovered-html\herbalism\traditions\jewish\index.html | Add route pattern to spa-navigation.js |
+| `#biblical` | unknown | critical | herbalism\traditions\jewish\index.html, _recovered-html\herbalism\traditions\jewish\index.html | Add route pattern to spa-navigation.js |
+| `#historical` | unknown | critical | herbalism\traditions\norse\barley-hops.html, _recovered-html\herbalism\traditions\norse\ash.html (+3) | Add route pattern to spa-navigation.js |
+| `#preparation` | unknown | critical | herbalism\traditions\norse\barley-hops.html, herbalism\universal\sage.html (+15) | Add route pattern to spa-navigation.js |
+| `#modern` | unknown | critical | herbalism\traditions\norse\barley-hops.html, herbalism\universal\soma.html (+4) | Add route pattern to spa-navigation.js |
+| `#sacred-trees` | unknown | critical | herbalism\traditions\norse\index.html, _recovered-html\herbalism\traditions\norse\index.html | Add route pattern to spa-navigation.js |
+| `#ritual-plants` | unknown | critical | herbalism\traditions\norse\index.html, _recovered-html\herbalism\traditions\norse\index.html | Add route pattern to spa-navigation.js |
+| `#sacred-resins` | unknown | critical | herbalism\universal\index.html, _recovered-html\herbalism\universal\index.html | Add route pattern to spa-navigation.js |
+| `#purification` | unknown | critical | herbalism\universal\index.html, _recovered-html\herbalism\universal\index.html | Add route pattern to spa-navigation.js |
+| `#visionary` | unknown | critical | herbalism\universal\index.html, _recovered-html\herbalism\universal\index.html | Add route pattern to spa-navigation.js |
+| `#traditions` | unknown | critical | herbalism\universal\sage.html, herbalism\universal\soma.html (+10) | Add route pattern to spa-navigation.js |
+| `#medicinal` | unknown | critical | herbalism\universal\sage.html, _recovered-html\herbalism\traditions\buddhist\lotus.html (+11) | Add route pattern to spa-navigation.js |
+| `#magical` | unknown | critical | herbalism\universal\sage.html, _recovered-html\herbalism\universal\blue-lotus.html (+7) | Add route pattern to spa-navigation.js |
+| `#safety` | unknown | critical | herbalism\universal\sage.html, _recovered-html\herbalism\traditions\jewish\mandrake.html (+10) | Add route pattern to spa-navigation.js |
+| `#identity` | unknown | critical | herbalism\universal\soma.html, _recovered-html\herbalism\universal\soma.html | Add route pattern to spa-navigation.js |
+| `#candidates` | unknown | critical | herbalism\universal\soma.html, _recovered-html\herbalism\universal\soma.html | Add route pattern to spa-navigation.js |
+| `#symbolism` | unknown | critical | herbalism\universal\soma.html, mythos\greek\deities\prometheus.html (+3) | Add route pattern to spa-navigation.js |
+| `#attributes` | unknown | critical | mythos\greek\deities\poseidon.html, mythos\greek\deities\prometheus.html (+9) | Add route pattern to spa-navigation.js |
+| `#relationships` | unknown | critical | mythos\greek\deities\poseidon.html, mythos\greek\deities\prometheus.html (+9) | Add route pattern to spa-navigation.js |
+| `#worship` | unknown | critical | mythos\greek\deities\poseidon.html, mythos\greek\deities\zeus.html (+8) | Add route pattern to spa-navigation.js |
+| `#tricksters` | unknown | critical | mythos\native_american\spirits\index.html, _recovered-html\mythos\native_american\spirits\index.html | Add route pattern to spa-navigation.js |
+| `#creators` | unknown | critical | mythos\native_american\spirits\index.html, _recovered-html\mythos\native_american\spirits\index.html | Add route pattern to spa-navigation.js |
+| `#sky-spirits` | unknown | critical | mythos\native_american\spirits\index.html, _recovered-html\mythos\native_american\spirits\index.html | Add route pattern to spa-navigation.js |
+| `#sacred-beings` | unknown | critical | mythos\native_american\spirits\index.html, _recovered-html\mythos\native_american\spirits\index.html | Add route pattern to spa-navigation.js |
+| `#enlightenment` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\bodhi-tree.html | Add route pattern to spa-navigation.js |
+| `#sutras` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\bodhi-tree.html, _recovered-html\herbalism\traditions\buddhist\lotus.html (+1) | Add route pattern to spa-navigation.js |
+| `#pilgrimage` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\bodhi-tree.html | Add route pattern to spa-navigation.js |
+| `#practice` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\bodhi-tree.html, _recovered-html\herbalism\traditions\buddhist\lotus.html | Add route pattern to spa-navigation.js |
+| `#deities` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\lotus.html | Add route pattern to spa-navigation.js |
+| `#sacred` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\sandalwood.html | Add route pattern to spa-navigation.js |
+| `#ritual` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\sandalwood.html, _recovered-html\herbalism\traditions\jewish\hyssop.html | Add route pattern to spa-navigation.js |
+| `#origins` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\tea.html | Add route pattern to spa-navigation.js |
+| `#zen` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\tea.html | Add route pattern to spa-navigation.js |
+| `#ceremony` | unknown | critical | _recovered-html\herbalism\traditions\buddhist\tea.html | Add route pattern to spa-navigation.js |
+| `#scripture` | unknown | critical | _recovered-html\herbalism\traditions\jewish\hyssop.html, _recovered-html\herbalism\traditions\jewish\mandrake.html | Add route pattern to spa-navigation.js |
+| `#kabbalah` | unknown | critical | _recovered-html\herbalism\traditions\jewish\hyssop.html, _recovered-html\herbalism\traditions\jewish\mandrake.html | Add route pattern to spa-navigation.js |
+| `#folklore` | unknown | critical | _recovered-html\herbalism\traditions\jewish\mandrake.html | Add route pattern to spa-navigation.js |
+| `#pharmacology` | unknown | critical | _recovered-html\herbalism\universal\ayahuasca.html | Add route pattern to spa-navigation.js |
+| `#experience` | unknown | critical | _recovered-html\herbalism\universal\ayahuasca.html | Add route pattern to spa-navigation.js |
+| `#spiritual` | unknown | critical | _recovered-html\herbalism\universal\ayahuasca.html | Add route pattern to spa-navigation.js |
+| `#dreams` | unknown | critical | _recovered-html\herbalism\universal\mugwort.html | Add route pattern to spa-navigation.js |
+| `#forms` | unknown | critical | _recovered-html\mythos\egyptian\deities\ra.html | Add route pattern to spa-navigation.js |
+| `#theories` | unknown | critical | _recovered-html\mythos\egyptian\deities\ra.html | Add route pattern to spa-navigation.js |
+| `#ameretat` | unknown | critical | _recovered-html\mythos\persian\deities\amesha-spentas.html | Add route pattern to spa-navigation.js |
+| `#haurvatat` | unknown | critical | _recovered-html\mythos\persian\deities\amesha-spentas.html | Add route pattern to spa-navigation.js |
+
+
+
+### INVALID CATEGORY (1 issues)
+
+| URL | Type | Priority | Sources | Fix |
+|-----|------|----------|---------|-----|
+| `#/browse/archetypes` | browse-category | high | index.html | Valid categories: deities, heroes, creatures, texts, rituals, herbs, cosmology, magic, items, places, symbols |
+
+
+
+### INVALID MYTHOLOGY (1 issues)
+
+| URL | Type | Priority | Sources | Fix |
+|-----|------|----------|---------|-----|
+| `#/mythology/${mythology.id}` | mythology | high | _recovered-html\test-homeview-standalone.html | Valid mythologies: greek, norse, egyptian, hindu, chinese, japanese, celtic, babylonian, sumerian, persian, roman, aztec, mayan, buddhist, christian, jewish, islamic, yoruba, native_american, apocryphal |
 
 
 ## Link Type Distribution
 
 | Type | Total | OK | Broken |
 |------|-------|-----|--------|
-| unknown | 729 | 0 | 729 |
+| unknown | 750 | 0 | 750 |
 | home | 2 | 2 | 0 |
 | search | 1 | 1 | 0 |
 | compare | 1 | 1 | 0 |
 | about | 1 | 1 | 0 |
 | privacy | 1 | 1 | 0 |
 | terms | 1 | 1 | 0 |
+| mythologies | 1 | 1 | 0 |
+| browse-category | 11 | 10 | 1 |
 | dashboard | 1 | 1 | 0 |
+| mythology | 1 | 0 | 1 |
 

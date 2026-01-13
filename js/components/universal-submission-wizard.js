@@ -25,6 +25,10 @@ class UniversalSubmissionWizard {
 
         // Services
         this.submissionService = window.contentSubmissionService || null;
+        this.aiPopulateService = window.aiPopulateService || null;
+
+        // AI Populate state
+        this.isAIPopulating = false;
 
         // Callbacks
         this.onSubmitSuccess = options.onSubmitSuccess || null;
@@ -441,6 +445,19 @@ class UniversalSubmissionWizard {
             <h2 class="usw-step-title">Basic Information</h2>
             <p class="usw-step-description">Enter the essential details for your ${selectedType.name || 'entry'}</p>
 
+            <!-- AI Populate Section -->
+            <div class="usw-ai-populate-section">
+                <div class="usw-ai-populate-header">
+                    <span class="usw-ai-icon">&#10024;</span>
+                    <span class="usw-ai-title">AI Auto-Fill</span>
+                </div>
+                <p class="usw-ai-description">Enter a name and description, then let AI fill in the remaining fields based on mythology research.</p>
+                <button type="button" class="usw-btn usw-btn-ai" id="usw-ai-populate-btn" ${this.isAIPopulating ? 'disabled' : ''}>
+                    ${this.isAIPopulating ? '<span class="usw-spinner-sm"></span> Populating...' : '&#10024; AI Auto-Fill Fields'}
+                </button>
+                <span class="usw-ai-hint">Requires name + description</span>
+            </div>
+
             <div class="usw-form-container">
                 <!-- Name -->
                 <div class="usw-form-section">
@@ -538,6 +555,18 @@ class UniversalSubmissionWizard {
         return `
             <h2 class="usw-step-title">Extended Information</h2>
             <p class="usw-step-description">Add detailed information specific to ${selectedType.name}</p>
+
+            <!-- AI Populate Section for Extended Fields -->
+            <div class="usw-ai-populate-section usw-ai-populate-extended">
+                <div class="usw-ai-populate-header">
+                    <span class="usw-ai-icon">&#10024;</span>
+                    <span class="usw-ai-title">AI Auto-Fill Extended Fields</span>
+                </div>
+                <p class="usw-ai-description">Let AI populate the type-specific fields below based on your entity's name and description.</p>
+                <button type="button" class="usw-btn usw-btn-ai" id="usw-ai-populate-extended-btn" ${this.isAIPopulating ? 'disabled' : ''}>
+                    ${this.isAIPopulating ? '<span class="usw-spinner-sm"></span> Populating...' : '&#10024; AI Auto-Fill Extended'}
+                </button>
+            </div>
 
             <div class="usw-form-container">
                 <!-- Type-specific fields -->
@@ -1128,6 +1157,11 @@ class UniversalSubmissionWizard {
      * Attach Step 2 listeners
      */
     attachStep2Listeners() {
+        // AI Populate button
+        this.container.querySelector('#usw-ai-populate-btn')?.addEventListener('click', () => {
+            this.handleAIPopulate();
+        });
+
         // Name input
         this.container.querySelector('#usw-name')?.addEventListener('input', (e) => {
             this.formData.name = e.target.value;
@@ -1197,6 +1231,11 @@ class UniversalSubmissionWizard {
      * Attach Step 3 listeners (type-specific)
      */
     attachStep3Listeners() {
+        // AI Populate extended button
+        this.container.querySelector('#usw-ai-populate-extended-btn')?.addEventListener('click', () => {
+            this.handleAIPopulate();
+        });
+
         // Domains (for deities)
         this.container.querySelector('#usw-add-domain')?.addEventListener('click', () => {
             const input = this.container.querySelector('#usw-domain-input');
@@ -1845,6 +1884,239 @@ class UniversalSubmissionWizard {
             indicator.parentElement.classList.add('show');
             setTimeout(() => indicator.parentElement.classList.remove('show'), 2000);
         }
+    }
+
+    // AI Populate methods
+
+    /**
+     * Handle AI Populate button click
+     */
+    async handleAIPopulate() {
+        // Validate requirements
+        if (!this.formData.name?.trim()) {
+            alert('Please enter a name before using AI auto-fill');
+            return;
+        }
+
+        if (!this.formData.shortDescription?.trim() && !this.formData.longDescription?.trim()) {
+            alert('Please enter at least a short or long description for AI to work with');
+            return;
+        }
+
+        if (!this.formData.type) {
+            alert('Please select an asset type first');
+            return;
+        }
+
+        // Check for AI service
+        if (!this.aiPopulateService && window.aiPopulateService) {
+            this.aiPopulateService = window.aiPopulateService;
+        }
+
+        if (!this.aiPopulateService) {
+            alert('AI Populate service not available. Please check your connection and try again.');
+            return;
+        }
+
+        // Check authentication
+        if (!this.aiPopulateService.isAuthenticated()) {
+            alert('Please sign in to use AI auto-fill');
+            return;
+        }
+
+        // Set loading state
+        this.isAIPopulating = true;
+        this.updateAIButtonState(true);
+
+        try {
+            console.log('[Wizard] Starting AI populate for:', this.formData.type);
+
+            // Prepare existing data
+            const existingData = {
+                name: this.formData.name,
+                mythology: this.formData.mythology,
+                primaryMythology: this.formData.mythology,
+                shortDescription: this.formData.shortDescription,
+                description: this.formData.longDescription || this.formData.shortDescription,
+                longDescription: this.formData.longDescription,
+                domains: this.formData.domains,
+                tags: this.formData.tags,
+                epithets: this.formData.typeSpecific.epithets,
+                ...this.formData.typeSpecific
+            };
+
+            // Call AI service
+            const result = await this.aiPopulateService.populateFields(this.formData.type, existingData);
+
+            if (!result.success) {
+                if (result.needsAuth) {
+                    alert('Authentication required. Please sign in again.');
+                } else {
+                    alert('AI auto-fill failed: ' + (result.error || 'Unknown error'));
+                }
+                return;
+            }
+
+            // Merge AI data into form
+            this.mergeAIData(result.data);
+
+            // Show success message
+            const fieldsCount = result.fieldsPopulated?.length || Object.keys(result.data).length;
+            this.showAISuccess(fieldsCount);
+
+            // Re-render current step to show new data
+            this.updateWizardUI();
+
+        } catch (error) {
+            console.error('[Wizard] AI Populate error:', error);
+            alert('AI auto-fill encountered an error: ' + error.message);
+        } finally {
+            this.isAIPopulating = false;
+            this.updateAIButtonState(false);
+        }
+    }
+
+    /**
+     * Merge AI-generated data into form data, preserving user's values
+     */
+    mergeAIData(aiData) {
+        if (!aiData || typeof aiData !== 'object') return;
+
+        console.log('[Wizard] Merging AI data:', Object.keys(aiData));
+
+        // Field mapping from AI response to form data
+        const fieldMappings = {
+            domains: 'domains',
+            epithets: 'typeSpecific.epithets',
+            symbols: 'symbols',
+            sacredAnimals: 'typeSpecific.sacredAnimals',
+            sacredPlants: 'typeSpecific.sacredPlants',
+            attributes: 'attributes',
+            abilities: 'powers',
+            powers: 'powers',
+            weaknesses: 'typeSpecific.weaknesses',
+            habitat: 'typeSpecific.habitat',
+            diet: 'typeSpecific.diet',
+            achievements: 'typeSpecific.achievements',
+            quests: 'typeSpecific.quests',
+            weapons: 'typeSpecific.weapons',
+            companions: 'typeSpecific.companions',
+            characteristics: 'typeSpecific.characteristics',
+            festivals: 'typeSpecific.festivals',
+            worship: 'typeSpecific.worship',
+            iconography: 'typeSpecific.iconography'
+        };
+
+        for (const [aiField, value] of Object.entries(aiData)) {
+            if (value === undefined || value === null) continue;
+
+            // Get the target field path
+            const targetPath = fieldMappings[aiField] || aiField;
+
+            // Check if we should skip (user already has data)
+            const existingValue = this.getNestedValue(targetPath);
+
+            // For arrays, only add if empty
+            if (Array.isArray(value)) {
+                if (!existingValue || (Array.isArray(existingValue) && existingValue.length === 0)) {
+                    this.setNestedValue(targetPath, value);
+                } else if (Array.isArray(existingValue)) {
+                    // Merge arrays, avoiding duplicates
+                    const merged = [...existingValue];
+                    value.forEach(item => {
+                        if (!merged.includes(item)) merged.push(item);
+                    });
+                    this.setNestedValue(targetPath, merged);
+                }
+            }
+            // For objects, merge
+            else if (typeof value === 'object') {
+                const existing = existingValue || {};
+                this.setNestedValue(targetPath, { ...existing, ...value });
+            }
+            // For primitives, only set if empty
+            else {
+                if (!existingValue || existingValue === '') {
+                    this.setNestedValue(targetPath, value);
+                }
+            }
+        }
+
+        this.isDirty = true;
+    }
+
+    /**
+     * Get nested value from formData
+     */
+    getNestedValue(path) {
+        const parts = path.split('.');
+        let current = this.formData;
+
+        for (const part of parts) {
+            if (current === undefined || current === null) return undefined;
+            current = current[part];
+        }
+
+        return current;
+    }
+
+    /**
+     * Set nested value in formData
+     */
+    setNestedValue(path, value) {
+        const parts = path.split('.');
+        let current = this.formData;
+
+        for (let i = 0; i < parts.length - 1; i++) {
+            const part = parts[i];
+            if (!current[part]) current[part] = {};
+            current = current[part];
+        }
+
+        current[parts[parts.length - 1]] = value;
+    }
+
+    /**
+     * Update AI button loading state
+     */
+    updateAIButtonState(loading) {
+        const buttons = this.container.querySelectorAll('.usw-btn-ai');
+        buttons.forEach(btn => {
+            if (loading) {
+                btn.disabled = true;
+                btn.innerHTML = '<span class="usw-spinner-sm"></span> Populating...';
+            } else {
+                btn.disabled = false;
+                if (btn.id === 'usw-ai-populate-extended-btn') {
+                    btn.innerHTML = '&#10024; AI Auto-Fill Extended';
+                } else {
+                    btn.innerHTML = '&#10024; AI Auto-Fill Fields';
+                }
+            }
+        });
+    }
+
+    /**
+     * Show AI success message
+     */
+    showAISuccess(fieldsCount) {
+        const sections = this.container.querySelectorAll('.usw-ai-populate-section');
+        sections.forEach(section => {
+            // Add success message
+            const existingMsg = section.querySelector('.usw-ai-success');
+            if (existingMsg) existingMsg.remove();
+
+            const msg = document.createElement('div');
+            msg.className = 'usw-ai-success';
+            msg.innerHTML = `&#10003; Successfully populated ${fieldsCount} field${fieldsCount !== 1 ? 's' : ''}`;
+            section.appendChild(msg);
+
+            // Remove after delay
+            setTimeout(() => {
+                msg.classList.add('fade-out');
+                setTimeout(() => msg.remove(), 300);
+            }, 3000);
+        });
     }
 
     // Media methods

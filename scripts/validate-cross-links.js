@@ -51,7 +51,8 @@ class CrossLinkValidator {
 
     const categories = ['deities', 'heroes', 'creatures', 'items', 'places',
                        'texts', 'cosmology', 'rituals', 'herbs', 'symbols',
-                       'events', 'concepts'];
+                       'events', 'concepts', 'archetypes', 'magic', 'beings',
+                       'mythologies'];
 
     for (const category of categories) {
       const categoryPath = path.join(this.assetsPath, category);
@@ -632,7 +633,7 @@ class CrossLinkValidator {
 
 // Main execution
 async function main() {
-  const assetsPath = path.join(__dirname, '..', 'firebase-assets-enhanced');
+  const assetsPath = path.join(__dirname, '..', 'firebase-assets-downloaded');
   const validator = new CrossLinkValidator(assetsPath);
 
   try {

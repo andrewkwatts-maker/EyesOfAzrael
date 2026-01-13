@@ -22,14 +22,62 @@ class LandingPageView {
         this.db = firestore;
         this.assetTypes = this.getAssetTypes();
         this.isLoaded = false;
+
+        // Admin emails that can see restricted content
+        this.ADMIN_EMAILS = ['andrewkwatts@gmail.com'];
+    }
+
+    /**
+     * Check if current user is an admin
+     * @returns {boolean}
+     */
+    isAdmin() {
+        try {
+            const user = firebase?.auth?.()?.currentUser;
+            return user && this.ADMIN_EMAILS.includes(user.email);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get admin-only asset types (concepts, conspiracies)
+     * @returns {Array} Admin-only categories
+     */
+    getAdminOnlyAssetTypes() {
+        return [
+            {
+                id: 'concepts',
+                name: 'Concepts & Theories',
+                icon: 'icons/categories/concepts.svg',
+                fallbackIcon: '\uD83D\uDCA1', // Lightbulb
+                description: 'Core concepts, philosophical ideas, and theoretical frameworks',
+                route: '#/browse/concepts',
+                color: '#9f7aea',
+                order: 13,
+                adminOnly: true
+            },
+            {
+                id: 'conspiracies',
+                name: 'Hidden Knowledge',
+                icon: 'icons/categories/conspiracies.svg',
+                fallbackIcon: '\uD83D\uDD0D', // Magnifying glass
+                description: 'Esoteric connections, secret societies, and alternative theories',
+                route: '#/browse/conspiracies',
+                color: '#ed64a6',
+                order: 14,
+                adminOnly: true
+            }
+        ];
     }
 
     /**
      * Define all asset type categories for the landing page
      * Now using SVG icons instead of emoji for better visual quality
+     * Includes admin-only categories when user is admin
      */
     getAssetTypes() {
-        return [
+        const baseTypes = [
             {
                 id: 'mythologies',
                 name: 'World Mythologies',
@@ -139,6 +187,14 @@ class LandingPageView {
                 order: 12
             }
         ];
+
+        // Add admin-only categories if user is admin
+        if (this.isAdmin()) {
+            console.log('[Landing Page] Admin user detected, adding restricted categories');
+            return [...baseTypes, ...this.getAdminOnlyAssetTypes()].sort((a, b) => a.order - b.order);
+        }
+
+        return baseTypes;
     }
 
     /**
@@ -148,6 +204,10 @@ class LandingPageView {
         console.log('[Landing Page] Rendering...');
 
         try {
+            // Refresh asset types to check for admin access (auth state may have changed)
+            this.assetTypes = this.getAssetTypes();
+            console.log('[Landing Page] Asset types loaded:', this.assetTypes.length, 'categories');
+
             // Validate container
             if (!container) {
                 console.error('[Landing Page] ERROR: container is null or undefined');

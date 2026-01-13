@@ -68,6 +68,11 @@ class OwnershipService {
         // Auto-transfer configuration
         this.AUTO_TRANSFER_DAYS = 7; // Days before unclaimed asset can auto-transfer
         this.MIN_CONTRIBUTION_SCORE_FOR_CLAIM = 5; // Minimum score to submit a claim
+
+        // Admin configuration (bypasses ownership checks)
+        this.ADMIN_EMAILS = [
+            'andrewkwatts@gmail.com'
+        ];
     }
 
     /**
@@ -101,6 +106,61 @@ class OwnershipService {
      */
     getCurrentUser() {
         return this.auth?.currentUser;
+    }
+
+    /**
+     * Check if current user is an admin (can bypass ownership checks)
+     * @returns {boolean}
+     */
+    isAdmin() {
+        const user = this.getCurrentUser();
+        return user && this.ADMIN_EMAILS.includes(user.email);
+    }
+
+    /**
+     * Check if a user is an admin by email
+     * @param {string} email - User email to check
+     * @returns {boolean}
+     */
+    isAdminEmail(email) {
+        return email && this.ADMIN_EMAILS.includes(email);
+    }
+
+    /**
+     * Check if user can edit an asset (owner or admin)
+     * @param {string} assetId - Asset ID
+     * @param {string} userId - User ID (optional, defaults to current user)
+     * @returns {Promise<{canEdit: boolean, reason?: string, isAdmin?: boolean, isOwner?: boolean}>}
+     */
+    async canEditAsset(assetId, userId = null) {
+        await this.init();
+
+        const user = this.getCurrentUser();
+        const targetUserId = userId || user?.uid;
+
+        if (!user) {
+            return { canEdit: false, reason: 'Authentication required' };
+        }
+
+        // Admin can edit anything
+        if (this.isAdmin()) {
+            return { canEdit: true, isAdmin: true, reason: 'Admin access' };
+        }
+
+        // Check ownership
+        const ownership = await this.getOwnership(assetId);
+
+        // No ownership record = unclaimed, anyone can edit
+        if (!ownership || ownership.status === 'unclaimed') {
+            return { canEdit: true, reason: 'Asset is unclaimed' };
+        }
+
+        // Check if user is owner
+        if (ownership.ownerId === targetUserId) {
+            return { canEdit: true, isOwner: true, reason: 'You own this asset' };
+        }
+
+        return { canEdit: false, reason: 'You do not own this asset' };
     }
 
     // ==================== OWNERSHIP CORE ====================
@@ -276,9 +336,13 @@ class OwnershipService {
                 return { success: false, error: 'No ownership record found for this asset' };
             }
 
-            // Verify caller is current owner
+            // Verify caller is current owner (or admin)
             if (ownership.ownerId !== fromUserId || user.uid !== fromUserId) {
-                return { success: false, error: 'Only the current owner can transfer ownership' };
+                // Admin bypass
+                if (!this.isAdmin()) {
+                    return { success: false, error: 'Only the current owner can transfer ownership' };
+                }
+                console.log('[OwnershipService] Admin bypass: transferring ownership');
             }
 
             // Get new owner info
@@ -349,7 +413,11 @@ class OwnershipService {
             }
 
             if (ownership.ownerId !== userId) {
-                return { success: false, error: 'You are not the owner of this asset' };
+                // Admin bypass
+                if (!this.isAdmin()) {
+                    return { success: false, error: 'You are not the owner of this asset' };
+                }
+                console.log('[OwnershipService] Admin bypass: releasing ownership');
             }
 
             const now = firebase.firestore.FieldValue.serverTimestamp();
@@ -470,7 +538,11 @@ class OwnershipService {
             const ownership = await this.getOwnership(assetId);
 
             if (!ownership || ownership.ownerId !== user.uid) {
-                return { success: false, error: 'Only the current owner can approve claims' };
+                // Admin bypass
+                if (!this.isAdmin()) {
+                    return { success: false, error: 'Only the current owner can approve claims' };
+                }
+                console.log('[OwnershipService] Admin bypass: approving claim');
             }
 
             // Get claim data
@@ -583,7 +655,11 @@ class OwnershipService {
             const ownership = await this.getOwnership(assetId);
 
             if (!ownership || ownership.ownerId !== user.uid) {
-                return { success: false, error: 'Only the current owner can deny claims' };
+                // Admin bypass
+                if (!this.isAdmin()) {
+                    return { success: false, error: 'Only the current owner can deny claims' };
+                }
+                console.log('[OwnershipService] Admin bypass: denying claim');
             }
 
             const claimRef = this.db

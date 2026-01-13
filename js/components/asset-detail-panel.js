@@ -64,6 +64,7 @@
                         <!-- Main Content Area -->
                         <main class="asset-main-content">
                             ${this.renderDescriptionSection(entity)}
+                            ${this.renderKeyMythsSection(entity)}
                             ${this.renderTypeSpecificContent(entity)}
                             ${this.renderLinguisticSection(entity)}
                             ${this.renderGeographicSection(entity)}
@@ -73,6 +74,7 @@
                             ${this.renderCulturalSection(entity)}
                             ${this.renderGallerySection(entity)}
                             ${this.renderSourcesSection(entity)}
+                            ${this.renderComparativeNotesSection(entity)}
                             ${this.renderCorpusSection(entity)}
                         </main>
 
@@ -181,8 +183,21 @@
          * Render quick actions in header
          */
         renderQuickActions(entity) {
+            const voteScore = entity.voteScore || entity.votes?.score || 0;
+
             return `
                 <div class="asset-quick-actions">
+                    <!-- Voting Section -->
+                    <div class="asset-vote-section" data-entity-id="${this.escapeAttr(entity.id)}">
+                        <button class="vote-btn vote-up" data-vote="up" title="Upvote">
+                            <span class="vote-icon">&#9650;</span>
+                        </button>
+                        <span class="vote-count" data-vote-count>${voteScore}</span>
+                        <button class="vote-btn vote-down" data-vote="down" title="Downvote">
+                            <span class="vote-icon">&#9660;</span>
+                        </button>
+                    </div>
+
                     <button class="quick-action-btn" data-action="bookmark" title="Bookmark this ${entity.type || 'entity'}">
                         <span class="action-icon" aria-hidden="true">&#9733;</span>
                         <span class="action-label">Bookmark</span>
@@ -1872,6 +1887,52 @@
         }
 
         /**
+         * Render key myths and stories section
+         */
+        renderKeyMythsSection(entity) {
+            const keyMyths = entity.keyMyths || [];
+            if (keyMyths.length === 0) return '';
+
+            return `
+                <section class="asset-section asset-keymyths-section" id="section-keymyths">
+                    ${this.renderSectionHeader('Key Myths &amp; Stories', '&#128214;', 'keymyths')}
+                    <div class="section-content ${this.collapsedSections.has('keymyths') ? 'collapsed' : ''}">
+                        <div class="keymyths-grid">
+                            ${keyMyths.map(myth => this.renderKeyMythCard(myth)).join('')}
+                        </div>
+                    </div>
+                </section>
+            `;
+        }
+
+        /**
+         * Render a single key myth card
+         */
+        renderKeyMythCard(myth) {
+            const title = myth.title || myth.name || 'Untitled Myth';
+            const description = myth.description || '';
+            const source = myth.source || '';
+
+            return `
+                <div class="keymyth-card">
+                    <div class="keymyth-header">
+                        <span class="keymyth-icon" aria-hidden="true">&#128220;</span>
+                        <h4 class="keymyth-title">${this.escapeHtml(title)}</h4>
+                    </div>
+                    ${description ? `
+                        <p class="keymyth-description">${this.escapeHtml(description)}</p>
+                    ` : ''}
+                    ${source ? `
+                        <div class="keymyth-source">
+                            <span class="source-label">Source:</span>
+                            <span class="source-value">${this.escapeHtml(source)}</span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        /**
          * Render sources section
          */
         renderSourcesSection(entity) {
@@ -1918,6 +1979,122 @@
                     </div>
                 </div>
             `;
+        }
+
+        /**
+         * Render comparative notes section (cross-cultural/religious parallels)
+         */
+        renderComparativeNotesSection(entity) {
+            const comparativeNotes = entity.comparativeNotes || {};
+            const traditions = Object.keys(comparativeNotes);
+
+            if (traditions.length === 0) return '';
+
+            return `
+                <section class="asset-section asset-comparative-section" id="section-comparative">
+                    ${this.renderSectionHeader('Comparative Studies', '&#128279;', 'comparative')}
+                    <div class="section-content ${this.collapsedSections.has('comparative') ? 'collapsed' : ''}">
+                        <div class="comparative-intro">
+                            <p>Cross-cultural and comparative religious parallels</p>
+                        </div>
+                        ${traditions.map(tradition => this.renderComparativeTradition(tradition, comparativeNotes[tradition])).join('')}
+                    </div>
+                </section>
+            `;
+        }
+
+        /**
+         * Render a single comparative tradition block
+         */
+        renderComparativeTradition(traditionName, data) {
+            if (!data || typeof data !== 'object') return '';
+
+            return `
+                <div class="comparative-tradition" data-tradition="${this.escapeAttr(traditionName)}">
+                    <h4 class="tradition-header">
+                        <span class="tradition-icon">${this.getTraditionIcon(traditionName)}</span>
+                        ${this.capitalize(traditionName)} Parallels
+                    </h4>
+
+                    ${data.overview ? `
+                        <div class="tradition-overview">
+                            <p>${this.escapeHtml(data.overview)}</p>
+                        </div>
+                    ` : ''}
+
+                    ${data.biblicalParallels?.length > 0 ? `
+                        <div class="biblical-parallels">
+                            <h5 class="parallels-subtitle">Biblical Parallels</h5>
+                            <div class="parallels-list">
+                                ${data.biblicalParallels.map(parallel => `
+                                    <div class="parallel-item">
+                                        <span class="parallel-reference">${this.escapeHtml(parallel.reference)}</span>
+                                        <p class="parallel-description">${this.escapeHtml(parallel.description)}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${data.patristicInterpretation ? `
+                        <div class="patristic-block">
+                            <h5 class="parallels-subtitle">Patristic Interpretation</h5>
+                            ${data.patristicInterpretation.summary ? `
+                                <p class="patristic-summary">${this.escapeHtml(data.patristicInterpretation.summary)}</p>
+                            ` : ''}
+                            ${data.patristicInterpretation.sources?.length > 0 ? `
+                                <div class="patristic-sources">
+                                    ${data.patristicInterpretation.sources.map(src => `
+                                        <div class="patristic-source">
+                                            <span class="source-author">${this.escapeHtml(src.author)}</span>
+                                            <span class="source-work">${this.escapeHtml(src.work)}</span>
+                                            <p class="source-interpretation">${this.escapeHtml(src.interpretation)}</p>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : ''}
+                        </div>
+                    ` : ''}
+
+                    ${data.typologicalReading ? `
+                        <div class="typological-block">
+                            <h5 class="parallels-subtitle">Typological Reading</h5>
+                            <p>${this.escapeHtml(data.typologicalReading)}</p>
+                        </div>
+                    ` : ''}
+
+                    ${data.theologicalReflection ? `
+                        <div class="theological-block">
+                            <h5 class="parallels-subtitle">Theological Reflection</h5>
+                            <p>${this.escapeHtml(data.theologicalReflection)}</p>
+                        </div>
+                    ` : ''}
+
+                    ${data.scholarlyReferences?.length > 0 ? `
+                        <div class="scholarly-refs">
+                            <h5 class="parallels-subtitle">Scholarly References</h5>
+                            <ul class="refs-list">
+                                ${data.scholarlyReferences.map(ref => `<li>${this.escapeHtml(ref)}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        /**
+         * Get icon for religious tradition
+         */
+        getTraditionIcon(tradition) {
+            const icons = {
+                'christian': '&#9769;',      // Cross
+                'jewish': '&#10017;',        // Star of David
+                'islamic': '&#9770;',        // Star and crescent
+                'hindu': '&#128330;',        // Om
+                'buddhist': '&#9784;',       // Wheel
+                'default': '&#128279;'       // Link symbol
+            };
+            return icons[tradition.toLowerCase()] || icons.default;
         }
 
         /**
@@ -2426,6 +2603,136 @@
                     this.handleQuickAction(action, panel.dataset.entityId);
                 });
             });
+
+            // Voting handlers
+            this.initializeVoting(panel);
+        }
+
+        /**
+         * Initialize voting functionality
+         */
+        initializeVoting(panel) {
+            const voteSection = panel.querySelector('.asset-vote-section');
+            if (!voteSection) return;
+
+            const entityId = voteSection.dataset.entityId;
+            const entityType = panel.dataset.entityType;
+            const voteService = window.voteService;
+
+            if (!voteService) {
+                console.warn('[AssetDetailPanel] VoteService not available');
+                return;
+            }
+
+            // Get user's existing vote
+            this.loadUserVote(voteSection, entityId, entityType, voteService);
+
+            // Attach click handlers
+            voteSection.querySelector('.vote-up')?.addEventListener('click', async () => {
+                await this.handleVote(voteSection, entityId, entityType, 'up', voteService);
+            });
+
+            voteSection.querySelector('.vote-down')?.addEventListener('click', async () => {
+                await this.handleVote(voteSection, entityId, entityType, 'down', voteService);
+            });
+        }
+
+        /**
+         * Load user's existing vote
+         */
+        async loadUserVote(voteSection, entityId, entityType, voteService) {
+            try {
+                const result = await voteService.getUserVote(entityId, entityType);
+                if (result.success && result.vote) {
+                    this.updateVoteUI(voteSection, result.vote);
+                }
+            } catch (error) {
+                console.error('[AssetDetailPanel] Failed to load user vote:', error);
+            }
+        }
+
+        /**
+         * Handle vote button click
+         */
+        async handleVote(voteSection, entityId, entityType, voteType, voteService) {
+            const upBtn = voteSection.querySelector('.vote-up');
+            const downBtn = voteSection.querySelector('.vote-down');
+            const countEl = voteSection.querySelector('.vote-count');
+
+            // Check if already voted this way (toggle off)
+            const isUpActive = upBtn.classList.contains('active');
+            const isDownActive = downBtn.classList.contains('active');
+
+            // Determine action
+            let action;
+            if (voteType === 'up' && isUpActive) {
+                action = 'remove';
+            } else if (voteType === 'down' && isDownActive) {
+                action = 'remove';
+            } else {
+                action = voteType;
+            }
+
+            // Disable buttons during request
+            upBtn.disabled = true;
+            downBtn.disabled = true;
+
+            try {
+                let result;
+                if (action === 'remove') {
+                    result = await voteService.removeVote(entityId, entityType);
+                } else if (action === 'up') {
+                    result = await voteService.upvote(entityId, entityType);
+                } else {
+                    result = await voteService.downvote(entityId, entityType);
+                }
+
+                if (result.success) {
+                    // Update UI
+                    countEl.textContent = result.newScore !== undefined ? result.newScore : (parseInt(countEl.textContent) || 0);
+
+                    if (action === 'remove') {
+                        upBtn.classList.remove('active');
+                        downBtn.classList.remove('active');
+                    } else if (action === 'up') {
+                        upBtn.classList.add('active');
+                        downBtn.classList.remove('active');
+                    } else {
+                        upBtn.classList.remove('active');
+                        downBtn.classList.add('active');
+                    }
+                } else {
+                    if (result.needsAuth) {
+                        window.dispatchEvent(new CustomEvent('toast:show', {
+                            detail: { message: 'Please sign in to vote', type: 'warning' }
+                        }));
+                    } else {
+                        console.error('[AssetDetailPanel] Vote failed:', result.error);
+                    }
+                }
+            } catch (error) {
+                console.error('[AssetDetailPanel] Vote error:', error);
+            } finally {
+                upBtn.disabled = false;
+                downBtn.disabled = false;
+            }
+        }
+
+        /**
+         * Update vote UI based on user's vote
+         */
+        updateVoteUI(voteSection, vote) {
+            const upBtn = voteSection.querySelector('.vote-up');
+            const downBtn = voteSection.querySelector('.vote-down');
+
+            upBtn.classList.remove('active');
+            downBtn.classList.remove('active');
+
+            if (vote === 'up' || vote === 1) {
+                upBtn.classList.add('active');
+            } else if (vote === 'down' || vote === -1) {
+                downBtn.classList.add('active');
+            }
         }
 
         /**
