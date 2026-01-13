@@ -36,9 +36,10 @@ const spaError = (...args) => console.error('[SPA]', ...args);
 
 /**
  * Navigation timing metrics collector
- * Tracks performance data for navigation events
+ * Uses external module if available (js/router/navigation-metrics.js)
+ * Falls back to inline definition for backwards compatibility
  */
-const NavigationMetrics = {
+const NavigationMetrics = window.NavigationMetrics || {
     _metrics: [],
     _maxMetrics: 100,
 
@@ -89,8 +90,9 @@ const NavigationMetrics = {
 
 /**
  * Scroll position manager for history navigation
+ * Uses external module if available (js/router/scroll-manager.js)
  */
-const ScrollManager = {
+const ScrollManager = window.ScrollManager || {
     _positions: new Map(),
     _maxEntries: 50,
 
@@ -134,8 +136,9 @@ const ScrollManager = {
 
 /**
  * Route preloader for hover-based prefetching
+ * Uses external module if available (js/router/route-preloader.js)
  */
-const RoutePreloader = {
+const RoutePreloader = window.RoutePreloader || {
     _cache: new Map(),
     _pending: new Map(),
     _maxCacheSize: 20,
@@ -298,6 +301,7 @@ class SPANavigation {
             mythology: /^#?\/mythology\/([^\/]+)\/?$/,
             entity: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/([^\/]+)\/?$/,
             entity_alt: /^#?\/entity\/([^\/]+)\/([^\/]+)\/([^\/]+)\/?$/,
+            entity_simple: /^#?\/entity\/([^\/]+)\/([^\/]+)\/?$/,  // 2-param: #/entity/collection/id
             category: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/?$/,
             search: /^#?\/search\/?$/,
             corpus_explorer: /^#?\/corpus-explorer\/?$/,
@@ -318,6 +322,7 @@ class SPANavigation {
             mythology: 'Mythology',
             entity: 'Entity Details',
             entity_alt: 'Entity Details',
+            entity_simple: 'Entity Details',
             category: 'Category',
             search: 'Search',
             corpus_explorer: 'Corpus Explorer',
@@ -406,6 +411,41 @@ class SPANavigation {
         }
 
         spaLog('Constructor completed');
+    }
+
+    /**
+     * Convert entity type to collection name (singular to plural)
+     * @param {string} type - Entity type (e.g., 'deity', 'hero', 'deities')
+     * @returns {string} Collection name (e.g., 'deities', 'heroes')
+     */
+    getCollectionName(type) {
+        // Normalize to lowercase for case-insensitive matching
+        const normalizedType = type?.toLowerCase() || type;
+
+        const singularToPlural = {
+            'deity': 'deities',
+            'hero': 'heroes',
+            'creature': 'creatures',
+            'item': 'items',
+            'place': 'places',
+            'concept': 'concepts',
+            'magic': 'magic',
+            'theory': 'user_theories',
+            'mythology': 'mythologies',
+            'archetype': 'archetypes',
+            'herb': 'herbs',
+            'ritual': 'rituals',
+            'text': 'texts',
+            'symbol': 'symbols',
+            'cosmology': 'cosmology',
+            'event': 'events',
+            'being': 'beings'
+        };
+        // If already plural (in the map values), return as-is
+        if (Object.values(singularToPlural).includes(normalizedType)) {
+            return normalizedType;
+        }
+        return singularToPlural[normalizedType] || normalizedType;
     }
 
     /**
@@ -925,14 +965,25 @@ class SPANavigation {
                 const match = path.match(this.routes.browse_category);
                 spaLog('Matched BROWSE CATEGORY route:', match[1]);
                 await this.renderBrowseCategory(match[1]);
+            } else if (this.routes.entity_simple.test(path)) {
+                // 2-param format: #/entity/collection/id (e.g., #/entity/deities/zeus)
+                const match = path.match(this.routes.entity_simple);
+                const collection = this.getCollectionName(match[1]);
+                spaLog('Matched ENTITY (simple 2-param) route:', collection, match[2]);
+                // No mythology in URL, pass null - renderEntity will extract from entity data
+                await this.renderEntity(null, collection, match[2]);
             } else if (this.routes.entity_alt.test(path)) {
+                // 3-param format: #/entity/collection/mythology/id
                 const match = path.match(this.routes.entity_alt);
+                const collection = this.getCollectionName(match[1]);
                 spaLog('Matched ENTITY (alt format) route:', match[3]);
-                await this.renderEntity(match[2], match[1], match[3]);
+                await this.renderEntity(match[2], collection, match[3]);
             } else if (this.routes.entity.test(path)) {
+                // 3-param format: #/mythology/mythology/type/id
                 const match = path.match(this.routes.entity);
+                const collection = this.getCollectionName(match[2]);
                 spaLog('Matched ENTITY route:', match[3]);
-                await this.renderEntity(match[1], match[2], match[3]);
+                await this.renderEntity(match[1], collection, match[3]);
             } else if (this.routes.category.test(path)) {
                 const match = path.match(this.routes.category);
                 spaLog('Matched CATEGORY route:', match[2]);
@@ -1541,8 +1592,10 @@ class SPANavigation {
 
     async renderBasicEntityPage(mythology, categoryType, entityId) {
         let entity = null;
+        // Ensure we use the correct collection name (handles singular/plural)
+        const collectionName = this.getCollectionName(categoryType);
         try {
-            const doc = await this.db.collection(categoryType).doc(entityId).get();
+            const doc = await this.db.collection(collectionName).doc(entityId).get();
             if (doc.exists) {
                 entity = { id: doc.id, ...doc.data() };
             }

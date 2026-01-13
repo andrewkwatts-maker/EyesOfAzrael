@@ -1,12 +1,12 @@
 # Quick Fix Summary
 
-**Generated:** 2025-12-29T01:49:15.215Z
+**Generated:** 2026-01-11T02:41:15.167Z
 
 
 ## Immediate Actions Required
 
 
-### 🔴 CRITICAL (729 issues)
+### 🔴 CRITICAL (750 issues)
 
 **Fix immediately - site is broken**
 
@@ -14,67 +14,67 @@
 - [ ] **#angels-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#devas-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#yazatas-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#amesha-spentas-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#apsaras-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#gandharvas-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#valkyries-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#houris-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#fravashis-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#dakinis-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#shen-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#aeons-section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#hierogamy**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#/guidelines**
   - Issue: missing-route
@@ -84,47 +84,47 @@
 - [ ] **#overview**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 3 file(s)
+  - Found in: 14 file(s)
 
 - [ ] **#history**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#mythology**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 5 file(s)
+  - Found in: 19 file(s)
 
 - [ ] **#creation**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#heroes**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#monsters**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#references**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#section**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#main-content**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 3 file(s)
+  - Found in: 13 file(s)
 
 - [ ] **#features**
   - Issue: missing-route
@@ -3524,137 +3524,256 @@
 - [ ] **#sacred-plants**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 2 file(s)
+  - Found in: 4 file(s)
 
 - [ ] **#meditation**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#ayurveda**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#temple**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#biblical**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#historical**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 5 file(s)
 
 - [ ] **#preparation**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 2 file(s)
+  - Found in: 17 file(s)
 
 - [ ] **#modern**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 2 file(s)
+  - Found in: 6 file(s)
 
 - [ ] **#sacred-trees**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#ritual-plants**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#sacred-resins**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#purification**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#visionary**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#traditions**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 2 file(s)
+  - Found in: 12 file(s)
 
 - [ ] **#medicinal**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 13 file(s)
 
 - [ ] **#magical**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 9 file(s)
 
 - [ ] **#safety**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 12 file(s)
 
 - [ ] **#identity**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#candidates**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#symbolism**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 2 file(s)
+  - Found in: 5 file(s)
 
 - [ ] **#attributes**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 3 file(s)
+  - Found in: 11 file(s)
 
 - [ ] **#relationships**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 3 file(s)
+  - Found in: 11 file(s)
 
 - [ ] **#worship**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 2 file(s)
+  - Found in: 10 file(s)
 
 - [ ] **#tricksters**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#creators**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#sky-spirits**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
-  - Found in: 1 file(s)
+  - Found in: 2 file(s)
 
 - [ ] **#sacred-beings**
   - Issue: missing-route
   - Fix: Add route pattern to spa-navigation.js
+  - Found in: 2 file(s)
+
+- [ ] **#enlightenment**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
   - Found in: 1 file(s)
+
+- [ ] **#sutras**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 3 file(s)
+
+- [ ] **#pilgrimage**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#practice**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 2 file(s)
+
+- [ ] **#deities**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#sacred**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#ritual**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 2 file(s)
+
+- [ ] **#origins**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#zen**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#ceremony**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#scripture**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 2 file(s)
+
+- [ ] **#kabbalah**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 2 file(s)
+
+- [ ] **#folklore**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#pharmacology**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#experience**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#spiritual**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#dreams**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#forms**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#theories**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#ameretat**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+- [ ] **#haurvatat**
+  - Issue: missing-route
+  - Fix: Add route pattern to spa-navigation.js
+  - Found in: 1 file(s)
+
+
+### 🟠 HIGH PRIORITY (2 issues)
+
+**Fix this week**
+
+
+- [ ] **#/browse/archetypes**
+  - Issue: invalid-category
+  - Fix: Valid categories: deities, heroes, creatures, texts, rituals, herbs, cosmology, magic, items, places, symbols
+
+- [ ] **#/mythology/${mythology.id}**
+  - Issue: invalid-mythology
+  - Fix: Valid mythologies: greek, norse, egyptian, hindu, chinese, japanese, celtic, babylonian, sumerian, persian, roman, aztec, mayan, buddhist, christian, jewish, islamic, yoruba, native_american, apocryphal
 
 
 ## Auto-Fix Available

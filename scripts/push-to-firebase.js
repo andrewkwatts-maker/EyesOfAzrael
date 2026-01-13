@@ -544,29 +544,42 @@ class FirebaseUploader {
       return;
     }
 
-    if (this.validationResults.failed.length > 0 && !this.skipValidation) {
-      console.log('\n❌ Cannot upload: validation failures detected');
-      console.log('Use --skip-validation to override (not recommended)');
+    // If skip-validation, upload all loaded assets
+    if (this.skipValidation) {
+      const allAssetsList = Array.from(this.allAssets.keys()).map(id => ({ id }));
+      console.log(`\nSkipping validation - uploading all ${allAssetsList.length} assets...`);
+      await this.uploadAssetList(allAssetsList);
       return;
     }
 
+    // With --force, upload passed assets even if there are failures
     const assetsToUpload = this.force
       ? [...this.validationResults.passed]
       : this.validationResults.passed.filter(a => !a.warnings || a.warnings.length === 0);
+
+    if (this.validationResults.failed.length > 0) {
+      console.log(`\n⚠️ ${this.validationResults.failed.length} assets failed validation and will be skipped`);
+    }
 
     if (assetsToUpload.length === 0) {
       console.log('\nNo assets to upload');
       return;
     }
 
-    console.log(`\nUploading ${assetsToUpload.length} assets to Firebase...`);
+    await this.uploadAssetList(assetsToUpload);
+  }
 
-    const batch = this.db.batch();
+  async uploadAssetList(assetList) {
+    console.log(`\nUploading ${assetList.length} assets to Firebase...`);
+
+    let batch = this.db.batch();
     let batchCount = 0;
     let totalUploaded = 0;
 
-    for (const item of assetsToUpload) {
+    for (const item of assetList) {
       const asset = this.allAssets.get(item.id);
+      if (!asset) continue;
+
       const collection = this.categoryToCollection[asset._category] || asset._category;
       const cleaned = this.cleanAssetForUpload(asset);
 
@@ -581,6 +594,7 @@ class FirebaseUploader {
         console.log(`  Committed batch of ${batchCount} assets`);
         totalUploaded += batchCount;
         batchCount = 0;
+        batch = this.db.batch(); // Create new batch
       }
     }
 

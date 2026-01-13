@@ -250,7 +250,7 @@ async function main() {
   const args = process.argv.slice(2);
   const dryRun = !args.includes('--apply');
 
-  const assetsPath = path.join(__dirname, '..', 'firebase-assets-enhanced');
+  const assetsPath = path.join(__dirname, '..', 'firebase-assets-downloaded');
   const reportPath = path.join(__dirname, '..', 'reports', 'cross-link-validation-report.json');
 
   const adder = new BidirectionalLinkAdder(assetsPath, reportPath, dryRun);
