@@ -1,96 +1,94 @@
 /**
- * Analyze broken link patterns to understand how to fix them
+ * Analyze Broken Links
+ * Categorizes broken links to identify fix strategies
  */
 
-const fs = require('fs');
+const fs = require('fs').promises;
 const path = require('path');
 
-const reportPath = path.join(__dirname, 'reports', 'connection-validation-report.json');
-const report = JSON.parse(fs.readFileSync(reportPath, 'utf-8'));
+const ASSETS_DIR = path.join(__dirname, '..', 'firebase-assets-downloaded');
+const REPORT_PATH = path.join(__dirname, '..', 'reports', 'broken-links.json');
 
-// Analyze broken link patterns
-const patterns = {
-    containsRelationship: [],
-    textInsteadOfId: [],
-    validLooking: [],
-    other: []
-};
+async function loadAllAssetIds() {
+  const assetIds = new Set();
+  const categories = await fs.readdir(ASSETS_DIR);
 
-const relationshipWords = ['mother', 'father', 'sister', 'brother', 'wife', 'husband', 'son', 'daughter', 'half-', 'through', 'consort'];
-const descriptionIndicators = ['none', 'various', 'prominently', 'named', 'mythology', 'associated', 'connected', 'related', 'unknown', 'unclear'];
+  for (const category of categories) {
+    const categoryPath = path.join(ASSETS_DIR, category);
+    const stat = await fs.stat(categoryPath);
+    if (!stat.isDirectory()) continue;
 
-report.brokenLinks.forEach(link => {
-    const id = link.targetId || '';
-    const name = link.targetName || '';
-
-    if (relationshipWords.some(w => id.toLowerCase().includes(w))) {
-        patterns.containsRelationship.push({ id, name, source: link.assetId, field: link.field });
+    const files = await fs.readdir(categoryPath);
+    for (const file of files) {
+      if (file.endsWith('.json')) {
+        assetIds.add(file.replace('.json', ''));
+      }
     }
-    else if (descriptionIndicators.some(w => id.toLowerCase().includes(w)) || id.length > 40) {
-        patterns.textInsteadOfId.push({ id, name, source: link.assetId, field: link.field });
+  }
+  return assetIds;
+}
+
+async function analyzeLinks() {
+  console.log('Loading broken links report...');
+  const report = JSON.parse(await fs.readFile(REPORT_PATH, 'utf8'));
+  const existingIds = await loadAllAssetIds();
+
+  console.log('Found ' + report.count + ' broken links');
+  console.log('Database has ' + existingIds.size + ' assets\n');
+
+  const uniqueTargets = new Map();
+
+  for (const link of report.links) {
+    const targetId = link.targetId;
+    if (!uniqueTargets.has(targetId)) {
+      uniqueTargets.set(targetId, { count: 0, sources: new Set(), examples: [] });
     }
-    else if (id.match(/^[a-z][a-z0-9_-]+$/i) && id.length < 40) {
-        patterns.validLooking.push({ id, name, source: link.assetId, field: link.field });
+    const entry = uniqueTargets.get(targetId);
+    entry.count++;
+    entry.sources.add(link.assetId);
+    if (entry.examples.length < 2) {
+      entry.examples.push({ source: link.assetId, field: link.field });
     }
-    else {
-        patterns.other.push({ id, name, source: link.assetId, field: link.field });
+  }
+
+  // Categorize
+  const malformed = [];
+  const validMissing = [];
+
+  for (const [targetId, data] of uniqueTargets) {
+    const item = { targetId, count: data.count, sources: data.sources.size };
+    
+    if (targetId.includes('-lord-') || targetId.includes('-goddess-') ||
+        targetId.includes('-god-of-') || targetId.includes('-sent-to-') ||
+        targetId.includes('-some-traditions') || targetId.includes('-strength-') ||
+        targetId.startsWith('s-') && targetId.length > 20 ||
+        targetId.length > 40) {
+      malformed.push(item);
+    } else {
+      validMissing.push(item);
     }
-});
+  }
 
-console.log('=== Broken Link Pattern Analysis ===\n');
-console.log('Total broken links:', report.brokenLinks.length, '\n');
+  malformed.sort((a, b) => b.count - a.count);
+  validMissing.sort((a, b) => b.count - a.count);
 
-console.log('Contains relationship words:', patterns.containsRelationship.length);
-patterns.containsRelationship.slice(0, 8).forEach(p => {
-    console.log('   ', p.id, 'from', p.source);
-});
+  console.log('='.repeat(60));
+  console.log('ANALYSIS SUMMARY');
+  console.log('='.repeat(60));
+  console.log('Unique broken targets: ' + uniqueTargets.size);
+  console.log('Malformed IDs (to remove): ' + malformed.length);
+  console.log('Valid missing entities: ' + validMissing.length);
 
-console.log('\nText instead of ID:', patterns.textInsteadOfId.length);
-patterns.textInsteadOfId.slice(0, 8).forEach(p => {
-    console.log('   ', p.id, 'from', p.source);
-});
+  console.log('\nMALFORMED IDs (first 15):');
+  malformed.slice(0, 15).forEach(m => console.log('  ' + m.targetId));
 
-console.log('\nValid looking IDs:', patterns.validLooking.length);
-patterns.validLooking.slice(0, 15).forEach(p => {
-    console.log('   ', p.id, 'from', p.source);
-});
+  console.log('\nVALID MISSING (first 30):');
+  validMissing.slice(0, 30).forEach(m => console.log('  ' + m.targetId + ' (' + m.count + ' refs)'));
 
-console.log('\nOther patterns:', patterns.other.length);
-patterns.other.slice(0, 8).forEach(p => {
-    console.log('   ', p.id, 'from', p.source);
-});
+  // Save analysis
+  const analysis = { malformed, validMissing, summary: { total: uniqueTargets.size, malformedCount: malformed.length, validCount: validMissing.length } };
+  await fs.writeFile(path.join(__dirname, '..', 'reports', 'broken-link-analysis.json'), JSON.stringify(analysis, null, 2));
+  console.log('\nAnalysis saved to reports/broken-link-analysis.json');
+}
 
-// Count by source asset
-const bySource = {};
-report.brokenLinks.forEach(link => {
-    bySource[link.assetId] = (bySource[link.assetId] || 0) + 1;
-});
-
-const topSources = Object.entries(bySource)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 20);
-
-console.log('\n=== Assets with most broken links ===');
-topSources.forEach(([id, count]) => {
-    console.log(' ', id + ':', count, 'broken links');
-});
-
-// Save patterns
-fs.writeFileSync(
-    path.join(__dirname, 'reports', 'broken-link-patterns.json'),
-    JSON.stringify({
-        summary: {
-            total: report.brokenLinks.length,
-            containsRelationship: patterns.containsRelationship.length,
-            textInsteadOfId: patterns.textInsteadOfId.length,
-            validLooking: patterns.validLooking.length,
-            other: patterns.other.length
-        },
-        containsRelationship: patterns.containsRelationship,
-        textInsteadOfId: patterns.textInsteadOfId,
-        validLooking: patterns.validLooking,
-        other: patterns.other
-    }, null, 2)
-);
-
-console.log('\nPatterns saved to scripts/reports/broken-link-patterns.json');
+analyzeLinks().catch(console.error);
