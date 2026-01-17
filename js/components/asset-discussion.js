@@ -525,7 +525,7 @@ class AssetDiscussion {
                                     </svg>
                                     <span class="corpus-citation-label">Corpus Citation</span>
                                 </div>
-                                <a href="#/corpus-search?query=${encodeURIComponent(comment.corpusQuery.term)}"
+                                <a href="/corpus-explorer.html?term=${encodeURIComponent(comment.corpusQuery.term)}"
                                    class="corpus-citation-link"
                                    data-query-id="${this._escapeAttr(comment.corpusQuery.id || '')}">
                                     <span class="corpus-query-term">"${this._escapeHtml(comment.corpusQuery.term)}"</span>

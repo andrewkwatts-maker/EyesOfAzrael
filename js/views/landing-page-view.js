@@ -2665,38 +2665,39 @@ class LandingPageView {
     }
 
     /**
-     * Attach event listeners
+     * Attach event listeners with proper cleanup registration
      */
     attachEventListeners() {
+        // Store references for cleanup
+        this._eventListeners = [];
+        this._abortController = new AbortController();
+        const signal = this._abortController.signal;
+
         const cards = document.querySelectorAll('.landing-category-card');
         cards.forEach(card => {
+            // Use signal for automatic cleanup
             card.addEventListener('click', (e) => {
                 const type = card.dataset.type;
                 console.log('[Landing Page] Navigating to:', type);
-                // SPA navigation will handle the route
-            });
+            }, { signal });
 
-            // Add keyboard support for Enter key
             card.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     card.click();
                 }
-            });
+            }, { signal });
 
-            // Listen for custom context menu events
             card.addEventListener('add-to-favorites', (e) => {
                 const type = card.dataset.type;
                 console.log('[Landing Page] Adding to favorites:', type);
-                // Could integrate with a favorites service here
                 this.showToast(`Added ${type} to favorites`);
-            });
+            }, { signal });
 
             card.addEventListener('quick-view', (e) => {
                 const type = card.dataset.type;
                 console.log('[Landing Page] Quick view:', type);
-                // Could show a modal preview here
-            });
+            }, { signal });
         });
 
         // Hero search form handling
@@ -2709,22 +2710,27 @@ class LandingPageView {
                 if (query) {
                     window.location.hash = `#/search?q=${encodeURIComponent(query)}`;
                 }
-            });
+            }, { signal });
 
-            // Enter key handling
             searchInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') {
                     e.preventDefault();
                     searchForm.dispatchEvent(new Event('submit'));
                 }
-            });
+            }, { signal });
         }
 
-        // Listen for pull-to-refresh event
-        document.addEventListener('pull-to-refresh', async () => {
+        // Pull-to-refresh handler (document level - MUST be cleaned up)
+        this._pullToRefreshHandler = async () => {
             console.log('[Landing Page] Pull-to-refresh triggered');
             await this.handleRefresh();
-        });
+        };
+        document.addEventListener('pull-to-refresh', this._pullToRefreshHandler);
+
+        // Register cleanup callback with SPA navigation
+        if (window.SPANavigation) {
+            window.SPANavigation.registerViewCleanup(() => this.cleanup());
+        }
 
         // Load featured entities if database is available
         this.loadFeaturedEntities();
@@ -2737,6 +2743,33 @@ class LandingPageView {
 
         // Mark images as loaded for lazy loading
         this.initLazyImages();
+    }
+
+    /**
+     * Cleanup method to remove all event listeners
+     */
+    cleanup() {
+        console.log('[Landing Page] Running cleanup');
+
+        // Abort all listeners registered with signal
+        if (this._abortController) {
+            this._abortController.abort();
+            this._abortController = null;
+        }
+
+        // Remove document-level listeners
+        if (this._pullToRefreshHandler) {
+            document.removeEventListener('pull-to-refresh', this._pullToRefreshHandler);
+            this._pullToRefreshHandler = null;
+        }
+
+        // Clear any pending timeouts
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = null;
+        }
+
+        this._eventListeners = [];
     }
 
     /**
