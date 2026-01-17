@@ -1201,23 +1201,28 @@ class BrowseCategoryView {
     }
 
     /**
-     * Attach event listeners
+     * Attach event listeners with proper cleanup registration
      */
     attachEventListeners() {
+        // Initialize cleanup tracking
+        this._abortController = new AbortController();
+        const signal = this._abortController.signal;
+        this._documentListeners = [];
+
         // Quick filter chips
         document.querySelectorAll('.filter-chip').forEach(chip => {
-            chip.addEventListener('click', (e) => this.handleChipClick(e));
+            chip.addEventListener('click', (e) => this.handleChipClick(e), { signal });
         });
 
         // Clear all filters
         const clearBtn = document.getElementById('clearFiltersBtn');
         if (clearBtn) {
-            clearBtn.addEventListener('click', () => this.clearAllFilters());
+            clearBtn.addEventListener('click', () => this.clearAllFilters(), { signal });
         }
 
         const clearFromEmpty = document.getElementById('clearFiltersFromEmpty');
         if (clearFromEmpty) {
-            clearFromEmpty.addEventListener('click', () => this.clearAllFilters());
+            clearFromEmpty.addEventListener('click', () => this.clearAllFilters(), { signal });
         }
 
         // Search filter with debouncing
@@ -1229,7 +1234,7 @@ class BrowseCategoryView {
                     this.searchTerm = e.target.value.toLowerCase();
                     this.applyFilters();
                 }, 300);
-            });
+            }, { signal });
         }
 
         // Sort order
@@ -1239,7 +1244,7 @@ class BrowseCategoryView {
                 this.sortBy = e.target.value;
                 localStorage.setItem('browse-sort-by', this.sortBy);
                 this.applyFilters();
-            });
+            }, { signal });
         }
 
         // View toggle with smooth transition
@@ -1254,12 +1259,14 @@ class BrowseCategoryView {
                 localStorage.setItem('browse-view-mode', this.viewMode);
 
                 // Smooth transition
-                grid.style.opacity = '0';
-                setTimeout(() => {
-                    grid.className = `entity-grid ${this.viewMode}-view density-${this.viewDensity}`;
-                    grid.style.opacity = '1';
-                }, 150);
-            });
+                if (grid) {
+                    grid.style.opacity = '0';
+                    setTimeout(() => {
+                        grid.className = `entity-grid ${this.viewMode}-view density-${this.viewDensity}`;
+                        grid.style.opacity = '1';
+                    }, 150);
+                }
+            }, { signal });
         });
 
         // Density toggle
@@ -1270,12 +1277,14 @@ class BrowseCategoryView {
             densityBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 densityMenu.classList.toggle('active');
-            });
+            }, { signal });
 
-            // Close menu on outside click
-            document.addEventListener('click', () => {
+            // Close menu on outside click - document level, needs manual cleanup
+            this._densityMenuCloseHandler = () => {
                 densityMenu.classList.remove('active');
-            });
+            };
+            document.addEventListener('click', this._densityMenuCloseHandler);
+            this._documentListeners.push({ event: 'click', handler: this._densityMenuCloseHandler });
 
             // Density options
             document.querySelectorAll('.density-option').forEach(option => {
@@ -1287,41 +1296,89 @@ class BrowseCategoryView {
                     // Update UI
                     document.querySelectorAll('.density-option').forEach(o => o.classList.remove('active'));
                     option.classList.add('active');
-                    document.querySelector('.density-label').textContent = this.capitalize(this.viewDensity);
+                    const label = document.querySelector('.density-label');
+                    if (label) label.textContent = this.capitalize(this.viewDensity);
 
                     // Re-render grid
-                    grid.className = `entity-grid ${this.viewMode}-view density-${this.viewDensity}`;
-                    this.updateGrid();
+                    if (grid) {
+                        grid.className = `entity-grid ${this.viewMode}-view density-${this.viewDensity}`;
+                        this.updateGrid();
+                    }
 
                     densityMenu.classList.remove('active');
-                });
+                }, { signal });
             });
         }
 
         // Virtual scrolling for large lists
         const container = document.getElementById('entityContainer');
         if (container && this.entities.length > 50) {
-            container.addEventListener('scroll', () => this.handleScroll());
+            container.addEventListener('scroll', () => this.handleScroll(), { signal });
         }
 
         // Quick action buttons on entity cards (delegated)
-        this.setupQuickActionListeners();
+        this.setupQuickActionListeners(signal);
 
         // Pull-to-refresh support for mobile
         this.setupPullToRefresh();
 
         // Add context menu support to entity cards
-        this.setupMobileContextMenus();
+        this.setupMobileContextMenus(signal);
+
+        // Register cleanup with SPA navigation
+        if (window.SPANavigation) {
+            window.SPANavigation.registerViewCleanup(() => this.cleanup());
+        }
+    }
+
+    /**
+     * Cleanup method to remove all event listeners
+     */
+    cleanup() {
+        console.log('[Browse View] Running cleanup');
+
+        // Abort all listeners registered with signal
+        if (this._abortController) {
+            this._abortController.abort();
+            this._abortController = null;
+        }
+
+        // Remove document-level listeners
+        if (this._documentListeners) {
+            this._documentListeners.forEach(({ event, handler }) => {
+                document.removeEventListener(event, handler);
+            });
+            this._documentListeners = [];
+        }
+
+        // Remove pull-to-refresh handler
+        if (this._pullToRefreshHandler) {
+            document.removeEventListener('pull-to-refresh', this._pullToRefreshHandler);
+            this._pullToRefreshHandler = null;
+        }
+
+        // Clear any pending timeouts
+        if (this.searchTimeout) {
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = null;
+        }
+
+        if (this.scrollTimeout) {
+            clearTimeout(this.scrollTimeout);
+            this.scrollTimeout = null;
+        }
     }
 
     /**
      * Setup pull-to-refresh for mobile
      */
     setupPullToRefresh() {
-        document.addEventListener('pull-to-refresh', async () => {
+        this._pullToRefreshHandler = async () => {
             console.log('[Browse View] Pull-to-refresh triggered');
             await this.handleRefresh();
-        });
+        };
+        document.addEventListener('pull-to-refresh', this._pullToRefreshHandler);
+        this._documentListeners.push({ event: 'pull-to-refresh', handler: this._pullToRefreshHandler });
     }
 
     /**
@@ -1358,7 +1415,7 @@ class BrowseCategoryView {
     /**
      * Setup context menus for entity cards on mobile
      */
-    setupMobileContextMenus() {
+    setupMobileContextMenus(signal) {
         // Add context menu data to entity cards
         const cards = document.querySelectorAll('.entity-card, .browse-entity-card');
         cards.forEach(card => {
@@ -1382,8 +1439,8 @@ class BrowseCategoryView {
             }
         });
 
-        // Listen for context menu events
-        document.addEventListener('add-to-favorites', (e) => {
+        // Listen for context menu events - use document level with tracking
+        this._addToFavoritesHandler = (e) => {
             const card = e.target.closest('[data-entity-id]');
             if (card) {
                 const entityId = card.dataset.entityId;
@@ -1391,22 +1448,26 @@ class BrowseCategoryView {
                 this.toggleFavorite(entityId, collection);
                 this.showToast('Added to favorites', 'success');
             }
-        });
+        };
+        document.addEventListener('add-to-favorites', this._addToFavoritesHandler);
+        this._documentListeners.push({ event: 'add-to-favorites', handler: this._addToFavoritesHandler });
 
-        document.addEventListener('compare', (e) => {
+        this._compareHandler = (e) => {
             const card = e.target.closest('[data-entity-id]');
             if (card) {
                 const entityId = card.dataset.entityId;
                 const collection = card.dataset.collection || this.category;
                 window.location.hash = `#/compare/${collection}:${entityId}`;
             }
-        });
+        };
+        document.addEventListener('compare', this._compareHandler);
+        this._documentListeners.push({ event: 'compare', handler: this._compareHandler });
     }
 
     /**
      * Setup delegated event listeners for quick action buttons
      */
-    setupQuickActionListeners() {
+    setupQuickActionListeners(signal) {
         const grid = document.getElementById('entityGrid');
         if (!grid) return;
 
@@ -1428,7 +1489,7 @@ class BrowseCategoryView {
             } else if (action === 'compare') {
                 this.handleCompareAction(actionBtn, entityId, collection);
             }
-        });
+        }, { signal });
     }
 
     /**

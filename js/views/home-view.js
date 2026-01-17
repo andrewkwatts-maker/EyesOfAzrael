@@ -741,16 +741,37 @@ class HomeView {
     }
 
     /**
-     * Attach event listeners
+     * Attach event listeners with proper cleanup
      */
     attachEventListeners() {
+        // Initialize cleanup tracking
+        this._abortController = new AbortController();
+        const signal = this._abortController.signal;
+
         // Add hover effects or click tracking if needed
         const cards = document.querySelectorAll('.mythology-card');
         cards.forEach(card => {
             card.addEventListener('mouseenter', () => {
                 console.log('[Home View] Hovering over:', card.dataset.mythology);
-            });
+            }, { signal });
         });
+
+        // Register cleanup with SPA navigation
+        if (window.SPANavigation) {
+            window.SPANavigation.registerViewCleanup(() => this.cleanup());
+        }
+    }
+
+    /**
+     * Cleanup method to remove all event listeners
+     */
+    cleanup() {
+        console.log('[Home View] Running cleanup');
+
+        if (this._abortController) {
+            this._abortController.abort();
+            this._abortController = null;
+        }
     }
 }
 

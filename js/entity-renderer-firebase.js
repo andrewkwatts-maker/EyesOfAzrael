@@ -18,6 +18,44 @@ class FirebaseEntityRenderer {
         // Entity cache with 5-minute TTL
         this._cache = new Map();
         this._cacheTTL = 5 * 60 * 1000; // 5 minutes
+        this._maxCacheSize = 100; // Prevent memory bloat
+        // Schema section renderer instance
+        this.schemaSectionRenderer = null;
+        // Periodic cache cleanup (every 2 minutes)
+        this._cleanupInterval = setInterval(() => this._cleanupCache(), 2 * 60 * 1000);
+    }
+
+    /**
+     * Clean up expired cache entries to prevent memory leaks
+     */
+    _cleanupCache() {
+        const now = Date.now();
+        for (const [key, value] of this._cache.entries()) {
+            if (now - value.timestamp >= this._cacheTTL) {
+                this._cache.delete(key);
+            }
+        }
+        // Also trim if cache exceeds max size (keep newest entries)
+        if (this._cache.size > this._maxCacheSize) {
+            const entries = Array.from(this._cache.entries())
+                .sort((a, b) => b[1].timestamp - a[1].timestamp);
+            this._cache.clear();
+            entries.slice(0, this._maxCacheSize).forEach(([k, v]) => this._cache.set(k, v));
+        }
+    }
+
+    /**
+     * Get or create schema section renderer
+     */
+    getSchemaSectionRenderer() {
+        if (!this.schemaSectionRenderer || this.schemaSectionRenderer.mythology !== this.mythology) {
+            this.schemaSectionRenderer = new SchemaSectionRenderer({
+                mythology: this.mythology,
+                entityType: this.currentEntity?.type,
+                baseUrl: ''
+            });
+        }
+        return this.schemaSectionRenderer;
     }
 
     /**
@@ -62,15 +100,25 @@ class FirebaseEntityRenderer {
     async loadAndRender(type, id, mythology, container) {
         await this.init();
 
+        // Input validation - prevent path traversal and injection
+        const validTypes = ['deity', 'hero', 'creature', 'item', 'place', 'concept', 'magic', 'theory', 'ritual', 'text', 'archetype', 'symbol', 'herb', 'mythology', 'being', 'event', 'cosmology'];
+        const sanitizedType = String(type || '').toLowerCase().replace(/[^a-z-]/g, '');
+        const sanitizedId = String(id || '').replace(/[^a-zA-Z0-9_-]/g, '');
+
+        if (!sanitizedType || !sanitizedId) {
+            this.renderError(container, 'Invalid entity type or ID');
+            return;
+        }
+
         // Show loading state
-        this.showLoading(container, type);
+        this.showLoading(container, sanitizedType);
 
         try {
-            // Fetch entity from Firestore (with caching)
-            const entity = await this.fetchEntity(type, id);
+            // Fetch entity from Firestore (with caching) - use sanitized values
+            const entity = await this.fetchEntity(sanitizedType, sanitizedId);
 
             if (!entity) {
-                this.renderError(container, `Entity not found: ${type}/${id}`);
+                this.renderError(container, `Entity not found: ${sanitizedType}/${sanitizedId}`);
                 return;
             }
 
@@ -106,6 +154,21 @@ class FirebaseEntityRenderer {
                     break;
                 case 'theory':
                     this.renderTheory(entity, container);
+                    break;
+                case 'ritual':
+                    this.renderRitual(entity, container);
+                    break;
+                case 'text':
+                    this.renderText(entity, container);
+                    break;
+                case 'archetype':
+                    this.renderArchetype(entity, container);
+                    break;
+                case 'symbol':
+                    this.renderSymbol(entity, container);
+                    break;
+                case 'herb':
+                    this.renderHerb(entity, container);
                     break;
                 default:
                     this.renderGenericEntity(entity, container);
@@ -167,6 +230,29 @@ class FirebaseEntityRenderer {
     }
 
     /**
+     * Get default icon for entity type
+     */
+    getDefaultIcon(type) {
+        const icons = {
+            'deity': '⚡', 'deities': '⚡',
+            'hero': '🗡️', 'heroes': '🗡️',
+            'creature': '🐉', 'creatures': '🐉',
+            'item': '⚔️', 'items': '⚔️',
+            'place': '🏛️', 'places': '🏛️',
+            'concept': '💭', 'concepts': '💭',
+            'event': '📅', 'events': '📅',
+            'text': '📜', 'texts': '📜',
+            'ritual': '🕯️', 'rituals': '🕯️',
+            'symbol': '☯️', 'symbols': '☯️',
+            'archetype': '🎭', 'archetypes': '🎭',
+            'herb': '🌿', 'herbs': '🌿',
+            'magic': '🔮',
+            'mythology': '🌍', 'mythologies': '🌍'
+        };
+        return icons[type?.toLowerCase()] || '✨';
+    }
+
+    /**
      * Get Firestore collection name for entity type
      */
     getCollectionName(type) {
@@ -179,24 +265,46 @@ class FirebaseEntityRenderer {
             'concept': 'concepts',
             'magic': 'magic',
             'theory': 'user_theories',
-            'mythology': 'mythologies'
+            'mythology': 'mythologies',
+            'ritual': 'rituals',
+            'text': 'texts',
+            'archetype': 'archetypes',
+            'symbol': 'symbols',
+            'herb': 'herbs',
+            'cosmology': 'cosmology',
+            'event': 'events',
+            'figure': 'figures',
+            'angel': 'angels',
+            'being': 'beings'
         };
         return map[type] || type;
     }
 
     /**
-     * Apply mythology-specific styling to container
+     * Apply mythology-specific styling to container and document
      */
     applyMythologyStyles(container, mythology) {
+        const mythologyLower = mythology ? mythology.toLowerCase() : null;
+
         // Remove any existing mythology data attribute
         container.removeAttribute('data-mythology');
 
-        // Apply new mythology
-        if (mythology) {
-            container.setAttribute('data-mythology', mythology.toLowerCase());
+        // Apply new mythology to container
+        if (mythologyLower) {
+            container.setAttribute('data-mythology', mythologyLower);
         }
 
-        // Ensure mythology-colors.css is loaded
+        // Also apply to document body for global CSS cascading
+        // This ensures mythology colors work throughout the page
+        if (mythologyLower) {
+            document.body.setAttribute('data-mythology', mythologyLower);
+            document.documentElement.setAttribute('data-mythology', mythologyLower);
+        } else {
+            document.body.removeAttribute('data-mythology');
+            document.documentElement.removeAttribute('data-mythology');
+        }
+
+        // Ensure mythology-colors.css is loaded (fallback check)
         if (!document.querySelector('link[href*="mythology-colors.css"]')) {
             const link = document.createElement('link');
             link.rel = 'stylesheet';
@@ -211,6 +319,7 @@ class FirebaseEntityRenderer {
     renderDeity(entity, container) {
         // Make container position relative for edit icon
         container.style.position = 'relative';
+        const ssr = this.getSchemaSectionRenderer();
 
         const html = `
             ${this.renderEditIcon(entity)}
@@ -225,7 +334,7 @@ class FirebaseEntityRenderer {
 
             <!-- Attributes & Domains -->
             <section>
-                <h2 style="color: var(--color-primary);">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <a data-mythos="${this.mythology}" data-smart href="#attributes">Attributes</a> &amp; Domains
                 </h2>
                 <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
@@ -233,14 +342,17 @@ class FirebaseEntityRenderer {
                 </div>
             </section>
 
-            <!-- Mythology & Stories -->
-            ${entity.mythsAndLegends?.length ? `
+            <!-- Key Myths (Enhanced with SchemaSectionRenderer) -->
+            ${entity.keyMyths?.length ? ssr.renderKeyMyths(entity.keyMyths, 'Key Myths & Legends') : ''}
+
+            <!-- Mythology & Stories (Legacy format) -->
+            ${entity.mythsAndLegends?.length && !entity.keyMyths?.length ? `
             <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <a data-mythos="${this.mythology}" data-smart href="#mythology">Mythology</a> &amp; Stories
                 </h2>
                 <p>${this.escapeHtml(entity.name || 'This entity')}'s mythology spans numerous tales and legends. These stories reveal the nature of divine power, wisdom, and the relationship between the divine and humanity.</p>
-                <h3 style="color: var(--color-text-primary); margin-top: 1.5rem;">Key Myths:</h3>
+                <h3 style="color: var(--mythos-secondary, var(--color-text-primary)); margin-top: 1.5rem;">Key Myths:</h3>
                 <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
                     ${entity.mythsAndLegends.map(myth => `
                         <li>
@@ -255,10 +367,10 @@ class FirebaseEntityRenderer {
             <!-- Family Relationships -->
             ${entity.family ? `
             <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <a data-mythos="${this.mythology}" data-smart href="#relationships">Relationships</a>
                 </h2>
-                <h3 style="color: var(--color-text-primary);">Family</h3>
+                <h3 style="color: var(--mythos-secondary, var(--color-text-primary));">Family</h3>
                 <ul style="margin: 0.5rem 0 0 2rem;">
                     ${this.renderFamilyRelationships(entity.family)}
                 </ul>
@@ -268,10 +380,10 @@ class FirebaseEntityRenderer {
             <!-- Worship & Sacred Sites -->
             ${entity.worship || entity.cultCenters ? `
             <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <a data-mythos="${this.mythology}" data-smart href="#worship">Worship</a> &amp; Rituals
                 </h2>
-                <h3 style="color: var(--color-text-primary);">Sacred Sites</h3>
+                <h3 style="color: var(--mythos-secondary, var(--color-text-primary));">Sacred Sites</h3>
                 ${entity.worship ? `<p>${this.escapeHtml(entity.worship)}</p>` : ''}
                 ${entity.cultCenters?.length ? `
                     <ul style="margin: 0.5rem 0 0 2rem;">
@@ -280,6 +392,12 @@ class FirebaseEntityRenderer {
                 ` : ''}
             </section>
             ` : ''}
+
+            <!-- Extended Content Sections -->
+            ${entity.extendedContent?.length ? ssr.renderExtendedContent(entity.extendedContent) : ''}
+
+            <!-- Symbolism & Meaning -->
+            ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
 
             <!-- Content (Markdown) -->
             ${entity.content ? `
@@ -290,28 +408,37 @@ class FirebaseEntityRenderer {
             </section>
             ` : ''}
 
-            <!-- Related Entities -->
-            ${entity.relatedEntities?.length ? `
-            <section>
-                <h2 style="color: var(--mythos-primary);">Related Entities</h2>
-                ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
-            </section>
-            ` : ''}
+            <!-- Related Concepts -->
+            ${entity.relatedConcepts?.length ? ssr.renderPillsList(entity.relatedConcepts, 'Related Concepts', '💭') : ''}
+
+            <!-- Related Entities (Enhanced - handles nested object format) -->
+            ${entity.relatedEntities && typeof entity.relatedEntities === 'object' && !Array.isArray(entity.relatedEntities) ?
+                ssr.renderCategorizedRelatedEntities(entity.relatedEntities) :
+                (entity.relatedEntities?.length ? `
+                    <section>
+                        <h2 style="color: var(--mythos-primary);">Related Entities</h2>
+                        ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
+                    </section>
+                ` : '')
+            }
 
             <!-- Sacred Texts / Primary Sources -->
             ${entity.texts?.length || entity.sources?.length ? this.renderSacredTexts(entity) : ''}
 
-            <!-- Corpus Search Queries Section -->
+            <!-- Corpus Search Section -->
+            ${entity.corpusSearch ? ssr.renderCorpusSearch(entity.corpusSearch, entity.name) : ''}
+
+            <!-- Corpus Search Queries Section (dynamic) -->
             <div id="corpus-queries-section-${entity.id || 'main'}" class="corpus-queries-wrapper"></div>
 
-            <!-- Sources -->
-            ${entity.sources?.length && !entity.texts?.length ? `
-            <section>
-                <div class="citation" style="margin-top: 1rem;">
-                    <strong>Sources:</strong> ${entity.sources.map(source => this.escapeHtml(source)).join(', ')}
-                </div>
-            </section>
-            ` : ''}
+            <!-- Sources Table (if texts not present) -->
+            ${entity.sources?.length && !entity.texts?.length ? ssr.renderSourcesTable(entity.sources) : ''}
+
+            <!-- Tags & Search Terms -->
+            ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
+
+            <!-- Remaining Dynamic Fields -->
+            ${ssr.renderRemainingFields(entity, ['keyMyths', 'extendedContent', 'symbolism', 'relatedConcepts', 'corpusSearch', 'tags', 'searchTerms'])}
         `;
 
         container.innerHTML = html + this.renderUserNotesSection(entity);
@@ -392,6 +519,10 @@ class FirebaseEntityRenderer {
      * Render family relationships
      */
     renderFamilyRelationships(family) {
+        if (!family || typeof family !== 'object') {
+            return '';
+        }
+
         const sections = [];
 
         if (family.parents?.length) {
@@ -789,6 +920,7 @@ class FirebaseEntityRenderer {
     renderHero(entity, container) {
         // Make container position relative for edit icon
         container.style.position = 'relative';
+        const ssr = this.getSchemaSectionRenderer();
 
         const html = `
             ${this.renderEditIcon(entity)}
@@ -798,13 +930,14 @@ class FirebaseEntityRenderer {
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'hero', entity.name)}</div>
                 <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
-                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
+                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.7;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
 
             <!-- Attributes & Accomplishments -->
             <section>
-                <h2 style="color: var(--color-primary);">
-                    <a data-mythos="${this.mythology}" data-smart href="#attributes">Attributes</a> &amp; Accomplishments
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">🗡️</span>
+                    Attributes &amp; Accomplishments
                 </h2>
                 <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                     ${this.renderHeroAttributes(entity)}
@@ -814,29 +947,33 @@ class FirebaseEntityRenderer {
             <!-- Quests & Adventures -->
             ${entity.quests?.length || entity.adventures?.length ? `
             <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">
-                    <a data-mythos="${this.mythology}" data-smart href="#quests">Quests</a> &amp; Adventures
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">🗺️</span>
+                    Quests &amp; Adventures
                 </h2>
-                <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
-                    ${(entity.quests || entity.adventures || []).map(quest => `
-                        <li>
-                            <strong>${this.escapeHtml(quest.title || quest.name || quest)}</strong>
-                            ${quest.description ? `: ${this.escapeHtml(quest.description)}` : ''}
-                        </li>
-                    `).join('')}
-                </ul>
+                <div class="glass-card" style="padding: 1rem;">
+                    <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
+                        ${(entity.quests || entity.adventures || []).map(quest => `
+                            <li style="margin-bottom: 0.5rem;">
+                                <strong style="color: var(--mythos-primary, var(--color-primary));">${this.escapeHtml(quest.title || quest.name || quest)}</strong>
+                                ${quest.description ? `<br><span style="opacity: 0.9;">${this.escapeHtml(quest.description)}</span>` : ''}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
             </section>
             ` : ''}
 
             <!-- Weapons & Equipment -->
             ${entity.weapons?.length || entity.equipment?.length ? `
             <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">
-                    <a data-mythos="${this.mythology}" data-smart href="#weapons">Weapons</a> &amp; Equipment
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">⚔️</span>
+                    Weapons &amp; Equipment
                 </h2>
                 <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
                     ${(entity.weapons || entity.equipment || []).map(item => `
-                        <span class="tag" style="background: rgba(var(--color-primary-rgb), 0.2); padding: 0.5rem 1rem; border-radius: 8px;">
+                        <span class="tag" style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.15); color: var(--mythos-primary, var(--color-primary)); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.3);">
                             ${this.escapeHtml(typeof item === 'string' ? item : item.name)}
                         </span>
                     `).join('')}
@@ -844,28 +981,56 @@ class FirebaseEntityRenderer {
             </section>
             ` : ''}
 
+            <!-- Key Myths Section -->
+            ${entity.keyMyths?.length ? ssr.renderKeyMyths(entity.keyMyths) : ''}
+
+            <!-- Extended Content Sections -->
+            ${entity.extendedContent?.length ? ssr.renderExtendedContent(entity.extendedContent) : ''}
+
+            <!-- Symbolism -->
+            ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
+
             <!-- Content (Markdown) -->
             ${entity.content ? `
             <section style="margin-top: 2rem;">
-                <div class="glass-card">
+                <div class="glass-card" style="padding: 1.5rem;">
                     ${this.renderMarkdown(entity.content)}
                 </div>
             </section>
             ` : ''}
 
+            <!-- Related Concepts -->
+            ${entity.relatedConcepts?.length ? `
+                <section style="margin-top: 2rem;">
+                    ${ssr.renderPillsList(entity.relatedConcepts, 'Related Concepts', '💭')}
+                </section>
+            ` : ''}
+
             <!-- Sacred Texts / Primary Sources -->
             ${entity.texts?.length ? this.renderSacredTexts(entity) : ''}
 
-            <!-- Related Entities -->
-            ${entity.relatedEntities?.length ? `
-            <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">Related Entities</h2>
-                ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
-            </section>
-            ` : ''}
+            <!-- Related Entities (handles both array and nested object formats) -->
+            ${entity.relatedEntities && typeof entity.relatedEntities === 'object' && !Array.isArray(entity.relatedEntities) ?
+                ssr.renderCategorizedRelatedEntities(entity.relatedEntities) :
+                (Array.isArray(entity.relatedEntities) && entity.relatedEntities.length > 0 ? `
+                    <section style="margin-top: 2rem;">
+                        <h2 style="color: var(--mythos-primary, var(--color-primary));">Related Entities</h2>
+                        ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
+                    </section>
+                ` : '')
+            }
+
+            <!-- Corpus Search Section -->
+            ${entity.corpusSearch ? ssr.renderCorpusSearch(entity.corpusSearch, entity.name) : ''}
 
             <!-- Corpus Search Queries Section -->
             <div id="corpus-queries-section-${entity.id || 'main'}" class="corpus-queries-wrapper"></div>
+
+            <!-- Sources Table -->
+            ${entity.sources?.length ? ssr.renderSourcesTable(entity.sources) : ''}
+
+            <!-- Tags -->
+            ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
         `;
 
         container.innerHTML = html + this.renderUserNotesSection(entity);
@@ -928,6 +1093,12 @@ class FirebaseEntityRenderer {
     renderItem(entity, container) {
         // Make container position relative for edit icon
         container.style.position = 'relative';
+        const ssr = this.getSchemaSectionRenderer();
+
+        // Build classification badges
+        const badges = [];
+        if (entity.itemType) badges.push(entity.itemType);
+        if (entity.subtype) badges.push(entity.subtype);
 
         const html = `
             ${this.renderEditIcon(entity)}
@@ -936,54 +1107,106 @@ class FirebaseEntityRenderer {
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'item', entity.name)}</div>
                 <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
-                ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
-                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
+                ${entity.subtitle || entity.shortDescription ? `<p class="subtitle" style="font-size: 1.25rem; margin: 0.5rem 0; opacity: 0.9;">${this.escapeHtml(entity.subtitle || entity.shortDescription)}</p>` : ''}
+                ${badges.length > 0 ? `
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.75rem 0;">
+                        ${badges.map(badge => `
+                            <span style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.2); color: var(--mythos-primary, var(--color-primary)); padding: 0.3rem 0.75rem; border-radius: 15px; font-size: 0.8rem; text-transform: capitalize;">
+                                ${this.escapeHtml(badge)}
+                            </span>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.7;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
 
-            <!-- Properties -->
-            ${entity.properties?.length || entity.powers?.length ? `
+            <!-- Properties & Powers -->
+            ${entity.properties?.length || entity.powers?.length || entity.materials?.length ? `
             <section>
-                <h2 style="color: var(--color-primary);">Properties &amp; Powers</h2>
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">⚔️</span>
+                    Properties &amp; Powers
+                </h2>
                 <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                     ${this.renderItemProperties(entity)}
                 </div>
             </section>
             ` : ''}
 
+            <!-- Item-specific sections (materials, powers, related items) -->
+            ${ssr.renderItemDetails(entity)}
+
             <!-- Wielders/Owners -->
             ${entity.wielders?.length || entity.owners?.length ? `
             <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">Notable Wielders</h2>
-                <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
-                    ${(entity.wielders || entity.owners || []).map(wielder => `
-                        <li>${this.escapeHtml(typeof wielder === 'string' ? wielder : wielder.name)}</li>
-                    `).join('')}
-                </ul>
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">👥</span>
+                    Notable Wielders
+                </h2>
+                <div class="glass-card" style="padding: 1rem;">
+                    <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
+                        ${(entity.wielders || entity.owners || []).map(wielder => `
+                            <li>${this.escapeHtml(typeof wielder === 'string' ? wielder : wielder.name)}</li>
+                        `).join('')}
+                    </ul>
+                </div>
             </section>
             ` : ''}
+
+            <!-- Key Myths Section -->
+            ${entity.keyMyths?.length ? ssr.renderKeyMyths(entity.keyMyths) : ''}
+
+            <!-- Extended Content Sections -->
+            ${entity.extendedContent?.length ? ssr.renderExtendedContent(entity.extendedContent) : ''}
+
+            <!-- Symbolism -->
+            ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
+
+            <!-- Long Description -->
+            ${entity.longDescription && entity.longDescription !== entity.description ?
+                ssr.renderSymbolism(entity.longDescription, 'Detailed Description') : ''}
 
             <!-- Content (Markdown) -->
             ${entity.content ? `
             <section style="margin-top: 2rem;">
-                <div class="glass-card">
+                <div class="glass-card" style="padding: 1.5rem;">
                     ${this.renderMarkdown(entity.content)}
                 </div>
             </section>
             ` : ''}
 
+            <!-- Related Concepts -->
+            ${entity.relatedConcepts?.length ? `
+                <section style="margin-top: 2rem;">
+                    ${ssr.renderPillsList(entity.relatedConcepts, 'Related Concepts', '💭')}
+                </section>
+            ` : ''}
+
             <!-- Sacred Texts / Primary Sources -->
             ${entity.texts?.length ? this.renderSacredTexts(entity) : ''}
 
-            <!-- Related Entities -->
-            ${entity.relatedEntities?.length ? `
-            <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">Related Entities</h2>
-                ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
-            </section>
-            ` : ''}
+            <!-- Related Entities (handles both array and nested object formats) -->
+            ${entity.relatedEntities && typeof entity.relatedEntities === 'object' && !Array.isArray(entity.relatedEntities) ?
+                ssr.renderCategorizedRelatedEntities(entity.relatedEntities) :
+                (Array.isArray(entity.relatedEntities) && entity.relatedEntities.length > 0 ? `
+                    <section style="margin-top: 2rem;">
+                        <h2 style="color: var(--mythos-primary, var(--color-primary));">Related Entities</h2>
+                        ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
+                    </section>
+                ` : '')
+            }
+
+            <!-- Corpus Search Section -->
+            ${entity.corpusSearch ? ssr.renderCorpusSearch(entity.corpusSearch, entity.name) : ''}
 
             <!-- Corpus Search Queries Section -->
             <div id="corpus-queries-section-${entity.id || 'main'}" class="corpus-queries-wrapper"></div>
+
+            <!-- Sources Table -->
+            ${entity.sources?.length ? ssr.renderSourcesTable(entity.sources) : ''}
+
+            <!-- Tags -->
+            ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
         `;
 
         container.innerHTML = html + this.renderUserNotesSection(entity);
@@ -1046,6 +1269,7 @@ class FirebaseEntityRenderer {
     renderPlace(entity, container) {
         // Make container position relative for edit icon
         container.style.position = 'relative';
+        const ssr = this.getSchemaSectionRenderer();
 
         const html = `
             ${this.renderEditIcon(entity)}
@@ -1055,53 +1279,72 @@ class FirebaseEntityRenderer {
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'place', entity.name)}</div>
                 <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
-                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
+                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.7;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
 
             <!-- Location Details -->
             ${entity.geography || entity.realm || entity.region ? `
             <section>
-                <h2 style="color: var(--color-primary);">Location Details</h2>
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">Location Details</h2>
                 <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                     ${this.renderPlaceDetails(entity)}
                 </div>
             </section>
             ` : ''}
 
-            <!-- Inhabitants -->
-            ${entity.inhabitants?.length ? `
-            <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">Notable Inhabitants</h2>
-                <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
-                    ${entity.inhabitants.map(inhabitant => `
-                        <li>${this.escapeHtml(typeof inhabitant === 'string' ? inhabitant : inhabitant.name)}</li>
-                    `).join('')}
-                </ul>
-            </section>
-            ` : ''}
+            <!-- Place-specific sections (features, significance, inhabitants, etc.) -->
+            ${ssr.renderPlaceDetails(entity)}
+
+            <!-- Key Myths Section -->
+            ${entity.keyMyths?.length ? ssr.renderKeyMyths(entity.keyMyths) : ''}
+
+            <!-- Extended Content Sections -->
+            ${entity.extendedContent?.length ? ssr.renderExtendedContent(entity.extendedContent) : ''}
+
+            <!-- Symbolism -->
+            ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
 
             <!-- Content (Markdown) -->
             ${entity.content ? `
             <section style="margin-top: 2rem;">
-                <div class="glass-card">
+                <div class="glass-card" style="padding: 1.5rem;">
                     ${this.renderMarkdown(entity.content)}
                 </div>
             </section>
             ` : ''}
 
+            <!-- Related Concepts -->
+            ${entity.relatedConcepts?.length ? `
+                <section style="margin-top: 2rem;">
+                    ${ssr.renderPillsList(entity.relatedConcepts, 'Related Concepts', '💭')}
+                </section>
+            ` : ''}
+
             <!-- Sacred Texts / Primary Sources -->
             ${entity.texts?.length ? this.renderSacredTexts(entity) : ''}
 
-            <!-- Related Entities -->
-            ${entity.relatedEntities?.length ? `
-            <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">Related Entities</h2>
-                ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
-            </section>
-            ` : ''}
+            <!-- Related Entities (handles both array and nested object formats) -->
+            ${entity.relatedEntities && typeof entity.relatedEntities === 'object' && !Array.isArray(entity.relatedEntities) ?
+                ssr.renderCategorizedRelatedEntities(entity.relatedEntities) :
+                (Array.isArray(entity.relatedEntities) && entity.relatedEntities.length > 0 ? `
+                    <section style="margin-top: 2rem;">
+                        <h2 style="color: var(--mythos-primary, var(--color-primary));">Related Entities</h2>
+                        ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
+                    </section>
+                ` : '')
+            }
+
+            <!-- Corpus Search Section -->
+            ${entity.corpusSearch ? ssr.renderCorpusSearch(entity.corpusSearch, entity.name) : ''}
 
             <!-- Corpus Search Queries Section -->
             <div id="corpus-queries-section-${entity.id || 'main'}" class="corpus-queries-wrapper"></div>
+
+            <!-- Sources Table -->
+            ${entity.sources?.length ? ssr.renderSourcesTable(entity.sources) : ''}
+
+            <!-- Tags -->
+            ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
         `;
 
         container.innerHTML = html + this.renderUserNotesSection(entity);
@@ -1160,23 +1403,67 @@ class FirebaseEntityRenderer {
     }
 
     /**
-     * Render concept entity
+     * Render concept entity - uses enhanced generic renderer
      */
     renderConcept(entity, container) {
+        // Concepts use the full generic renderer which now handles all schema sections
         this.renderGenericEntity(entity, container);
     }
 
     /**
-     * Render magic system entity
+     * Render magic system entity - uses enhanced generic renderer
      */
     renderMagicSystem(entity, container) {
+        // Magic systems use the full generic renderer which now handles all schema sections
         this.renderGenericEntity(entity, container);
     }
 
     /**
-     * Render theory entity
+     * Render theory entity - uses enhanced generic renderer
      */
     renderTheory(entity, container) {
+        // Theories use the full generic renderer which now handles all schema sections
+        this.renderGenericEntity(entity, container);
+    }
+
+    /**
+     * Render ritual entity - uses enhanced generic renderer with ritual-specific sections
+     */
+    renderRitual(entity, container) {
+        // Set type for generic renderer to recognize
+        entity.type = entity.type || 'ritual';
+        this.renderGenericEntity(entity, container);
+    }
+
+    /**
+     * Render text entity - uses enhanced generic renderer
+     */
+    renderText(entity, container) {
+        entity.type = entity.type || 'text';
+        this.renderGenericEntity(entity, container);
+    }
+
+    /**
+     * Render archetype entity - uses enhanced generic renderer
+     */
+    renderArchetype(entity, container) {
+        entity.type = entity.type || 'archetype';
+        this.renderGenericEntity(entity, container);
+    }
+
+    /**
+     * Render symbol entity - uses enhanced generic renderer
+     */
+    renderSymbol(entity, container) {
+        entity.type = entity.type || 'symbol';
+        this.renderGenericEntity(entity, container);
+    }
+
+    /**
+     * Render herb entity - uses enhanced generic renderer
+     */
+    renderHerb(entity, container) {
+        entity.type = entity.type || 'herb';
         this.renderGenericEntity(entity, container);
     }
 
@@ -1186,6 +1473,12 @@ class FirebaseEntityRenderer {
     renderCreature(entity, container) {
         // Make container position relative for edit icon
         container.style.position = 'relative';
+        const ssr = this.getSchemaSectionRenderer();
+
+        // Build classification badges
+        const badges = [];
+        if (entity.classification) badges.push(entity.classification);
+        if (entity.category) badges.push(entity.category);
 
         const html = `
             ${this.renderEditIcon(entity)}
@@ -1195,44 +1488,127 @@ class FirebaseEntityRenderer {
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'creature', entity.name)}</div>
                 <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
-                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
+                ${badges.length > 0 ? `
+                    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.75rem 0;">
+                        ${badges.map(badge => `
+                            <span style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.2); color: var(--mythos-primary, var(--color-primary)); padding: 0.3rem 0.75rem; border-radius: 15px; font-size: 0.8rem; text-transform: capitalize;">
+                                ${this.escapeHtml(badge)}
+                            </span>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.7;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
 
-            <!-- Attributes -->
-            ${entity.attributes || entity.characteristics ? `
-            <section>
-                <h2 style="color: var(--color-primary);">
-                    <a data-mythos="${this.mythology}" data-smart href="#attributes">Attributes</a>
+            <!-- Appearance -->
+            ${entity.appearance ? `
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">👁️</span>
+                    Appearance
                 </h2>
-                <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-                    ${this.renderCreatureAttributes(entity)}
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <p style="margin: 0; line-height: 1.7;">${this.escapeHtml(entity.appearance)}</p>
                 </div>
             </section>
             ` : ''}
 
+            <!-- Attributes -->
+            ${entity.attributes || entity.characteristics || entity.abilities?.length || entity.habitat?.length ? `
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">🐉</span>
+                    Attributes
+                </h2>
+                <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    ${this.renderCreatureAttributes(entity)}
+                    ${entity.abilities?.length ? `
+                        <div class="subsection-card" style="padding: 1rem;">
+                            <div class="attribute-label" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span>✨</span><span>Abilities</span>
+                            </div>
+                            <div class="attribute-value" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                                ${entity.abilities.map(a => `
+                                    <span style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.1); padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.85rem;">
+                                        ${this.escapeHtml(a)}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    ${entity.habitat?.length ? `
+                        <div class="subsection-card" style="padding: 1rem;">
+                            <div class="attribute-label" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                <span>🌍</span><span>Habitat</span>
+                            </div>
+                            <div class="attribute-value" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                                ${entity.habitat.map(h => `
+                                    <span style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.1); padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.85rem;">
+                                        ${this.escapeHtml(h)}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </section>
+            ` : ''}
+
+            <!-- Key Myths Section -->
+            ${entity.keyMyths?.length ? ssr.renderKeyMyths(entity.keyMyths) : ''}
+
+            <!-- Extended Content Sections -->
+            ${entity.extendedContent?.length ? ssr.renderExtendedContent(entity.extendedContent) : ''}
+
+            <!-- Symbolism -->
+            ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
+
             <!-- Content (Markdown) -->
             ${entity.content ? `
             <section style="margin-top: 2rem;">
-                <div class="glass-card">
+                <div class="glass-card" style="padding: 1.5rem;">
                     ${this.renderMarkdown(entity.content)}
                 </div>
             </section>
             ` : ''}
 
+            <!-- Related Concepts -->
+            ${entity.relatedConcepts?.length ? `
+                <section style="margin-top: 2rem;">
+                    ${ssr.renderPillsList(entity.relatedConcepts, 'Related Concepts', '💭')}
+                </section>
+            ` : ''}
+
             <!-- Sacred Texts / Primary Sources -->
             ${entity.texts?.length ? this.renderSacredTexts(entity) : ''}
 
-            <!-- Related Entities -->
-            ${entity.relatedEntities?.length ? `
-            <section style="margin-top: 2rem;">
-                <h2 style="color: var(--color-primary);">Related Entities</h2>
-                ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
-            </section>
-            ` : ''}
+            <!-- Related Entities (handles both array and nested object formats) -->
+            ${entity.relatedEntities && typeof entity.relatedEntities === 'object' && !Array.isArray(entity.relatedEntities) ?
+                ssr.renderCategorizedRelatedEntities(entity.relatedEntities) :
+                (Array.isArray(entity.relatedEntities) && entity.relatedEntities.length > 0 ? `
+                    <section style="margin-top: 2rem;">
+                        <h2 style="color: var(--mythos-primary, var(--color-primary));">Related Entities</h2>
+                        ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
+                    </section>
+                ` : '')
+            }
+
+            <!-- Corpus Search Section -->
+            ${entity.corpusSearch ? ssr.renderCorpusSearch(entity.corpusSearch, entity.name) : ''}
+
+            <!-- Corpus Search Queries Section -->
+            <div id="corpus-queries-section-${entity.id || 'main'}" class="corpus-queries-wrapper"></div>
+
+            <!-- Sources Table -->
+            ${entity.sources?.length ? ssr.renderSourcesTable(entity.sources) : ''}
+
+            <!-- Tags -->
+            ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
         `;
 
         container.innerHTML = html + this.renderUserNotesSection(entity);
         this.initializeUserNotes(entity);
+        this.initializeCorpusSection(entity);
     }
 
     /**
@@ -1269,32 +1645,194 @@ class FirebaseEntityRenderer {
     }
 
     /**
-     * Render generic entity (fallback)
+     * Render generic entity (fallback) - now comprehensive for all schema fields
      */
     renderGenericEntity(entity, container) {
         // Make container position relative for edit icon
         container.style.position = 'relative';
+        const ssr = this.getSchemaSectionRenderer();
+
+        // Determine entity type for specialized sections
+        const entityType = entity.type || 'entity';
+        const typeIcon = this.getDefaultIcon(entityType);
+
+        // Build category/classification info
+        const classificationInfo = [];
+        if (entity.category) classificationInfo.push(`Category: ${entity.category}`);
+        if (entity.itemType) classificationInfo.push(`Type: ${entity.itemType}`);
+        if (entity.subtype) classificationInfo.push(`Subtype: ${entity.subtype}`);
 
         const html = `
             ${this.renderEditIcon(entity)}
 
             <!-- Hero Section with Large Icon -->
             <section class="hero-section">
-                <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, entity.type, entity.name)}</div>
+                <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, entityType, entity.name)}</div>
                 <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
-                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
+                ${classificationInfo.length > 0 ? `
+                    <div class="entity-classification" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.75rem 0;">
+                        ${classificationInfo.map(info => `
+                            <span style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.15); color: var(--mythos-primary, var(--color-primary)); padding: 0.3rem 0.6rem; border-radius: 12px; font-size: 0.8rem;">
+                                ${this.escapeHtml(info)}
+                            </span>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.7;">${this.escapeHtml(entity.description)}</p>` : ''}
+                ${entity.shortDescription && !entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.shortDescription)}</p>` : ''}
             </section>
 
+            <!-- Quick Facts Grid (for attributes that exist) -->
+            ${this.renderQuickFacts(entity, ssr)}
+
+            <!-- Key Myths Section -->
+            ${entity.keyMyths?.length ? ssr.renderKeyMyths(entity.keyMyths) : ''}
+
+            <!-- Extended Content Sections (titled content blocks) -->
+            ${entity.extendedContent?.length ? ssr.renderExtendedContent(entity.extendedContent) : ''}
+
+            <!-- Symbolism & Meaning -->
+            ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
+
+            <!-- Long Description -->
+            ${entity.longDescription && entity.longDescription !== entity.description ?
+                ssr.renderSymbolism(entity.longDescription, 'Detailed Description') : ''}
+
+            <!-- Content (Markdown) -->
             ${entity.content ? `
-            <section class="glass-card" style="margin-top: 2rem;">
-                ${this.renderMarkdown(entity.content)}
-            </section>
+                <section class="glass-card" style="margin-top: 2rem; padding: 1.5rem;">
+                    ${this.renderMarkdown(entity.content)}
+                </section>
             ` : ''}
+
+            <!-- Related Concepts -->
+            ${entity.relatedConcepts?.length ? `
+                <section style="margin-top: 2rem;">
+                    ${ssr.renderPillsList(entity.relatedConcepts, 'Related Concepts', '💭')}
+                </section>
+            ` : ''}
+
+            <!-- Ritual Details (for ritual type) -->
+            ${entityType === 'ritual' ? ssr.renderRitualDetails(entity) : ''}
+
+            <!-- Place Details (for place type) -->
+            ${entityType === 'place' ? ssr.renderPlaceDetails(entity) : ''}
+
+            <!-- Item Details (for item type) -->
+            ${entityType === 'item' ? ssr.renderItemDetails(entity) : ''}
+
+            <!-- Related Entities (handles both array and nested object formats) -->
+            ${entity.relatedEntities && typeof entity.relatedEntities === 'object' && !Array.isArray(entity.relatedEntities) ?
+                ssr.renderCategorizedRelatedEntities(entity.relatedEntities) :
+                (Array.isArray(entity.relatedEntities) && entity.relatedEntities.length > 0 ? `
+                    <section style="margin-top: 2rem;">
+                        <h2 style="color: var(--mythos-primary, var(--color-primary));">Related Entities</h2>
+                        ${this.renderRelatedEntities(entity.relatedEntities, 'relatedEntities', entity.displayOptions)}
+                    </section>
+                ` : '')
+            }
+
+            <!-- Sacred Texts / Primary Sources -->
+            ${entity.texts?.length ? this.renderSacredTexts(entity) : ''}
+
+            <!-- Corpus Search Section -->
+            ${entity.corpusSearch ? ssr.renderCorpusSearch(entity.corpusSearch, entity.name) : ''}
+
+            <!-- Corpus Search Queries Section (dynamic) -->
+            <div id="corpus-queries-section-${entity.id || 'main'}" class="corpus-queries-wrapper"></div>
+
+            <!-- Sources Table -->
+            ${entity.sources?.length ? ssr.renderSourcesTable(entity.sources) : ''}
+
+            <!-- Tags & Search Terms -->
+            ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
+
+            <!-- Remaining Dynamic Fields (auto-detect and render) -->
+            ${ssr.renderRemainingFields(entity, [
+                'keyMyths', 'extendedContent', 'symbolism', 'longDescription',
+                'relatedConcepts', 'corpusSearch', 'tags', 'searchTerms', 'sources',
+                'relatedEntities', 'texts', 'content'
+            ])}
         `;
 
         container.innerHTML = html + this.renderUserNotesSection(entity);
         this.initializeUserNotes(entity);
+        this.initializeCorpusSection(entity);
+    }
+
+    /**
+     * Render quick facts grid for any entity
+     */
+    renderQuickFacts(entity, ssr) {
+        const facts = [];
+
+        // Common quick facts across all entity types
+        const quickFactFields = [
+            { key: 'domains', label: 'Domains', icon: '🔮' },
+            { key: 'symbols', label: 'Symbols', icon: '⚜️' },
+            { key: 'epithets', label: 'Epithets', icon: '📜' },
+            { key: 'titles', label: 'Titles', icon: '👑' },
+            { key: 'abilities', label: 'Abilities', icon: '✨' },
+            { key: 'powers', label: 'Powers', icon: '⚡' },
+            { key: 'materials', label: 'Materials', icon: '🔩' },
+            { key: 'features', label: 'Features', icon: '🏔️' },
+            { key: 'significance', label: 'Significance', icon: '⭐' },
+            { key: 'inhabitants', label: 'Inhabitants', icon: '👥' },
+            { key: 'associatedDeities', label: 'Associated Deities', icon: '⚡' },
+            { key: 'sacredAnimals', label: 'Sacred Animals', icon: '🦅' },
+            { key: 'sacredPlants', label: 'Sacred Plants', icon: '🌿' },
+            { key: 'sacredPlaces', label: 'Sacred Places', icon: '🏛️' },
+            { key: 'feats', label: 'Feats', icon: '🏆' },
+            { key: 'skills', label: 'Skills', icon: '🎯' },
+            { key: 'weapons', label: 'Weapons', icon: '⚔️' },
+            { key: 'equipment', label: 'Equipment', icon: '🛡️' }
+        ];
+
+        for (const field of quickFactFields) {
+            const value = entity[field.key];
+            if (Array.isArray(value) && value.length > 0) {
+                facts.push(`
+                    <div class="subsection-card" style="padding: 1rem;">
+                        <div class="attribute-label" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span>${field.icon}</span>
+                            <span>${field.label}</span>
+                        </div>
+                        <div class="attribute-value" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+                            ${value.map(v => `
+                                <span style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.1); padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.85rem;">
+                                    ${this.escapeHtml(typeof v === 'object' ? (v.name || v.id) : v)}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>
+                `);
+            } else if (value && typeof value === 'string') {
+                facts.push(`
+                    <div class="subsection-card" style="padding: 1rem;">
+                        <div class="attribute-label" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <span>${field.icon}</span>
+                            <span>${field.label}</span>
+                        </div>
+                        <div class="attribute-value">${this.escapeHtml(value)}</div>
+                    </div>
+                `);
+            }
+        }
+
+        if (facts.length === 0) return '';
+
+        return `
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem;">
+                    <span style="margin-right: 0.5rem;">📋</span>
+                    Key Attributes
+                </h2>
+                <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    ${facts.join('')}
+                </div>
+            </section>
+        `;
     }
 
     /**
@@ -1339,10 +1877,15 @@ class FirebaseEntityRenderer {
      * Render markdown content
      */
     renderMarkdown(markdown) {
+        // Guard against null/undefined input
+        if (!markdown || typeof markdown !== 'string') {
+            return markdown || '';
+        }
+
         // Basic markdown rendering (can be enhanced with a proper markdown library)
         return markdown
-            .replace(/^### (.*$)/gim, '<h3 style="color: var(--mythos-secondary);">$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2 style="color: var(--mythos-primary);">$1</h2>')
+            .replace(/^### (.*$)/gim, '<h3 style="color: var(--mythos-secondary, var(--color-secondary));">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 style="color: var(--mythos-primary, var(--color-primary));">$1</h2>')
             .replace(/^# (.*$)/gim, '<h1>$1</h1>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
@@ -1632,7 +2175,7 @@ class FirebaseEntityRenderer {
             // Just show link to corpus explorer
             container.innerHTML = `
                 <section class="corpus-search-section glass-card" style="padding: 1.5rem; margin-top: 2rem;">
-                    <h3 style="margin: 0 0 1rem; color: var(--color-primary);">
+                    <h3 style="margin: 0 0 1rem; color: var(--mythos-primary, var(--color-primary));">
                         <span style="margin-right: 0.5rem;">📚</span>
                         Primary Source References
                     </h3>
@@ -1640,7 +2183,7 @@ class FirebaseEntityRenderer {
                         Search ancient texts for references to ${this.escapeHtml(entity.name)}.
                     </p>
                     <a href="/corpus-explorer.html?term=${encodeURIComponent(entity.name)}"
-                       style="display: inline-block; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; background: var(--color-primary); color: white;">
+                       style="display: inline-block; padding: 0.5rem 1rem; text-decoration: none; border-radius: 4px; background: var(--mythos-primary, var(--color-primary)); color: white;">
                         🔍 Search Ancient Texts
                     </a>
                 </section>
@@ -1650,7 +2193,7 @@ class FirebaseEntityRenderer {
 
         container.innerHTML = `
             <section class="corpus-search-section" style="margin-top: 2rem;">
-                <h3 style="margin: 0 0 1rem; color: var(--color-primary);">
+                <h3 style="margin: 0 0 1rem; color: var(--mythos-primary, var(--color-primary));">
                     <span style="margin-right: 0.5rem;">📚</span>
                     Primary Source References
                 </h3>
@@ -1661,7 +2204,7 @@ class FirebaseEntityRenderer {
                            style="display: flex; align-items: center; gap: 1rem; padding: 1rem; text-decoration: none; border-radius: 8px;">
                             <span style="font-size: 1.25rem;">${query.queryType === 'github' ? '📜' : '🔍'}</span>
                             <div style="flex: 1;">
-                                <strong style="color: var(--color-primary);">${this.escapeHtml(query.label)}</strong>
+                                <strong style="color: var(--mythos-primary, var(--color-primary));">${this.escapeHtml(query.label)}</strong>
                                 ${query.description ? `<p style="margin: 0.25rem 0 0; font-size: 0.85rem; opacity: 0.7;">${this.escapeHtml(query.description)}</p>` : ''}
                             </div>
                             <span style="opacity: 0.5;">→</span>
@@ -1670,7 +2213,7 @@ class FirebaseEntityRenderer {
                 </div>
                 <div style="margin-top: 1rem; text-align: center;">
                     <a href="/corpus-explorer.html?term=${encodeURIComponent(entity.name)}"
-                       style="color: var(--color-primary); font-size: 0.9rem;">
+                       style="color: var(--mythos-primary, var(--color-primary)); font-size: 0.9rem;">
                         Search for more references →
                     </a>
                 </div>
@@ -1740,15 +2283,19 @@ window.FirebaseEntityRenderer = FirebaseEntityRenderer;
 
 // Auto-load if URL parameters are present
 document.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    const type = params.get('type');
-    const id = params.get('id');
-    const mythology = params.get('mythology');
-    const autoLoad = params.get('firebase') === 'true';
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const type = params.get('type');
+        const id = params.get('id');
+        const mythology = params.get('mythology');
+        const autoLoad = params.get('firebase') === 'true';
 
-    if (autoLoad && type && id) {
-        const container = document.querySelector('main') || document.body;
-        const renderer = new FirebaseEntityRenderer();
-        await renderer.loadAndRender(type, id, mythology, container);
+        if (autoLoad && type && id) {
+            const container = document.querySelector('main') || document.body;
+            const renderer = new FirebaseEntityRenderer();
+            await renderer.loadAndRender(type, id, mythology, container);
+        }
+    } catch (error) {
+        console.error('Auto-load failed:', error);
     }
 });

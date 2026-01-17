@@ -1276,7 +1276,7 @@
                     e.preventDefault();
                     e.stopPropagation();
                     const term = corpusBtn.dataset.term;
-                    window.location.href = `/corpus-search.html?term=${encodeURIComponent(term)}`;
+                    window.location.href = `/corpus-explorer.html?term=${encodeURIComponent(term)}`;
                 };
                 this._addTrackedListener(corpusBtn, 'click', corpusHandler);
             }
