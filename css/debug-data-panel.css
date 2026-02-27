@@ -1,0 +1,333 @@
+/**
+ * Debug Data Panel Styles
+ * Right-hand side panel showing Firebase data for the current page
+ */
+
+/* When debug mode is active, shift main content to make room */
+body.debug-mode-active #main-content {
+    margin-right: 420px;
+    transition: margin-right 0.3s ease;
+}
+
+body.debug-mode-active .site-footer {
+    margin-right: 420px;
+    transition: margin-right 0.3s ease;
+}
+
+/* The debug panel itself */
+.debug-data-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 420px;
+    height: 100vh;
+    background: rgba(10, 14, 30, 0.97);
+    border-left: 1px solid rgba(139, 127, 255, 0.3);
+    z-index: 8000;
+    display: flex;
+    flex-direction: column;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    font-size: 12px;
+    color: #e0e0e0;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+body.debug-mode-active .debug-data-panel {
+    transform: translateX(0);
+}
+
+/* Panel header */
+.debug-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(139, 127, 255, 0.1);
+    border-bottom: 1px solid rgba(139, 127, 255, 0.2);
+    flex-shrink: 0;
+}
+
+.debug-panel-header h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #8b7fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.debug-panel-header h3::before {
+    content: '\1F41E'; /* bug emoji */
+    font-size: 14px;
+}
+
+.debug-panel-close {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #999;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: inherit;
+    transition: all 0.2s;
+}
+
+.debug-panel-close:hover {
+    background: rgba(255, 70, 70, 0.2);
+    border-color: rgba(255, 70, 70, 0.4);
+    color: #ff6b6b;
+}
+
+/* Route info bar */
+.debug-route-info {
+    padding: 10px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.debug-route-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    margin-bottom: 4px;
+}
+
+.debug-route-path {
+    font-size: 13px;
+    color: #ffd93d;
+    word-break: break-all;
+}
+
+/* Scrollable content area */
+.debug-panel-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139, 127, 255, 0.3) transparent;
+}
+
+.debug-panel-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.debug-panel-content::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.debug-panel-content::-webkit-scrollbar-thumb {
+    background: rgba(139, 127, 255, 0.3);
+    border-radius: 3px;
+}
+
+/* Section containers */
+.debug-section {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.debug-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.debug-section-header:hover {
+    background: rgba(139, 127, 255, 0.06);
+}
+
+.debug-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #b0b0b0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.debug-section-toggle {
+    font-size: 10px;
+    color: #666;
+    transition: transform 0.2s;
+}
+
+.debug-section.expanded .debug-section-toggle {
+    transform: rotate(90deg);
+}
+
+.debug-section-badge {
+    font-size: 10px;
+    background: rgba(139, 127, 255, 0.2);
+    color: #8b7fff;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.debug-section-body {
+    display: none;
+    padding: 0 16px 12px;
+}
+
+.debug-section.expanded .debug-section-body {
+    display: block;
+}
+
+/* JSON Tree Viewer */
+.json-tree {
+    font-family: inherit;
+    font-size: 12px;
+    line-height: 1.6;
+}
+
+.json-tree-item {
+    position: relative;
+    padding-left: 16px;
+}
+
+.json-tree-item::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.json-key {
+    color: #8b7fff;
+    cursor: default;
+}
+
+.json-key-expandable {
+    color: #8b7fff;
+    cursor: pointer;
+}
+
+.json-key-expandable:hover {
+    text-decoration: underline;
+}
+
+.json-toggle {
+    display: inline-block;
+    width: 14px;
+    font-size: 10px;
+    color: #666;
+    cursor: pointer;
+    user-select: none;
+    text-align: center;
+    transition: transform 0.15s;
+}
+
+.json-toggle.expanded {
+    transform: rotate(90deg);
+}
+
+.json-string { color: #a8db8f; }
+.json-number { color: #f9a875; }
+.json-boolean { color: #ff7eb6; }
+.json-null { color: #666; font-style: italic; }
+.json-type-hint {
+    color: #555;
+    font-size: 10px;
+    margin-left: 4px;
+}
+
+.json-children {
+    display: none;
+    padding-left: 4px;
+}
+
+.json-children.expanded {
+    display: block;
+}
+
+.json-array-index {
+    color: #555;
+    font-size: 10px;
+}
+
+/* Empty state */
+.debug-empty-state {
+    padding: 40px 20px;
+    text-align: center;
+    color: #555;
+    font-style: italic;
+}
+
+/* Panel footer */
+.debug-panel-footer {
+    padding: 8px 16px;
+    background: rgba(0, 0, 0, 0.3);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: #555;
+}
+
+.debug-panel-footer button {
+    background: rgba(139, 127, 255, 0.15);
+    border: 1px solid rgba(139, 127, 255, 0.3);
+    color: #8b7fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 10px;
+    transition: all 0.2s;
+}
+
+.debug-panel-footer button:hover {
+    background: rgba(139, 127, 255, 0.25);
+}
+
+/* Admin button for toggling debug */
+.debug-toggle-btn {
+    background: none;
+    border: 1px solid rgba(139, 127, 255, 0.3);
+    color: #8b7fff;
+    padding: 4px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.debug-toggle-btn:hover {
+    background: rgba(139, 127, 255, 0.15);
+}
+
+.debug-toggle-btn.active {
+    background: rgba(139, 127, 255, 0.2);
+    border-color: #8b7fff;
+}
+
+/* Responsive: collapse on narrow screens */
+@media (max-width: 900px) {
+    .debug-data-panel {
+        width: 100%;
+        max-width: 420px;
+    }
+
+    body.debug-mode-active #main-content,
+    body.debug-mode-active .site-footer {
+        margin-right: 0;
+    }
+}
