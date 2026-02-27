@@ -437,11 +437,17 @@ class MythologiesView {
         const color = mythology.color || '#8b7fff';
         const counts = mythology.counts || { deities: 0, heroes: 0, creatures: 0 };
 
-        // Check if icon is SVG path or emoji
-        const isSvgIcon = mythology.icon && mythology.icon.includes('/');
-        const iconHTML = isSvgIcon
-            ? `<img src="${mythology.icon}" alt="${mythology.name} icon" class="mythology-icon" loading="lazy" />`
-            : `<span class="mythology-icon">${mythology.icon || '📖'}</span>`;
+        // Check if icon is an image URL or emoji
+        const icon = mythology.icon || '';
+        const iconTrimmed = icon.trim();
+        const isImageUrl = iconTrimmed.startsWith('http://') ||
+                           iconTrimmed.startsWith('https://') ||
+                           iconTrimmed.startsWith('./') ||
+                           /\.(svg|png|jpg|jpeg|webp|gif)$/i.test(iconTrimmed);
+        const fallbackEmoji = mythology.icon || '📖';
+        const iconHTML = isImageUrl
+            ? `<img src="${iconTrimmed}" alt="${mythology.name} icon" class="mythology-icon" loading="lazy" onerror="this.outerHTML='<span class=\\'mythology-icon\\'>${fallbackEmoji}</span>'" />`
+            : `<span class="mythology-icon">${fallbackEmoji}</span>`;
 
         return `
             <a href="#/mythology/${mythology.id}"
