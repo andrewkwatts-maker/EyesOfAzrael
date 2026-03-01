@@ -1306,6 +1306,40 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    // ===== ENTITY POSTS (Public Discussions) =====
+    match /entity_posts/{entityKey} {
+      allow read: if true;
+      allow create, update: if isAuthenticated();
+
+      match /posts/{postId} {
+        allow read: if true;
+        allow create: if isAuthenticated()
+                      && request.resource.data.authorId == request.auth.uid
+                      && request.resource.data.content.size() >= 10
+                      && request.resource.data.netVotes == 0;
+        allow update: if isOwner(resource.data.authorId)
+                      && request.resource.data.authorId == resource.data.authorId;
+        // Admin can also update (for moderation status changes)
+        allow update: if isAdminEmail();
+        allow delete: if isOwner(resource.data.authorId) || isAdminEmail();
+
+        match /votes/{voteUserId} {
+          allow read: if true;
+          allow write: if isAuthenticated()
+                       && request.auth.uid == voteUserId
+                       && request.resource.data.value in [1, -1];
+        }
+      }
+    }
+
+    // ===== PRIVATE NOTES (User Annotations) =====
+    match /private_notes/{noteId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+
     // ===== DEFAULT FALLBACK FOR UNDEFINED COLLECTIONS =====
     // Allow read access to any collection not explicitly defined above
     // This is useful for new collections during development
