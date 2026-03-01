@@ -97,7 +97,7 @@ class FirebaseEntityRenderer {
      * @param {string} mythology - Mythology tradition
      * @param {HTMLElement} container - Container to render into
      */
-    async loadAndRender(type, id, mythology, container) {
+    async loadAndRender(type, id, mythology, container, prefetchedData = null) {
         await this.init();
 
         // Input validation - prevent path traversal and injection
@@ -110,12 +110,19 @@ class FirebaseEntityRenderer {
             return;
         }
 
-        // Show loading state
-        this.showLoading(container, sanitizedType);
+        // If we have prefetched data, skip loading animation for instant render
+        if (!prefetchedData) {
+            this.showLoading(container, sanitizedType);
+        }
 
         try {
-            // Fetch entity from Firestore (with caching) - use sanitized values
-            const entity = await this.fetchEntity(sanitizedType, sanitizedId);
+            // Use prefetched data if available, otherwise fetch from Firestore
+            let entity = prefetchedData;
+            if (!entity) {
+                entity = await this.fetchEntity(sanitizedType, sanitizedId);
+            } else {
+                console.log('[EntityRenderer] Using prefetched data - instant render!');
+            }
 
             if (!entity) {
                 this.renderError(container, `Entity not found: ${sanitizedType}/${sanitizedId}`);
@@ -185,6 +192,7 @@ class FirebaseEntityRenderer {
 
     /**
      * Fetch entity from Firestore with caching
+     * Checks LinkPrefetcher cache first for instant loading
      * @param {string} type - Entity type
      * @param {string} id - Entity ID
      * @returns {Object|null} Entity data or null if not found
@@ -192,10 +200,31 @@ class FirebaseEntityRenderer {
     async fetchEntity(type, id) {
         const cacheKey = `${type}:${id}`;
 
-        // Check cache first
+        // Check local cache first
         const cached = this._cache.get(cacheKey);
         if (cached && (Date.now() - cached.timestamp < this._cacheTTL)) {
             return cached.data;
+        }
+
+        // Check LinkPrefetcher cache for prefetched data (instant navigation)
+        if (window.LinkPrefetcher) {
+            const prefetchPaths = [
+                `entity/${type}/${id}`,
+                `mythology/greek/${type}/${id}`,
+                `mythology/norse/${type}/${id}`,
+                `mythology/egyptian/${type}/${id}`
+            ];
+            for (const path of prefetchPaths) {
+                const prefetched = window.LinkPrefetcher.get(path);
+                if (prefetched && prefetched.id === id) {
+                    // Cache locally too
+                    this._cache.set(cacheKey, {
+                        data: prefetched,
+                        timestamp: Date.now()
+                    });
+                    return prefetched;
+                }
+            }
         }
 
         const collectionName = this.getCollectionName(type);
@@ -399,6 +428,31 @@ class FirebaseEntityRenderer {
             <!-- Symbolism & Meaning -->
             ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
 
+            <!-- Cultural Section (worship practices, festivals, modern legacy) -->
+            ${entity.cultural ? ssr.renderCulturalSection(entity.cultural) : ''}
+
+            <!-- Cross-Cultural Parallels -->
+            ${entity.cross_cultural_parallels?.length ? ssr.renderCrossCulturalParallels(entity.cross_cultural_parallels) : ''}
+
+            <!-- Related Deities (simple array format) -->
+            ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
+
+            <!-- Associations -->
+            ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
+
+            <!-- Quests & Journeys -->
+            ${entity.quests?.length ? ssr.renderQuestsOrFeats(entity.quests, 'Quests & Journeys', '🗺️') : ''}
+
+            <!-- Notable Feats -->
+            ${entity.feats?.length ? ssr.renderQuestsOrFeats(entity.feats, 'Notable Feats', '🏆') : ''}
+
+            <!-- Adventures -->
+            ${entity.adventures?.length ? ssr.renderQuestsOrFeats(entity.adventures, 'Epic Adventures', '⚔️') : ''}
+
+            <!-- Companions & Allies -->
+            ${entity.companions?.length ? ssr.renderCompanions(entity.companions) : ''}
+            ${entity.allies?.length && !entity.companions?.length ? ssr.renderCompanions(entity.allies) : ''}
+
             <!-- Content (Markdown) -->
             ${entity.content ? `
             <section>
@@ -438,12 +492,19 @@ class FirebaseEntityRenderer {
             ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
 
             <!-- Remaining Dynamic Fields -->
-            ${ssr.renderRemainingFields(entity, ['keyMyths', 'extendedContent', 'symbolism', 'relatedConcepts', 'corpusSearch', 'tags', 'searchTerms'])}
+            ${ssr.renderRemainingFields(entity, [
+                'keyMyths', 'extendedContent', 'symbolism', 'relatedConcepts', 'corpusSearch',
+                'tags', 'searchTerms', 'cultural', 'cross_cultural_parallels', 'relatedDeities',
+                'associations', 'quests', 'feats', 'adventures', 'companions', 'allies'
+            ])}
         `;
 
-        container.innerHTML = html + this.renderUserNotesSection(entity);
+        container.innerHTML = html + this.renderEntityPostsSection(entity) + this.renderPrivateNotesSection(entity) + this.renderUserNotesSection(entity);
+        this.initializeEntityPosts(entity);
+        this.initializePrivateNotes(entity);
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
+        this.initializeAdminEditIcons(container, entity);
     }
 
     /**
@@ -990,6 +1051,22 @@ class FirebaseEntityRenderer {
             <!-- Symbolism -->
             ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
 
+            <!-- Cultural Section (worship practices, festivals, modern legacy) -->
+            ${entity.cultural ? ssr.renderCulturalSection(entity.cultural) : ''}
+
+            <!-- Cross-Cultural Parallels -->
+            ${entity.cross_cultural_parallels?.length ? ssr.renderCrossCulturalParallels(entity.cross_cultural_parallels) : ''}
+
+            <!-- Related Deities (simple array format) -->
+            ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
+
+            <!-- Associations -->
+            ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
+
+            <!-- Companions & Allies -->
+            ${entity.companions?.length ? ssr.renderCompanions(entity.companions) : ''}
+            ${entity.allies?.length && !entity.companions?.length ? ssr.renderCompanions(entity.allies) : ''}
+
             <!-- Content (Markdown) -->
             ${entity.content ? `
             <section style="margin-top: 2rem;">
@@ -1031,11 +1108,22 @@ class FirebaseEntityRenderer {
 
             <!-- Tags -->
             ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
+
+            <!-- Remaining Dynamic Fields -->
+            ${ssr.renderRemainingFields(entity, [
+                'keyMyths', 'extendedContent', 'symbolism', 'relatedConcepts', 'corpusSearch',
+                'tags', 'searchTerms', 'cultural', 'cross_cultural_parallels', 'relatedDeities',
+                'associations', 'quests', 'feats', 'adventures', 'companions', 'allies',
+                'weapons', 'equipment', 'sources', 'relatedEntities', 'texts', 'content'
+            ])}
         `;
 
-        container.innerHTML = html + this.renderUserNotesSection(entity);
+        container.innerHTML = html + this.renderEntityPostsSection(entity) + this.renderPrivateNotesSection(entity) + this.renderUserNotesSection(entity);
+        this.initializeEntityPosts(entity);
+        this.initializePrivateNotes(entity);
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
+        this.initializeAdminEditIcons(container, entity);
     }
 
     /**
@@ -1166,6 +1254,18 @@ class FirebaseEntityRenderer {
             ${entity.longDescription && entity.longDescription !== entity.description ?
                 ssr.renderSymbolism(entity.longDescription, 'Detailed Description') : ''}
 
+            <!-- Cultural Section -->
+            ${entity.cultural ? ssr.renderCulturalSection(entity.cultural) : ''}
+
+            <!-- Cross-Cultural Parallels -->
+            ${entity.cross_cultural_parallels?.length ? ssr.renderCrossCulturalParallels(entity.cross_cultural_parallels) : ''}
+
+            <!-- Related Deities -->
+            ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
+
+            <!-- Associations -->
+            ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
+
             <!-- Content (Markdown) -->
             ${entity.content ? `
             <section style="margin-top: 2rem;">
@@ -1207,11 +1307,22 @@ class FirebaseEntityRenderer {
 
             <!-- Tags -->
             ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
+
+            <!-- Remaining Dynamic Fields -->
+            ${ssr.renderRemainingFields(entity, [
+                'keyMyths', 'extendedContent', 'symbolism', 'longDescription', 'relatedConcepts',
+                'corpusSearch', 'tags', 'searchTerms', 'cultural', 'cross_cultural_parallels',
+                'relatedDeities', 'associations', 'properties', 'powers', 'materials',
+                'wielders', 'owners', 'sources', 'relatedEntities', 'texts', 'content'
+            ])}
         `;
 
-        container.innerHTML = html + this.renderUserNotesSection(entity);
+        container.innerHTML = html + this.renderEntityPostsSection(entity) + this.renderPrivateNotesSection(entity) + this.renderUserNotesSection(entity);
+        this.initializeEntityPosts(entity);
+        this.initializePrivateNotes(entity);
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
+        this.initializeAdminEditIcons(container, entity);
     }
 
     /**
@@ -1304,6 +1415,18 @@ class FirebaseEntityRenderer {
             <!-- Symbolism -->
             ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
 
+            <!-- Cultural Section -->
+            ${entity.cultural ? ssr.renderCulturalSection(entity.cultural) : ''}
+
+            <!-- Cross-Cultural Parallels -->
+            ${entity.cross_cultural_parallels?.length ? ssr.renderCrossCulturalParallels(entity.cross_cultural_parallels) : ''}
+
+            <!-- Related Deities -->
+            ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
+
+            <!-- Associations -->
+            ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
+
             <!-- Content (Markdown) -->
             ${entity.content ? `
             <section style="margin-top: 2rem;">
@@ -1345,11 +1468,22 @@ class FirebaseEntityRenderer {
 
             <!-- Tags -->
             ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
+
+            <!-- Remaining Dynamic Fields -->
+            ${ssr.renderRemainingFields(entity, [
+                'keyMyths', 'extendedContent', 'symbolism', 'relatedConcepts', 'corpusSearch',
+                'tags', 'searchTerms', 'cultural', 'cross_cultural_parallels', 'relatedDeities',
+                'associations', 'geography', 'realm', 'region', 'significance', 'features',
+                'inhabitants', 'sources', 'relatedEntities', 'texts', 'content'
+            ])}
         `;
 
-        container.innerHTML = html + this.renderUserNotesSection(entity);
+        container.innerHTML = html + this.renderEntityPostsSection(entity) + this.renderPrivateNotesSection(entity) + this.renderUserNotesSection(entity);
+        this.initializeEntityPosts(entity);
+        this.initializePrivateNotes(entity);
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
+        this.initializeAdminEditIcons(container, entity);
     }
 
     /**
@@ -1563,6 +1697,18 @@ class FirebaseEntityRenderer {
             <!-- Symbolism -->
             ${entity.symbolism ? ssr.renderSymbolism(entity.symbolism) : ''}
 
+            <!-- Cultural Section -->
+            ${entity.cultural ? ssr.renderCulturalSection(entity.cultural) : ''}
+
+            <!-- Cross-Cultural Parallels -->
+            ${entity.cross_cultural_parallels?.length ? ssr.renderCrossCulturalParallels(entity.cross_cultural_parallels) : ''}
+
+            <!-- Related Deities -->
+            ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
+
+            <!-- Associations -->
+            ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
+
             <!-- Content (Markdown) -->
             ${entity.content ? `
             <section style="margin-top: 2rem;">
@@ -1604,11 +1750,22 @@ class FirebaseEntityRenderer {
 
             <!-- Tags -->
             ${(entity.tags?.length || entity.searchTerms?.length) ? ssr.renderTags(entity.tags, entity.searchTerms) : ''}
+
+            <!-- Remaining Dynamic Fields -->
+            ${ssr.renderRemainingFields(entity, [
+                'keyMyths', 'extendedContent', 'symbolism', 'relatedConcepts', 'corpusSearch',
+                'tags', 'searchTerms', 'cultural', 'cross_cultural_parallels', 'relatedDeities',
+                'associations', 'abilities', 'habitat', 'appearance', 'classification', 'category',
+                'sources', 'relatedEntities', 'texts', 'content'
+            ])}
         `;
 
-        container.innerHTML = html + this.renderUserNotesSection(entity);
+        container.innerHTML = html + this.renderEntityPostsSection(entity) + this.renderPrivateNotesSection(entity) + this.renderUserNotesSection(entity);
+        this.initializeEntityPosts(entity);
+        this.initializePrivateNotes(entity);
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
+        this.initializeAdminEditIcons(container, entity);
     }
 
     /**
@@ -1699,6 +1856,31 @@ class FirebaseEntityRenderer {
             ${entity.longDescription && entity.longDescription !== entity.description ?
                 ssr.renderSymbolism(entity.longDescription, 'Detailed Description') : ''}
 
+            <!-- Cultural Section (worship practices, festivals, modern legacy) -->
+            ${entity.cultural ? ssr.renderCulturalSection(entity.cultural) : ''}
+
+            <!-- Cross-Cultural Parallels -->
+            ${entity.cross_cultural_parallels?.length ? ssr.renderCrossCulturalParallels(entity.cross_cultural_parallels) : ''}
+
+            <!-- Related Deities (simple array format) -->
+            ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
+
+            <!-- Associations -->
+            ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
+
+            <!-- Quests & Journeys -->
+            ${entity.quests?.length ? ssr.renderQuestsOrFeats(entity.quests, 'Quests & Journeys', '🗺️') : ''}
+
+            <!-- Notable Feats -->
+            ${entity.feats?.length && !this.renderQuickFacts(entity, ssr).includes('Feats') ? ssr.renderQuestsOrFeats(entity.feats, 'Notable Feats', '🏆') : ''}
+
+            <!-- Adventures -->
+            ${entity.adventures?.length ? ssr.renderQuestsOrFeats(entity.adventures, 'Epic Adventures', '⚔️') : ''}
+
+            <!-- Companions & Allies -->
+            ${entity.companions?.length ? ssr.renderCompanions(entity.companions) : ''}
+            ${entity.allies?.length && !entity.companions?.length ? ssr.renderCompanions(entity.allies) : ''}
+
             <!-- Content (Markdown) -->
             ${entity.content ? `
                 <section class="glass-card" style="margin-top: 2rem; padding: 1.5rem;">
@@ -1752,13 +1934,17 @@ class FirebaseEntityRenderer {
             ${ssr.renderRemainingFields(entity, [
                 'keyMyths', 'extendedContent', 'symbolism', 'longDescription',
                 'relatedConcepts', 'corpusSearch', 'tags', 'searchTerms', 'sources',
-                'relatedEntities', 'texts', 'content'
+                'relatedEntities', 'texts', 'content', 'cultural', 'cross_cultural_parallels',
+                'relatedDeities', 'associations', 'quests', 'feats', 'adventures', 'companions', 'allies'
             ])}
         `;
 
-        container.innerHTML = html + this.renderUserNotesSection(entity);
+        container.innerHTML = html + this.renderEntityPostsSection(entity) + this.renderPrivateNotesSection(entity) + this.renderUserNotesSection(entity);
+        this.initializeEntityPosts(entity);
+        this.initializePrivateNotes(entity);
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
+        this.initializeAdminEditIcons(container, entity);
     }
 
     /**
@@ -1868,6 +2054,9 @@ class FirebaseEntityRenderer {
 
         const user = firebase.auth().currentUser;
         if (!user) return false;
+
+        // Admin can edit anything
+        if (user.email === 'andrewkwatts@gmail.com') return true;
 
         // Check if user created this entity
         return entity.createdBy === user.uid;
@@ -2275,6 +2464,80 @@ class FirebaseEntityRenderer {
     truncateText(text, maxLength = 150) {
         if (!text || text.length <= maxLength) return text || '';
         return text.substring(0, maxLength).trim() + '...';
+    }
+
+    /**
+     * Initialize admin edit icons on the rendered entity
+     * Injects pencil icons next to editable fields for admin users
+     * @param {HTMLElement} container - The entity container
+     * @param {Object} entity - The entity data
+     */
+    initializeAdminEditIcons(container, entity) {
+        if (window.AdminFieldEditIcons) {
+            setTimeout(() => {
+                window.AdminFieldEditIcons.inject(container, entity);
+            }, 150);
+        }
+    }
+
+    /**
+     * Render the entity posts (discussion) section HTML
+     * @param {Object} entity - Entity data
+     * @returns {string} HTML for the posts section container
+     */
+    renderEntityPostsSection(entity) {
+        return `
+            <!-- Entity Discussion Posts -->
+            <section class="entity-posts-wrapper" id="entityPostsWrapper"
+                     data-entity-type="${entity.type}"
+                     data-entity-id="${entity.id}">
+            </section>
+        `;
+    }
+
+    /**
+     * Initialize the entity posts component after DOM is ready
+     * @param {Object} entity - Entity data
+     */
+    initializeEntityPosts(entity) {
+        setTimeout(() => {
+            const wrapper = document.getElementById('entityPostsWrapper');
+            if (wrapper && window.EntityPostsComponent) {
+                const postsComponent = new EntityPostsComponent(wrapper, entity);
+                postsComponent.init();
+                window._entityPostsInstance = postsComponent;
+            }
+        }, 200);
+    }
+
+    /**
+     * Render the private notes section HTML
+     * @param {Object} entity - Entity data
+     * @returns {string} HTML for the private notes container
+     */
+    renderPrivateNotesSection(entity) {
+        return `
+            <!-- Private Notes (User Annotations) -->
+            <section class="private-notes-wrapper" id="privateNotesWrapper"
+                     data-entity-type="${entity.type}"
+                     data-entity-id="${entity.id}">
+            </section>
+        `;
+    }
+
+    /**
+     * Initialize the private notes panel after DOM is ready
+     * @param {Object} entity - Entity data
+     */
+    initializePrivateNotes(entity) {
+        setTimeout(() => {
+            const wrapper = document.getElementById('privateNotesWrapper');
+            if (wrapper && window.PrivateNotesPanel) {
+                const notesPanel = new PrivateNotesPanel(wrapper, entity);
+                notesPanel.init();
+                window._privateNotesPanelInstance = notesPanel;
+            }
+        }, 300);
     }
 }
 
