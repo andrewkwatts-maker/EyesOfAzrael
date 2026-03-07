@@ -583,16 +583,24 @@
      * Apply shader for current theme
      */
     async function applyShader(themeName) {
-        if (!shaderManager) return;
+        if (!shaderManager) {
+            console.warn('[Theme Picker] No shader manager available');
+            return;
+        }
 
         if (shadersEnabled) {
             const shaderName = SHADER_MAPPING[themeName] || 'night';
+            console.log('[Theme Picker] Activating shader:', shaderName, 'for theme:', themeName);
             try {
-                document.body.classList.add('shader-active');
                 const success = await shaderManager.activate(shaderName);
-                if (!success) {
+                if (success) {
+                    document.body.classList.add('shader-active');
+                    document.body.classList.add('shader-rendering');
+                    console.log('[Theme Picker] Shader activated successfully:', shaderName);
+                } else {
                     document.body.classList.remove('shader-active');
                     document.body.classList.remove('shader-rendering');
+                    console.warn('[Theme Picker] Shader activation returned false for:', shaderName);
                 }
             } catch (error) {
                 console.warn('[Theme Picker] Shader activation failed:', error);

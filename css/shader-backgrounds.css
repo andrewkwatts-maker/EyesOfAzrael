@@ -3,14 +3,14 @@
  * Ensures shader canvas works properly with existing layout
  */
 
-/* Shader canvas base styling */
+/* Shader canvas base styling - z-index: 0 so it sits above viewport bg */
 #shader-background {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1;
+    z-index: 0;
     pointer-events: none;
     opacity: 1;
     transition: opacity 0.5s ease;
@@ -21,32 +21,39 @@
     opacity: 0;
 }
 
-/* Ensure body allows shader background to show through when shader is rendering */
-body.shader-active.shader-rendering {
+/* When shader is rendering, content must layer above the canvas (z-index: 0) */
+body.shader-active.shader-rendering #main-content {
     position: relative;
-    background: transparent;
+    z-index: 1;
 }
 
-/* Make sure main content areas have proper backdrop for readability */
-.view-container,
-.site-header,
-.site-footer {
+body.shader-active.shader-rendering .site-header {
+    z-index: 9999; /* already sticky/positioned - just ensure above canvas */
+}
+
+body.shader-active.shader-rendering .skip-to-main {
+    z-index: 10000;
+}
+
+/* Footer and view containers get transparent bg so shader shows through */
+body.shader-active.shader-rendering .view-container,
+body.shader-active.shader-rendering .site-footer {
     position: relative;
     background: transparent;
 }
 
 /* Ensure glass-morphism panels work well with shaders */
-.glass-card,
-.deity-card,
-.card {
-    background: rgba(26, 31, 58, 0.85);
+body.shader-active.shader-rendering .glass-card,
+body.shader-active.shader-rendering .deity-card,
+body.shader-active.shader-rendering .card {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.85);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
 
 /* Hero sections need stronger background for readability */
-.hero-section {
-    background: rgba(26, 31, 58, 0.75);
+body.shader-active.shader-rendering .hero-section {
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.75);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
 }
@@ -73,7 +80,7 @@ body.shader-active.shader-rendering {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background: rgba(26, 31, 58, 0.95);
+    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.95);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border: 2px solid var(--color-border);
@@ -240,14 +247,14 @@ body.shader-active.shader-rendering {
     }
 
     /* Stronger backgrounds on mobile for readability */
-    .glass-card,
-    .deity-card,
-    .card {
-        background: rgba(26, 31, 58, 0.92);
+    body.shader-active.shader-rendering .glass-card,
+    body.shader-active.shader-rendering .deity-card,
+    body.shader-active.shader-rendering .card {
+        background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.92);
     }
 
-    .hero-section {
-        background: rgba(26, 31, 58, 0.88);
+    body.shader-active.shader-rendering .hero-section {
+        background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.88);
     }
 }
 
@@ -264,11 +271,11 @@ body.shader-active.shader-rendering {
 
 /* High contrast mode */
 @media (prefers-contrast: high) {
-    .glass-card,
-    .deity-card,
-    .card,
-    .hero-section {
-        background: rgba(26, 31, 58, 0.98);
+    body.shader-active.shader-rendering .glass-card,
+    body.shader-active.shader-rendering .deity-card,
+    body.shader-active.shader-rendering .card,
+    body.shader-active.shader-rendering .hero-section {
+        background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.98);
     }
 }
 
@@ -290,36 +297,20 @@ body.shader-active.shader-rendering {
     transition: opacity 0.8s ease;
 }
 
-/* Fallback gradient when WebGL not supported */
-body.no-webgl {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+/* Animated CSS gradient fallback — always visible as base layer.
+   Uses theme CSS variables so it changes with the selected theme.
+   The WebGL shader canvas (z-index: 0) renders on top when available. */
+body {
+    background:
+        var(--color-bg-primary, #0a0e27);
+    background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(var(--color-primary-rgb, 139, 127, 255), 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(var(--color-secondary-rgb, 255, 126, 182), 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, rgba(var(--color-accent-rgb, 255, 217, 61), 0.05) 0%, transparent 40%);
+    background-attachment: fixed;
 }
 
+/* Hide shader canvas when WebGL not supported */
 body.no-webgl #shader-background {
     display: none;
-}
-
-/* Theme-specific fallbacks */
-body.no-webgl[data-shader-theme="water"] {
-    background: linear-gradient(135deg, #0a1628 0%, #0d3d56 50%, #1a5f7a 100%);
-}
-
-body.no-webgl[data-shader-theme="fire"] {
-    background: linear-gradient(135deg, #1a0a05 0%, #3d1f0d 50%, #5a2f1a 100%);
-}
-
-body.no-webgl[data-shader-theme="night"] {
-    background: linear-gradient(135deg, #05050a 0%, #0a0a1e 50%, #0f0f2e 100%);
-}
-
-body.no-webgl[data-shader-theme="earth"] {
-    background: linear-gradient(135deg, #0a0805 0%, #1a150d 50%, #2a251a 100%);
-}
-
-body.no-webgl[data-shader-theme="light"] {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #3a3a3a 100%);
-}
-
-body.no-webgl[data-shader-theme="dark"] {
-    background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #141414 100%);
 }

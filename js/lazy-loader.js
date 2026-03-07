@@ -505,9 +505,9 @@ class ProgressiveLazyLoader {
         console.log('[Lazy Loader] Loading shaders...');
 
         try {
-            // Check if shaders are already initialized by app-init-simple.js
-            if (window.EyesOfAzrael?.shaders) {
-                console.log('[Lazy Loader] Shaders already initialized by app, skipping');
+            // Check if shaders are already initialized by shader-theme-picker.js or app-init
+            if (window.EyesOfAzrael?.shaders || document.getElementById('shader-background')) {
+                console.log('[Lazy Loader] Shaders already initialized, skipping');
                 return;
             }
 

@@ -132,7 +132,7 @@ class ShaderThemeManager {
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: -1;
+            z-index: 0;
             pointer-events: none;
         `;
 
@@ -212,10 +212,14 @@ class ShaderThemeManager {
         try {
             const response = await fetch(`/js/shaders/${filename}`);
             if (!response.ok) {
-                throw new Error(`Failed to load shader: ${filename}`);
+                throw new Error(`Failed to load shader: ${filename} (HTTP ${response.status})`);
             }
             const source = await response.text();
+            if (!source || source.trim().length === 0) {
+                throw new Error(`Shader file is empty: ${filename}`);
+            }
             this.shaderCache.set(filename, source);
+            console.log(`[ShaderThemes] Loaded shader source: ${filename} (${source.length} chars)`);
             return source;
         } catch (error) {
             console.error('[ShaderThemes] Error loading shader:', error);
@@ -352,8 +356,12 @@ class ShaderThemeManager {
             return false;
         }
 
-        // Add canvas to DOM if not already added
+        // Guard against duplicate canvas elements
         if (!this.canvas.parentElement) {
+            const existing = document.getElementById('shader-background');
+            if (existing && existing !== this.canvas) {
+                existing.remove();
+            }
             document.body.insertBefore(this.canvas, document.body.firstChild);
         }
 
@@ -362,9 +370,6 @@ class ShaderThemeManager {
         if (success) {
             this.enabled = true;
             this.resume();
-
-            // Add class to indicate shader is actually rendering
-            document.body.classList.add('shader-rendering');
             return true;
         }
 
