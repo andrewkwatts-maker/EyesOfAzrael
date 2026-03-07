@@ -83,18 +83,9 @@ body {
     transition: background-color 0.3s ease;
 }
 
-/* When WebGL shader is active, use semi-transparent dark background so shader shows through.
-   We use a dark overlay instead of fully transparent to ensure dark theme is maintained
-   even if the shader fails to load or render properly. */
-body.shader-active {
-    background: rgba(var(--color-bg-primary-rgb, 10, 14, 39), 0.85);
-    background-image: none;
-}
-
-/* When shader canvas is confirmed visible and rendering, make fully transparent */
-body.shader-active.shader-rendering {
-    background: transparent;
-}
+/* Shader background integration is handled by shader-backgrounds.css.
+   The WebGL canvas renders at z-index: 0 on top of the body background,
+   so no transparency tricks are needed here. */
 
 /* Header - Modern Glass Morphism */
 header {
