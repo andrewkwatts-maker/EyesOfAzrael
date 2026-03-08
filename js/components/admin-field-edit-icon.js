@@ -135,6 +135,9 @@ class AdminFieldEditIcons {
         if (entity.sources?.length) {
             fields.push({ name: 'sources', label: 'Sources', type: 'sources', headerMatch: 'Source' });
         }
+        if (entity.icon !== undefined) {
+            fields.push({ name: 'icon', label: 'Icon', type: 'icon', sectionMatch: 'entity-icon' });
+        }
 
         return fields;
     }
