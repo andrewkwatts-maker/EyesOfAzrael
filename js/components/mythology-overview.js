@@ -1,42 +1,51 @@
 /**
  * Mythology Overview Component
- * Displays detailed view of a specific mythology
+ * Displays a full encyclopedia-style page for a mythology tradition.
  *
- * Features:
- * - Hero section with mythology info
- * - Entity type cards (Deities, Heroes, Creatures, etc.)
- * - Statistics dashboard
- * - Navigation to entity type browsers
+ * Layout:
+ * 1. Hero section — icon, title, metadata
+ * 2. Introduction — long-form description from Firebase
+ * 3. Table of contents — anchor links to each category section
+ * 4. Expanded category sections — intro paragraph + entity grid per type
  */
 
 class MythologyOverview {
     constructor(options = {}) {
         this.db = options.db || (window.firebase && window.firebase.firestore());
         this.router = options.router;
+        this.PREVIEW_LIMIT = 20; // max entities shown per section before "show all"
     }
 
+    // Entity type definitions
+    static ENTITY_TYPES = [
+        { collection: 'deities', singular: 'deity', plural: 'deities', icon: '👑', label: 'Deities & Gods' },
+        { collection: 'heroes', singular: 'hero', plural: 'heroes', icon: '🦸', label: 'Heroes & Legends' },
+        { collection: 'creatures', singular: 'creature', plural: 'creatures', icon: '🐉', label: 'Mythical Creatures' },
+        { collection: 'cosmology', singular: 'cosmology', plural: 'cosmology', icon: '🌌', label: 'Cosmology' },
+        { collection: 'places', singular: 'place', plural: 'places', icon: '🏛️', label: 'Sacred Places' },
+        { collection: 'items', singular: 'item', plural: 'items', icon: '⚔️', label: 'Sacred Items' },
+        { collection: 'texts', singular: 'text', plural: 'texts', icon: '📜', label: 'Sacred Texts' },
+        { collection: 'rituals', singular: 'ritual', plural: 'rituals', icon: '🕯️', label: 'Rituals & Practices' },
+        { collection: 'symbols', singular: 'symbol', plural: 'symbols', icon: '⚡', label: 'Symbols' },
+        { collection: 'herbs', singular: 'herb', plural: 'herbs', icon: '🌿', label: 'Sacred Herbalism' },
+        { collection: 'magic', singular: 'magic', plural: 'magic', icon: '✨', label: 'Magic Systems' },
+    ];
+
     /**
-     * Render the mythology overview
-     * @param {object} route - Route object from router
-     * @returns {string} HTML string
+     * Main render entry point
      */
     async render(route) {
         try {
             const { mythology } = route;
 
-            // Load mythology data
             const mythologyData = await this.loadMythology(mythology);
-
             if (!mythologyData) {
                 return this.renderNotFound(mythology);
             }
 
-            // Load entity type counts
-            const entityCounts = await this.loadEntityCounts(mythology);
+            const sections = await this.loadCategorySections(mythology);
 
-            // Generate HTML
-            return this.generateHTML(mythologyData, entityCounts);
-
+            return this.generateHTML(mythologyData, sections);
         } catch (error) {
             console.error('[MythologyOverview] Render error:', error);
             throw error;
@@ -44,74 +53,69 @@ class MythologyOverview {
     }
 
     /**
-     * Load mythology data from Firebase
+     * Load mythology document from Firestore
      */
     async loadMythology(mythologyId) {
-        if (!this.db) {
-            throw new Error('Firebase Firestore not initialized');
-        }
+        if (!this.db) throw new Error('Firebase Firestore not initialized');
 
         const doc = await this.db.collection('mythologies').doc(mythologyId).get();
+        if (!doc.exists) return null;
 
-        if (!doc.exists) {
-            return null;
-        }
-
-        return {
-            id: doc.id,
-            ...doc.data()
-        };
+        return { id: doc.id, ...doc.data() };
     }
 
     /**
-     * Load entity counts for all types
+     * Load all category sections with entity data in parallel
      */
-    async loadEntityCounts(mythologyId) {
-        const entityTypes = [
-            { collection: 'deities', singular: 'deity', plural: 'deities', icon: '👑' },
-            { collection: 'heroes', singular: 'hero', plural: 'heroes', icon: '🦸' },
-            { collection: 'creatures', singular: 'creature', plural: 'creatures', icon: '🐉' },
-            { collection: 'cosmology', singular: 'cosmology', plural: 'cosmology', icon: '🌌' },
-            { collection: 'rituals', singular: 'ritual', plural: 'rituals', icon: '🕯️' },
-            { collection: 'herbs', singular: 'herb', plural: 'herbs', icon: '🌿' },
-            { collection: 'texts', singular: 'text', plural: 'texts', icon: '📜' },
-            { collection: 'symbols', singular: 'symbol', plural: 'symbols', icon: '⚡' },
-            { collection: 'items', singular: 'item', plural: 'items', icon: '⚔️' },
-            { collection: 'places', singular: 'place', plural: 'places', icon: '🏛️' },
-            { collection: 'magic', singular: 'magic', plural: 'magic', icon: '✨' }
-        ];
+    async loadCategorySections(mythologyId) {
+        const results = await Promise.all(
+            MythologyOverview.ENTITY_TYPES.map(async (type) => {
+                try {
+                    const snapshot = await this.db.collection(type.collection)
+                        .where('mythology', '==', mythologyId)
+                        .get();
 
-        const counts = {};
+                    if (snapshot.empty) return null;
 
-        for (const type of entityTypes) {
-            try {
-                const snapshot = await this.db.collection(type.collection)
-                    .where('mythology', '==', mythologyId)
-                    .get();
+                    const entities = [];
+                    snapshot.forEach(doc => {
+                        entities.push({ id: doc.id, ...doc.data() });
+                    });
 
-                counts[type.collection] = {
-                    count: snapshot.size,
-                    ...type
-                };
-            } catch (error) {
-                console.error(`[MythologyOverview] Error loading ${type.collection}:`, error);
-                counts[type.collection] = {
-                    count: 0,
-                    ...type
-                };
-            }
-        }
+                    // Sort alphabetically by name
+                    entities.sort((a, b) => {
+                        const nameA = (a.name || a.title || '').toLowerCase();
+                        const nameB = (b.name || b.title || '').toLowerCase();
+                        return nameA.localeCompare(nameB);
+                    });
 
-        return counts;
+                    return {
+                        ...type,
+                        count: entities.length,
+                        entities
+                    };
+                } catch (error) {
+                    console.error(`[MythologyOverview] Error loading ${type.collection}:`, error);
+                    return null;
+                }
+            })
+        );
+
+        // Filter out empty categories, sort by count descending
+        return results
+            .filter(s => s && s.count > 0)
+            .sort((a, b) => b.count - a.count);
     }
 
     /**
-     * Generate HTML for overview
+     * Generate the full page HTML
      */
-    generateHTML(mythology, entityCounts) {
+    generateHTML(mythology, sections) {
         const colors = mythology.colors || {};
         const primaryColor = colors.primary || '#667eea';
         const secondaryColor = colors.secondary || '#764ba2';
+        const mythName = this.escapeHtml(mythology.name);
+        const totalEntities = sections.reduce((sum, s) => sum + s.count, 0);
 
         return `
             <div class="mythology-overview" data-mythology="${mythology.id}">
@@ -120,113 +124,212 @@ class MythologyOverview {
                     <div class="mythology-hero-background"></div>
                     <div class="mythology-hero-content">
                         <div class="mythology-icon-large">${mythology.icon || '📚'}</div>
-                        <h1 class="mythology-title">${this.escapeHtml(mythology.name)} Mythology</h1>
-                        ${mythology.description ? `
-                            <p class="mythology-description">${this.escapeHtml(mythology.description)}</p>
-                        ` : ''}
-
+                        <h1 class="mythology-title">${mythName}</h1>
+                        ${mythology.subtitle ? `<p class="mythology-subtitle">${this.escapeHtml(mythology.subtitle)}</p>` : ''}
                         <div class="mythology-meta-info">
-                            ${mythology.region ? `
-                                <div class="meta-item">
-                                    <span class="meta-label">Region:</span>
-                                    <span class="meta-value">${this.escapeHtml(mythology.region)}</span>
-                                </div>
-                            ` : ''}
-                            ${mythology.period ? `
-                                <div class="meta-item">
-                                    <span class="meta-label">Period:</span>
-                                    <span class="meta-value">${this.escapeHtml(mythology.period)}</span>
-                                </div>
-                            ` : ''}
-                            ${mythology.language ? `
-                                <div class="meta-item">
-                                    <span class="meta-label">Language:</span>
-                                    <span class="meta-value">${this.escapeHtml(mythology.language)}</span>
-                                </div>
-                            ` : ''}
+                            ${mythology.region ? `<div class="meta-item"><span class="meta-label">Region</span><span class="meta-value">${this.escapeHtml(mythology.region)}</span></div>` : ''}
+                            ${mythology.period ? `<div class="meta-item"><span class="meta-label">Period</span><span class="meta-value">${this.escapeHtml(mythology.period)}</span></div>` : ''}
+                            ${mythology.language ? `<div class="meta-item"><span class="meta-label">Language</span><span class="meta-value">${this.escapeHtml(mythology.language)}</span></div>` : ''}
+                            <div class="meta-item">
+                                <span class="meta-label">Entries</span>
+                                <span class="meta-value">${totalEntities.toLocaleString()}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Stats Dashboard -->
-                <div class="entity-stats-dashboard">
-                    <h2 class="section-title">Content Statistics</h2>
-                    <div class="stats-grid">
-                        ${this.renderStatCards(entityCounts)}
-                    </div>
+                <!-- Introduction -->
+                ${this.renderIntroSection(mythology)}
+
+                <!-- Table of Contents -->
+                ${this.renderTableOfContents(sections, mythology)}
+
+                <!-- Category Sections -->
+                <div class="mythology-sections-container">
+                    ${sections.map(section => this.renderCategorySection(mythology, section)).join('')}
                 </div>
 
-                <!-- Entity Type Grid -->
-                <div class="entity-types-section">
-                    <h2 class="section-title">Explore by Category</h2>
-                    <div class="entity-types-grid">
-                        ${this.renderEntityTypeCards(mythology.id, entityCounts)}
-                    </div>
+                <!-- Back to top -->
+                <div class="mythology-back-to-top">
+                    <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" class="back-to-top-link">Back to top</a>
                 </div>
-
-                ${mythology.fullDescription ? `
-                    <div class="mythology-details-section">
-                        <h2 class="section-title">About ${this.escapeHtml(mythology.name)} Mythology</h2>
-                        <div class="mythology-full-description">
-                            ${this.escapeHtml(mythology.fullDescription)}
-                        </div>
-                    </div>
-                ` : ''}
             </div>
         `;
     }
 
     /**
-     * Render stat cards
+     * Render the long-form introduction section
      */
-    renderStatCards(entityCounts) {
-        const totalEntities = Object.values(entityCounts).reduce((sum, type) => sum + type.count, 0);
+    renderIntroSection(mythology) {
+        // Try multiple fields for rich content
+        const longText = mythology.fullDescription
+            || mythology.overview
+            || mythology.content
+            || mythology.longDescription
+            || mythology.description
+            || '';
 
-        const majorTypes = ['deities', 'heroes', 'creatures'];
-        const majorCounts = majorTypes
-            .map(type => entityCounts[type])
-            .filter(type => type && type.count > 0);
+        if (!longText) return '';
 
         return `
-            <div class="stat-card">
-                <div class="stat-number">${totalEntities}</div>
-                <div class="stat-label">Total Entities</div>
-            </div>
-            ${majorCounts.map(type => `
-                <div class="stat-card">
-                    <div class="stat-icon">${type.icon}</div>
-                    <div class="stat-number">${type.count}</div>
-                    <div class="stat-label">${this.capitalize(type.plural)}</div>
+            <div class="mythology-intro-section">
+                <div class="mythology-intro-content">
+                    ${this.renderLongText(longText)}
                 </div>
-            `).join('')}
+            </div>
         `;
     }
 
     /**
-     * Render entity type cards
+     * Render text as multiple paragraphs, splitting on double newlines
      */
-    renderEntityTypeCards(mythologyId, entityCounts) {
-        // Sort by count (descending) and show only non-zero
-        const sortedTypes = Object.values(entityCounts)
-            .filter(type => type.count > 0)
-            .sort((a, b) => b.count - a.count);
+    renderLongText(text) {
+        if (!text) return '';
+        const escaped = this.escapeHtml(text);
+        // Split on double newlines or single newlines for paragraph breaks
+        const paragraphs = escaped.split(/\n\n+/).filter(p => p.trim());
+        if (paragraphs.length <= 1) {
+            // If no paragraph breaks, just wrap as a single block
+            return `<p>${escaped}</p>`;
+        }
+        return paragraphs.map(p => `<p>${p.trim()}</p>`).join('');
+    }
 
-        if (sortedTypes.length === 0) {
-            return `
-                <div class="empty-state">
-                    <p>No entities available for this mythology yet.</p>
+    /**
+     * Render the table of contents as anchor links
+     */
+    renderTableOfContents(sections, mythology) {
+        if (sections.length === 0) return '';
+
+        const mythName = this.escapeHtml(mythology.name);
+
+        return `
+            <nav class="mythology-toc" aria-label="Page contents">
+                <div class="mythology-toc-header">
+                    <h2 class="mythology-toc-title">Contents</h2>
+                    <span class="mythology-toc-subtitle">${sections.length} categories in ${mythName}</span>
                 </div>
-            `;
+                <div class="mythology-toc-links">
+                    ${sections.map(section => `
+                        <a href="#section-${section.plural}" class="mythology-toc-link"
+                           onclick="document.getElementById('section-${section.plural}')?.scrollIntoView({behavior:'smooth',block:'start'});return false;">
+                            <span class="toc-icon">${section.icon}</span>
+                            <span class="toc-label">${section.label}</span>
+                            <span class="toc-count">${section.count}</span>
+                        </a>
+                    `).join('')}
+                </div>
+            </nav>
+        `;
+    }
+
+    /**
+     * Render a single expanded category section with entity grid
+     */
+    renderCategorySection(mythology, section) {
+        const mythName = this.escapeHtml(mythology.name);
+        const mythId = mythology.id;
+        const entitiesToShow = section.entities.slice(0, this.PREVIEW_LIMIT);
+        const hasMore = section.entities.length > this.PREVIEW_LIMIT;
+        const remaining = section.entities.length - this.PREVIEW_LIMIT;
+
+        // Build an intro from the first few entities' context
+        const intro = this.generateCategoryIntro(mythology, section);
+
+        return `
+            <section class="mythology-category-section" id="section-${section.plural}">
+                <div class="category-section-header">
+                    <h2 class="category-section-title">
+                        <span class="category-section-icon">${section.icon}</span>
+                        ${section.label}
+                        <span class="category-section-count">${section.count}</span>
+                    </h2>
+                    <a href="#/mythology/${mythId}/${section.plural}" class="category-browse-link">Browse all</a>
+                </div>
+
+                ${intro ? `<p class="category-intro">${intro}</p>` : ''}
+
+                <div class="category-entity-grid">
+                    ${entitiesToShow.map(entity =>
+                        this.renderEntityMiniCard(entity, mythId, section.collection)
+                    ).join('')}
+                </div>
+
+                ${hasMore ? `
+                    <div class="category-show-more">
+                        <a href="#/mythology/${mythId}/${section.plural}" class="category-show-all-link">
+                            View all ${section.count} ${section.plural} →
+                        </a>
+                    </div>
+                ` : ''}
+            </section>
+        `;
+    }
+
+    /**
+     * Generate an introductory sentence for a category section
+     */
+    generateCategoryIntro(mythology, section) {
+        const mythName = this.escapeHtml(mythology.name);
+        const count = section.count;
+        const plural = section.plural;
+
+        // Use category-specific intros
+        const intros = {
+            deities: `The ${mythName} pantheon encompasses ${count} divine figures, each embodying fundamental aspects of the natural and spiritual world.`,
+            heroes: `${count} legendary heroes and figures define the heroic tradition of ${mythName} mythology, their stories exploring themes of courage, fate, and the human condition.`,
+            creatures: `${mythName} mythology features ${count} mythical creatures and beings, from fearsome monsters to benevolent guardians of the sacred.`,
+            cosmology: `The cosmological framework of ${mythName} mythology comprises ${count} entries describing the structure of the universe, creation narratives, and the nature of existence.`,
+            places: `${count} sacred locations and mythical realms form the geography of ${mythName} mythology, from divine dwelling places to sites of legendary events.`,
+            items: `${count} sacred artifacts, weapons, and objects of power feature in ${mythName} mythology, each carrying deep symbolic and narrative significance.`,
+            texts: `${count} sacred texts and literary works preserve the wisdom and stories of ${mythName} mythology for posterity.`,
+            rituals: `${count} rituals, ceremonies, and sacred practices connect practitioners to the divine traditions of ${mythName} mythology.`,
+            symbols: `${count} sacred symbols and signs carry the visual language of ${mythName} mythology, encoding spiritual meaning in form and pattern.`,
+            herbs: `${count} sacred plants and herbal preparations hold special significance within ${mythName} mythological and spiritual practice.`,
+            magic: `${count} magical systems and supernatural arts form the esoteric dimension of ${mythName} mythology.`,
+        };
+
+        return intros[plural] || `Explore ${count} ${plural} from ${mythName} mythology.`;
+    }
+
+    /**
+     * Render a compact entity card for the grid
+     */
+    renderEntityMiniCard(entity, mythologyId, collection) {
+        const name = this.escapeHtml(entity.name || entity.title || 'Unnamed');
+        const icon = entity.icon || '';
+        const subtitle = entity.subtitle || entity.shortDescription || '';
+        const domains = entity.domains || entity.domain || [];
+        const entityId = entity.id;
+
+        // Build subtitle text: prefer subtitle, then first 2 domains
+        let subText = '';
+        if (subtitle) {
+            subText = this.escapeHtml(this.truncate(subtitle, 60));
+        } else if (Array.isArray(domains) && domains.length > 0) {
+            subText = domains.slice(0, 2).map(d => this.escapeHtml(d)).join(' · ');
         }
 
-        return sortedTypes.map(type => `
-            <a href="#/mythology/${mythologyId}/${type.plural}" class="entity-type-card">
-                <div class="entity-type-icon">${type.icon}</div>
-                <div class="entity-type-name">${this.capitalize(type.plural)}</div>
-                <div class="entity-type-count">${type.count} ${type.count === 1 ? type.singular : type.plural}</div>
-                <div class="entity-type-arrow">→</div>
+        // Link can use either entity route or mythology route
+        const href = `#/entity/${collection}/${entityId}`;
+
+        return `
+            <a href="${href}" class="entity-mini-card" data-entity-id="${entityId}">
+                ${icon ? `<span class="mini-card-icon">${this.escapeHtml(icon)}</span>` : ''}
+                <span class="mini-card-body">
+                    <span class="mini-card-name">${name}</span>
+                    ${subText ? `<span class="mini-card-sub">${subText}</span>` : ''}
+                </span>
             </a>
-        `).join('');
+        `;
+    }
+
+    /**
+     * Truncate text to a max length
+     */
+    truncate(text, maxLen) {
+        if (!text || text.length <= maxLen) return text;
+        return text.substring(0, maxLen).replace(/\s+\S*$/, '') + '...';
     }
 
     /**
@@ -247,17 +350,11 @@ class MythologyOverview {
         `;
     }
 
-    /**
-     * Capitalize string
-     */
     capitalize(str) {
         if (!str) return '';
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    /**
-     * Escape HTML
-     */
     escapeHtml(text) {
         if (!text) return '';
         const div = document.createElement('div');

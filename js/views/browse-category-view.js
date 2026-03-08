@@ -240,22 +240,21 @@ class BrowseCategoryView {
         const domainCount = this.availableDomains.size;
 
         statsEl.innerHTML = `
-            <span class="stat-badge">
-                <span class="stat-icon">📊</span>
-                <span class="stat-value">${totalCount}</span>
-                <span class="stat-label">${this.category}</span>
-            </span>
-            <span class="stat-badge">
-                <span class="stat-icon">🌍</span>
-                <span class="stat-value">${mythCount}</span>
-                <span class="stat-label">mythologies</span>
-            </span>
+            <div class="browse-hero-stat">
+                <span class="browse-hero-stat-value">${totalCount}</span>
+                <span class="browse-hero-stat-label">${this.category}</span>
+            </div>
+            ${!this.mythology && mythCount > 1 ? `
+                <div class="browse-hero-stat">
+                    <span class="browse-hero-stat-value">${mythCount}</span>
+                    <span class="browse-hero-stat-label">Mythologies</span>
+                </div>
+            ` : ''}
             ${domainCount > 0 ? `
-                <span class="stat-badge">
-                    <span class="stat-icon">🏷️</span>
-                    <span class="stat-value">${domainCount}</span>
-                    <span class="stat-label">domains</span>
-                </span>
+                <div class="browse-hero-stat">
+                    <span class="browse-hero-stat-value">${domainCount}</span>
+                    <span class="browse-hero-stat-label">Domains</span>
+                </div>
             ` : ''}
         `;
     }
@@ -330,14 +329,15 @@ class BrowseCategoryView {
         return `
             <div class="browse-view">
                 <!-- Skeleton Header -->
-                <header class="browse-header skeleton-header">
-                    <div class="browse-header-icon skeleton-pulse">⏳</div>
-                    <div class="browse-header-content">
-                        <div class="skeleton-title skeleton-pulse"></div>
-                        <div class="skeleton-text skeleton-pulse"></div>
-                        <div class="skeleton-stats skeleton-pulse"></div>
+                <div class="browse-hero skeleton-header">
+                    <div class="browse-hero-background"></div>
+                    <div class="browse-hero-content" style="text-align:center;">
+                        <div class="skeleton-icon skeleton-pulse" style="margin: 0 auto 1rem; width:3.5rem; height:3.5rem;"></div>
+                        <div class="skeleton-title skeleton-pulse" style="margin: 0 auto 0.5rem; width:300px;"></div>
+                        <div class="skeleton-text skeleton-pulse" style="margin: 0 auto 1rem; width:500px;"></div>
+                        <div class="skeleton-stats skeleton-pulse" style="margin: 0 auto; width:200px;"></div>
                     </div>
-                </header>
+                </div>
 
                 <!-- Skeleton Grid -->
                 <div class="entity-grid">
@@ -499,37 +499,79 @@ class BrowseCategoryView {
     }
 
     /**
-     * Get header HTML
+     * Get header HTML — polished hero section
      */
     getHeaderHTML(categoryInfo) {
+        const mythCount = Object.keys(this.groupedEntities).length;
+        const domainCount = this.availableDomains.size;
+        const mythLabel = this.mythology ? this.capitalize(this.mythology) : null;
+
         return `
-            <header class="browse-header">
-                <div class="browse-header-icon">${categoryInfo.icon}</div>
-                <div class="browse-header-content">
-                    <h1 class="browse-title">${categoryInfo.name}</h1>
-                    <p class="browse-description">${categoryInfo.description}</p>
-                    <div class="browse-stats" id="browseStats">
-                        <span class="stat-badge">
-                            <span class="stat-icon">📊</span>
-                            <span class="stat-value">${this.entities.length}</span>
-                            <span class="stat-label">${this.category}</span>
-                        </span>
-                        <span class="stat-badge">
-                            <span class="stat-icon">🌍</span>
-                            <span class="stat-value">${Object.keys(this.groupedEntities).length}</span>
-                            <span class="stat-label">mythologies</span>
-                        </span>
-                        ${this.availableDomains.size > 0 ? `
-                            <span class="stat-badge">
-                                <span class="stat-icon">🏷️</span>
-                                <span class="stat-value">${this.availableDomains.size}</span>
-                                <span class="stat-label">domains</span>
-                            </span>
+            <div class="browse-hero">
+                <div class="browse-hero-background"></div>
+                <div class="browse-hero-content">
+                    <div class="browse-hero-icon">${categoryInfo.icon}</div>
+                    <h1 class="browse-hero-title">${categoryInfo.name}</h1>
+                    ${mythLabel ? `<p class="browse-hero-mythology">${mythLabel} Mythology</p>` : ''}
+                    <p class="browse-hero-description">${this.getCategoryLongDescription(this.category, mythLabel)}</p>
+                    <div class="browse-hero-stats" id="browseStats">
+                        <div class="browse-hero-stat">
+                            <span class="browse-hero-stat-value">${this.entities.length}</span>
+                            <span class="browse-hero-stat-label">${this.category}</span>
+                        </div>
+                        ${!this.mythology && mythCount > 1 ? `
+                            <div class="browse-hero-stat">
+                                <span class="browse-hero-stat-value">${mythCount}</span>
+                                <span class="browse-hero-stat-label">Mythologies</span>
+                            </div>
+                        ` : ''}
+                        ${domainCount > 0 ? `
+                            <div class="browse-hero-stat">
+                                <span class="browse-hero-stat-value">${domainCount}</span>
+                                <span class="browse-hero-stat-label">Domains</span>
+                            </div>
                         ` : ''}
                     </div>
                 </div>
-            </header>
+            </div>
         `;
+    }
+
+    /**
+     * Get a longer, richer description for a category
+     */
+    getCategoryLongDescription(category, mythologyName) {
+        if (mythologyName) {
+            const descs = {
+                deities: `Explore the divine figures of ${mythologyName} mythology — gods, goddesses, and celestial beings who embody the forces of nature, fate, and the human spirit.`,
+                heroes: `Legendary heroes and mortal champions of ${mythologyName} tradition, whose epic quests and fateful journeys define the heroic ideal.`,
+                creatures: `Mythical beings and supernatural creatures from ${mythologyName} mythology, from fearsome guardians to benevolent spirits.`,
+                items: `Sacred artifacts, divine weapons, and objects of power from ${mythologyName} mythology, each carrying deep symbolic significance.`,
+                places: `Sacred locations, divine realms, and legendary sites from ${mythologyName} mythology — places where the mortal and divine worlds intersect.`,
+                herbs: `Sacred plants and herbal preparations holding spiritual significance within the ${mythologyName} tradition.`,
+                rituals: `Ceremonies, rites, and sacred practices that connect practitioners to the divine traditions of ${mythologyName} mythology.`,
+                texts: `Holy scriptures, epic poems, and sacred writings that preserve the wisdom of ${mythologyName} mythology.`,
+                symbols: `Sacred symbols, sigils, and icons encoding the spiritual language of ${mythologyName} mythology.`,
+                cosmology: `The cosmological framework of ${mythologyName} mythology — creation narratives, cosmic structures, and the nature of existence.`,
+                magic: `Magical systems and supernatural arts from the esoteric dimension of ${mythologyName} mythology.`
+            };
+            return descs[category] || `Explore ${category} from ${mythologyName} mythology.`;
+        }
+
+        const descs = {
+            deities: 'Divine beings and pantheons from every corner of the ancient world. From storm gods to harvest goddesses, explore the forces that civilizations believed shaped their destinies.',
+            heroes: 'Epic heroes and legendary figures whose journeys explore themes of courage, sacrifice, and the boundaries of human potential across world mythologies.',
+            creatures: 'Dragons, monsters, spirits, and fantastic beasts that populate the world\'s mythological traditions — from fearsome chaos serpents to benevolent guardian spirits.',
+            items: 'Legendary artifacts, divine weapons, and enchanted objects of power that shape the narratives of world mythology.',
+            places: 'Sacred mountains, divine realms, enchanted forests, and legendary cities — the geography of the mythological imagination across cultures.',
+            herbs: 'Sacred plants, magical herbs, and traditional preparations that bridge the natural and supernatural in world mythology.',
+            rituals: 'Ceremonies, rites of passage, and sacred practices that connect humanity to the divine across the world\'s spiritual traditions.',
+            texts: 'Holy scriptures, epic poems, and sacred writings that preserve humanity\'s oldest stories and deepest wisdom.',
+            symbols: 'Sacred symbols, ritual signs, and mystical icons that encode spiritual meaning across the world\'s mythological traditions.',
+            cosmology: 'Creation myths, cosmic structures, and metaphysical frameworks that explain how different cultures understood the origin and nature of existence.',
+            magic: 'Magical traditions, supernatural arts, and esoteric practices from the mystical dimensions of world mythology.'
+        };
+        return descs[category] || `Browse and explore ${category} from world mythologies.`;
     }
 
     /**
@@ -863,6 +905,37 @@ class BrowseCategoryView {
                     </div>
                 </div>
             </a>
+        `;
+    }
+
+    /**
+     * Get "Add New" card HTML for the end of the grid
+     * Only visible to authenticated users
+     */
+    getAddNewCardHTML() {
+        const isAuth = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
+        if (!isAuth) return '';
+
+        const categoryLabel = this.category ? this.category.replace(/s$/, '') : 'entity';
+
+        return `
+            <button class="entity-card entity-card--add-new"
+                    type="button"
+                    aria-label="Submit new ${categoryLabel}"
+                    data-action="submit-new-content"
+                    data-category="${this.category || ''}">
+                <div class="add-new-card__content">
+                    <div class="add-new-card__icon">
+                        <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </div>
+                    <h3 class="add-new-card__title">Submit New ${this.capitalize(categoryLabel)}</h3>
+                    <p class="add-new-card__desc">Contribute to the encyclopedia</p>
+                </div>
+            </button>
         `;
     }
 
@@ -1472,6 +1545,15 @@ class BrowseCategoryView {
         if (!grid) return;
 
         grid.addEventListener('click', (e) => {
+            // Check if "Add New" card was clicked
+            const addNewCard = e.target.closest('.entity-card--add-new');
+            if (addNewCard) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.openSubmissionWizard(addNewCard.dataset.category);
+                return;
+            }
+
             // Check if clicked on a quick action button
             const actionBtn = e.target.closest('.quick-action-btn');
             if (!actionBtn) return;
@@ -1519,6 +1601,58 @@ class BrowseCategoryView {
             isFavorited ? 'Added to favorites' : 'Removed from favorites',
             isFavorited ? 'success' : 'info'
         );
+    }
+
+    /**
+     * Open the content submission wizard modal
+     */
+    openSubmissionWizard(category) {
+        // Reuse the ContributeMenu's wizard launcher if available
+        if (window.ContributeMenu && window.ContributeMenu.prototype._openSubmissionWizard) {
+            const menu = new ContributeMenu();
+            menu._openSubmissionWizard();
+            return;
+        }
+
+        // Fallback: create modal directly
+        let modal = document.getElementById('submission-wizard-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+            return;
+        }
+
+        modal = document.createElement('div');
+        modal.id = 'submission-wizard-modal';
+        modal.className = 'submission-wizard-modal';
+        modal.innerHTML = `
+            <div class="submission-wizard-modal__backdrop"></div>
+            <div class="submission-wizard-modal__content">
+                <button class="submission-wizard-modal__close" type="button" aria-label="Close wizard">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div id="wizard-container" data-content-wizard></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.body.classList.add('modal-open');
+
+        if (window.ContentSubmissionWizard) {
+            window.contentWizard = new window.ContentSubmissionWizard('#wizard-container');
+            window.contentWizard.init();
+        }
+
+        const closeBtn = modal.querySelector('.submission-wizard-modal__close');
+        const backdrop = modal.querySelector('.submission-wizard-modal__backdrop');
+        const closeModal = () => {
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        };
+        closeBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
     }
 
     /**
@@ -1818,7 +1952,7 @@ class BrowseCategoryView {
 
         grid.innerHTML = this.displayedEntities
             .map(entity => this.getEntityCardHTML(entity))
-            .join('');
+            .join('') + this.getAddNewCardHTML();
 
         // Update load more button visibility
         this.updateLoadMoreButton();
@@ -2098,79 +2232,9 @@ class BrowseCategoryView {
                 }
 
                 /* ==========================================
-                   Header Section
+                   Header/Hero Section
+                   (Main hero styles are in dynamic-views.css)
                    ========================================== */
-                .browse-header {
-                    display: flex;
-                    gap: var(--spacing-xl, 2rem);
-                    align-items: center;
-                    margin-bottom: var(--spacing-xl, 2rem);
-                    padding: var(--spacing-xl, 2rem);
-                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
-                    border-radius: var(--radius-2xl, 1.5rem);
-                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
-                    box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
-                }
-
-                .browse-header-icon {
-                    font-size: 4rem;
-                    filter: drop-shadow(0 4px 8px rgba(var(--color-primary-rgb), 0.4));
-                    line-height: 1;
-                }
-
-                .browse-header-content {
-                    flex: 1;
-                }
-
-                .browse-title {
-                    font-size: clamp(1.75rem, 4vw, 2.5rem);
-                    margin: 0 0 var(--spacing-sm, 0.5rem) 0;
-                    color: var(--color-text-primary);
-                    font-family: var(--font-heading, Georgia, serif);
-                }
-
-                .browse-description {
-                    color: var(--color-text-secondary);
-                    font-size: clamp(0.95rem, 2vw, 1.1rem);
-                    margin: 0 0 var(--spacing-lg, 1.5rem) 0;
-                    line-height: var(--leading-relaxed, 1.75);
-                }
-
-                .browse-stats {
-                    display: flex;
-                    gap: var(--spacing-lg, 1.5rem);
-                    flex-wrap: wrap;
-                }
-
-                .stat-badge {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: var(--spacing-sm, 0.5rem);
-                    padding: var(--spacing-sm, 0.5rem) var(--spacing-lg, 1.5rem);
-                    background: linear-gradient(135deg,
-                        rgba(var(--color-primary-rgb), 0.2),
-                        rgba(var(--color-secondary-rgb), 0.2));
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.4);
-                    border-radius: var(--radius-full, 9999px);
-                    font-weight: var(--font-semibold, 600);
-                }
-
-                .stat-icon {
-                    font-size: 1.25rem;
-                    line-height: 1;
-                }
-
-                .stat-value {
-                    color: var(--color-primary);
-                    font-size: 1.1rem;
-                }
-
-                .stat-label {
-                    color: var(--color-text-secondary);
-                    font-size: 0.9rem;
-                }
 
                 /* ==========================================
                    Quick Filters Section

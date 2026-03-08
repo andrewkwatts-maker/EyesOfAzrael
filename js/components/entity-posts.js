@@ -221,6 +221,15 @@ class EntityPostsComponent {
                     case 'reply':
                         this._showReplyForm(postId);
                         break;
+                    case 'edit':
+                        this._handleEdit(postId);
+                        break;
+                    case 'save-edit':
+                        this._handleSaveEdit(postId);
+                        break;
+                    case 'cancel-edit':
+                        this._handleCancelEdit(postId);
+                        break;
                     case 'delete':
                         this._handleDelete(postId);
                         break;
@@ -352,6 +361,8 @@ class EntityPostsComponent {
                         ${post.replyCount > 0 ? `<button class="post-action-btn" data-action="load-replies" data-post-id="${post.id}">
                             ${post.replyCount} ${post.replyCount === 1 ? 'reply' : 'replies'}
                         </button>` : ''}
+                        ${isAuthor ? `<button class="post-action-btn post-action-edit" data-action="edit" data-post-id="${post.id}">Edit</button>` : ''}
+                        ${post.edited ? `<span class="post-edited-badge">(edited)</span>` : ''}
                         ${canDelete ? `<button class="post-action-btn post-action-delete" data-action="delete" data-post-id="${post.id}">Delete</button>` : ''}
                     </div>
                     <div class="post-reply-form" id="replyForm-${post.id}" style="display:none;"></div>
@@ -533,6 +544,73 @@ class EntityPostsComponent {
         } catch (error) {
             console.error('[EntityPosts] Error loading replies:', error);
         }
+    }
+
+    /**
+     * Handle post edit - show inline edit form
+     */
+    _handleEdit(postId) {
+        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        if (!card) return;
+
+        const bodyEl = card.querySelector('.post-body');
+        if (!bodyEl) return;
+
+        const currentContent = bodyEl.textContent.trim();
+        bodyEl.dataset.originalContent = bodyEl.innerHTML;
+
+        bodyEl.innerHTML = `
+            <textarea class="post-edit-textarea" data-post-id="${postId}" rows="4">${this._escapeHtml(currentContent)}</textarea>
+            <div class="post-edit-actions">
+                <button class="post-action-btn post-action-save" data-action="save-edit" data-post-id="${postId}">Save</button>
+                <button class="post-action-btn post-action-cancel" data-action="cancel-edit" data-post-id="${postId}">Cancel</button>
+            </div>
+        `;
+
+        const textarea = bodyEl.querySelector('textarea');
+        if (textarea) {
+            textarea.focus();
+            textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+        }
+    }
+
+    /**
+     * Save edited post
+     */
+    async _handleSaveEdit(postId) {
+        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        if (!card) return;
+
+        const textarea = card.querySelector('.post-edit-textarea');
+        if (!textarea) return;
+
+        const newContent = textarea.value.trim();
+        if (newContent.length < 10) {
+            alert('Post must be at least 10 characters');
+            return;
+        }
+
+        try {
+            await window.postsService.updatePost(this.collection, this.entity.id, postId, newContent);
+            await this.loadPosts();
+        } catch (error) {
+            console.error('[EntityPosts] Edit error:', error);
+            alert('Failed to save: ' + error.message);
+        }
+    }
+
+    /**
+     * Cancel post edit
+     */
+    _handleCancelEdit(postId) {
+        const card = document.querySelector(`.post-card[data-post-id="${postId}"]`);
+        if (!card) return;
+
+        const bodyEl = card.querySelector('.post-body');
+        if (!bodyEl || !bodyEl.dataset.originalContent) return;
+
+        bodyEl.innerHTML = bodyEl.dataset.originalContent;
+        delete bodyEl.dataset.originalContent;
     }
 
     /**

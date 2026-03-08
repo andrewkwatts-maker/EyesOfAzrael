@@ -497,7 +497,7 @@ class SearchEnhancements {
                         const item = `
                             <div class="dropdown-item" data-mythology="${myth.id}" data-query="${myth.name}" data-index="${totalIndex}" role="option">
                                 <span class="dropdown-item-icon">\u{1F3DB}\uFE0F</span>
-                                <span class="dropdown-item-text">${this.highlightMatch(myth.name, query)} Mythology</span>
+                                <span class="dropdown-item-text">${this.highlightMatch(myth.name, query)}${/mythology/i.test(myth.name) ? '' : ' Mythology'}</span>
                             </div>
                         `;
                         totalIndex++;

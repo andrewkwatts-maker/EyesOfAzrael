@@ -190,6 +190,19 @@ class ContributeMenu {
                 </span>
                 ${this.options.showLabels ? '<span class="contribute-menu__item-label">Submit Variant</span>' : ''}
             </button>
+
+            <button class="contribute-menu__item contribute-menu__item--submit-new"
+                    type="button" role="menuitem" data-action="submit-new-content">
+                <span class="contribute-menu__item-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg>
+                </span>
+                ${this.options.showLabels ? '<span class="contribute-menu__item-label">Submit New Content</span>' : ''}
+            </button>
         `;
     }
 
@@ -267,6 +280,10 @@ class ContributeMenu {
                         collection: this.currentCollection
                     });
                 }
+                break;
+
+            case 'submit-new-content':
+                this._openSubmissionWizard();
                 break;
 
             case 'login':
@@ -372,6 +389,64 @@ class ContributeMenu {
                 item.addEventListener('click', (e) => this._handleItemClick(e));
             });
         }
+    }
+
+    /**
+     * Open the content submission wizard in a modal
+     */
+    _openSubmissionWizard() {
+        // Check if modal already exists
+        let modal = document.getElementById('submission-wizard-modal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.classList.add('modal-open');
+            return;
+        }
+
+        // Create modal overlay
+        modal = document.createElement('div');
+        modal.id = 'submission-wizard-modal';
+        modal.className = 'submission-wizard-modal';
+        modal.innerHTML = `
+            <div class="submission-wizard-modal__backdrop"></div>
+            <div class="submission-wizard-modal__content">
+                <button class="submission-wizard-modal__close" type="button" aria-label="Close wizard">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+                <div id="wizard-container" data-content-wizard></div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        document.body.classList.add('modal-open');
+
+        // Initialize wizard
+        if (window.ContentSubmissionWizard) {
+            window.contentWizard = new window.ContentSubmissionWizard('#wizard-container');
+            window.contentWizard.init();
+        }
+
+        // Close handlers
+        const closeBtn = modal.querySelector('.submission-wizard-modal__close');
+        const backdrop = modal.querySelector('.submission-wizard-modal__backdrop');
+
+        const closeModal = () => {
+            modal.style.display = 'none';
+            document.body.classList.remove('modal-open');
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+
+        // Escape key
+        const escHandler = (e) => {
+            if (e.key === 'Escape' && modal.style.display !== 'none') {
+                closeModal();
+            }
+        };
+        document.addEventListener('keydown', escHandler);
     }
 
     /**
@@ -629,6 +704,9 @@ const contributeMenuStyles = `
 }
 .contribute-menu__item--login .contribute-menu__item-icon {
     --action-color: #6366f1;
+}
+.contribute-menu__item--submit-new .contribute-menu__item-icon {
+    --action-color: #ec4899;
 }
 
 .contribute-menu__item:hover .contribute-menu__item-icon,

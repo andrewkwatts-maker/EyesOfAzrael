@@ -734,6 +734,274 @@ class SchemaSectionRenderer {
     }
 
     // ==========================================
+    // CROSS-CULTURAL PARALLELS
+    // ==========================================
+
+    /**
+     * Render cross-cultural parallels section
+     */
+    renderCrossCulturalParallels(parallels) {
+        if (!Array.isArray(parallels) || parallels.length === 0) return '';
+
+        const validParallels = parallels.filter(p => p && (p.name || p.id));
+
+        if (validParallels.length === 0) return '';
+
+        return `
+            <section class="cross-cultural-section" style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🌐</span>
+                    Cross-Cultural Parallels
+                </h2>
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <p style="opacity: 0.8; margin-bottom: 1rem; font-size: 0.9rem;">
+                        Similar deities and figures across world mythologies:
+                    </p>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
+                        ${validParallels.map(p => `
+                            <a href="#/entity/deities/${p.id || this.slugify(p.name)}"
+                               class="glass-card parallel-card"
+                               style="padding: 0.75rem 1rem; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 0.25rem; border-radius: 8px; transition: all 0.2s;">
+                                <span style="font-weight: 600; color: var(--mythos-primary, var(--color-primary));">
+                                    ${this.escapeHtml(p.name || p.id)}
+                                </span>
+                                ${p.tradition ? `<span style="font-size: 0.8rem; opacity: 0.7;">📍 ${this.escapeHtml(p.tradition)}</span>` : ''}
+                                ${p.archetype ? `<span style="font-size: 0.75rem; opacity: 0.6;">🎭 ${this.escapeHtml(p.archetype)}</span>` : ''}
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Convert string to URL-friendly slug
+     */
+    slugify(str) {
+        if (!str) return '';
+        return str.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
+    }
+
+    // ==========================================
+    // CULTURAL PRACTICES & FESTIVALS
+    // ==========================================
+
+    /**
+     * Render cultural section (worship practices, festivals, modern legacy)
+     */
+    renderCulturalSection(cultural) {
+        if (!cultural || typeof cultural !== 'object') return '';
+
+        const sections = [];
+
+        // Worship Practices
+        if (cultural.worshipPractices?.length) {
+            const practices = Array.isArray(cultural.worshipPractices)
+                ? cultural.worshipPractices
+                : [cultural.worshipPractices];
+            sections.push(`
+                <div class="worship-practices" style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--mythos-secondary, var(--color-secondary)); margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🛕</span> Worship Practices
+                    </h4>
+                    ${practices.map(p => `
+                        <div class="glass-card" style="padding: 1rem; margin-bottom: 0.5rem; line-height: 1.7;">
+                            ${this.renderFormattedText(typeof p === 'object' ? p.description : p)}
+                        </div>
+                    `).join('')}
+                </div>
+            `);
+        }
+
+        // Festivals
+        if (cultural.festivals?.length) {
+            sections.push(`
+                <div class="festivals" style="margin-bottom: 1.5rem;">
+                    <h4 style="color: var(--mythos-secondary, var(--color-secondary)); margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                        <span>🎉</span> Festivals & Ceremonies
+                    </h4>
+                    <div style="display: grid; gap: 0.75rem;">
+                        ${cultural.festivals.map(f => `
+                            <div class="glass-card festival-card" style="padding: 1rem; border-radius: 8px;">
+                                <h5 style="color: var(--mythos-primary, var(--color-primary)); margin: 0 0 0.5rem 0; font-size: 1rem;">
+                                    ${this.escapeHtml(f.name || 'Festival')}
+                                </h5>
+                                <p style="margin: 0; opacity: 0.9; line-height: 1.6; font-size: 0.9rem;">
+                                    ${this.escapeHtml(f.description || '')}
+                                </p>
+                                ${f.timing ? `<p style="margin: 0.5rem 0 0; opacity: 0.7; font-size: 0.85rem;">📅 ${this.escapeHtml(f.timing)}</p>` : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `);
+        }
+
+        // Modern Legacy
+        if (cultural.modernLegacy) {
+            const legacy = typeof cultural.modernLegacy === 'object'
+                ? cultural.modernLegacy.culturalImpact || cultural.modernLegacy.description
+                : cultural.modernLegacy;
+            if (legacy) {
+                sections.push(`
+                    <div class="modern-legacy" style="margin-bottom: 1.5rem;">
+                        <h4 style="color: var(--mythos-secondary, var(--color-secondary)); margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                            <span>🌟</span> Modern Legacy
+                        </h4>
+                        <div class="glass-card" style="padding: 1rem; line-height: 1.7;">
+                            ${this.renderFormattedText(legacy)}
+                        </div>
+                    </div>
+                `);
+            }
+        }
+
+        if (sections.length === 0) return '';
+
+        return `
+            <section class="cultural-section" style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🏛️</span>
+                    Cultural Context
+                </h2>
+                <div class="cultural-content">
+                    ${sections.join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    // ==========================================
+    // RELATED DEITIES (SIMPLE ARRAY)
+    // ==========================================
+
+    /**
+     * Render related deities as a linked grid
+     */
+    renderRelatedDeities(relatedDeities, mythology) {
+        if (!Array.isArray(relatedDeities) || relatedDeities.length === 0) return '';
+
+        const validDeities = relatedDeities.filter(d => d && (d.name || d.id));
+        if (validDeities.length === 0) return '';
+
+        const myth = mythology || this.mythology || 'greek';
+
+        return `
+            <section class="related-deities-section" style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>⚡</span>
+                    Related Deities
+                </h2>
+                <div class="related-deities-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem;">
+                    ${validDeities.map(deity => `
+                        <a href="#/entity/deities/${deity.id || this.slugify(deity.name)}"
+                           class="glass-card deity-link"
+                           style="padding: 0.75rem 1rem; text-decoration: none; color: inherit; text-align: center; border-radius: 8px; transition: all 0.2s;">
+                            <span style="font-size: 1.5rem; display: block; margin-bottom: 0.25rem;">⚡</span>
+                            <span style="font-weight: 500;">${this.escapeHtml(deity.name || deity.id)}</span>
+                        </a>
+                    `).join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    // ==========================================
+    // ASSOCIATIONS (SIMPLE ARRAY)
+    // ==========================================
+
+    /**
+     * Render associations as pills with icons
+     */
+    renderAssociations(associations) {
+        if (!Array.isArray(associations) || associations.length === 0) return '';
+
+        return `
+            <section class="associations-section" style="margin-top: 1.5rem;">
+                <h3 style="color: var(--mythos-secondary, var(--color-secondary)); margin: 0 0 0.75rem 0; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>🔗</span>
+                    Associations
+                </h3>
+                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+                    ${associations.map(a => `
+                        <span class="association-pill" style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.1); color: var(--color-text-primary); padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.2);">
+                            ${this.escapeHtml(a)}
+                        </span>
+                    `).join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    // ==========================================
+    // QUESTS, FEATS, COMPANIONS (ARRAY OF OBJECTS)
+    // ==========================================
+
+    /**
+     * Render quests/feats/adventures as expandable cards
+     */
+    renderQuestsOrFeats(items, title = 'Notable Feats', icon = '⚔️') {
+        if (!Array.isArray(items) || items.length === 0) return '';
+
+        return `
+            <section class="feats-section" style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>${icon}</span>
+                    ${this.escapeHtml(title)}
+                </h2>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    ${items.map((item, i) => `
+                        <div class="glass-card feat-card" style="padding: 1.25rem; border-radius: 8px;">
+                            <div style="display: flex; align-items: flex-start; gap: 1rem;">
+                                <span style="font-size: 1.5rem; opacity: 0.8;">${i + 1}.</span>
+                                <div style="flex: 1;">
+                                    <h4 style="color: var(--mythos-primary, var(--color-primary)); margin: 0 0 0.5rem 0;">
+                                        ${this.escapeHtml(item.title || item.name || `${title} ${i + 1}`)}
+                                    </h4>
+                                    <p style="margin: 0; opacity: 0.9; line-height: 1.7;">
+                                        ${this.renderFormattedText(item.description || item.content || item.summary || '')}
+                                    </p>
+                                    ${item.source ? `<p style="margin: 0.75rem 0 0; font-size: 0.85rem; opacity: 0.7;">📜 ${this.escapeHtml(item.source)}</p>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    /**
+     * Render companions/allies as cards
+     */
+    renderCompanions(companions) {
+        if (!Array.isArray(companions) || companions.length === 0) return '';
+
+        return `
+            <section class="companions-section" style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <span>👥</span>
+                    Companions & Allies
+                </h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
+                    ${companions.map(c => `
+                        <div class="glass-card companion-card" style="padding: 1rem; border-radius: 8px;">
+                            <h4 style="color: var(--mythos-primary, var(--color-primary)); margin: 0 0 0.5rem 0; font-size: 1rem;">
+                                ${this.escapeHtml(c.name || c.id || 'Companion')}
+                            </h4>
+                            ${c.role ? `<p style="margin: 0 0 0.5rem; font-size: 0.85rem; opacity: 0.8;">🎭 ${this.escapeHtml(c.role)}</p>` : ''}
+                            ${c.description ? `<p style="margin: 0; font-size: 0.85rem; opacity: 0.9;">${this.escapeHtml(c.description)}</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </section>
+        `;
+    }
+
+    // ==========================================
     // UNIVERSAL FIELD RENDERER
     // ==========================================
 
@@ -748,7 +1016,7 @@ class SchemaSectionRenderer {
             'metadata', '_modified', '_created', '_enhanced', '_uploadedAt', 'status',
             'migratedFrom', 'migrationDate', 'enrichedAt', 'enrichedBy', 'iconType',
             'generatedBy', 'enhancedBy', 'visibility', 'authoredAt', 'updated_at',
-            'filename', 'slug', 'primaryMythology'];
+            'filename', 'slug', 'primaryMythology', '_syncedAt', '_syncedBy', 'mediaReferences'];
 
         if (skipFields.includes(fieldName)) return '';
 
@@ -768,9 +1036,8 @@ class SchemaSectionRenderer {
             case 'longDescription':
                 return this.renderSymbolism(value, fieldName === 'symbolism' ? 'Symbolism & Meaning' : 'Detailed Description');
             case 'tags':
-                return ''; // Handled separately at bottom
             case 'searchTerms':
-                return ''; // Handled with tags
+                return ''; // Handled separately at bottom
             case 'features':
             case 'significance':
             case 'associatedDeities':
@@ -784,17 +1051,57 @@ class SchemaSectionRenderer {
                 return ''; // Handled in place-specific section
             case 'relatedConcepts':
                 return Array.isArray(value) ? this.renderPillsList(value, 'Related Concepts', '💭') : '';
+
+            // NEW: Cultural section
+            case 'cultural':
+                return this.renderCulturalSection(value);
+
+            // NEW: Cross-cultural parallels
+            case 'cross_cultural_parallels':
+            case 'crossCulturalParallels':
+                return this.renderCrossCulturalParallels(value);
+
+            // NEW: Related deities (simple array)
+            case 'relatedDeities':
+                return this.renderRelatedDeities(value, entity.mythology);
+
+            // NEW: Associations
+            case 'associations':
+                return this.renderAssociations(value);
+
+            // NEW: Quests, feats, adventures
+            case 'quests':
+                return this.renderQuestsOrFeats(value, 'Quests & Journeys', '🗺️');
+            case 'feats':
+                return this.renderQuestsOrFeats(value, 'Notable Feats', '🏆');
+            case 'adventures':
+                return this.renderQuestsOrFeats(value, 'Adventures', '⚔️');
+
+            // NEW: Companions
+            case 'companions':
+            case 'allies':
+                return this.renderCompanions(value);
+
+            // Usage/description variants
+            case 'usage':
+                return value ? this.renderSymbolism(value, 'Usage & Function') : '';
+
             case 'mythologies':
             case 'mythologyContexts':
             case 'mythologyCollection':
                 return Array.isArray(value) && value.length > 0
                     ? this.renderPillsList(value.map(m => typeof m === 'object' ? m.name : m), 'Mythological Traditions', '🌍')
                     : '';
+
             default:
                 // Generic rendering for unknown fields
                 if (Array.isArray(value) && value.length > 0) {
-                    // Array of objects
+                    // Array of objects - try to render intelligently
                     if (typeof value[0] === 'object') {
+                        // Check if it looks like entity references
+                        if (value[0].name || value[0].id) {
+                            return this.renderQuestsOrFeats(value, this.formatFieldName(fieldName), '📋');
+                        }
                         return ''; // Skip complex arrays we don't know how to render
                     }
                     // Array of strings
