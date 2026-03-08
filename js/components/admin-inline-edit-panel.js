@@ -216,6 +216,9 @@ class AdminInlineEditPanel {
             case 'sources':
                 this._renderSourcesEditor(body, currentValue || []);
                 break;
+            case 'icon':
+                this._renderIconEditor(body, currentValue || '');
+                break;
             default:
                 this._renderTextEditor(body, fieldName, currentValue || '');
                 break;
@@ -587,6 +590,87 @@ class AdminInlineEditPanel {
     }
 
     /**
+     * Render icon editor with SVG preview and AI generation
+     */
+    _renderIconEditor(body, currentValue) {
+        const previewSvg = currentValue && currentValue.trim().startsWith('<svg')
+            ? currentValue
+            : '<svg viewBox="0 0 100 100" width="80" height="80"><circle cx="50" cy="50" r="40" fill="none" stroke="#666" stroke-width="2" stroke-dasharray="8 4"/><text x="50" y="55" text-anchor="middle" fill="#666" font-size="14">No icon</text></svg>';
+
+        body.innerHTML = `
+            <div class="admin-edit-icon-editor">
+                <div class="admin-edit-icon-preview" id="adminEditIconPreview">
+                    ${previewSvg}
+                </div>
+                <div class="admin-edit-icon-actions">
+                    <button type="button" class="admin-edit-icon-btn" id="adminEditIconGenerate">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        AI Generate
+                    </button>
+                    <button type="button" class="admin-edit-icon-btn" id="adminEditIconEdit">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>
+                        Edit SVG
+                    </button>
+                </div>
+                <textarea id="adminEditTextarea"
+                          class="admin-edit-textarea admin-edit-icon-textarea"
+                          rows="6"
+                          placeholder="Paste SVG code here...">${this._escapeHtml(String(currentValue || ''))}</textarea>
+            </div>
+        `;
+
+        const textarea = document.getElementById('adminEditTextarea');
+        const preview = document.getElementById('adminEditIconPreview');
+
+        // Update preview on textarea change
+        textarea.addEventListener('input', () => {
+            this.hasUnsavedChanges = true;
+            const val = textarea.value.trim();
+            if (val.startsWith('<svg')) {
+                preview.innerHTML = val;
+            }
+        });
+
+        // AI Generate button
+        document.getElementById('adminEditIconGenerate').addEventListener('click', () => {
+            if (window.AIIconGenerator && this.currentField?.entity) {
+                const generator = new AIIconGenerator();
+                const svg = generator.generateIcon(this.currentField.entity);
+                if (svg) {
+                    textarea.value = svg;
+                    preview.innerHTML = svg;
+                    this.hasUnsavedChanges = true;
+                }
+            } else if (window.SVGEditorModal) {
+                window.SVGEditorModal.open({
+                    initialSvg: textarea.value,
+                    entityData: this.currentField?.entity,
+                    onSave: (data) => {
+                        textarea.value = data.svgCode || data;
+                        preview.innerHTML = data.svgCode || data;
+                        this.hasUnsavedChanges = true;
+                    }
+                });
+            }
+        });
+
+        // Edit SVG button - open full editor
+        document.getElementById('adminEditIconEdit').addEventListener('click', () => {
+            if (window.SVGEditorModal) {
+                window.SVGEditorModal.open({
+                    initialSvg: textarea.value,
+                    entityData: this.currentField?.entity,
+                    onSave: (data) => {
+                        textarea.value = data.svgCode || data;
+                        preview.innerHTML = data.svgCode || data;
+                        this.hasUnsavedChanges = true;
+                    }
+                });
+            }
+        });
+    }
+
+    /**
      * Get the current editor value based on field type
      */
     _getEditorValue() {
@@ -601,6 +685,10 @@ class AdminInlineEditPanel {
                 return this._getExtendedContentData().filter(s => s.title || s.content);
             case 'sources':
                 return this._getSourcesData().filter(s => s.source || s.text);
+            case 'icon': {
+                const textarea = document.getElementById('adminEditTextarea');
+                return textarea ? textarea.value : null;
+            }
             default: {
                 const textarea = document.getElementById('adminEditTextarea');
                 return textarea ? textarea.value : null;
