@@ -435,6 +435,15 @@ service cloud.firestore {
         && request.auth.token.email == 'andrewkwatts@gmail.com';
     }
 
+    // ===== ITEMS COLLECTION =====
+    // Path: /items/{itemId}
+
+    match /items/{itemId} {
+      allow read: if true;
+      allow create, update, delete: if isAuthenticated()
+        && request.auth.token.email == 'andrewkwatts@gmail.com';
+    }
+
     // ===== HERBS COLLECTION =====
     // Path: /herbs/{herbId}
 
@@ -1309,7 +1318,8 @@ service cloud.firestore {
     // ===== ENTITY POSTS (Public Discussions) =====
     match /entity_posts/{entityKey} {
       allow read: if true;
-      allow create, update: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdminEmail();
 
       match /posts/{postId} {
         allow read: if true;
