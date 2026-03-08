@@ -990,53 +990,12 @@ console.log('[App Init] Script loaded - starting execution');
         perfMark('search-end');
         perfMeasure('search', 'search-start', 'search-end');
 
-        // Step 12: Lazy load ShaderThemeManager (non-critical, deferred)
-        updateLoadingProgress(85, 'shaders', 'Queueing shader initialization...');
-        console.log('[App] [12/15] Deferring Shaders (non-critical)...');
-
-        // Lazy load shaders after first render to not block main content
-        const lazyLoadShaders = () => {
-            perfMark('shaders-start');
-            if (dependencyExists('ShaderThemeManager') && !window.EyesOfAzrael.shaders) {
-                try {
-                    window.EyesOfAzrael.shaders = new ShaderThemeManager({
-                        quality: 'auto',
-                        targetFPS: 60
-                    });
-                    console.log('[App] Shaders lazy loaded');
-
-                    // Auto-activate shader based on time of day
-                    const hour = new Date().getHours();
-                    const theme = (hour >= 6 && hour < 18) ? 'day' : 'night';
-                    window.EyesOfAzrael.shaders.activate(theme);
-                } catch (error) {
-                    console.error('[App] ShaderThemeManager lazy load failed:', error);
-                    initState.warnings.push(`Shaders failed: ${error.message}`);
-                }
-            } else if (!dependencyExists('ShaderThemeManager')) {
-                console.debug('[App] ShaderThemeManager not found - shader effects unavailable');
-            }
-            perfMark('shaders-end');
-            perfMeasure('shaders', 'shaders-start', 'shaders-end');
-        };
-
-        // Defer shader loading until after first render or after a delay
-        if (initState.firstRenderComplete) {
-            // First render already done, load shaders now
-            setTimeout(lazyLoadShaders, 100);
-        } else {
-            // Wait for first render, then load shaders
-            document.addEventListener('first-render-complete', () => {
-                setTimeout(lazyLoadShaders, CONFIG.LAZY_LOAD_DELAY);
-            }, { once: true });
-
-            // Fallback: load shaders after timeout if first render never fires
-            setTimeout(() => {
-                if (!window.EyesOfAzrael?.shaders) {
-                    lazyLoadShaders();
-                }
-            }, CONFIG.LAZY_LOAD_DELAY + 2000);
-        }
+        // Step 12: Shaders - managed by shader-theme-picker.js (skip duplicate init)
+        updateLoadingProgress(85, 'shaders', 'Shader managed by theme picker...');
+        console.log('[App] [12/15] Shaders managed by shader-theme-picker.js (skipping)');
+        perfMark('shaders-start');
+        perfMark('shaders-end');
+        perfMeasure('shaders', 'shaders-start', 'shaders-end');
 
         // Step 13: Setup UI components
         updateLoadingProgress(90, 'ui-setup', 'Setting up UI components...');

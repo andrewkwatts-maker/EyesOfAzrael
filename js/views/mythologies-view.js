@@ -137,297 +137,114 @@ class MythologiesView {
      * Get mythologies grid HTML
      */
     getMythologiesHTML() {
+        // Group mythologies by region for the index
+        const regions = this.groupByRegion(this.mythologies);
+        const totalEntities = this.mythologies.reduce((sum, m) => {
+            const counts = m.counts || {};
+            return sum + (counts.deities || 0) + (counts.heroes || 0) + (counts.creatures || 0);
+        }, 0);
+
         return `
             <div class="mythologies-view">
-                <!-- Header -->
-                <header class="mythologies-header">
-                    <div class="header-icon">🏛️</div>
-                    <div class="header-content">
-                        <h1 class="page-title">World Mythologies</h1>
-                        <p class="page-description">
-                            Explore gods, heroes, and legends from cultures around the world.
-                            Each mythology contains deities, creatures, sacred texts, and more.
-                        </p>
-                        <div class="mythology-stats">
-                            <span class="stat">${this.mythologies.length} traditions</span>
-                            <span class="stat">6000+ years of history</span>
+                <!-- Hero Section -->
+                <div class="mythologies-hero">
+                    <div class="mythologies-hero-background"></div>
+                    <div class="mythologies-hero-content">
+                        <div class="mythologies-hero-icon">🏛️</div>
+                        <h1 class="mythologies-hero-title">World Mythologies</h1>
+                        <p class="mythologies-hero-subtitle">A living encyclopedia of humanity's sacred traditions</p>
+                        <div class="mythologies-hero-meta">
+                            <div class="hero-meta-item">
+                                <span class="hero-meta-value">${this.mythologies.length}</span>
+                                <span class="hero-meta-label">Traditions</span>
+                            </div>
+                            <div class="hero-meta-item">
+                                <span class="hero-meta-value">6000+</span>
+                                <span class="hero-meta-label">Years of History</span>
+                            </div>
+                            ${totalEntities > 0 ? `
+                                <div class="hero-meta-item">
+                                    <span class="hero-meta-value">${totalEntities.toLocaleString()}</span>
+                                    <span class="hero-meta-label">Entities</span>
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
-                </header>
+                </div>
+
+                <!-- Introduction -->
+                <div class="mythologies-intro">
+                    <div class="mythologies-intro-content">
+                        <p>From the thundering halls of Asgard to the sun-drenched temples of the Nile, mythology has been the lens through which civilizations have understood creation, morality, and the forces that shape existence. These are not merely ancient stories — they are the foundational narratives that defined law, art, science, and spirituality for billions of people across thousands of years.</p>
+                        <p>Each tradition represented here offers a complete worldview: a cosmology explaining how the universe came to be, a pantheon of divine beings who govern its forces, heroes whose journeys mirror the human condition, and sacred texts that preserve accumulated wisdom. Explore any tradition to discover its deities, creatures, artifacts, and rituals.</p>
+                    </div>
+                </div>
+
+                <!-- Region Index -->
+                ${Object.keys(regions).length > 1 ? `
+                    <nav class="mythologies-region-index" aria-label="Browse by region">
+                        <div class="region-index-header">
+                            <h2 class="region-index-title">Browse by Region</h2>
+                            <span class="region-index-subtitle">${Object.keys(regions).length} cultural regions</span>
+                        </div>
+                        <div class="region-index-chips">
+                            <button class="region-chip active" data-region="all" onclick="document.querySelectorAll('.mythology-card').forEach(c=>c.style.display='');document.querySelectorAll('.region-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');">
+                                All Traditions
+                                <span class="region-chip-count">${this.mythologies.length}</span>
+                            </button>
+                            ${Object.entries(regions).map(([region, myths]) => `
+                                <button class="region-chip" data-region="${region}" onclick="document.querySelectorAll('.mythology-card').forEach(c=>{c.style.display=c.dataset.region==='${region}'?'':'none'});document.querySelectorAll('.region-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');">
+                                    ${region}
+                                    <span class="region-chip-count">${myths.length}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </nav>
+                ` : ''}
 
                 <!-- Mythology Grid -->
                 <div class="mythology-grid">
                     ${this.mythologies.map(myth => this.getMythologyCardHTML(myth)).join('')}
                 </div>
+
+                <!-- Back to top -->
+                <div class="mythologies-back-to-top">
+                    <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" class="back-to-top-link">Back to top</a>
+                </div>
             </div>
-
-            <style>
-                /* ===== MYTHOLOGIES VIEW STYLES ===== */
-                /* Standardized to match VISUAL_CONSISTENCY_GUIDE.md */
-
-                .mythologies-view {
-                    max-width: 1400px;
-                    margin: 0 auto;
-                    padding: 0 var(--spacing-xl, 2rem) var(--spacing-4xl, 4rem);
-                }
-
-                /* === Header Section === */
-                .mythologies-header {
-                    display: flex;
-                    gap: var(--spacing-xl, 2rem);
-                    align-items: center;
-                    margin-bottom: var(--spacing-4xl, 4rem);
-                    padding: var(--spacing-xl, 2rem);
-                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
-                    border-radius: var(--radius-2xl, 1.5rem);
-                    border: 2px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.3);
-                    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                }
-
-                .header-icon {
-                    font-size: 4rem;
-                    filter: drop-shadow(0 4px 8px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4));
-                    line-height: 1;
-                }
-
-                .header-content {
-                    flex: 1;
-                }
-
-                .page-title {
-                    font-family: var(--font-heading, Georgia, serif);
-                    font-size: clamp(1.75rem, 4vw, 2.5rem);
-                    margin: 0 0 var(--spacing-sm, 0.5rem) 0;
-                    color: var(--color-text-primary, #e5e7eb);
-                    font-weight: var(--font-bold, 700);
-                }
-
-                .page-description {
-                    color: var(--color-text-secondary, #9ca3af);
-                    font-size: clamp(0.95rem, 2vw, 1.1rem);
-                    margin: 0 0 var(--spacing-lg, 1.5rem) 0;
-                    line-height: var(--leading-relaxed, 1.75);
-                }
-
-                .mythology-stats {
-                    display: flex;
-                    gap: var(--spacing-xl, 2rem);
-                    flex-wrap: wrap;
-                }
-
-                .stat {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: var(--spacing-xs, 0.25rem);
-                    color: var(--color-primary, #8b7fff);
-                    font-weight: var(--font-semibold, 600);
-                    font-size: 1rem;
-                }
-
-                /* === Mythology Grid === */
-                .mythology-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: var(--spacing-lg, 1.5rem);
-                    margin-bottom: var(--spacing-3xl, 3rem);
-                }
-
-                /* === Mythology Cards === */
-                .mythology-card {
-                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.6);
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
-                    border: 2px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.5);
-                    border-radius: var(--radius-xl, 1rem);
-                    padding: var(--spacing-xl, 2rem);
-                    text-decoration: none;
-                    color: inherit;
-                    transition: all var(--transition-base, 0.3s ease);
-                    cursor: pointer;
-                    position: relative;
-                    overflow: hidden;
-                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-                    min-height: 180px;
-                    display: flex;
-                    flex-direction: column;
-                }
-
-                .mythology-card::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    height: 4px;
-                    background: var(--card-color, linear-gradient(90deg, var(--color-primary), var(--color-secondary)));
-                    transform: scaleX(0);
-                    transition: transform var(--transition-base, 0.3s ease);
-                }
-
-                .mythology-card:hover {
-                    transform: translateY(-8px);
-                    border-color: var(--card-color, var(--color-primary));
-                    box-shadow: 0 12px 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.8);
-                }
-
-                .mythology-card:hover::before {
-                    transform: scaleX(1);
-                }
-
-                .mythology-icon {
-                    width: 2rem;
-                    height: 2rem;
-                    margin-bottom: var(--spacing-md, 1rem);
-                    display: block;
-                    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-                    transition: transform var(--transition-base, 0.3s ease);
-                    line-height: 1;
-                    color: var(--card-color, var(--color-primary));
-                    opacity: 0.9;
-                }
-
-                /* Support both emoji and SVG icons */
-                .mythology-icon:not(img) {
-                    font-size: 2rem;
-                    width: auto;
-                    height: auto;
-                }
-
-                .mythology-card:hover .mythology-icon {
-                    transform: scale(1.15);
-                    opacity: 1;
-                    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4))
-                            drop-shadow(0 0 12px var(--card-color));
-                }
-
-                .mythology-name {
-                    font-size: clamp(1.25rem, 2vw, 1.4rem);
-                    font-weight: var(--font-semibold, 600);
-                    margin-bottom: var(--spacing-sm, 0.5rem);
-                    color: var(--color-text-primary, #e5e7eb);
-                    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-                    line-height: var(--leading-tight, 1.25);
-                }
-
-                .mythology-description {
-                    font-size: clamp(0.875rem, 1.25vw, 0.95rem);
-                    color: var(--color-text-secondary, #9ca3af);
-                    line-height: var(--leading-normal, 1.6);
-                    margin-bottom: var(--spacing-md, 1rem);
-                    flex-grow: 1;
-                }
-
-                .mythology-counts {
-                    display: flex;
-                    gap: var(--spacing-md, 1rem);
-                    font-size: clamp(0.75rem, 1vw, 0.85rem);
-                    color: var(--color-text-secondary, #9ca3af);
-                    flex-wrap: wrap;
-                }
-
-                .count-item {
-                    display: flex;
-                    align-items: center;
-                    gap: var(--spacing-xs, 0.25rem);
-                }
-
-                /* === Responsive Design === */
-
-                /* Mobile (320px - 767px) */
-                @media (max-width: 767px) {
-                    .mythologies-view {
-                        padding: 0 var(--spacing-sm, 0.5rem) var(--spacing-xl, 2rem);
-                    }
-
-                    .mythologies-header {
-                        flex-direction: column;
-                        text-align: center;
-                        padding: var(--spacing-lg, 1.5rem);
-                        gap: var(--spacing-lg, 1.5rem);
-                        margin-bottom: var(--spacing-xl, 2rem);
-                    }
-
-                    .header-icon {
-                        font-size: 3rem;
-                    }
-
-                    .mythology-stats {
-                        justify-content: center;
-                    }
-
-                    .mythology-grid {
-                        grid-template-columns: 1fr;
-                        gap: var(--spacing-md, 1rem);
-                    }
-
-                    .mythology-card {
-                        padding: var(--spacing-md, 1rem);
-                        min-height: 200px;
-                    }
-
-                    .mythology-icon {
-                        font-size: 2rem;
-                    }
-                }
-
-                /* Tablet (768px - 1023px) */
-                @media (min-width: 768px) and (max-width: 1023px) {
-                    .mythology-grid {
-                        grid-template-columns: repeat(2, 1fr);
-                    }
-                }
-
-                /* Desktop (1024px+) */
-                @media (min-width: 1024px) {
-                    .mythology-grid {
-                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                    }
-                }
-
-                /* Large Desktop (1400px+) */
-                @media (min-width: 1400px) {
-                    .mythology-grid {
-                        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    }
-                }
-
-                /* Touch-friendly adjustments */
-                @media (hover: none) and (pointer: coarse) {
-                    .mythology-card {
-                        min-height: 200px;
-                    }
-                }
-
-                /* Reduce motion for accessibility */
-                @media (prefers-reduced-motion: reduce) {
-                    .mythology-card,
-                    .mythology-card::before,
-                    .mythology-icon {
-                        transition: none;
-                        animation: none;
-                    }
-
-                    .mythology-card:hover {
-                        transform: none;
-                    }
-
-                    .mythology-card:hover .mythology-icon {
-                        transform: none;
-                    }
-                }
-
-                /* High contrast mode */
-                @media (prefers-contrast: high) {
-                    .mythology-card,
-                    .mythologies-header {
-                        border-width: 3px;
-                    }
-                }
-            </style>
         `;
+    }
+
+    /**
+     * Group mythologies by region
+     */
+    groupByRegion(mythologies) {
+        const regions = {};
+        mythologies.forEach(m => {
+            const region = m.region || this.inferRegion(m.id);
+            if (!regions[region]) regions[region] = [];
+            regions[region].push(m);
+        });
+        return regions;
+    }
+
+    /**
+     * Infer region from mythology ID
+     */
+    inferRegion(id) {
+        const regionMap = {
+            greek: 'Mediterranean', roman: 'Mediterranean',
+            norse: 'Northern Europe', celtic: 'Northern Europe',
+            egyptian: 'Africa & Middle East', babylonian: 'Africa & Middle East',
+            sumerian: 'Africa & Middle East', persian: 'Africa & Middle East',
+            hindu: 'South & Central Asia', buddhist: 'South & Central Asia',
+            chinese: 'East Asia', japanese: 'East Asia',
+            aztec: 'Americas', mayan: 'Americas', native_american: 'Americas',
+            yoruba: 'Africa & Middle East',
+            christian: 'Abrahamic', islamic: 'Abrahamic', jewish: 'Abrahamic',
+            tarot: 'Esoteric', apocryphal: 'Esoteric', comparative: 'Esoteric'
+        };
+        return regionMap[id] || 'Other';
     }
 
     /**
@@ -438,32 +255,39 @@ class MythologiesView {
         const counts = mythology.counts || { deities: 0, heroes: 0, creatures: 0 };
 
         // Check if icon is an image URL or emoji
-        const icon = mythology.icon || '';
-        const iconTrimmed = icon.trim();
-        const isImageUrl = iconTrimmed.startsWith('http://') ||
-                           iconTrimmed.startsWith('https://') ||
-                           iconTrimmed.startsWith('./') ||
-                           /\.(svg|png|jpg|jpeg|webp|gif)$/i.test(iconTrimmed);
-        const fallbackEmoji = mythology.icon || '📖';
+        const icon = (mythology.icon || '').trim();
+        const isImageUrl = icon.startsWith('http://') ||
+                           icon.startsWith('https://') ||
+                           icon.startsWith('./') ||
+                           icon.startsWith('icons/') ||
+                           /\.(svg|png|jpg|jpeg|webp|gif)$/i.test(icon);
+        const fallbackEmoji = '📖';
         const iconHTML = isImageUrl
-            ? `<img src="${iconTrimmed}" alt="${mythology.name} icon" class="mythology-icon" loading="lazy" onerror="this.outerHTML='<span class=\\'mythology-icon\\'>${fallbackEmoji}</span>'" />`
-            : `<span class="mythology-icon">${fallbackEmoji}</span>`;
+            ? `<img src="${icon}" alt="" class="mythology-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><span class="mythology-icon mythology-icon-fallback" style="display:none;">${fallbackEmoji}</span>`
+            : `<span class="mythology-icon">${icon || fallbackEmoji}</span>`;
+
+        const region = mythology.region || this.inferRegion(mythology.id);
 
         return `
             <a href="#/mythology/${mythology.id}"
                class="mythology-card"
                data-mythology="${mythology.id}"
+               data-region="${region}"
                style="--card-color: ${color}">
-                ${iconHTML}
+                <div class="mythology-card-top">
+                    ${iconHTML}
+                    ${mythology.region ? `<span class="mythology-region-tag">${mythology.region}</span>` : ''}
+                </div>
                 <h3 class="mythology-name">${mythology.name}</h3>
-                <p class="mythology-description">${mythology.description}</p>
+                <p class="mythology-description">${mythology.description || ''}</p>
                 ${counts.deities || counts.heroes || counts.creatures ? `
                     <div class="mythology-counts">
-                        ${counts.deities ? `<span class="count-item">⚡ ${counts.deities}</span>` : ''}
-                        ${counts.heroes ? `<span class="count-item">🗡️ ${counts.heroes}</span>` : ''}
-                        ${counts.creatures ? `<span class="count-item">🐉 ${counts.creatures}</span>` : ''}
+                        ${counts.deities ? `<span class="count-item"><span class="count-icon">⚡</span>${counts.deities} deities</span>` : ''}
+                        ${counts.heroes ? `<span class="count-item"><span class="count-icon">🗡️</span>${counts.heroes} heroes</span>` : ''}
+                        ${counts.creatures ? `<span class="count-item"><span class="count-icon">🐉</span>${counts.creatures} creatures</span>` : ''}
                     </div>
                 ` : ''}
+                <span class="mythology-card-arrow">Explore &rarr;</span>
             </a>
         `;
     }

@@ -142,12 +142,16 @@ const RoutePreloader = window.RoutePreloader || {
     _cache: new Map(),
     _pending: new Map(),
     _maxCacheSize: 20,
-    _hoverDelay: 150, // ms before starting prefetch
-    _cacheExpiry: 60000, // 1 minute cache
+    _hoverDelay: 50, // Reduced from 150ms for faster prefetch
+    _cacheExpiry: 300000, // 5 minutes (up from 1 min)
 
     init(db) {
         this.db = db;
-        this._setupHoverListeners();
+        // Only setup listeners if LinkPrefetcher isn't available
+        // LinkPrefetcher provides better prefetching with IntersectionObserver
+        if (!window.LinkPrefetcher) {
+            this._setupHoverListeners();
+        }
     },
 
     _setupHoverListeners() {
@@ -174,6 +178,11 @@ const RoutePreloader = window.RoutePreloader || {
     },
 
     async prefetch(path) {
+        // Delegate to LinkPrefetcher if available
+        if (window.LinkPrefetcher) {
+            return window.LinkPrefetcher.prefetch(path, 'legacy');
+        }
+
         const normalizedPath = path.replace(/^#\/?/, '');
 
         // Check cache
@@ -242,6 +251,12 @@ const RoutePreloader = window.RoutePreloader || {
     },
 
     getCached(path) {
+        // Check LinkPrefetcher first for better cache hit rate
+        if (window.LinkPrefetcher) {
+            const prefetched = window.LinkPrefetcher.get(path);
+            if (prefetched) return prefetched;
+        }
+
         const normalizedPath = path.replace(/^#\/?/, '');
         const cached = this._cache.get(normalizedPath);
         if (cached && Date.now() - cached.timestamp < this._cacheExpiry) {
@@ -253,6 +268,9 @@ const RoutePreloader = window.RoutePreloader || {
     clearCache() {
         this._cache.clear();
         this._pending.clear();
+        if (window.LinkPrefetcher) {
+            window.LinkPrefetcher.clearCache();
+        }
     }
 };
 
@@ -970,20 +988,27 @@ class SPANavigation {
                 const match = path.match(this.routes.entity_simple);
                 const collection = this.getCollectionName(match[1]);
                 spaLog('Matched ENTITY (simple 2-param) route:', collection, match[2]);
+                // Check for prefetched data for instant navigation
+                const prefetched = window.LinkPrefetcher?.get(`entity/${match[1]}/${match[2]}`);
+                if (prefetched) spaLog('Using prefetched entity data - instant load!');
                 // No mythology in URL, pass null - renderEntity will extract from entity data
-                await this.renderEntity(null, collection, match[2]);
+                await this.renderEntity(null, collection, match[2], prefetched);
             } else if (this.routes.entity_alt.test(path)) {
                 // 3-param format: #/entity/collection/mythology/id
                 const match = path.match(this.routes.entity_alt);
                 const collection = this.getCollectionName(match[1]);
                 spaLog('Matched ENTITY (alt format) route:', match[3]);
-                await this.renderEntity(match[2], collection, match[3]);
+                const prefetched = window.LinkPrefetcher?.get(`entity/${match[1]}/${match[2]}/${match[3]}`);
+                if (prefetched) spaLog('Using prefetched entity data - instant load!');
+                await this.renderEntity(match[2], collection, match[3], prefetched);
             } else if (this.routes.entity.test(path)) {
                 // 3-param format: #/mythology/mythology/type/id
                 const match = path.match(this.routes.entity);
                 const collection = this.getCollectionName(match[2]);
                 spaLog('Matched ENTITY route:', match[3]);
-                await this.renderEntity(match[1], collection, match[3]);
+                const prefetched = window.LinkPrefetcher?.get(`mythology/${match[1]}/${match[2]}/${match[3]}`);
+                if (prefetched) spaLog('Using prefetched entity data - instant load!');
+                await this.renderEntity(match[1], collection, match[3], prefetched);
             } else if (this.routes.category.test(path)) {
                 const match = path.match(this.routes.category);
                 spaLog('Matched CATEGORY route:', match[2]);
@@ -1472,8 +1497,8 @@ class SPANavigation {
         return `
             <div class="mythology-page" style="--myth-color: ${myth.color};">
                 <div class="mythology-hero" style="text-align: center; padding: 3rem 1rem; background: linear-gradient(135deg, ${myth.color}22 0%, transparent 100%);">
-                    <h1 style="font-size: 3rem; margin-bottom: 0.5rem; color: ${myth.color};">${myth.name} Mythology</h1>
-                    <p style="font-size: 1.2rem; opacity: 0.8;">Explore ${totalCount} entities from the ${myth.name} tradition</p>
+                    <h1 style="font-size: 3rem; margin-bottom: 0.5rem; color: ${myth.color};">${myth.name.replace(/\s*Mythology$/i, '')} Mythology</h1>
+                    <p style="font-size: 1.2rem; opacity: 0.8;">Explore ${totalCount} entities from the ${myth.name.replace(/\s*Mythology$/i, '')} tradition</p>
                 </div>
                 <div class="mythology-categories" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 2rem;">
                     ${entityTypes.filter(type => counts[type] > 0).map(type => `
@@ -1558,26 +1583,33 @@ class SPANavigation {
         `;
     }
 
-    async renderEntity(mythology, categoryType, entityId) {
+    async renderEntity(mythology, categoryType, entityId, prefetchedData = null) {
         spaLog('renderEntity() called');
 
         try {
             const mainContent = document.getElementById('main-content');
 
-            // Check for prefetched data
-            const prefetchedData = RoutePreloader.getCached(`mythology/${mythology}/${categoryType}/${entityId}`);
+            // Check for prefetched data from various sources
+            if (!prefetchedData) {
+                prefetchedData = RoutePreloader.getCached(`mythology/${mythology}/${categoryType}/${entityId}`);
+            }
+            if (!prefetchedData && window.LinkPrefetcher) {
+                prefetchedData = window.LinkPrefetcher.get(`entity/${categoryType}/${entityId}`);
+            }
+
             if (prefetchedData) {
-                spaLog('Using prefetched entity data');
+                spaLog('Using prefetched entity data - instant render!');
             }
 
             if (typeof FirebaseEntityRenderer !== 'undefined') {
                 spaLog('FirebaseEntityRenderer class available, using it...');
                 const entityRenderer = new FirebaseEntityRenderer();
-                await entityRenderer.loadAndRender(categoryType, entityId, mythology, mainContent);
+                // Pass prefetched data to skip Firestore fetch if available
+                await entityRenderer.loadAndRender(categoryType, entityId, mythology, mainContent, prefetchedData);
                 spaLog('Entity page rendered via FirebaseEntityRenderer');
             } else {
                 spaLog('FirebaseEntityRenderer not available, using basic fallback...');
-                mainContent.innerHTML = await this.renderBasicEntityPage(mythology, categoryType, entityId);
+                mainContent.innerHTML = await this.renderBasicEntityPage(mythology, categoryType, entityId, prefetchedData);
                 spaLog('Entity page rendered (basic fallback)');
             }
 
@@ -1590,17 +1622,23 @@ class SPANavigation {
         }
     }
 
-    async renderBasicEntityPage(mythology, categoryType, entityId) {
-        let entity = null;
-        // Ensure we use the correct collection name (handles singular/plural)
-        const collectionName = this.getCollectionName(categoryType);
-        try {
-            const doc = await this.db.collection(collectionName).doc(entityId).get();
-            if (doc.exists) {
-                entity = { id: doc.id, ...doc.data() };
+    async renderBasicEntityPage(mythology, categoryType, entityId, prefetchedData = null) {
+        let entity = prefetchedData;
+
+        // If no prefetched data, fetch from Firestore
+        if (!entity) {
+            // Ensure we use the correct collection name (handles singular/plural)
+            const collectionName = this.getCollectionName(categoryType);
+            try {
+                const doc = await this.db.collection(collectionName).doc(entityId).get();
+                if (doc.exists) {
+                    entity = { id: doc.id, ...doc.data() };
+                }
+            } catch (error) {
+                spaError(`Error loading entity ${entityId}:`, error);
             }
-        } catch (error) {
-            spaError(`Error loading entity ${entityId}:`, error);
+        } else {
+            spaLog('Using prefetched entity data for basic render');
         }
 
         if (!entity) {

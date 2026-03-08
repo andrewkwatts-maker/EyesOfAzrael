@@ -337,6 +337,38 @@ class PostsService {
     /**
      * Delete a post (admin or owner)
      */
+    async updatePost(collection, entityId, postId, newContent) {
+        await this.init();
+
+        const user = this._getCurrentUser();
+        if (!user) throw new Error('Must be logged in');
+
+        if (!newContent || newContent.trim().length < 10) {
+            throw new Error('Post content must be at least 10 characters');
+        }
+
+        const entityKey = this._entityKey(collection, entityId);
+        const postRef = this.db.collection('entity_posts').doc(entityKey).collection('posts').doc(postId);
+
+        const doc = await postRef.get();
+        if (!doc.exists) throw new Error('Post not found');
+
+        const postData = doc.data();
+
+        // Only author can edit their own post
+        if (postData.authorId !== user.uid) {
+            throw new Error('Not authorized to edit this post');
+        }
+
+        await postRef.update({
+            content: newContent.trim(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            edited: true
+        });
+
+        this._invalidateCache(entityKey);
+    }
+
     async deletePost(collection, entityId, postId) {
         await this.init();
 
