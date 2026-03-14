@@ -573,6 +573,43 @@ class FirebaseEntityRenderer {
             `);
         }
 
+        // Nested attributes (physical, personality) from enriched data
+        if (entity.attributes && typeof entity.attributes === 'object') {
+            if (entity.attributes.physical?.length) {
+                attributes.push(`
+                    <div class="subsection-card">
+                        <div class="attribute-label">Physical Traits</div>
+                        <div class="attribute-value">${entity.attributes.physical.join(', ')}</div>
+                    </div>
+                `);
+            }
+            if (entity.attributes.personality?.length) {
+                attributes.push(`
+                    <div class="subsection-card">
+                        <div class="attribute-label">Personality</div>
+                        <div class="attribute-value">${entity.attributes.personality.join(', ')}</div>
+                    </div>
+                `);
+            }
+            // Also check nested domains/symbols if not already rendered at top level
+            if (!entity.domains?.length && entity.attributes.domains?.length) {
+                attributes.push(`
+                    <div class="subsection-card">
+                        <div class="attribute-label">Domains</div>
+                        <div class="attribute-value">${entity.attributes.domains.join(', ')}</div>
+                    </div>
+                `);
+            }
+            if (!entity.symbols?.length && entity.attributes.symbols?.length) {
+                attributes.push(`
+                    <div class="subsection-card">
+                        <div class="attribute-label">Symbols</div>
+                        <div class="attribute-value">${entity.attributes.symbols.join(', ')}</div>
+                    </div>
+                `);
+            }
+        }
+
         return attributes.length > 0 ? attributes.join('') : '<p style="color: var(--color-text-secondary);">No attributes recorded yet.</p>';
     }
 
@@ -610,6 +647,47 @@ class FirebaseEntityRenderer {
             sections.push(`
                 <li><strong>Siblings:</strong> ${family.siblings.join(', ')}</li>
             `);
+        }
+
+        return sections.join('');
+    }
+
+    /**
+     * Render comparative religious notes (cross-tradition analysis)
+     */
+    renderComparativeNotes(notes) {
+        if (!notes || typeof notes !== 'object') return '';
+
+        const sections = [];
+
+        for (const [key, value] of Object.entries(notes)) {
+            if (!value) continue;
+            const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, s => s.toUpperCase()).trim();
+
+            if (typeof value === 'string') {
+                sections.push(`
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="color: var(--mythos-secondary, var(--color-text-primary)); margin-bottom: 0.5rem;">${this.escapeHtml(label)}</h3>
+                        <p style="margin: 0; line-height: 1.7; opacity: 0.9;">${this.escapeHtml(value)}</p>
+                    </div>
+                `);
+            } else if (Array.isArray(value)) {
+                sections.push(`
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="color: var(--mythos-secondary, var(--color-text-primary)); margin-bottom: 0.5rem;">${this.escapeHtml(label)}</h3>
+                        <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
+                            ${value.map(v => `<li>${this.escapeHtml(typeof v === 'string' ? v : v.description || v.name || JSON.stringify(v))}</li>`).join('')}
+                        </ul>
+                    </div>
+                `);
+            } else if (typeof value === 'object') {
+                sections.push(`
+                    <div style="margin-bottom: 1rem;">
+                        <h3 style="color: var(--mythos-secondary, var(--color-text-primary)); margin-bottom: 0.5rem;">${this.escapeHtml(label)}</h3>
+                        ${this.renderComparativeNotes(value)}
+                    </div>
+                `);
+            }
         }
 
         return sections.join('');
@@ -1042,6 +1120,21 @@ class FirebaseEntityRenderer {
             </section>
             ` : ''}
 
+            <!-- Family Relationships -->
+            ${entity.family ? `
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">👨‍👩‍👧‍👦</span>
+                    Family &amp; Lineage
+                </h2>
+                <div class="glass-card" style="padding: 1rem;">
+                    <ul style="margin: 0; padding-left: 1.5rem;">
+                        ${this.renderFamilyRelationships(entity.family)}
+                    </ul>
+                </div>
+            </section>
+            ` : ''}
+
             <!-- Key Myths Section -->
             ${entity.keyMyths?.length ? ssr.renderKeyMyths(entity.keyMyths) : ''}
 
@@ -1114,7 +1207,7 @@ class FirebaseEntityRenderer {
                 'keyMyths', 'extendedContent', 'symbolism', 'relatedConcepts', 'corpusSearch',
                 'tags', 'searchTerms', 'cultural', 'cross_cultural_parallels', 'relatedDeities',
                 'associations', 'quests', 'feats', 'adventures', 'companions', 'allies',
-                'weapons', 'equipment', 'sources', 'relatedEntities', 'texts', 'content'
+                'weapons', 'equipment', 'sources', 'relatedEntities', 'texts', 'content', 'family'
             ])}
         `;
 
@@ -1421,11 +1514,35 @@ class FirebaseEntityRenderer {
             <!-- Cross-Cultural Parallels -->
             ${entity.cross_cultural_parallels?.length ? ssr.renderCrossCulturalParallels(entity.cross_cultural_parallels) : ''}
 
+            <!-- Related Events -->
+            ${entity.relatedEvents?.length ? `
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">📜</span>
+                    Notable Events
+                </h2>
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    ${entity.relatedEvents.map(event => `
+                        <div class="glass-card" style="padding: 1.25rem;">
+                            <h3 style="color: var(--mythos-primary, var(--color-primary)); margin: 0 0 0.5rem 0;">
+                                ${this.escapeHtml(event.title || event.name || 'Event')}
+                            </h3>
+                            ${event.description ? `<p style="margin: 0; line-height: 1.7; opacity: 0.9;">${this.escapeHtml(event.description)}</p>` : ''}
+                            ${event.significance ? `<p style="margin: 0.5rem 0 0 0; font-style: italic; opacity: 0.8;">${this.escapeHtml(event.significance)}</p>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </section>
+            ` : ''}
+
             <!-- Related Deities -->
             ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
 
             <!-- Associations -->
             ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
+
+            <!-- Companions -->
+            ${entity.companions?.length ? ssr.renderCompanions(entity.companions) : ''}
 
             <!-- Content (Markdown) -->
             ${entity.content ? `
@@ -1474,7 +1591,8 @@ class FirebaseEntityRenderer {
                 'keyMyths', 'extendedContent', 'symbolism', 'relatedConcepts', 'corpusSearch',
                 'tags', 'searchTerms', 'cultural', 'cross_cultural_parallels', 'relatedDeities',
                 'associations', 'geography', 'realm', 'region', 'significance', 'features',
-                'inhabitants', 'sources', 'relatedEntities', 'texts', 'content'
+                'inhabitants', 'sources', 'relatedEntities', 'texts', 'content', 'relatedEvents',
+                'companions'
             ])}
         `;
 
@@ -1688,6 +1806,44 @@ class FirebaseEntityRenderer {
             </section>
             ` : ''}
 
+            <!-- Weaknesses -->
+            ${entity.weaknesses?.length ? `
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">🛡️</span>
+                    Weaknesses &amp; Vulnerabilities
+                </h2>
+                <div class="glass-card" style="padding: 1.5rem;">
+                    <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
+                        ${entity.weaknesses.map(w => `
+                            <li style="margin-bottom: 0.5rem;">
+                                ${typeof w === 'string' ? this.escapeHtml(w) : `
+                                    <strong style="color: var(--mythos-primary, var(--color-primary));">${this.escapeHtml(w.name || w.title || '')}</strong>
+                                    ${w.description ? `<br><span style="opacity: 0.9;">${this.escapeHtml(w.description)}</span>` : ''}
+                                `}
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            </section>
+            ` : ''}
+
+            <!-- Behavior -->
+            ${entity.behavior ? `
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">🧠</span>
+                    Behavior
+                </h2>
+                <div class="glass-card" style="padding: 1.5rem;">
+                    ${typeof entity.behavior === 'string' ? `<p style="margin: 0; line-height: 1.7;">${this.escapeHtml(entity.behavior)}</p>` :
+                      Array.isArray(entity.behavior) ? `<ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">${entity.behavior.map(b => `<li>${this.escapeHtml(typeof b === 'string' ? b : b.description || b.name || JSON.stringify(b))}</li>`).join('')}</ul>` :
+                      `<p style="margin: 0; line-height: 1.7;">${this.escapeHtml(JSON.stringify(entity.behavior))}</p>`
+                    }
+                </div>
+            </section>
+            ` : ''}
+
             <!-- Key Myths Section -->
             ${entity.keyMyths?.length ? ssr.renderKeyMyths(entity.keyMyths) : ''}
 
@@ -1703,11 +1859,27 @@ class FirebaseEntityRenderer {
             <!-- Cross-Cultural Parallels -->
             ${entity.cross_cultural_parallels?.length ? ssr.renderCrossCulturalParallels(entity.cross_cultural_parallels) : ''}
 
+            <!-- Comparative Notes (cross-religious analysis) -->
+            ${entity.comparativeNotes ? `
+            <section style="margin-top: 2rem;">
+                <h2 style="color: var(--mythos-primary, var(--color-primary));">
+                    <span style="margin-right: 0.5rem;">📖</span>
+                    Comparative Religious Analysis
+                </h2>
+                <div class="glass-card" style="padding: 1.5rem;">
+                    ${this.renderComparativeNotes(entity.comparativeNotes)}
+                </div>
+            </section>
+            ` : ''}
+
             <!-- Related Deities -->
             ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
 
             <!-- Associations -->
             ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
+
+            <!-- Companions -->
+            ${entity.companions?.length ? ssr.renderCompanions(entity.companions) : ''}
 
             <!-- Content (Markdown) -->
             ${entity.content ? `
@@ -1756,7 +1928,8 @@ class FirebaseEntityRenderer {
                 'keyMyths', 'extendedContent', 'symbolism', 'relatedConcepts', 'corpusSearch',
                 'tags', 'searchTerms', 'cultural', 'cross_cultural_parallels', 'relatedDeities',
                 'associations', 'abilities', 'habitat', 'appearance', 'classification', 'category',
-                'sources', 'relatedEntities', 'texts', 'content'
+                'sources', 'relatedEntities', 'texts', 'content', 'weaknesses', 'behavior',
+                'comparativeNotes', 'companions'
             ])}
         `;
 
