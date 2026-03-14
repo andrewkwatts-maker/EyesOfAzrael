@@ -2678,11 +2678,30 @@ class FirebaseEntityRenderer {
      * Render error message
      */
     renderError(container, message) {
+        const isOffline = !navigator.onLine;
+        const isNotFound = message.includes('not found') || message.includes('No entity');
+
         container.innerHTML = `
-            <div class="glass-card" style="border-color: #DC143C; background: rgba(220, 20, 60, 0.1);">
-                <h2 style="color: #DC143C;">Error</h2>
-                <p>${this.escapeHtml(message)}</p>
-                <p><a href="/mythos/index.html">Return to Home</a></p>
+            <div class="error-state-container" style="text-align: center; padding: 3rem 1.5rem; max-width: 500px; margin: 2rem auto;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                    ${isOffline ? '📡' : isNotFound ? '🔍' : '⚠️'}
+                </div>
+                <h2 style="color: ${isOffline ? '#f59e0b' : '#DC143C'}; margin-bottom: 0.75rem;">
+                    ${isOffline ? 'You\'re Offline' : isNotFound ? 'Not Found' : 'Something Went Wrong'}
+                </h2>
+                <p style="color: var(--color-text-secondary, #9ca3af); margin-bottom: 1.5rem; line-height: 1.6;">
+                    ${isOffline
+                        ? 'Please check your internet connection and try again.'
+                        : this.escapeHtml(message)}
+                </p>
+                <div style="display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap;">
+                    <button onclick="window.location.reload()" style="padding: 0.6rem 1.2rem; border-radius: 8px; border: 1px solid rgba(139, 127, 255, 0.3); background: rgba(139, 127, 255, 0.1); color: var(--color-primary, #8b7fff); cursor: pointer;">
+                        Try Again
+                    </button>
+                    <a href="#/" style="padding: 0.6rem 1.2rem; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1); background: transparent; color: var(--color-text-secondary, #9ca3af); text-decoration: none; display: inline-block;">
+                        Go Home
+                    </a>
+                </div>
             </div>
         `;
     }
