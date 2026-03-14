@@ -2590,17 +2590,88 @@ class FirebaseEntityRenderer {
     }
 
     updatePageMetadata(entity) {
-        // Update page title
-        document.title = `${entity.name} - ${this.capitalize(this.mythology)} Mythology - Eyes of Azrael`;
+        const name = entity.name || entity.title || 'Entity';
+        const mythology = this.capitalize(this.mythology || 'World');
+        const type = this.capitalize(entity.type || 'entity');
+        const description = entity.description || entity.subtitle || `Learn about ${name}, ${type} in ${mythology} mythology.`;
+        const url = window.location.href;
+        const siteName = 'Eyes of Azrael';
 
-        // Update meta description
-        let metaDesc = document.querySelector('meta[name="description"]');
-        if (!metaDesc) {
-            metaDesc = document.createElement('meta');
-            metaDesc.name = 'description';
-            document.head.appendChild(metaDesc);
+        // Update page title
+        document.title = `${name} - ${mythology} Mythology - ${siteName}`;
+
+        // Helper to set/create meta tags
+        const setMeta = (attr, attrVal, content) => {
+            let tag = document.querySelector(`meta[${attr}="${attrVal}"]`);
+            if (!tag) {
+                tag = document.createElement('meta');
+                tag.setAttribute(attr, attrVal);
+                document.head.appendChild(tag);
+            }
+            tag.content = content;
+        };
+
+        // Standard meta
+        setMeta('name', 'description', description);
+
+        // Open Graph
+        setMeta('property', 'og:title', `${name} - ${mythology} ${type}`);
+        setMeta('property', 'og:description', description);
+        setMeta('property', 'og:type', 'article');
+        setMeta('property', 'og:url', url);
+        setMeta('property', 'og:site_name', siteName);
+
+        // Twitter Card
+        setMeta('name', 'twitter:card', 'summary');
+        setMeta('name', 'twitter:title', `${name} - ${mythology} ${type}`);
+        setMeta('name', 'twitter:description', description);
+
+        // Canonical URL
+        let canonical = document.querySelector('link[rel="canonical"]');
+        if (!canonical) {
+            canonical = document.createElement('link');
+            canonical.rel = 'canonical';
+            document.head.appendChild(canonical);
         }
-        metaDesc.content = entity.description || `Learn about ${entity.name}, ${entity.subtitle || entity.type} in ${this.capitalize(this.mythology)} mythology.`;
+        canonical.href = url;
+
+        // JSON-LD Structured Data (Schema.org)
+        let ldScript = document.getElementById('entity-jsonld');
+        if (!ldScript) {
+            ldScript = document.createElement('script');
+            ldScript.id = 'entity-jsonld';
+            ldScript.type = 'application/ld+json';
+            document.head.appendChild(ldScript);
+        }
+
+        const jsonLd = {
+            '@context': 'https://schema.org',
+            '@type': 'Article',
+            'name': name,
+            'headline': `${name} - ${mythology} ${type}`,
+            'description': description,
+            'url': url,
+            'publisher': {
+                '@type': 'Organization',
+                'name': siteName
+            },
+            'about': {
+                '@type': 'Thing',
+                'name': name,
+                'description': description
+            },
+            'isPartOf': {
+                '@type': 'WebSite',
+                'name': siteName,
+                'url': window.location.origin
+            }
+        };
+
+        if (entity.tags?.length) {
+            jsonLd.keywords = entity.tags.join(', ');
+        }
+
+        ldScript.textContent = JSON.stringify(jsonLd);
     }
 
     /**
