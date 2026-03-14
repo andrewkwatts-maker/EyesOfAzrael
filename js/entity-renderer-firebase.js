@@ -2815,6 +2815,18 @@ class FirebaseEntityRenderer {
                 backToTop.classList.toggle('visible', window.scrollY > 400);
             }, { passive: true });
         }
+
+        // Initialize admin populate button for sparse pages
+        if (this.currentEntity && window.AdminPopulateButton) {
+            const populateBtn = new AdminPopulateButton(container, this.currentEntity);
+            populateBtn.init();
+        }
+
+        // Initialize share toolbar and reading progress
+        if (this.currentEntity && window.ShareToolbar) {
+            const shareToolbar = new ShareToolbar(container, this.currentEntity);
+            shareToolbar.init();
+        }
     }
 }
 
