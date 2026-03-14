@@ -518,34 +518,21 @@ console.log('[App Init] Script loaded - starting execution');
         console.log('[App] Running startup checklist...');
         const checklistResults = window.StartupChecklist.runAll();
 
-        // If critical checks failed, show diagnostic panel and stop
+        // Log failures but do NOT block initialization — app-init-simple.js
+        // has its own dependency checks with retry logic and better error handling.
         if (!checklistResults.allCriticalPassed) {
-            console.error('[App] Critical startup checks failed!');
-
-            if (typeof window.DiagnosticPanel !== 'undefined') {
-                window.DiagnosticPanel.show(checklistResults);
-            } else {
-                window.StartupChecklist.showDiagnosticPanel(checklistResults);
-            }
-
-            // Dispatch error event for any listeners
-            document.dispatchEvent(new CustomEvent('app-init-failed', {
-                detail: { reason: 'startup-checklist', results: checklistResults }
-            }));
-
-            return; // Stop initialization
+            console.warn('[App] Startup checklist: some critical checks failed, continuing init anyway');
+            console.warn('[App] Failed:', checklistResults.criticalFailures);
         }
 
-        // If optional checks failed, show warning badge
         if (!checklistResults.allPassed) {
             console.warn('[App] Some optional startup checks failed');
-            // Defer showing badge until after DOM is ready
             document.addEventListener('DOMContentLoaded', () => {
                 window.StartupChecklist.showWarningBadge(checklistResults);
             }, { once: true });
         }
 
-        console.log('[App] Startup checklist passed');
+        console.log('[App] Startup checklist complete, proceeding with initialization');
     } else {
         console.debug('[App] StartupChecklist not available, using legacy checks');
     }
@@ -708,7 +695,25 @@ console.log('[App Init] Script loaded - starting execution');
         updateLoadingProgress(30, 'dependency-check', 'Checking dependencies...');
         perfMark('dependency-check-start');
         console.log('[App] [5/15] Checking Firebase SDK and config...');
-        const criticalMissing = checkDependencies(CONFIG.CRITICAL_DEPENDENCIES, true);
+        let criticalMissing = checkDependencies(CONFIG.CRITICAL_DEPENDENCIES, true);
+
+        // Retry Firebase check — CDN scripts may still be loading on slow connections
+        if (criticalMissing.includes('firebase') || criticalMissing.includes('firebaseConfig')) {
+            console.warn('[App] Firebase not ready yet, waiting up to 5s for CDN scripts...');
+            for (let retry = 0; retry < 10; retry++) {
+                await new Promise(r => setTimeout(r, 500));
+                if (typeof firebase !== 'undefined' && typeof firebaseConfig !== 'undefined') {
+                    console.log(`[App] Firebase became available after ${(retry + 1) * 500}ms`);
+                    initState.missingDependencies = initState.missingDependencies.filter(
+                        d => d.name !== 'firebase' && d.name !== 'firebaseConfig'
+                    );
+                    criticalMissing = criticalMissing.filter(
+                        d => d !== 'firebase' && d !== 'firebaseConfig'
+                    );
+                    break;
+                }
+            }
+        }
 
         if (criticalMissing.includes('firebase')) {
             throw new Error('Firebase SDK not loaded. Ensure Firebase scripts are included in index.html');
