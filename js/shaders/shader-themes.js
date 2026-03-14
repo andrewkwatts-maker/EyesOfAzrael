@@ -209,6 +209,14 @@ class ShaderThemeManager {
             return this.shaderCache.get(filename);
         }
 
+        // Check inline sources first (avoids Firebase Hosting rewrite issue)
+        if (window.SHADER_SOURCES && window.SHADER_SOURCES[filename]) {
+            const source = window.SHADER_SOURCES[filename];
+            this.shaderCache.set(filename, source);
+            console.log(`[ShaderThemes] Loaded inline shader: ${filename} (${source.length} chars)`);
+            return source;
+        }
+
         try {
             const response = await fetch(`/js/shaders/${filename}`);
             if (!response.ok) {
@@ -217,6 +225,10 @@ class ShaderThemeManager {
             const source = await response.text();
             if (!source || source.trim().length === 0) {
                 throw new Error(`Shader file is empty: ${filename}`);
+            }
+            // Detect if Firebase Hosting returned HTML instead of GLSL
+            if (source.trim().startsWith('<!') || source.trim().startsWith('<html')) {
+                throw new Error(`Got HTML instead of GLSL for ${filename} (Firebase rewrite)`);
             }
             this.shaderCache.set(filename, source);
             console.log(`[ShaderThemes] Loaded shader source: ${filename} (${source.length} chars)`);
