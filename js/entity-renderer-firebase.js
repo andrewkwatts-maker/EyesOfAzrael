@@ -505,6 +505,7 @@ class FirebaseEntityRenderer {
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
         this.initializeAdminEditIcons(container, entity);
+        this.buildTableOfContents(container);
     }
 
     /**
@@ -1217,6 +1218,7 @@ class FirebaseEntityRenderer {
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
         this.initializeAdminEditIcons(container, entity);
+        this.buildTableOfContents(container);
     }
 
     /**
@@ -1416,6 +1418,7 @@ class FirebaseEntityRenderer {
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
         this.initializeAdminEditIcons(container, entity);
+        this.buildTableOfContents(container);
     }
 
     /**
@@ -1602,6 +1605,7 @@ class FirebaseEntityRenderer {
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
         this.initializeAdminEditIcons(container, entity);
+        this.buildTableOfContents(container);
     }
 
     /**
@@ -1939,6 +1943,7 @@ class FirebaseEntityRenderer {
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
         this.initializeAdminEditIcons(container, entity);
+        this.buildTableOfContents(container);
     }
 
     /**
@@ -2118,6 +2123,7 @@ class FirebaseEntityRenderer {
         this.initializeUserNotes(entity);
         this.initializeCorpusSection(entity);
         this.initializeAdminEditIcons(container, entity);
+        this.buildTableOfContents(container);
     }
 
     /**
@@ -2711,6 +2717,104 @@ class FirebaseEntityRenderer {
                 window._privateNotesPanelInstance = notesPanel;
             }
         }, 300);
+    }
+
+    /**
+     * Build Table of Contents from rendered section headings + add back-to-top button
+     * Called after container innerHTML is set.
+     */
+    buildTableOfContents(container) {
+        const headings = container.querySelectorAll('section > h2, section > h3');
+        if (headings.length < 3) return; // Don't show TOC for very short pages
+
+        // Assign IDs to headings
+        const tocItems = [];
+        headings.forEach((heading, index) => {
+            const text = heading.textContent.trim().replace(/^[^\w]*/, ''); // Strip leading emojis/icons
+            const id = 'section-' + text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || `section-${index}`;
+            const section = heading.closest('section');
+            if (section) section.id = id;
+            heading.id = id + '-heading';
+
+            tocItems.push({
+                text: text,
+                id: id,
+                level: heading.tagName === 'H3' ? 2 : 1
+            });
+        });
+
+        // Build TOC HTML
+        const tocHtml = `
+            <nav class="entity-toc" id="entity-toc">
+                <div class="entity-toc-toggle" onclick="document.getElementById('entity-toc').classList.toggle('collapsed')">
+                    <span>Contents</span>
+                    <span class="toc-chevron">&#9660;</span>
+                </div>
+                <ul class="entity-toc-list">
+                    ${tocItems.map(item => `
+                        <li class="toc-level-${item.level}">
+                            <a href="#${item.id}" onclick="document.getElementById('${item.id}')?.scrollIntoView({behavior:'smooth'});return false;">
+                                ${this.escapeHtml(item.text)}
+                            </a>
+                        </li>
+                    `).join('')}
+                </ul>
+            </nav>
+        `;
+
+        // Insert TOC after hero section
+        const heroSection = container.querySelector('.hero-section');
+        if (heroSection) {
+            heroSection.insertAdjacentHTML('afterend', tocHtml);
+        } else {
+            container.insertAdjacentHTML('afterbegin', tocHtml);
+        }
+
+        // Add section comment indicators to each section heading
+        headings.forEach(heading => {
+            if (heading.tagName !== 'H2') return;
+            const section = heading.closest('section');
+            if (!section || !section.id) return;
+
+            const bubble = document.createElement('span');
+            bubble.className = 'section-comment-bubble';
+            bubble.title = 'Discuss this section';
+            bubble.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
+            bubble.onclick = (e) => {
+                e.preventDefault();
+                const filterSelect = document.getElementById('entityPostsFilter');
+                if (filterSelect) {
+                    // Find matching option by section text
+                    const sectionText = heading.textContent.trim().replace(/^[^\w]*/, '');
+                    for (const opt of filterSelect.options) {
+                        if (opt.textContent.toLowerCase().includes(sectionText.toLowerCase().substring(0, 10))) {
+                            filterSelect.value = opt.value;
+                            filterSelect.dispatchEvent(new Event('change'));
+                            break;
+                        }
+                    }
+                }
+                document.getElementById('entityPostsWrapper')?.scrollIntoView({ behavior: 'smooth' });
+            };
+            heading.style.position = 'relative';
+            heading.appendChild(bubble);
+        });
+
+        // Add back-to-top button
+        let backToTop = document.getElementById('back-to-top-btn');
+        if (!backToTop) {
+            backToTop = document.createElement('button');
+            backToTop.id = 'back-to-top-btn';
+            backToTop.className = 'back-to-top-btn';
+            backToTop.innerHTML = '&#8593;';
+            backToTop.title = 'Back to top';
+            backToTop.onclick = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.body.appendChild(backToTop);
+
+            window.addEventListener('scroll', () => {
+                backToTop.classList.toggle('visible', window.scrollY > 400);
+            }, { passive: true });
+        }
     }
 }
 
