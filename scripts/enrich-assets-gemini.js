@@ -16,12 +16,22 @@
 const fs = require('fs');
 const path = require('path');
 
-// Gemini API configuration
-const GEMINI_API_KEY = 'AIzaSyCrDboksSpF_gOQ26U0H5zDhpRXqSlc05g';
+// Parse command line arguments first (need for API key)
+const args = process.argv.slice(2);
+
+// Gemini API configuration - Get a new key from https://aistudio.google.com/apikey
+const API_KEY_ARG = args.find(a => a.startsWith('--api-key='))?.split('=')[1];
+const GEMINI_API_KEY = API_KEY_ARG || process.env.GEMINI_API_KEY;
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
 
-// Parse command line arguments
-const args = process.argv.slice(2);
+if (!GEMINI_API_KEY) {
+    console.error('ERROR: Gemini API key not provided');
+    console.error('Option 1: node script.js --api-key=YOUR_KEY_HERE');
+    console.error('Option 2: set GEMINI_API_KEY=YOUR_KEY_HERE (Windows)');
+    console.error('Get a key from: https://aistudio.google.com/apikey');
+    process.exit(1);
+}
+
 const DRY_RUN = args.includes('--dry-run');
 const TYPE_FILTER = args.find(a => a.startsWith('--type='))?.split('=')[1];
 const LIMIT = parseInt(args.find(a => a.startsWith('--limit='))?.split('=')[1] || '0');
