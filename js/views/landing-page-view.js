@@ -295,6 +295,7 @@ class LandingPageView {
             console.log('[Landing Page] Has .landing-hero-title:', !!container.querySelector('.landing-hero-title'));
 
             this.attachEventListeners();
+            this.loadEntityCounts();
             this.isLoaded = true;
 
             // Dispatch event to hide loading spinner
@@ -2638,6 +2639,30 @@ class LandingPageView {
      * @param {object} type - Asset type configuration
      * @param {number} index - Card index for staggered animation
      */
+    /**
+     * Load entity counts for each category and display on cards
+     */
+    async loadEntityCounts() {
+        if (!this.db) return;
+
+        const countElements = document.querySelectorAll('.landing-category-count[data-count-for]');
+        for (const el of countElements) {
+            const collection = el.dataset.countFor;
+            if (!collection) continue;
+
+            try {
+                const snapshot = await this.db.collection(collection).get();
+                const count = snapshot.size;
+                if (count > 0) {
+                    el.textContent = count >= 100 ? `${count}+` : `${count}`;
+                    el.classList.add('has-count');
+                }
+            } catch (err) {
+                // Collection may not exist, silently skip
+            }
+        }
+    }
+
     getAssetTypeCardHTML(type, index = 0) {
         const truncatedDescription = this.truncateText(type.description, 100);
 
@@ -2660,6 +2685,7 @@ class LandingPageView {
                 ${this.renderIconHTML(type.icon, type.id, 'landing-category-icon')}
                 <h3 class="landing-category-name card-title-truncate">${type.name}</h3>
                 <p class="landing-category-description card-desc-truncate">${truncatedDescription}</p>
+                <span class="landing-category-count" data-count-for="${type.collection || type.id}"></span>
             </a>
         `;
     }
