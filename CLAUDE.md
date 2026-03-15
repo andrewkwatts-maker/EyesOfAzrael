@@ -8,100 +8,63 @@ Eyes of Azrael is a mythology encyclopedia web application built with vanilla Ja
 
 ### Core Files
 
-- `index.html` - Main entry point
+- `index.html` - Main entry point (SPA shell)
+- `firebase-config.js` - Firebase configuration and initialization
 - `js/spa-navigation.js` - SPA router and view management
-- `js/app-init-simple.js` - Application initialization
+- `js/app-init-simple.js` - Application initialization sequence
 - `js/auth-guard-simple.js` - Authentication and session management
+- `js/firebase-cache-manager.js` - Multi-layer cache (memory + localStorage)
 
-### Views
+### Router Modules (`js/router/`)
 
-- `js/views/landing-page-view.js` - **Home page landing view** (12 asset type categories)
-- `js/views/home-view.js` - Legacy home view (mythologies grid)
-- `js/views/browse-category-view.js` - Category browsing
-- `js/views/mythologies-view.js` - Mythologies grid
+- `route-matcher.js` - URL pattern matching
+- `history-manager.js` - Browser history management
+- `scroll-manager.js` - Scroll position save/restore
+- `route-preloader.js` - Hover-based prefetching
+- `navigation-metrics.js` - Navigation timing
+- `transition-manager.js` - Page transition animations
+- `render-utilities.js` - Shared rendering helpers
+- `accessibility-manager.js` - ARIA and focus management
+
+All router modules use `window.X = { ... }` pattern (not ES modules).
+
+### Views (`js/views/`)
+
+- `landing-page-view.js` - **Home page** (12 asset type categories)
+- `home-view.js` - Legacy home view (mythologies grid)
+- `browse-category-view.js` - Category browsing
+- `mythologies-view.js` - Mythologies grid
+- `entity-detail-view.js` - Entity detail page
+- `user-dashboard-view.js` - User dashboard
+- `user-profile-view.js` - User profile
+
+### Components (`js/components/`)
+
+- `universal-display-renderer.js` - Main entity display renderer
+- `search-view-complete.js` - Full search interface
+- `compare-view.js` - Entity comparison
+- `edit-entity-modal.js` - Entity editing
+- `user-dashboard.js` - Dashboard component
+- `corpus-search.js` - Corpus search
+- `about-page.js`, `privacy-page.js`, `terms-page.js` - Static pages
 
 ### Renderers
 
-- `js/components/universal-display-renderer.js` - Main entity display renderer
 - `js/page-asset-renderer.js` - Firebase-based dynamic page renderer
 - `js/universal-entity-renderer.js` - Entity card rendering
+- `js/entity-renderer-firebase.js` - Firebase entity rendering
 
-## Landing Page Asset
-
-### Current Implementation
+## Landing Page
 
 The landing page (`LandingPageView`) displays 12 asset type categories:
-
-1. World Mythologies
-2. Deities & Gods
-3. Heroes & Legends
-4. Mythical Creatures
-5. Sacred Items
-6. Sacred Places
-7. Archetypes
-8. Magic Systems
-9. Sacred Herbalism
-10. Rituals & Practices
-11. Sacred Texts
-12. Sacred Symbols
+Mythologies, Deities, Heroes, Creatures, Items, Places, Archetypes, Magic Systems, Herbalism, Rituals, Texts, Symbols.
 
 ### View Priority (renderHome)
 
-When loading the home page, the SPA tries views in this order:
-
 1. **LandingPageView** (priority) - Static 12-category grid
-2. **PageAssetRenderer** - Loads `pages/home` document from Firebase
+2. **PageAssetRenderer** - Loads `pages/home` from Firebase
 3. **HomeView** - Legacy mythologies grid
 4. **Inline fallback** - Hardcoded mythologies
-
-### Firebase Page Assets (Optional)
-
-The `PageAssetRenderer` can load dynamic page content from Firebase:
-
-**Collection:** `pages`
-
-**Document structure for `pages/home`:**
-```json
-{
-  "title": "Eyes of Azrael",
-  "hero": {
-    "title": "Explore World Mythologies",
-    "subtitle": "Discover the myths and legends of humanity",
-    "icon": "eye_icon_url",
-    "cta": [
-      { "text": "Explore", "link": "#/mythologies", "primary": true }
-    ]
-  },
-  "sections": [
-    {
-      "id": "mythologies",
-      "title": "World Mythologies",
-      "description": "Ancient traditions and belief systems",
-      "icon": "globe_icon",
-      "collection": "mythologies",
-      "displayCount": 12,
-      "sortBy": "order",
-      "link": "#/mythologies"
-    }
-  ]
-}
-```
-
-### Category Icons
-
-SVG icons are stored in `icons/categories/`:
-- `mythologies.svg`
-- `deities.svg`
-- `heroes.svg`
-- `creatures.svg`
-- `items.svg`
-- `places.svg`
-- `archetypes.svg`
-- `magic.svg`
-- `herbs.svg`
-- `rituals.svg`
-- `texts.svg`
-- `symbols.svg`
 
 ## Authentication
 
@@ -116,51 +79,73 @@ SVG icons are stored in `icons/categories/`:
 
 - `eoa_auth_cached` - Auth state (true/false)
 - `eoa_auth_timestamp` - Cache timestamp
-- `eoa_last_user_email` - Last logged in email
-- `eoa_last_user_name` - Last logged in display name
-- `eoa_last_user_photo` - Last logged in photo URL
+- `eoa_last_user_email`, `eoa_last_user_name`, `eoa_last_user_photo`
 
-## Firebase Collections
+## Firebase
+
+### Initialization
+
+`firebase-config.js` (loaded early in index.html) initializes Firebase immediately. Client-side API keys are safe to deploy (secured by Firebase security rules).
 
 ### Content Collections
 
-- `mythologies` - Mythology systems (Greek, Norse, Egyptian, etc.)
-- `deities` - Gods and divine beings
-- `heroes` - Legendary heroes and figures
-- `creatures` - Mythical creatures and beasts
-- `items` - Sacred items and artifacts
-- `places` - Sacred locations and sites
-- `texts` - Sacred texts and scriptures
-- `rituals` - Ceremonies and practices
-- `herbs` - Sacred plants and preparations
-- `archetypes` - Universal patterns
-- `symbols` - Sacred symbols and icons
+mythologies, deities, heroes, creatures, items, places, texts, rituals, herbs, archetypes, symbols, concepts, cosmology
 
 ### System Collections
 
-- `pages` - Dynamic page content (optional)
-- `users` - User profiles and preferences
+pages, users
 
 ## Theme System
 
-Themes are managed by `js/shader-theme-picker.js`:
+Themes managed by `js/shader-theme-picker.js`: Night (default), Cosmic, Sacred, Golden, Ocean, Fire.
 
-- Night (default)
-- Cosmic
-- Sacred
-- Golden
-- Ocean
-- Fire
+Config: `themes/theme-config.json`. Icons: `icons/categories/*.svg`.
 
-Theme configuration is stored in `themes/theme-config.json`.
+## Development
 
-## Development Notes
+### Commands
+
+```bash
+npm run dev          # Local dev server
+npm run dev:pull     # Pull Firebase assets + start dev server
+npm test             # Run Jest unit tests (51 suites, 2200 tests)
+npm run test:ci      # CI mode with coverage
+npm run test:e2e     # Playwright E2E tests
+npm run lint         # ESLint (flat config, v10+)
+npm run validate:project  # Check index.html references + orphaned files
+npm run push         # Upload to Firebase
+npm run deploy       # Deploy to Firebase Hosting
+```
+
+### Module Pattern
+
+All modules use `window.X = { ... }` with optional CommonJS export:
+```js
+window.MyModule = { init() { ... } };
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = window.MyModule;
+}
+```
+
+Do NOT use ES module `export` syntax — scripts are loaded as regular `<script>` tags.
+
+### Testing
+
+- Jest with jsdom environment
+- Coverage thresholds: 75% statements/lines, 70% branches, 75% functions
+- Test files: `__tests__/components/`, `__tests__/router/`, `__tests__/integration/`, `__tests__/performance/`, `__tests__/security/`
+
+### CI/CD
+
+- `.github/workflows/ci.yml` - Lint + test on push/PR
+- `.github/workflows/deploy.yml` - Test + deploy on push to main
+- `.github/workflows/e2e-tests.yml` - Playwright browser tests
 
 ### Loading States
 
 All page renders should show:
 1. **Spinner** - While fetching data
-2. **Error message** - If fetch fails
+2. **Error message** - If fetch fails (use `getErrorHTML()`)
 3. **Content** - On success
 
 ### Error Handling
