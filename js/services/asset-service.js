@@ -150,18 +150,27 @@ class AssetService {
         const collectionName = this.getCollectionName(type);
         console.log(`[AssetService] Mapping category "${type}" → collection "${collectionName}"`);
 
-        try {
-            // Use cache manager if available
-            if (this.cache) {
+        // Try cache manager first, fall through to direct query on failure
+        if (this.cache) {
+            try {
                 const query = mythology ? { mythology } : {};
-                return await this.cache.getList(collectionName, query, {
+                const cached = await this.cache.getList(collectionName, query, {
                     ttl: this.cache.defaultTTL[collectionName] || 3600000,
                     orderBy: `${orderBy} asc`,
                     limit
                 });
+                if (cached && cached.length > 0) {
+                    console.log(`[AssetService] Cache returned ${cached.length} ${type}`);
+                    return cached;
+                }
+                console.log(`[AssetService] Cache returned empty for ${type}, falling through to direct query`);
+            } catch (cacheError) {
+                console.warn(`[AssetService] Cache error for ${type}, falling through to direct query:`, cacheError.message);
             }
+        }
 
-            // Fallback: Direct Firebase query
+        // Direct Firebase query (primary path when cache misses or unavailable)
+        try {
             let query = this.db.collection(collectionName);
 
             if (mythology) {
@@ -171,10 +180,12 @@ class AssetService {
             query = query.orderBy(orderBy).limit(limit);
 
             const snapshot = await query.get();
-            return snapshot.docs.map(doc => ({
+            const results = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
+            console.log(`[AssetService] Direct query returned ${results.length} ${type}`);
+            return results;
 
         } catch (error) {
             console.error(`[AssetService] Error fetching standard ${type}:`, error);
