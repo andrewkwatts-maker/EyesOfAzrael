@@ -91,6 +91,11 @@ module.exports = [
         PageAssetRenderer: 'writable',
         FirebaseCacheManager: 'writable',
         ToastNotification: 'writable',
+        AssetService: 'writable',
+        UserPreferencesService: 'writable',
+        ContentFilter: 'writable',
+        CompareView: 'writable',
+        ContributeMenu: 'writable',
         // Init-time functions (defined by error-monitoring.js, etc.)
         initErrorMonitoring: 'readonly',
         initPerformanceMonitoring: 'readonly',

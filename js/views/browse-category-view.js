@@ -96,8 +96,12 @@ class BrowseCategoryView {
 
             this.attachEventListeners();
 
-            // Apply initial filters
+            // Apply initial filters (also calls updateGrid, updatePagination, updateLoadMoreButton)
             this.applyFilters();
+
+            // Ensure pagination and load-more are visible after initial render
+            this.updatePagination();
+            this.updateLoadMoreButton();
 
             // Trigger fade-in animation
             requestAnimationFrame(() => {
@@ -914,7 +918,11 @@ class BrowseCategoryView {
      */
     getAddNewCardHTML() {
         const isAuth = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
-        if (!isAuth) return '';
+        if (!isAuth) {
+            // Auth may not be resolved yet; listen for auth state change and re-render add card
+            this.listenForAuthStateChange();
+            return '';
+        }
 
         const categoryLabel = this.category ? this.category.replace(/s$/, '') : 'entity';
 
@@ -937,6 +945,30 @@ class BrowseCategoryView {
                 </div>
             </button>
         `;
+    }
+
+    /**
+     * Listen for Firebase auth state changes and re-render the add card when user signs in
+     * Only registers the listener once per view instance
+     */
+    listenForAuthStateChange() {
+        if (this._authListenerRegistered) return;
+        this._authListenerRegistered = true;
+
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    // User signed in: inject the add card into the grid if not already present
+                    const grid = document.getElementById('entityGrid');
+                    if (grid && !grid.querySelector('.entity-card--add-new')) {
+                        const addCardHTML = this.getAddNewCardHTML();
+                        if (addCardHTML) {
+                            grid.insertAdjacentHTML('beforeend', addCardHTML);
+                        }
+                    }
+                }
+            });
+        }
     }
 
     /**
