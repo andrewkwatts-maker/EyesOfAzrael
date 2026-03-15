@@ -711,12 +711,13 @@ describe('SPANavigation', () => {
             expect(window.BrowseCategoryView).toHaveBeenCalled();
         });
 
-        test('should show error when BrowseCategoryView not available', async () => {
+        test('should show basic fallback when BrowseCategoryView not available', async () => {
             const ctx = createSpaWithMainContent();
             spa = ctx.spa;
             window.BrowseCategoryView = undefined;
             await spa.renderBrowseCategory('deities');
-            expect(ctx.mainContent.innerHTML).toContain('not available');
+            // Falls back to renderBasicCategoryPage instead of showing an error
+            expect(ctx.mainContent.innerHTML).toContain('Deities');
         });
     });
 
