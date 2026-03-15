@@ -151,7 +151,13 @@
 
         case 'CACHE_UPDATED':
           console.log('[SW] Cache updated:', data.url);
-          // Optionally notify user of background updates
+          break;
+
+        case 'OFFLINE_LOG_EVENT':
+          // Forward service worker offline events to the OfflineEventLogger
+          if (window.offlineLog) {
+            window.offlineLog.log(data.eventType, data.details);
+          }
           break;
 
         case 'SYNC_COMPLETE':

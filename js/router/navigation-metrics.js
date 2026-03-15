@@ -8,7 +8,7 @@
  *   NavigationMetrics.finishNavigation(metric);
  */
 
-const NavigationMetrics = {
+window.NavigationMetrics = {
     _metrics: [],
     _maxMetrics: 100,
 
@@ -92,8 +92,5 @@ const NavigationMetrics = {
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = NavigationMetrics;
+    module.exports = window.NavigationMetrics;
 }
-
-// Export to window for browser usage
-window.NavigationMetrics = NavigationMetrics;

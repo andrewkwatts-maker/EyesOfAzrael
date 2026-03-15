@@ -330,21 +330,25 @@ async function handleNavigationRequest(request) {
     // Network failed, try cache
     const cached = await caches.match(request);
     if (cached) {
+      postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'handleNavigation', input: { url: request.url }, decision: 'cache-fallback', reason: 'network failed, using cached page', outcome: 'fallback' });
       return cached;
     }
 
     // Fall back to index.html for SPA routing
     const indexCached = await caches.match('/index.html');
     if (indexCached) {
+      postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'handleNavigation', input: { url: request.url }, decision: 'index-fallback', reason: 'network failed, serving index.html for SPA', outcome: 'fallback' });
       return indexCached;
     }
 
     // Last resort: offline page
     const offlinePage = await caches.match(OFFLINE_PAGE);
     if (offlinePage) {
+      postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'handleNavigation', input: { url: request.url }, decision: 'offline-page', reason: 'all fallbacks exhausted, serving offline page', outcome: 'fail' });
       return offlinePage;
     }
 
+    postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'handleNavigation', input: { url: request.url }, decision: 'no-fallback', reason: 'no cached content available', outcome: 'fail' });
     return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
   } catch (error) {
     const offlinePage = await caches.match(OFFLINE_PAGE);
@@ -370,6 +374,23 @@ function getRouteConfig(request) {
     cache: 'dynamic',
     ttl: CACHE_TTL.dynamic
   };
+}
+
+/**
+ * Post an offline log event to all connected clients
+ * @param {string} eventType - Event type (SW_STRATEGY, SYNC, etc.)
+ * @param {Object} details - Event details
+ */
+function postOfflineLogEvent(eventType, details) {
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'OFFLINE_LOG_EVENT',
+        eventType,
+        details
+      });
+    });
+  }).catch(() => {});
 }
 
 /**
@@ -428,12 +449,15 @@ async function networkFirst(request, cacheType, ttl) {
       // Check if cache is still valid
       if (!isCacheExpired(cachedResponse, ttl)) {
         console.log('[Service Worker] Serving from cache (network failed):', request.url);
+        postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'networkFirst', input: { url: request.url, cacheType }, decision: 'cache-fallback', reason: 'network failed, cache still fresh', outcome: 'fallback' });
         return cachedResponse;
       }
       // Cache expired but still return it as fallback
       console.log('[Service Worker] Serving stale cache (network failed):', request.url);
+      postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'networkFirst', input: { url: request.url, cacheType }, decision: 'stale-fallback', reason: 'network failed, serving expired cache', outcome: 'fallback' });
       return cachedResponse;
     }
+    postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'networkFirst', input: { url: request.url, cacheType }, decision: 'no-fallback', reason: 'network failed, no cache available', outcome: 'fail' });
     throw error;
   }
 }
@@ -448,14 +472,17 @@ async function cacheFirst(request, cacheType, ttl) {
   if (cachedResponse) {
     // Check if cache is still fresh
     if (!isCacheExpired(cachedResponse, ttl)) {
+      postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'cacheFirst', input: { url: request.url, cacheType }, decision: 'cache-hit-fresh', reason: 'found in cache and still fresh', outcome: 'success' });
       return cachedResponse;
     }
     // Cache is stale, update in background but return cached
+    postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'cacheFirst', input: { url: request.url, cacheType }, decision: 'cache-hit-stale', reason: 'found in cache but expired, revalidating in background', outcome: 'fallback' });
     fetchAndCache(request, cacheName);
     return cachedResponse;
   }
 
   // Nothing in cache, fetch from network
+  postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'cacheFirst', input: { url: request.url, cacheType }, decision: 'cache-miss', reason: 'not found in cache, fetching from network', outcome: 'pending' });
   try {
     const response = await fetch(request);
 
@@ -520,10 +547,12 @@ async function staleWhileRevalidate(request, cacheType, ttl) {
 
   // Return cached response immediately if available
   if (cachedResponse) {
+    postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'staleWhileRevalidate', input: { url: request.url, cacheType }, decision: 'serve-cached', reason: 'returning cached copy, revalidating in background', outcome: 'success' });
     return cachedResponse;
   }
 
   // No cache, wait for network
+  postOfflineLogEvent('SW_STRATEGY', { source: 'ServiceWorker', action: 'staleWhileRevalidate', input: { url: request.url, cacheType }, decision: 'no-cache-wait', reason: 'no cached copy, waiting for network', outcome: 'pending' });
   const networkResponse = await fetchPromise;
   if (networkResponse) {
     return networkResponse;
@@ -712,8 +741,10 @@ async function queueFailedRequest(request) {
     }
 
     console.log('[Service Worker] Request queued for sync:', request.url);
+    postOfflineLogEvent('QUEUE_OP', { source: 'ServiceWorker', action: 'queueForSync', input: { url: request.url, method: request.method }, decision: 'queued', reason: 'request failed, queued for background sync', outcome: 'pending' });
   } catch (error) {
     console.error('[Service Worker] Failed to queue request:', error);
+    postOfflineLogEvent('QUEUE_OP', { source: 'ServiceWorker', action: 'queueForSync', input: { url: request.url }, decision: 'queue-failed', reason: error.message, outcome: 'fail' });
   }
 }
 
@@ -786,8 +817,10 @@ async function syncQueuedRequests() {
     });
 
     console.log(`[Service Worker] Synced ${successCount}/${requests.length} requests`);
+    postOfflineLogEvent('SYNC', { source: 'ServiceWorker', action: 'syncComplete', input: { total: requests.length }, decision: 'synced', reason: 'background sync completed', outcome: successCount === requests.length ? 'success' : 'partial', metadata: { synced: successCount, failed: requests.length - successCount } });
   } catch (error) {
     console.error('[Service Worker] Sync failed:', error);
+    postOfflineLogEvent('SYNC', { source: 'ServiceWorker', action: 'syncFailed', input: {}, decision: 'sync-error', reason: error.message, outcome: 'fail' });
     throw error;
   }
 }
