@@ -165,6 +165,7 @@ class FirebaseCacheManager {
                 if (memoryData && !this.isExpired(memoryData, ttl)) {
                     this.recordHit(startTime);
                     console.log(`[CacheManager] =� Memory hit: ${cacheKey}`);
+                    window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'get', input: { collection, id, online: this.isOnline() }, decision: 'memory-hit', reason: 'found in memory cache', outcome: 'success' });
                     return memoryData.data;
                 }
 
@@ -175,6 +176,7 @@ class FirebaseCacheManager {
                     this.memoryCache.set(cacheKey, sessionData);
                     this.recordHit(startTime);
                     console.log(`[CacheManager] =� Session hit: ${cacheKey}`);
+                    window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'get', input: { collection, id, online: this.isOnline() }, decision: 'session-hit', reason: 'found in sessionStorage', outcome: 'success' });
                     return sessionData.data;
                 }
 
@@ -186,6 +188,7 @@ class FirebaseCacheManager {
                     this.setToSessionStorage(cacheKey, localData);
                     this.recordHit(startTime);
                     console.log(`[CacheManager] =� Local hit: ${cacheKey}`);
+                    window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'get', input: { collection, id, online: this.isOnline() }, decision: 'local-hit', reason: 'found in localStorage', outcome: 'success' });
                     return localData.data;
                 }
             }
@@ -193,6 +196,7 @@ class FirebaseCacheManager {
             // 4. Cache miss - fetch from Firebase
             this.recordMiss();
             console.log(`[CacheManager] L Cache miss: ${cacheKey}, fetching from Firebase...`);
+            window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'get', input: { collection, id, online: this.isOnline() }, decision: 'cache-miss', reason: 'not found in any cache layer', outcome: 'pending' });
 
             const data = await this.fetchFromFirebase(collection, id);
 
@@ -435,19 +439,27 @@ class FirebaseCacheManager {
             const isStale = this.isExpired(cached, options.ttl || this.getDefaultTTL(collection));
 
             if (isStale) {
+                window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getWithRevalidate', input: { collection, id, online: this.isOnline() }, decision: 'serve-stale-revalidate', reason: 'cache expired, serving stale while revalidating', outcome: 'fallback', metadata: { age: Date.now() - cached.timestamp } });
+
                 // Revalidate in background
                 this.fetchFromFirebase(collection, id)
                     .then(freshData => {
                         if (freshData) {
                             this.set(collection, id, freshData, options);
+                            window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getWithRevalidate', input: { collection, id }, decision: 'revalidation-complete', reason: 'fresh data fetched in background', outcome: 'success' });
                             if (options.onFreshData) {
                                 options.onFreshData(freshData);
                             }
                         }
                     })
-                    .catch(err => console.warn('[CacheManager] Background revalidation failed:', err));
+                    .catch(err => {
+                        console.warn('[CacheManager] Background revalidation failed:', err);
+                        window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getWithRevalidate', input: { collection, id }, decision: 'revalidation-failed', reason: err.message, outcome: 'fail' });
+                    });
 
                 this.metrics.staleFallbacks++;
+            } else {
+                window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getWithRevalidate', input: { collection, id, online: this.isOnline() }, decision: 'cache-fresh', reason: 'cached data still valid', outcome: 'success' });
             }
 
             return cached.data;
@@ -515,6 +527,7 @@ class FirebaseCacheManager {
             // If offline, try to return stale cache data
             if (!this.isOnline() || error.code === 'unavailable') {
                 console.log(`[CacheManager] Offline - attempting to serve stale cache for: ${cacheKey}`);
+                window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'fetchFromFirebase', input: { collection, id, online: this.isOnline(), errorCode: error.code }, decision: 'serve-stale-attempt', reason: this.isOnline() ? `error.code=${error.code}` : 'navigator.onLine=false', outcome: 'pending' });
 
                 // Try all cache layers even if expired
                 const staleData = this.getFromMemory(cacheKey) ||
@@ -523,8 +536,11 @@ class FirebaseCacheManager {
 
                 if (staleData && staleData.data) {
                     console.log(`[CacheManager] Serving stale cache for: ${cacheKey}`);
+                    this.metrics.staleFallbacks++;
+                    window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'fetchFromFirebase', input: { collection, id }, decision: 'serve-stale', reason: 'stale data found in cache', outcome: 'fallback', metadata: { age: Date.now() - staleData.timestamp } });
                     return staleData.data;
                 }
+                window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'fetchFromFirebase', input: { collection, id }, decision: 'no-stale-data', reason: 'no cached data available', outcome: 'fail' });
             }
 
             throw error;
@@ -568,12 +584,14 @@ class FirebaseCacheManager {
                     }
                     this.recordHit(performance.now());
                     console.log(`[CacheManager] List cache hit (${cacheSource}): ${cacheKey}`);
+                    window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getList', input: { collection, filters, online: this.isOnline() }, decision: `${cacheSource}-hit`, reason: `list found in ${cacheSource} cache`, outcome: 'success', metadata: { itemCount: cached.data?.length } });
                     return cached.data;
                 }
             }
 
             // Fetch from Firebase
             this.recordMiss();
+            window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getList', input: { collection, filters, online: this.isOnline() }, decision: 'cache-miss', reason: 'list not found in any cache layer', outcome: 'pending' });
             const startTime = performance.now();
 
             let query = this.db.collection(collection);
@@ -631,6 +649,7 @@ class FirebaseCacheManager {
             // If offline, try to return stale cache data
             if (!this.isOnline() || error.code === 'unavailable') {
                 console.log(`[CacheManager] Offline - attempting to serve stale list cache for: ${cacheKey}`);
+                window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getList', input: { collection, filters, online: this.isOnline(), errorCode: error.code }, decision: 'serve-stale-list-attempt', reason: this.isOnline() ? `error.code=${error.code}` : 'navigator.onLine=false', outcome: 'pending' });
 
                 // Try all cache layers even if expired
                 const staleData = this.getFromMemory(cacheKey) ||
@@ -639,8 +658,11 @@ class FirebaseCacheManager {
 
                 if (staleData && staleData.data) {
                     console.log(`[CacheManager] Serving stale list cache for: ${cacheKey} (${staleData.data.length} items)`);
+                    this.metrics.staleFallbacks++;
+                    window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getList', input: { collection, filters }, decision: 'serve-stale-list', reason: 'stale list data found', outcome: 'fallback', metadata: { itemCount: staleData.data.length, age: Date.now() - staleData.timestamp } });
                     return staleData.data;
                 }
+                window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getList', input: { collection, filters }, decision: 'no-stale-list', reason: 'no cached list available', outcome: 'fail' });
             }
 
             throw error;
@@ -696,13 +718,17 @@ class FirebaseCacheManager {
 
             // If offline, try to return stale cache data
             if (!this.isOnline() || error.code === 'unavailable') {
+                window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getMetadata', input: { type, id, online: this.isOnline(), errorCode: error.code }, decision: 'serve-stale-metadata-attempt', reason: this.isOnline() ? `error.code=${error.code}` : 'navigator.onLine=false', outcome: 'pending' });
                 const staleData = this.getFromMemory(cacheKey) ||
                                   this.getFromLocalStorage(cacheKey);
 
                 if (staleData && staleData.data) {
                     console.log(`[CacheManager] Serving stale metadata for: ${cacheKey}`);
+                    this.metrics.staleFallbacks++;
+                    window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getMetadata', input: { type, id }, decision: 'serve-stale-metadata', reason: 'stale metadata found', outcome: 'fallback' });
                     return staleData.data;
                 }
+                window.offlineLog?.log('CACHE_DECISION', { source: 'CacheManager', action: 'getMetadata', input: { type, id }, decision: 'no-stale-metadata', reason: 'no cached metadata available', outcome: 'fail' });
             }
 
             return null;

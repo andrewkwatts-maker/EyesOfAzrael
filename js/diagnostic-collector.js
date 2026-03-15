@@ -53,6 +53,14 @@ class DiagnosticCollector {
                 errors: [],
                 warnings: [],
                 maxLogs: 50
+            },
+            offline: {
+                status: 'unknown',
+                currentState: typeof navigator !== 'undefined' ? (navigator.onLine ? 'online' : 'offline') : 'unknown',
+                lastStateChange: null,
+                recentEvents: [],
+                stats: { stateChanges: 0, cacheHits: 0, cacheMisses: 0, staleFallbacks: 0, queuedOps: 0, syncedOps: 0 },
+                timestamp: null
             }
         };
 
@@ -291,6 +299,7 @@ class DiagnosticCollector {
         this.collectDOMState();
         this.collectPerformance();
         this.collectNetworkState();
+        this.collectOfflineState();
     }
 
     /**
@@ -478,6 +487,34 @@ class DiagnosticCollector {
     }
 
     /**
+     * Collect offline state from OfflineEventLogger
+     */
+    collectOfflineState() {
+        try {
+            const logger = window.offlineLog;
+            if (logger) {
+                const stats = logger.getStats();
+                this.diagnostics.offline.currentState = stats.currentState;
+                this.diagnostics.offline.stats = {
+                    stateChanges: stats.stateChanges,
+                    cacheHits: stats.cacheHits,
+                    cacheMisses: stats.cacheMisses,
+                    staleFallbacks: stats.staleFallbacks,
+                    queuedOps: stats.queuedOps,
+                    syncedOps: stats.syncedOps
+                };
+                this.diagnostics.offline.recentEvents = logger.getRecent(20);
+                this.diagnostics.offline.status = stats.currentState === 'online' ? 'ok' : 'warning';
+            } else {
+                this.diagnostics.offline.status = 'unknown';
+            }
+        } catch (error) {
+            this.diagnostics.offline.status = 'error';
+        }
+        this.diagnostics.offline.timestamp = Date.now();
+    }
+
+    /**
      * Get all diagnostics
      */
     getDiagnostics() {
@@ -494,7 +531,8 @@ class DiagnosticCollector {
             this.diagnostics.navigation.status,
             this.diagnostics.dom.status,
             this.diagnostics.network.status,
-            this.diagnostics.performance.status
+            this.diagnostics.performance.status,
+            this.diagnostics.offline.status
         ];
 
         if (statuses.includes('error')) return 'error';

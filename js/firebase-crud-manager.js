@@ -123,11 +123,13 @@ class FirebaseCRUDManager {
         if (typeof window !== 'undefined') {
             window.addEventListener('online', () => {
                 console.log('[CRUD] Back online, processing queued operations...');
+                window.offlineLog?.log('STATE_CHANGE', { source: 'CRUD', action: 'online', input: { queueLength: this.offlineQueue.length }, decision: 'process-queue', reason: 'navigator.onLine changed to true', outcome: 'pending' });
                 this.processOfflineQueue();
             });
 
             window.addEventListener('offline', () => {
                 console.log('[CRUD] Went offline, operations will be queued');
+                window.offlineLog?.log('STATE_CHANGE', { source: 'CRUD', action: 'offline', input: { queueLength: this.offlineQueue.length }, decision: 'queue-mode', reason: 'navigator.onLine changed to false', outcome: 'offline' });
             });
         }
     }
@@ -155,6 +157,7 @@ class FirebaseCRUDManager {
         this.saveOfflineQueue();
 
         console.log('[CRUD] Operation queued for later:', queuedOp.type, queuedOp.id);
+        window.offlineLog?.log('QUEUE_OP', { source: 'CRUD', action: 'enqueue', input: { type: queuedOp.type, collection: operation.collection, entityId: operation.entityId }, decision: 'queued', reason: 'navigator.onLine=false', outcome: 'pending', metadata: { queueLength: this.offlineQueue.length, opId: queuedOp.id } });
 
         if (this.callbacks.onOfflineQueue) {
             this.callbacks.onOfflineQueue(queuedOp, this.offlineQueue.length);
@@ -173,6 +176,7 @@ class FirebaseCRUDManager {
 
         this.isProcessingQueue = true;
         console.log(`[CRUD] Processing ${this.offlineQueue.length} queued operations...`);
+        window.offlineLog?.log('SYNC', { source: 'CRUD', action: 'processQueue-start', input: { queueLength: this.offlineQueue.length }, decision: 'processing', reason: 'back online', outcome: 'pending' });
 
         const processed = [];
         const failed = [];
@@ -215,6 +219,7 @@ class FirebaseCRUDManager {
         this.isProcessingQueue = false;
 
         console.log(`[CRUD] Queue processing complete: ${processed.length} succeeded, ${failed.length} failed`);
+        window.offlineLog?.log('SYNC', { source: 'CRUD', action: 'processQueue-complete', input: { processed: processed.length, failed: failed.length }, decision: 'complete', reason: 'queue fully processed', outcome: failed.length === 0 ? 'success' : 'partial', metadata: { remaining: this.offlineQueue.length } });
 
         return { processed, failed };
     }
@@ -479,6 +484,7 @@ class FirebaseCRUDManager {
 
             // Check if offline - queue operation
             if (!this.isOnline()) {
+                window.offlineLog?.log('QUEUE_OP', { source: 'CRUD', action: 'create', input: { collection, online: false }, decision: 'queue', reason: 'navigator.onLine=false', outcome: 'pending' });
                 this.setLoadingState(loadingKey, false);
                 const queuedOp = this.queueOfflineOperation({
                     type: 'create',
@@ -599,6 +605,7 @@ class FirebaseCRUDManager {
 
             // Check if offline
             if (!this.isOnline()) {
+                window.offlineLog?.log('QUEUE_OP', { source: 'CRUD', action: 'batchCreate', input: { collection, count: entities.length, online: false }, decision: 'queue-batch', reason: 'navigator.onLine=false', outcome: 'pending' });
                 this.setLoadingState(loadingKey, false);
                 // Queue each entity separately for offline processing
                 const queuedIds = entities.map(entityData => {
@@ -1010,6 +1017,7 @@ class FirebaseCRUDManager {
 
             // Check if offline - queue operation
             if (!this.isOnline()) {
+                window.offlineLog?.log('QUEUE_OP', { source: 'CRUD', action: 'update', input: { collection, id, online: false }, decision: 'queue', reason: 'navigator.onLine=false', outcome: 'pending' });
                 this.setLoadingState(loadingKey, false);
                 const queuedOp = this.queueOfflineOperation({
                     type: 'update',
@@ -1214,6 +1222,7 @@ class FirebaseCRUDManager {
 
             // Check if offline - queue operation
             if (!this.isOnline()) {
+                window.offlineLog?.log('QUEUE_OP', { source: 'CRUD', action: 'delete', input: { collection, id, online: false }, decision: 'queue', reason: 'navigator.onLine=false', outcome: 'pending' });
                 this.setLoadingState(loadingKey, false);
                 const queuedOp = this.queueOfflineOperation({
                     type: 'delete',

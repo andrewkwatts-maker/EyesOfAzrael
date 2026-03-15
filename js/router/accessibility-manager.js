@@ -9,7 +9,7 @@
  *   AccessibilityManager.manageFocus();
  */
 
-const AccessibilityManager = {
+window.RouterAccessibilityManager = {
     _initialized: false,
     _routeAnnouncerId: 'spa-route-announcer',
     _loadingAnnouncerId: 'spa-loading-announcer',
@@ -214,8 +214,10 @@ const AccessibilityManager = {
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = AccessibilityManager;
+    module.exports = window.RouterAccessibilityManager;
 }
 
-// Export to window for browser usage
-window.AccessibilityManager = AccessibilityManager;
+// Also expose as AccessibilityManager if the main one hasn't loaded
+if (!window.AccessibilityManager) {
+    window.AccessibilityManager = window.RouterAccessibilityManager;
+}
