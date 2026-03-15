@@ -346,6 +346,7 @@ class FirebaseEntityRenderer {
      * Render deity entity
      */
     renderDeity(entity, container) {
+        entity.type = entity.type || 'deity';
         // Make container position relative for edit icon
         container.style.position = 'relative';
         const ssr = this.getSchemaSectionRenderer();
@@ -1058,6 +1059,7 @@ class FirebaseEntityRenderer {
      * Render hero entity with hero-specific fields
      */
     renderHero(entity, container) {
+        entity.type = entity.type || 'hero';
         // Make container position relative for edit icon
         container.style.position = 'relative';
         const ssr = this.getSchemaSectionRenderer();
@@ -1274,6 +1276,7 @@ class FirebaseEntityRenderer {
      * Render item entity
      */
     renderItem(entity, container) {
+        entity.type = entity.type || 'item';
         // Make container position relative for edit icon
         container.style.position = 'relative';
         const ssr = this.getSchemaSectionRenderer();
@@ -1474,6 +1477,7 @@ class FirebaseEntityRenderer {
      * Render place entity
      */
     renderPlace(entity, container) {
+        entity.type = entity.type || 'place';
         // Make container position relative for edit icon
         container.style.position = 'relative';
         const ssr = this.getSchemaSectionRenderer();
@@ -1662,6 +1666,7 @@ class FirebaseEntityRenderer {
      * Render concept entity - uses enhanced generic renderer
      */
     renderConcept(entity, container) {
+        entity.type = entity.type || 'concept';
         // Concepts use the full generic renderer which now handles all schema sections
         this.renderGenericEntity(entity, container);
     }
@@ -1670,6 +1675,7 @@ class FirebaseEntityRenderer {
      * Render magic system entity - uses enhanced generic renderer
      */
     renderMagicSystem(entity, container) {
+        entity.type = entity.type || 'magic';
         // Magic systems use the full generic renderer which now handles all schema sections
         this.renderGenericEntity(entity, container);
     }
@@ -1678,6 +1684,7 @@ class FirebaseEntityRenderer {
      * Render theory entity - uses enhanced generic renderer
      */
     renderTheory(entity, container) {
+        entity.type = entity.type || 'theory';
         // Theories use the full generic renderer which now handles all schema sections
         this.renderGenericEntity(entity, container);
     }
@@ -1727,6 +1734,7 @@ class FirebaseEntityRenderer {
      * Render creature entity
      */
     renderCreature(entity, container) {
+        entity.type = entity.type || 'creature';
         // Make container position relative for edit icon
         container.style.position = 'relative';
         const ssr = this.getSchemaSectionRenderer();
@@ -2770,11 +2778,28 @@ class FirebaseEntityRenderer {
      */
     initializeEntityPosts(entity) {
         setTimeout(() => {
+            // Ensure CSS is active (media="print" lazy-load may not have switched)
+            document.querySelectorAll('link[href*="entity-posts.css"]').forEach(link => {
+                if (link.media === 'print') link.media = 'all';
+            });
+
             const wrapper = document.getElementById('entityPostsWrapper');
             if (wrapper && window.EntityPostsComponent) {
-                const postsComponent = new EntityPostsComponent(wrapper, entity);
-                postsComponent.init();
-                window._entityPostsInstance = postsComponent;
+                // Ensure entity has type and id set
+                if (!entity.type) {
+                    console.warn('[EntityPosts] entity.type is missing, inferring from wrapper data attribute');
+                    entity.type = wrapper.dataset.entityType || 'entity';
+                }
+                if (!entity.id) {
+                    entity.id = wrapper.dataset.entityId;
+                }
+                try {
+                    const postsComponent = new EntityPostsComponent(wrapper, entity);
+                    postsComponent.init();
+                    window._entityPostsInstance = postsComponent;
+                } catch (err) {
+                    console.error('[EntityPosts] Failed to initialize:', err);
+                }
             }
         }, 200);
     }
@@ -2800,11 +2825,28 @@ class FirebaseEntityRenderer {
      */
     initializePrivateNotes(entity) {
         setTimeout(() => {
+            // Ensure CSS is active (media="print" lazy-load may not have switched)
+            document.querySelectorAll('link[href*="private-notes.css"]').forEach(link => {
+                if (link.media === 'print') link.media = 'all';
+            });
+
             const wrapper = document.getElementById('privateNotesWrapper');
             if (wrapper && window.PrivateNotesPanel) {
-                const notesPanel = new PrivateNotesPanel(wrapper, entity);
-                notesPanel.init();
-                window._privateNotesPanelInstance = notesPanel;
+                // Ensure entity has type and id set
+                if (!entity.type) {
+                    console.warn('[PrivateNotes] entity.type is missing, inferring from wrapper data attribute');
+                    entity.type = wrapper.dataset.entityType || 'entity';
+                }
+                if (!entity.id) {
+                    entity.id = wrapper.dataset.entityId;
+                }
+                try {
+                    const notesPanel = new PrivateNotesPanel(wrapper, entity);
+                    notesPanel.init();
+                    window._privateNotesPanelInstance = notesPanel;
+                } catch (err) {
+                    console.error('[PrivateNotes] Failed to initialize:', err);
+                }
             }
         }, 300);
     }

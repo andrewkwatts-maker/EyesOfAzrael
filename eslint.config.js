@@ -96,6 +96,13 @@ module.exports = [
         ContentFilter: 'writable',
         CompareView: 'writable',
         ContributeMenu: 'writable',
+        SchemaSectionRenderer: 'writable',
+        UserNotesComponent: 'writable',
+        RelatedTextsSection: 'writable',
+        EntityPostsComponent: 'writable',
+        PrivateNotesPanel: 'writable',
+        AdminPopulateButton: 'writable',
+        ShareToolbar: 'writable',
         // Init-time functions (defined by error-monitoring.js, etc.)
         initErrorMonitoring: 'readonly',
         initPerformanceMonitoring: 'readonly',
