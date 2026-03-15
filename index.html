@@ -330,13 +330,14 @@
     <link rel="stylesheet" href="css/user-profile.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/user-profile-polished.css" media="print" onload="this.media='all'">
 
-    <!-- VISUAL EFFECTS CSS - Load async (progressive enhancement) -->
-    <link rel="stylesheet" href="css/shader-backgrounds.css" media="print" onload="this.media='all'">
+    <!-- VISUAL EFFECTS CSS - Shader styles load eagerly for visual consistency -->
+    <link rel="stylesheet" href="css/shader-backgrounds.css">
     <link rel="stylesheet" href="css/debug-data-panel.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/admin-inline-edit.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/entity-posts.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/private-notes.css" media="print" onload="this.media='all'">
-    <link rel="stylesheet" href="css/panel-shaders.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/panel-shaders.css">
+    <link rel="stylesheet" href="css/shader-components.css">
     <link rel="stylesheet" href="css/svg-editor.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/icon-generator.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/icon-picker.css" media="print" onload="this.media='all'">
@@ -444,16 +445,7 @@
         });
     </script>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
-
-    <!-- Firebase Config -->
-    <script src="firebase-config.js"></script>
-
-    <!-- Early error catcher: track script load failures for diagnostics -->
+    <!-- Early error catcher: track script load failures BEFORE any scripts -->
     <script>
         window.__scriptErrors = [];
         window.addEventListener('error', function(e) {
@@ -462,6 +454,39 @@
                 console.error('[Script Load Error]', e.target.src);
             }
         }, true);
+    </script>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+
+    <!-- Firebase Config (with fallback if load fails) -->
+    <script src="firebase-config.js"></script>
+    <script>
+        // If firebase-config.js failed to load or execute, inject config inline as fallback
+        if (typeof window.firebaseConfig === 'undefined') {
+            console.warn('[Fallback] firebase-config.js did not load, using inline config');
+            window.firebaseConfig = {
+                apiKey: "AIzaSyB7bFdte6f81-bNMsdITgnnnWq7aBNMXRw",
+                authDomain: "eyesofazrael.firebaseapp.com",
+                projectId: "eyesofazrael",
+                storageBucket: "eyesofazrael.firebasestorage.app",
+                messagingSenderId: "533894778090",
+                appId: "1:533894778090:web:35b48ba34421b385569b93",
+                measurementId: "G-ECC98XJ9W9"
+            };
+            // Initialize Firebase immediately
+            try {
+                if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length === 0) {
+                    firebase.initializeApp(window.firebaseConfig);
+                    console.log('[Fallback] Firebase initialized successfully');
+                }
+            } catch (e) {
+                console.warn('[Fallback] Firebase init error:', e.message);
+            }
+        }
     </script>
 
     <!-- FOUC Prevention: Apply saved theme immediately before paint -->
