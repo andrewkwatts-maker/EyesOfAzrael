@@ -1715,7 +1715,7 @@ class ContentSubmissionWizard {
         if (!typeConfig) return;
 
         for (const field of typeConfig.fields) {
-            const input = document.getElementById(`csw-${field.toLowerCase().replace(/([A-Z])/g, '-$1')}`);
+            const input = document.getElementById(`csw-${field.replace(/([A-Z])/g, '-$1').toLowerCase()}`);
             if (input) {
                 this.formData.typeSpecific[field] = input.value?.trim() || '';
             }

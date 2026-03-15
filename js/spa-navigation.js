@@ -1120,23 +1120,32 @@ class SPANavigation {
     async _applyExitTransition(element) {
         if (!element) return;
 
+        // Delegate to TransitionManager if available for centralized control
+        if (window.TransitionManager && window.TransitionManager.isEnabled()) {
+            return window.TransitionManager.applyExitTransition(element);
+        }
+
         return new Promise(resolve => {
             element.classList.add('spa-transition-exit');
-            element.classList.add('spa-transition-exit-active');
 
-            const handleTransitionEnd = () => {
-                element.removeEventListener('transitionend', handleTransitionEnd);
-                element.classList.remove('spa-transition-exit', 'spa-transition-exit-active');
-                resolve();
-            };
+            requestAnimationFrame(() => {
+                element.classList.add('spa-transition-exit-active');
 
-            element.addEventListener('transitionend', handleTransitionEnd);
+                const handleTransitionEnd = () => {
+                    element.removeEventListener('transitionend', handleTransitionEnd);
+                    element.classList.remove('spa-transition-exit', 'spa-transition-exit-active');
+                    resolve();
+                };
 
-            // Fallback timeout in case transition doesn't fire
-            setTimeout(() => {
-                element.classList.remove('spa-transition-exit', 'spa-transition-exit-active');
-                resolve();
-            }, 300);
+                element.addEventListener('transitionend', handleTransitionEnd);
+
+                // Fallback timeout in case transition doesn't fire
+                setTimeout(() => {
+                    element.removeEventListener('transitionend', handleTransitionEnd);
+                    element.classList.remove('spa-transition-exit', 'spa-transition-exit-active');
+                    resolve();
+                }, 300);
+            });
         });
     }
 
@@ -1146,27 +1155,35 @@ class SPANavigation {
     async _applyEnterTransition(element) {
         if (!element) return;
 
+        // Delegate to TransitionManager if available for centralized control
+        if (window.TransitionManager && window.TransitionManager.isEnabled()) {
+            return window.TransitionManager.applyEnterTransition(element);
+        }
+
         return new Promise(resolve => {
             element.classList.add('spa-transition-enter');
 
             // Force reflow
             void element.offsetHeight;
 
-            element.classList.add('spa-transition-enter-active');
+            requestAnimationFrame(() => {
+                element.classList.add('spa-transition-enter-active');
 
-            const handleTransitionEnd = () => {
-                element.removeEventListener('transitionend', handleTransitionEnd);
-                element.classList.remove('spa-transition-enter', 'spa-transition-enter-active');
-                resolve();
-            };
+                const handleTransitionEnd = () => {
+                    element.removeEventListener('transitionend', handleTransitionEnd);
+                    element.classList.remove('spa-transition-enter', 'spa-transition-enter-active');
+                    resolve();
+                };
 
-            element.addEventListener('transitionend', handleTransitionEnd);
+                element.addEventListener('transitionend', handleTransitionEnd);
 
-            // Fallback timeout
-            setTimeout(() => {
-                element.classList.remove('spa-transition-enter', 'spa-transition-enter-active');
-                resolve();
-            }, 350);
+                // Fallback timeout
+                setTimeout(() => {
+                    element.removeEventListener('transitionend', handleTransitionEnd);
+                    element.classList.remove('spa-transition-enter', 'spa-transition-enter-active');
+                    resolve();
+                }, 350);
+            });
         });
     }
 
