@@ -12,6 +12,15 @@ class GeminiSVGGenerator {
         this.retryDelay = 1000; // 1 second
         this.auth = null;
 
+        // Rate limiting
+        this.rateLimitWindow = 60000; // 1 minute
+        this.maxRequestsPerWindow = 10;
+        this.requestTimestamps = [];
+
+        // SVG cache key prefix
+        this.cachePrefix = 'eoa_svg_cache_';
+        this.cacheMaxAge = 7 * 24 * 60 * 60 * 1000; // 7 days
+
         // System instructions for mythology-focused SVG generation
         this.systemInstructions = `You are an expert SVG artist specializing in mythology and sacred symbolism.
 Generate clean, semantic SVG code with these requirements:
@@ -121,6 +130,206 @@ Generate clean, semantic SVG code with these requirements:
     }
 
     /**
+     * Check if rate limit has been exceeded
+     * @returns {Object} {allowed: boolean, retryAfter: number, message: string}
+     */
+    checkRateLimit() {
+        const now = Date.now();
+        // Remove timestamps outside the window
+        this.requestTimestamps = this.requestTimestamps.filter(t => now - t < this.rateLimitWindow);
+
+        if (this.requestTimestamps.length >= this.maxRequestsPerWindow) {
+            const oldestInWindow = this.requestTimestamps[0];
+            const retryAfter = Math.ceil((this.rateLimitWindow - (now - oldestInWindow)) / 1000);
+            return {
+                allowed: false,
+                retryAfter: retryAfter,
+                message: `Rate limit reached. You can generate up to ${this.maxRequestsPerWindow} images per minute. Please wait ${retryAfter} seconds.`
+            };
+        }
+        return { allowed: true, retryAfter: 0, message: '' };
+    }
+
+    /**
+     * Get cached SVG from localStorage
+     * @param {string} prompt - The prompt used to generate the SVG
+     * @param {Object} options - Generation options
+     * @returns {string|null} Cached SVG code or null
+     */
+    getCachedSVG(prompt, options) {
+        try {
+            const cacheKey = this.cachePrefix + this.hashPrompt(prompt, options);
+            const cached = localStorage.getItem(cacheKey);
+            if (!cached) return null;
+
+            const parsed = JSON.parse(cached);
+            // Check expiry
+            if (Date.now() - parsed.timestamp > this.cacheMaxAge) {
+                localStorage.removeItem(cacheKey);
+                return null;
+            }
+            return parsed.svgCode;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    /**
+     * Cache SVG in localStorage
+     * @param {string} prompt - The prompt used
+     * @param {Object} options - Generation options
+     * @param {string} svgCode - The generated SVG
+     */
+    cacheSVG(prompt, options, svgCode) {
+        try {
+            const cacheKey = this.cachePrefix + this.hashPrompt(prompt, options);
+            localStorage.setItem(cacheKey, JSON.stringify({
+                svgCode: svgCode,
+                prompt: prompt,
+                timestamp: Date.now()
+            }));
+        } catch (e) {
+            // localStorage might be full; clean old entries and try again
+            this.cleanSVGCache();
+            try {
+                const cacheKey = this.cachePrefix + this.hashPrompt(prompt, options);
+                localStorage.setItem(cacheKey, JSON.stringify({
+                    svgCode: svgCode,
+                    prompt: prompt,
+                    timestamp: Date.now()
+                }));
+            } catch (e2) {
+                console.warn('[GeminiSVG] Could not cache SVG:', e2.message);
+            }
+        }
+    }
+
+    /**
+     * Clean old SVG cache entries from localStorage
+     */
+    cleanSVGCache() {
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(this.cachePrefix)) {
+                try {
+                    const data = JSON.parse(localStorage.getItem(key));
+                    if (Date.now() - data.timestamp > this.cacheMaxAge) {
+                        keysToRemove.push(key);
+                    }
+                } catch (e) {
+                    keysToRemove.push(key);
+                }
+            }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+    }
+
+    /**
+     * Simple hash for cache key generation
+     */
+    hashPrompt(prompt, options) {
+        const str = prompt + JSON.stringify(options || {});
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return Math.abs(hash).toString(36);
+    }
+
+    /**
+     * Get HTML for auth prompt overlay
+     * @returns {string} HTML string for login prompt
+     */
+    getAuthPromptHTML() {
+        const instructions = this.getConfigInstructions();
+        return `
+            <div class="svg-auth-prompt" style="
+                text-align: center;
+                padding: 2rem;
+                background: rgba(0,0,0,0.6);
+                border-radius: 12px;
+                border: 1px solid rgba(255,255,255,0.1);
+                max-width: 400px;
+                margin: 2rem auto;
+            ">
+                <div style="font-size: 2rem; margin-bottom: 1rem;">&#128274;</div>
+                <h3 style="color: var(--color-primary, #8b7fff); margin-bottom: 0.5rem;">${instructions.title}</h3>
+                <p style="color: var(--color-text-secondary, #aaa); margin-bottom: 1.5rem; font-size: 0.95rem;">
+                    ${instructions.message}
+                </p>
+                <button onclick="document.querySelector('.auth-login-btn')?.click(); document.getElementById('login-overlay')?.classList.remove('hidden');" style="
+                    background: var(--color-primary, #8b7fff);
+                    color: white;
+                    border: none;
+                    padding: 0.75rem 2rem;
+                    border-radius: 8px;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    font-weight: 600;
+                ">Sign In with Google</button>
+                <p style="color: var(--color-text-secondary, #777); font-size: 0.8rem; margin-top: 1rem;">
+                    ${instructions.note}
+                </p>
+            </div>
+        `;
+    }
+
+    /**
+     * Get HTML for rate limit message
+     * @param {number} retryAfter - Seconds until rate limit resets
+     * @returns {string} HTML string
+     */
+    getRateLimitHTML(retryAfter) {
+        return `
+            <div class="svg-rate-limit" style="
+                text-align: center;
+                padding: 1.5rem;
+                background: rgba(245, 158, 11, 0.1);
+                border: 1px solid rgba(245, 158, 11, 0.3);
+                border-radius: 12px;
+                max-width: 400px;
+                margin: 1rem auto;
+            ">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">&#9203;</div>
+                <p style="color: #f59e0b; font-weight: 600;">Rate Limit Reached</p>
+                <p style="color: var(--color-text-secondary, #aaa); font-size: 0.9rem;">
+                    Please wait <strong>${retryAfter}</strong> seconds before generating another image.
+                    You can generate up to ${this.maxRequestsPerWindow} images per minute.
+                </p>
+            </div>
+        `;
+    }
+
+    /**
+     * Get HTML for error message
+     * @param {string} error - Error message
+     * @param {boolean} needsAuth - Whether the error is auth-related
+     * @returns {string} HTML string
+     */
+    getErrorHTML(error, needsAuth) {
+        if (needsAuth) return this.getAuthPromptHTML();
+
+        return `
+            <div class="svg-error" style="
+                text-align: center;
+                padding: 1.5rem;
+                background: rgba(239, 68, 68, 0.1);
+                border: 1px solid rgba(239, 68, 68, 0.3);
+                border-radius: 12px;
+                max-width: 400px;
+                margin: 1rem auto;
+            ">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">&#9888;&#65039;</div>
+                <p style="color: #ef4444; font-weight: 600;">Generation Failed</p>
+                <p style="color: var(--color-text-secondary, #aaa); font-size: 0.9rem;">${error}</p>
+            </div>
+        `;
+    }
+
+    /**
      * Generate SVG from a text prompt
      * @param {string} prompt - User's description of desired SVG
      * @param {Object} options - Generation options (style, colorScheme, etc.)
@@ -130,11 +339,40 @@ Generate clean, semantic SVG code with these requirements:
         if (!this.isAuthenticated()) {
             return {
                 success: false,
-                error: 'Not authenticated',
+                error: 'Not authenticated. Please sign in with your Google account to use AI image generation.',
                 needsAuth: true,
+                authPromptHTML: this.getAuthPromptHTML(),
                 configInstructions: this.getConfigInstructions()
             };
         }
+
+        // Check rate limit
+        const rateCheck = this.checkRateLimit();
+        if (!rateCheck.allowed) {
+            return {
+                success: false,
+                error: rateCheck.message,
+                rateLimited: true,
+                retryAfter: rateCheck.retryAfter,
+                rateLimitHTML: this.getRateLimitHTML(rateCheck.retryAfter)
+            };
+        }
+
+        // Check localStorage cache first
+        const cached = this.getCachedSVG(prompt, options);
+        if (cached) {
+            console.log('[GeminiSVG] Returning cached SVG');
+            return {
+                success: true,
+                svgCode: cached,
+                prompt: prompt,
+                options: options,
+                fromCache: true
+            };
+        }
+
+        // Record this request for rate limiting
+        this.requestTimestamps.push(Date.now());
 
         // Build enhanced prompt with style preferences
         const enhancedPrompt = this.buildEnhancedPrompt(prompt, options);
@@ -148,6 +386,9 @@ Generate clean, semantic SVG code with these requirements:
                     // Validate SVG
                     const validation = this.validateSVG(result.svgCode);
                     if (validation.valid) {
+                        // Cache the successful result
+                        this.cacheSVG(prompt, options, result.svgCode);
+
                         return {
                             success: true,
                             svgCode: result.svgCode,
@@ -163,7 +404,8 @@ Generate clean, semantic SVG code with these requirements:
                         }
                         return {
                             success: false,
-                            error: `Generated SVG was invalid: ${validation.errors.join(', ')}`
+                            error: `Generated SVG was invalid: ${validation.errors.join(', ')}`,
+                            errorHTML: this.getErrorHTML(`The AI generated invalid SVG code. Please try again with a different prompt.`)
                         };
                     }
                 } else {
@@ -173,6 +415,7 @@ Generate clean, semantic SVG code with these requirements:
                         await this.sleep(this.retryDelay * attempt); // Exponential backoff
                         continue;
                     }
+                    result.errorHTML = this.getErrorHTML(result.error, result.needsAuth);
                     return result;
                 }
             } catch (error) {
@@ -183,14 +426,16 @@ Generate clean, semantic SVG code with these requirements:
                 }
                 return {
                     success: false,
-                    error: `Generation failed: ${error.message}`
+                    error: `Generation failed: ${error.message}`,
+                    errorHTML: this.getErrorHTML(`An unexpected error occurred: ${error.message}`)
                 };
             }
         }
 
         return {
             success: false,
-            error: 'Maximum retries exceeded'
+            error: 'Maximum retries exceeded. The AI service may be temporarily unavailable.',
+            errorHTML: this.getErrorHTML('Maximum retries exceeded. The AI service may be temporarily unavailable. Please try again later.')
         };
     }
 

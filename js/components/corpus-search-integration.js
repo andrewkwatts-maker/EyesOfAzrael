@@ -222,6 +222,8 @@
         renderFallback(container, entity) {
             const entityName = entity.name || entity.title || '';
             const entityType = entity.type || 'deities';
+            const entityId = entity.id || '';
+            const isSaved = this.isEntitySaved(entityId);
 
             container.innerHTML = `
                 <section class="entity-section entity-section-explore corpus-fallback" style="margin-top: 2rem;">
@@ -233,13 +235,12 @@
                         Discover more references, connections, and parallels
                     </p>
                     <div class="explore-actions" style="display: flex; gap: 1rem; flex-wrap: wrap;">
-                        <a href="/corpus-explorer.html?term=${encodeURIComponent(entityName)}"
+                        <a href="#/search"
                            class="btn-primary explore-btn"
-                           target="_blank"
-                           rel="noopener"
-                           style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: var(--color-primary, #6366f1); color: white; text-decoration: none; border-radius: 8px;">
-                            <span class="btn-icon">&#128214;</span>
-                            Search Sacred Texts
+                           style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: var(--color-primary, #6366f1); color: white; text-decoration: none; border-radius: 8px;"
+                           onclick="event.preventDefault(); window.location.hash='#/search'; setTimeout(function(){ var inp = document.getElementById('search-input'); if(inp){ inp.value='${entityName.replace(/'/g, "\\'")}'; inp.dispatchEvent(new Event('input')); } }, 500);">
+                            <span class="btn-icon">&#128269;</span>
+                            Search for "${entityName}"
                         </a>
                         <a href="#/browse/${entityType}"
                            class="btn-secondary explore-btn"
@@ -247,9 +248,86 @@
                             <span class="btn-icon">&#128279;</span>
                             Browse Related Entities
                         </a>
+                        <button class="btn-secondary save-entity-btn"
+                           data-entity-id="${entityId}"
+                           data-entity-name="${entityName}"
+                           data-entity-type="${entityType}"
+                           style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; background: ${isSaved ? 'rgba(245, 158, 11, 0.2)' : 'var(--color-surface, #1a1a2e)'}; color: var(--color-text-primary, #fff); border-radius: 8px; border: 1px solid ${isSaved ? 'rgba(245, 158, 11, 0.5)' : 'var(--color-border, rgba(255,255,255,0.1))'}; cursor: pointer; font-size: inherit;">
+                            <span class="btn-icon">${isSaved ? '&#9733;' : '&#9734;'}</span>
+                            ${isSaved ? 'Saved' : 'Save to Favorites'}
+                        </button>
                     </div>
                 </section>
             `;
+
+            // Attach save button handler
+            const saveBtn = container.querySelector('.save-entity-btn');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', () => {
+                    this.toggleSaveEntity(saveBtn, entity);
+                });
+            }
+        }
+
+        /**
+         * Check if an entity is saved in favorites
+         * @param {string} entityId
+         * @returns {boolean}
+         */
+        isEntitySaved(entityId) {
+            try {
+                const saved = JSON.parse(localStorage.getItem('eoa_saved_entities') || '[]');
+                return saved.some(function(e) { return e.id === entityId; });
+            } catch (e) {
+                return false;
+            }
+        }
+
+        /**
+         * Toggle save/unsave an entity to favorites
+         * @param {HTMLElement} btn - The save button element
+         * @param {Object} entity - Entity data
+         */
+        toggleSaveEntity(btn, entity) {
+            try {
+                var saved = JSON.parse(localStorage.getItem('eoa_saved_entities') || '[]');
+                var entityId = entity.id || '';
+                var existingIndex = -1;
+                for (var i = 0; i < saved.length; i++) {
+                    if (saved[i].id === entityId) {
+                        existingIndex = i;
+                        break;
+                    }
+                }
+
+                if (existingIndex >= 0) {
+                    // Remove from saved
+                    saved.splice(existingIndex, 1);
+                    btn.querySelector('.btn-icon').innerHTML = '&#9734;';
+                    btn.childNodes[btn.childNodes.length - 1].textContent = ' Save to Favorites';
+                    btn.style.background = 'var(--color-surface, #1a1a2e)';
+                    btn.style.borderColor = 'var(--color-border, rgba(255,255,255,0.1))';
+                    console.log('[CorpusSearchIntegration] Removed from favorites:', entity.name);
+                } else {
+                    // Add to saved
+                    saved.push({
+                        id: entityId,
+                        name: entity.name || entity.title || '',
+                        type: entity.type || 'entity',
+                        mythology: entity.mythology || '',
+                        savedAt: Date.now()
+                    });
+                    btn.querySelector('.btn-icon').innerHTML = '&#9733;';
+                    btn.childNodes[btn.childNodes.length - 1].textContent = ' Saved';
+                    btn.style.background = 'rgba(245, 158, 11, 0.2)';
+                    btn.style.borderColor = 'rgba(245, 158, 11, 0.5)';
+                    console.log('[CorpusSearchIntegration] Saved to favorites:', entity.name);
+                }
+
+                localStorage.setItem('eoa_saved_entities', JSON.stringify(saved));
+            } catch (e) {
+                console.warn('[CorpusSearchIntegration] Could not toggle save:', e);
+            }
         }
 
         /**

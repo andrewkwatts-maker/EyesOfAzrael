@@ -1029,20 +1029,38 @@ console.log('[App Init] Script loaded - starting execution');
         perfMark('navigation-end');
         perfMeasure('navigation', 'navigation-start', 'navigation-end');
 
-        // Step 11: Initialize EnhancedCorpusSearch
+        // Step 11: Initialize Search (EnhancedCorpusSearch with CorpusSearch fallback)
         updateLoadingProgress(80, 'search', 'Initializing search...');
         perfMark('search-start');
         console.log('[App] [11/15] Initializing Search...');
         if (dependencyExists('EnhancedCorpusSearch')) {
             try {
                 window.EyesOfAzrael.search = new EnhancedCorpusSearch(db);
-                console.log('[App] Search initialized');
+                console.log('[App] Search initialized (EnhancedCorpusSearch)');
             } catch (error) {
                 console.error('[App] EnhancedCorpusSearch initialization failed:', error);
+                initState.warnings.push(`EnhancedCorpusSearch failed: ${error.message}`);
+                // Fallback to base CorpusSearch
+                if (dependencyExists('CorpusSearch')) {
+                    try {
+                        window.EyesOfAzrael.search = new CorpusSearch(db);
+                        console.log('[App] Search initialized (CorpusSearch fallback)');
+                    } catch (fallbackError) {
+                        console.error('[App] CorpusSearch fallback also failed:', fallbackError);
+                        initState.warnings.push(`Search fallback failed: ${fallbackError.message}`);
+                    }
+                }
+            }
+        } else if (dependencyExists('CorpusSearch')) {
+            try {
+                window.EyesOfAzrael.search = new CorpusSearch(db);
+                console.log('[App] Search initialized (CorpusSearch - enhanced not available)');
+            } catch (error) {
+                console.error('[App] CorpusSearch initialization failed:', error);
                 initState.warnings.push(`Search failed: ${error.message}`);
             }
         } else {
-            console.warn('[App] EnhancedCorpusSearch not found - search features unavailable');
+            console.warn('[App] No search classes found - search features unavailable');
         }
         perfMark('search-end');
         perfMeasure('search', 'search-start', 'search-end');

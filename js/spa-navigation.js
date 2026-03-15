@@ -1710,16 +1710,58 @@ class SPANavigation {
                 return;
             }
 
-            if (typeof EnhancedCorpusSearch !== 'undefined') {
-                spaLog('Falling back to EnhancedCorpusSearch...');
-                const container = document.createElement('div');
-                container.id = 'search-container';
-                mainContent.innerHTML = '';
-                mainContent.appendChild(container);
-                const searchEngine = new EnhancedCorpusSearch(this.db);
-                spaLog('Search container created (EnhancedCorpusSearch)');
+            if (typeof EnhancedCorpusSearch !== 'undefined' || typeof CorpusSearch !== 'undefined') {
+                spaLog('Falling back to basic search UI...');
+                mainContent.innerHTML = `
+                    <div class="search-view" style="padding: 2rem; max-width: 800px; margin: 0 auto;">
+                        <h1 style="text-align: center; margin-bottom: 1rem; color: var(--color-primary, #8b7fff);">Search Mythology</h1>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 2rem;">
+                            <input type="text" id="fallback-search-input" placeholder="Search mythology..."
+                                style="flex: 1; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: white; font-size: 1rem;">
+                            <button id="fallback-search-btn" style="padding: 0.75rem 1.5rem; border-radius: 8px; background: var(--color-primary, #8b7fff); color: white; border: none; cursor: pointer; font-size: 1rem;">Search</button>
+                        </div>
+                        <div id="fallback-search-results"></div>
+                    </div>
+                `;
+                const SearchClass = typeof EnhancedCorpusSearch !== 'undefined' ? EnhancedCorpusSearch : CorpusSearch;
+                const searchEngine = new SearchClass(this.db);
+                const searchInput = document.getElementById('fallback-search-input');
+                const searchBtn = document.getElementById('fallback-search-btn');
+                const resultsDiv = document.getElementById('fallback-search-results');
+
+                const doSearch = async () => {
+                    const query = searchInput.value.trim();
+                    if (!query || query.length < 2) return;
+                    resultsDiv.innerHTML = '<p style="text-align:center; opacity:0.7;">Searching...</p>';
+                    try {
+                        const result = await searchEngine.search(query, { mode: 'generic', limit: 50 });
+                        if (!result.items || result.items.length === 0) {
+                            resultsDiv.innerHTML = '<p style="text-align:center; opacity:0.7;">No results found.</p>';
+                        } else {
+                            resultsDiv.innerHTML = result.items.map(function(entity) {
+                                var name = entity.name || 'Unknown';
+                                var desc = entity.description || entity.subtitle || '';
+                                if (desc.length > 120) desc = desc.substring(0, 120) + '...';
+                                var mythology = entity.mythology || 'unknown';
+                                var type = entity.type || entity.collection || 'entity';
+                                var id = entity.id || name.toLowerCase().replace(/\\s+/g, '-');
+                                return '<a href="#/mythology/' + mythology + '/' + type + '/' + id + '" style="display:block; padding:1rem; margin-bottom:0.5rem; background:rgba(255,255,255,0.05); border-radius:8px; text-decoration:none; color:inherit; border:1px solid rgba(255,255,255,0.1);">' +
+                                    '<strong style="color:var(--color-primary,#8b7fff);">' + name + '</strong>' +
+                                    '<p style="margin:0.25rem 0 0; opacity:0.7; font-size:0.9rem;">' + desc + '</p>' +
+                                    '</a>';
+                            }).join('');
+                        }
+                    } catch (err) {
+                        resultsDiv.innerHTML = '<p style="text-align:center; color:#ef4444;">Search failed: ' + err.message + '</p>';
+                    }
+                };
+
+                searchBtn.addEventListener('click', doSearch);
+                searchInput.addEventListener('keydown', function(e) { if (e.key === 'Enter') doSearch(); });
+
+                spaLog('Fallback search UI rendered');
                 document.dispatchEvent(new CustomEvent('first-render-complete', {
-                    detail: { route: 'search', renderer: 'EnhancedCorpusSearch', timestamp: Date.now() }
+                    detail: { route: 'search', renderer: 'FallbackSearch', timestamp: Date.now() }
                 }));
                 return;
             }

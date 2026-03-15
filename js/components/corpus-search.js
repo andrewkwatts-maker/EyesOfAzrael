@@ -90,26 +90,34 @@ class CorpusSearch {
         for (const collection of this.collections) {
             if (entityType && collection !== entityType) continue;
 
-            let queryRef = this.db.collection(collection);
+            try {
+                let queryRef = this.db.collection(collection);
 
-            if (mythology) {
-                queryRef = queryRef.where('mythology', '==', mythology);
-            }
-
-            const snapshot = await queryRef.get();
-
-            snapshot.forEach(doc => {
-                const entity = doc.data();
-                const score = this.calculateGenericScore(entity, searchTerms);
-
-                if (score > 0) {
-                    results.push({
-                        ...entity,
-                        _searchScore: score,
-                        _matchedFields: this.getMatchedFields(entity, searchTerms)
-                    });
+                if (mythology) {
+                    queryRef = queryRef.where('mythology', '==', mythology);
                 }
-            });
+
+                const snapshot = await queryRef.get();
+
+                snapshot.forEach(doc => {
+                    const entity = doc.data();
+                    const score = this.calculateGenericScore(entity, searchTerms);
+
+                    if (score > 0) {
+                        results.push({
+                            ...entity,
+                            id: entity.id || doc.id,
+                            type: entity.type || collection,
+                            collection: collection,
+                            _searchScore: score,
+                            _matchedFields: this.getMatchedFields(entity, searchTerms)
+                        });
+                    }
+                });
+            } catch (error) {
+                console.warn(`[CorpusSearch] Error searching collection '${collection}':`, error.message);
+                // Continue searching other collections
+            }
         }
 
         return results;
@@ -123,25 +131,32 @@ class CorpusSearch {
         const results = [];
 
         for (const collection of this.collections) {
-            const snapshot = await this.db.collection(collection).get();
+            try {
+                const snapshot = await this.db.collection(collection).get();
 
-            snapshot.forEach(doc => {
-                const entity = doc.data();
+                snapshot.forEach(doc => {
+                    const entity = doc.data();
 
-                // Skip if mythology filter doesn't match
-                if (mythology && entity.mythology !== mythology) return;
+                    // Skip if mythology filter doesn't match
+                    if (mythology && entity.mythology !== mythology) return;
 
-                const langData = entity.languages || {};
-                const score = this.calculateLanguageScore(langData, query, language);
+                    const langData = entity.languages || {};
+                    const score = this.calculateLanguageScore(langData, query, language);
 
-                if (score > 0) {
-                    results.push({
-                        ...entity,
-                        _searchScore: score,
-                        _matchedLanguage: this.getMatchedLanguage(langData, query, language)
-                    });
-                }
-            });
+                    if (score > 0) {
+                        results.push({
+                            ...entity,
+                            id: entity.id || doc.id,
+                            type: entity.type || collection,
+                            collection: collection,
+                            _searchScore: score,
+                            _matchedLanguage: this.getMatchedLanguage(langData, query, language)
+                        });
+                    }
+                });
+            } catch (error) {
+                console.warn(`[CorpusSearch] Error searching collection '${collection}':`, error.message);
+            }
         }
 
         return results;
@@ -156,24 +171,31 @@ class CorpusSearch {
         const searchTerms = this.tokenize(query.toLowerCase());
 
         for (const collection of this.collections) {
-            const snapshot = await this.db.collection(collection).get();
+            try {
+                const snapshot = await this.db.collection(collection).get();
 
-            snapshot.forEach(doc => {
-                const entity = doc.data();
+                snapshot.forEach(doc => {
+                    const entity = doc.data();
 
-                if (mythology && entity.mythology !== mythology) return;
+                    if (mythology && entity.mythology !== mythology) return;
 
-                const sources = entity.sources || {};
-                const score = this.calculateSourceScore(sources, searchTerms);
+                    const sources = entity.sources || {};
+                    const score = this.calculateSourceScore(sources, searchTerms);
 
-                if (score > 0) {
-                    results.push({
-                        ...entity,
-                        _searchScore: score,
-                        _matchedSources: this.getMatchedSources(sources, searchTerms)
-                    });
-                }
-            });
+                    if (score > 0) {
+                        results.push({
+                            ...entity,
+                            id: entity.id || doc.id,
+                            type: entity.type || collection,
+                            collection: collection,
+                            _searchScore: score,
+                            _matchedSources: this.getMatchedSources(sources, searchTerms)
+                        });
+                    }
+                });
+            } catch (error) {
+                console.warn(`[CorpusSearch] Error searching collection '${collection}':`, error.message);
+            }
         }
 
         return results;
@@ -188,24 +210,31 @@ class CorpusSearch {
         const searchTerm = query.toLowerCase().trim();
 
         for (const collection of this.collections) {
-            const snapshot = await this.db.collection(collection).get();
+            try {
+                const snapshot = await this.db.collection(collection).get();
 
-            snapshot.forEach(doc => {
-                const entity = doc.data();
+                snapshot.forEach(doc => {
+                    const entity = doc.data();
 
-                if (mythology && entity.mythology !== mythology) return;
+                    if (mythology && entity.mythology !== mythology) return;
 
-                const corpus = entity.corpusSearch || {};
-                const score = this.calculateCorpusScore(corpus, searchTerm);
+                    const corpus = entity.corpusSearch || {};
+                    const score = this.calculateCorpusScore(corpus, searchTerm);
 
-                if (score > 0) {
-                    results.push({
-                        ...entity,
-                        _searchScore: score,
-                        _matchedTerms: this.getMatchedCorpusTerms(corpus, searchTerm)
-                    });
-                }
-            });
+                    if (score > 0) {
+                        results.push({
+                            ...entity,
+                            id: entity.id || doc.id,
+                            type: entity.type || collection,
+                            collection: collection,
+                            _searchScore: score,
+                            _matchedTerms: this.getMatchedCorpusTerms(corpus, searchTerm)
+                        });
+                    }
+                });
+            } catch (error) {
+                console.warn(`[CorpusSearch] Error searching collection '${collection}':`, error.message);
+            }
         }
 
         return results;
@@ -232,10 +261,21 @@ class CorpusSearch {
         } else {
             // Get all entities
             for (const collection of this.collections) {
-                const snapshot = await this.db.collection(collection).get();
-                snapshot.forEach(doc => {
-                    results.push({ ...doc.data(), _searchScore: 50 });
-                });
+                try {
+                    const snapshot = await this.db.collection(collection).get();
+                    snapshot.forEach(doc => {
+                        const entity = doc.data();
+                        results.push({
+                            ...entity,
+                            id: entity.id || doc.id,
+                            type: entity.type || collection,
+                            collection: collection,
+                            _searchScore: 50
+                        });
+                    });
+                } catch (error) {
+                    console.warn(`[CorpusSearch] Error in advancedSearch for '${collection}':`, error.message);
+                }
             }
         }
 
@@ -625,35 +665,39 @@ class CorpusSearch {
         for (const collection of this.collections) {
             if (suggestions.size >= limit) break;
 
-            const snapshot = await this.db.collection(collection)
-                .limit(100)
-                .get();
+            try {
+                const snapshot = await this.db.collection(collection)
+                    .limit(100)
+                    .get();
 
-            snapshot.forEach(doc => {
-                const entity = doc.data();
+                snapshot.forEach(doc => {
+                    const entity = doc.data();
 
-                // Name suggestions
-                if (entity.name?.toLowerCase().startsWith(p)) {
-                    suggestions.add(entity.name);
-                }
-
-                // Search terms suggestions
-                (entity.searchTerms || []).forEach(term => {
-                    if (term.toLowerCase().startsWith(p)) {
-                        suggestions.add(term);
+                    // Name suggestions
+                    if (entity.name?.toLowerCase().startsWith(p)) {
+                        suggestions.add(entity.name);
                     }
-                });
 
-                // Corpus terms suggestions
-                const corpus = entity.corpusSearch || {};
-                ['epithets', 'domains', 'symbols'].forEach(field => {
-                    (corpus[field] || []).forEach(term => {
+                    // Search terms suggestions
+                    (entity.searchTerms || []).forEach(term => {
                         if (term.toLowerCase().startsWith(p)) {
                             suggestions.add(term);
                         }
                     });
+
+                    // Corpus terms suggestions
+                    const corpus = entity.corpusSearch || {};
+                    ['epithets', 'domains', 'symbols'].forEach(field => {
+                        (corpus[field] || []).forEach(term => {
+                            if (term.toLowerCase().startsWith(p)) {
+                                suggestions.add(term);
+                            }
+                        });
+                    });
                 });
-            });
+            } catch (error) {
+                console.warn(`[CorpusSearch] Error getting suggestions from '${collection}':`, error.message);
+            }
         }
 
         return Array.from(suggestions).slice(0, limit);
@@ -663,4 +707,9 @@ class CorpusSearch {
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = CorpusSearch;
+}
+
+// Browser global export
+if (typeof window !== 'undefined') {
+    window.CorpusSearch = CorpusSearch;
 }
