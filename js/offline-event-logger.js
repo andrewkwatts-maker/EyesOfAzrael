@@ -258,3 +258,8 @@ if (typeof window !== 'undefined') {
     window.offlineLog = OfflineEventLogger;
     window.OfflineEventLogger = OfflineEventLogger;
 }
+
+// Export for module systems
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = OfflineEventLogger;
+}

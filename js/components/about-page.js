@@ -92,3 +92,8 @@ class AboutPage {
 if (typeof window !== 'undefined') {
     window.AboutPage = AboutPage;
 }
+
+// CommonJS export for testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = AboutPage;
+}

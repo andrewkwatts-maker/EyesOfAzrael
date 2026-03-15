@@ -2941,3 +2941,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Auto-load failed:', error);
     }
 });
+
+// Export for module systems
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = FirebaseEntityRenderer;
+}

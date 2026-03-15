@@ -135,3 +135,8 @@ class TermsPage {
 if (typeof window !== 'undefined') {
     window.TermsPage = TermsPage;
 }
+
+// CommonJS export for testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = TermsPage;
+}

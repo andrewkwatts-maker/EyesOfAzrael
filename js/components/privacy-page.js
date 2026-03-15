@@ -149,3 +149,8 @@ class PrivacyPage {
 if (typeof window !== 'undefined') {
     window.PrivacyPage = PrivacyPage;
 }
+
+// CommonJS export for testing
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = PrivacyPage;
+}

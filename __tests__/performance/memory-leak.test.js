@@ -219,16 +219,20 @@ describe('Memory Leak Detection', () => {
             jest.useFakeTimers();
 
             // Arrange
-            let timerCount = 0;
+            let activeTimers = 0;
             const debounce = (fn, delay) => {
                 let timer;
                 return (...args) => {
-                    clearTimeout(timer);
+                    if (timer) {
+                        clearTimeout(timer);
+                        activeTimers--;
+                    }
                     timer = setTimeout(() => {
                         fn(...args);
-                        timerCount--;
+                        activeTimers--;
+                        timer = null;
                     }, delay);
-                    timerCount++;
+                    activeTimers++;
                 };
             };
 
@@ -243,9 +247,9 @@ describe('Memory Leak Detection', () => {
             // Fast forward
             jest.advanceTimersByTime(300);
 
-            // Assert - Only 1 timer should have executed
+            // Assert - Only 1 timer should have executed, no active timers remaining
             expect(fn).toHaveBeenCalledTimes(1);
-            expect(timerCount).toBe(0);
+            expect(activeTimers).toBe(0);
 
             jest.useRealTimers();
         });

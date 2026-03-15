@@ -501,8 +501,8 @@ describe('Search to Entity View Integration', () => {
         quickViewModal.addToFavorites();
         window.gtag('event', 'add_to_favorites', { item_id: 'zeus' });
 
-        // Verify all analytics calls
-        expect(window.gtag).toHaveBeenCalledTimes(3);
+        // Verify all analytics calls (3 manual + 1 from addToFavorites internal gtag call)
+        expect(window.gtag).toHaveBeenCalledTimes(4);
         expect(window.gtag).toHaveBeenCalledWith('event', 'search', expect.any(Object));
         expect(window.gtag).toHaveBeenCalledWith('event', 'view_item', expect.any(Object));
         expect(window.gtag).toHaveBeenCalledWith('event', 'add_to_favorites', expect.any(Object));

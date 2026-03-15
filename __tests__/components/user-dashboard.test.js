@@ -1,1233 +1,1383 @@
 /**
  * User Dashboard Component - Unit Tests
- * Testing: Dashboard initialization, contribution tracking, statistics,
- * favorites management, user profile, and error handling
+ * Testing: Dashboard initialization, data loading, tab management,
+ * action handling, utility methods, and error handling
  *
  * @coverage-target 85%
  * @total-tests 42
  */
 
-// Mock Firebase before importing UserDashboard
-const mockFirestore = {
-  collection: jest.fn(),
-  doc: jest.fn(),
-  get: jest.fn(),
-  where: jest.fn(),
-  orderBy: jest.fn(),
-  limit: jest.fn()
+// Mock console methods
+global.console = {
+    ...console,
+    log: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn()
 };
 
+// Mock Firebase
 const mockAuth = {
-  currentUser: null,
-  signInWithPopup: jest.fn(),
-  signOut: jest.fn(),
-  onAuthStateChanged: jest.fn()
+    currentUser: null,
+    signInWithPopup: jest.fn(),
+    signOut: jest.fn(),
+    onAuthStateChanged: jest.fn()
 };
 
 const mockCRUDManager = {
-  getUserEntities: jest.fn(),
-  create: jest.fn(),
-  read: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  restore: jest.fn()
+    getUserEntities: jest.fn(),
+    create: jest.fn(),
+    read: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn()
 };
 
 // Mock global firebase object
 global.firebase = {
-  firestore: jest.fn(() => mockFirestore),
-  auth: {
-    GoogleAuthProvider: jest.fn()
-  }
+    firestore: jest.fn(),
+    auth: {
+        GoogleAuthProvider: jest.fn()
+    }
 };
 
 // Mock alert and confirm
 global.alert = jest.fn();
 global.confirm = jest.fn(() => true);
 
-// Mock window objects
-global.window = {
-  EyesOfAzrael: {
-    navigation: {
-      navigate: jest.fn()
-    }
-  },
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn()
-  },
-  location: {
-    reload: jest.fn()
-  }
-};
-
-// Mock localStorage
-const localStorageMock = (() => {
-  let store = {};
-  return {
-    getItem: jest.fn(key => store[key] || null),
-    setItem: jest.fn((key, value) => { store[key] = value.toString(); }),
-    removeItem: jest.fn(key => { delete store[key]; }),
-    clear: jest.fn(() => { store = {}; })
-  };
-})();
-global.localStorage = localStorageMock;
-
 // Import UserDashboard after mocks
 const UserDashboard = require('../../js/components/user-dashboard.js');
 
 describe('UserDashboard Component', () => {
-  let dashboard;
-  let mockContainer;
+    let dashboard;
+    let mockContainer;
 
-  beforeEach(() => {
-    // Reset mocks
-    jest.clearAllMocks();
-    localStorageMock.clear();
-
-    // Create fresh dashboard instance
-    dashboard = new UserDashboard({
-      crudManager: mockCRUDManager,
-      auth: mockAuth
-    });
-
-    // Create mock container
-    mockContainer = document.createElement('div');
-    document.body.appendChild(mockContainer);
-  });
-
-  afterEach(() => {
-    document.body.innerHTML = '';
-  });
-
-  // ========================================
-  // 1. Dashboard Initialization (6 tests)
-  // ========================================
-
-  describe('Dashboard Initialization', () => {
-    test('should initialize with user ID', () => {
-      // Arrange
-      const mockUser = {
-        uid: 'test-user-123',
-        email: 'test@example.com',
-        displayName: 'Test User',
-        photoURL: 'https://example.com/photo.jpg'
-      };
-      mockAuth.currentUser = mockUser;
-
-      // Act
-      const dashboard = new UserDashboard({
-        crudManager: mockCRUDManager,
-        auth: mockAuth
-      });
-
-      // Assert
-      expect(dashboard.auth).toBe(mockAuth);
-      expect(dashboard.crudManager).toBe(mockCRUDManager);
-      expect(dashboard.entities).toEqual([]);
-    });
-
-    test('should fetch user contributions from Firestore', async () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123' };
-      const mockEntities = [
-        { id: '1', name: 'Zeus', collection: 'deities', status: 'active' },
-        { id: '2', name: 'Athena', collection: 'deities', status: 'active' }
-      ];
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: mockEntities
-      });
-
-      // Act
-      await dashboard.loadUserEntities();
-
-      // Assert
-      expect(mockCRUDManager.getUserEntities).toHaveBeenCalled();
-      expect(dashboard.entities.length).toBeGreaterThan(0);
-    });
-
-    test('should fetch user favorites from Firestore', async () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123' };
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: []
-      });
-
-      // Act
-      await dashboard.loadUserEntities();
-
-      // Assert
-      expect(mockCRUDManager.getUserEntities).toHaveBeenCalled();
-    });
-
-    test('should calculate contribution statistics', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', status: 'active', mythology: 'greek' },
-        { id: '2', status: 'active', mythology: 'norse' },
-        { id: '3', status: 'deleted', mythology: 'greek' }
-      ];
-
-      // Act
-      const stats = dashboard.calculateStats();
-
-      // Assert
-      expect(stats.total).toBe(3);
-      expect(stats.active).toBe(2);
-      expect(stats.mythologies).toBe(2);
-    });
-
-    test('should render loading state', async () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123' };
-      mockCRUDManager.getUserEntities.mockImplementation(() =>
-        new Promise(resolve => setTimeout(() => resolve({ success: true, data: [] }), 100))
-      );
-
-      // Act
-      const html = await dashboard.render();
-
-      // Assert
-      expect(html).toContain('user-dashboard');
-    });
-
-    test('should require authentication', async () => {
-      // Arrange
-      mockAuth.currentUser = null;
-
-      // Act
-      const html = await dashboard.render();
-
-      // Assert
-      expect(html).toContain('Authentication Required');
-      expect(html).toContain('signInBtn');
-    });
-  });
-
-  // ========================================
-  // 2. Contribution Tracking (10 tests)
-  // ========================================
-
-  describe('Contribution Tracking', () => {
     beforeEach(() => {
-      mockAuth.currentUser = {
-        uid: 'user-123',
-        displayName: 'Test User',
-        email: 'test@example.com'
-      };
-    });
-
-    test('should display total contribution count', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', name: 'Entity1' },
-        { id: '2', name: 'Entity2' },
-        { id: '3', name: 'Entity3' }
-      ];
-
-      // Act
-      const stats = dashboard.calculateStats();
-
-      // Assert
-      expect(stats.total).toBe(3);
-    });
-
-    test('should display contributions by type', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', collection: 'deities', status: 'active' },
-        { id: '2', collection: 'heroes', status: 'active' },
-        { id: '3', collection: 'deities', status: 'active' }
-      ];
-
-      // Act
-      const deities = dashboard.entities.filter(e => e.collection === 'deities');
-
-      // Assert
-      expect(deities.length).toBe(2);
-    });
-
-    test('should display recent contributions (last 10)', async () => {
-      // Arrange
-      const mockDate = new Date('2024-01-01');
-      const entities = Array.from({ length: 15 }, (_, i) => ({
-        id: `${i}`,
-        name: `Entity ${i}`,
-        createdAt: { toDate: () => new Date(mockDate.getTime() + i * 1000) },
-        status: 'active'
-      }));
-
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: entities
-      });
-
-      // Act
-      await dashboard.loadUserEntities();
-      const recent = dashboard.entities.slice(0, 10);
-
-      // Assert
-      expect(recent.length).toBe(10);
-    });
-
-    test('should show contribution timestamps', () => {
-      // Arrange
-      const timestamp = { toDate: () => new Date('2024-01-15') };
-
-      // Act
-      const formatted = dashboard.formatDate(timestamp);
-
-      // Assert
-      expect(formatted).toBeTruthy();
-      expect(typeof formatted).toBe('string');
-    });
-
-    test('should show contribution status (pending/approved/rejected)', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', status: 'active' },
-        { id: '2', status: 'deleted' }
-      ];
-
-      // Act
-      const active = dashboard.entities.filter(e => e.status === 'active');
-      const deleted = dashboard.entities.filter(e => e.status === 'deleted');
-
-      // Assert
-      expect(active.length).toBe(1);
-      expect(deleted.length).toBe(1);
-    });
-
-    test('should link to contribution entities', () => {
-      // Arrange
-      const entity = {
-        id: 'zeus-123',
-        collection: 'deities',
-        name: 'Zeus',
-        status: 'active'
-      };
-
-      // Act
-      const cardHTML = dashboard.renderEntityCard(entity);
-
-      // Assert
-      expect(cardHTML).toContain('data-action="view"');
-      expect(cardHTML).toContain('data-id="zeus-123"');
-    });
-
-    test('should filter contributions by status', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', status: 'active', collection: 'deities' },
-        { id: '2', status: 'deleted', collection: 'deities' }
-      ];
-      dashboard.filter.status = 'active';
-
-      // Act
-      const filtered = dashboard.filterEntities();
-
-      // Assert
-      expect(filtered.length).toBe(1);
-      expect(filtered[0].status).toBe('active');
-    });
-
-    test('should sort contributions by date', async () => {
-      // Arrange
-      const entities = [
-        { id: '1', createdAt: { toDate: () => new Date('2024-01-01') } },
-        { id: '2', createdAt: { toDate: () => new Date('2024-01-03') } },
-        { id: '3', createdAt: { toDate: () => new Date('2024-01-02') } }
-      ];
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: entities
-      });
-
-      // Act
-      await dashboard.loadUserEntities();
-
-      // Assert
-      expect(dashboard.entities[0].id).toBe('2'); // Newest first
-    });
-
-    test('should paginate contributions (>10)', () => {
-      // Arrange
-      dashboard.entities = Array.from({ length: 25 }, (_, i) => ({
-        id: `${i}`,
-        name: `Entity ${i}`,
-        status: 'active'
-      }));
-
-      // Act
-      const filtered = dashboard.filterEntities();
-
-      // Assert
-      expect(filtered.length).toBe(25);
-    });
-
-    test('should handle zero contributions gracefully', () => {
-      // Arrange
-      dashboard.entities = [];
-
-      // Act
-      const html = dashboard.renderEntitiesList();
-
-      // Assert
-      expect(html).toContain('No entities found');
-    });
-  });
-
-  // ========================================
-  // 3. Statistics Display (8 tests)
-  // ========================================
-
-  describe('Statistics Display', () => {
-    test('should calculate total views across contributions', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', views: 100 },
-        { id: '2', views: 200 },
-        { id: '3', views: 150 }
-      ];
-
-      // Act
-      const totalViews = dashboard.entities.reduce((sum, e) => sum + (e.views || 0), 0);
-
-      // Assert
-      expect(totalViews).toBe(450);
-    });
-
-    test('should display most viewed contribution', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', views: 100, name: 'Entity1' },
-        { id: '2', views: 500, name: 'Entity2' },
-        { id: '3', views: 150, name: 'Entity3' }
-      ];
-
-      // Act
-      const mostViewed = dashboard.entities.reduce((max, e) =>
-        (e.views || 0) > (max.views || 0) ? e : max
-      );
-
-      // Assert
-      expect(mostViewed.name).toBe('Entity2');
-      expect(mostViewed.views).toBe(500);
-    });
-
-    test('should calculate contribution streak', () => {
-      // Arrange
-      const today = new Date();
-      dashboard.entities = [
-        { createdAt: { toDate: () => today } },
-        { createdAt: { toDate: () => new Date(today.getTime() - 24*60*60*1000) } },
-        { createdAt: { toDate: () => new Date(today.getTime() - 2*24*60*60*1000) } }
-      ];
-
-      // Act
-      const streak = dashboard.entities.length;
-
-      // Assert
-      expect(streak).toBeGreaterThan(0);
-    });
-
-    test('should display contribution badges', () => {
-      // Arrange
-      dashboard.entities = Array.from({ length: 10 }, (_, i) => ({ id: `${i}` }));
-
-      // Act
-      const badges = [];
-      if (dashboard.entities.length >= 10) badges.push('Contributor');
-      if (dashboard.entities.length >= 50) badges.push('Expert');
-
-      // Assert
-      expect(badges).toContain('Contributor');
-    });
-
-    test('should show contribution ranking', () => {
-      // Arrange
-      const stats = dashboard.calculateStats();
-
-      // Act & Assert
-      expect(stats.total).toBeDefined();
-      expect(stats.active).toBeDefined();
-    });
-
-    test('should display contribution timeline chart', () => {
-      // Arrange
-      dashboard.entities = [
-        { createdAt: { toDate: () => new Date('2024-01-01') } },
-        { createdAt: { toDate: () => new Date('2024-01-15') } },
-        { createdAt: { toDate: () => new Date('2024-02-01') } }
-      ];
-
-      // Act
-      const months = [...new Set(dashboard.entities.map(e => {
-        const date = e.createdAt.toDate();
-        return `${date.getFullYear()}-${date.getMonth()}`;
-      }))];
-
-      // Assert
-      expect(months.length).toBeGreaterThan(0);
-    });
-
-    test('should show mythology distribution chart', () => {
-      // Arrange
-      dashboard.entities = [
-        { mythology: 'greek' },
-        { mythology: 'norse' },
-        { mythology: 'greek' }
-      ];
-
-      // Act
-      const stats = dashboard.calculateStats();
-
-      // Assert
-      expect(stats.mythologies).toBe(2);
-    });
-
-    test('should calculate average contribution quality score', () => {
-      // Arrange
-      dashboard.entities = [
-        { quality: 4.5 },
-        { quality: 3.8 },
-        { quality: 4.2 }
-      ];
-
-      // Act
-      const avgQuality = dashboard.entities.reduce((sum, e) => sum + (e.quality || 0), 0) / dashboard.entities.length;
-
-      // Assert
-      expect(avgQuality).toBeCloseTo(4.17, 1);
-    });
-  });
-
-  // ========================================
-  // 4. Favorites Management (7 tests)
-  // ========================================
-
-  describe('Favorites Management', () => {
-    test('should display favorite entities', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', isFavorite: true },
-        { id: '2', isFavorite: false },
-        { id: '3', isFavorite: true }
-      ];
-
-      // Act
-      const favorites = dashboard.entities.filter(e => e.isFavorite);
-
-      // Assert
-      expect(favorites.length).toBe(2);
-    });
-
-    test('should add entity to favorites', () => {
-      // Arrange
-      const entity = { id: '1', isFavorite: false };
-
-      // Act
-      entity.isFavorite = true;
-
-      // Assert
-      expect(entity.isFavorite).toBe(true);
-    });
-
-    test('should remove entity from favorites', () => {
-      // Arrange
-      const entity = { id: '1', isFavorite: true };
-
-      // Act
-      entity.isFavorite = false;
-
-      // Assert
-      expect(entity.isFavorite).toBe(false);
-    });
-
-    test('should organize favorites by collection', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', collection: 'deities', isFavorite: true },
-        { id: '2', collection: 'heroes', isFavorite: true },
-        { id: '3', collection: 'deities', isFavorite: true }
-      ];
-
-      // Act
-      const favorites = dashboard.entities.filter(e => e.isFavorite);
-      const byCollection = favorites.reduce((acc, e) => {
-        acc[e.collection] = (acc[e.collection] || 0) + 1;
-        return acc;
-      }, {});
-
-      // Assert
-      expect(byCollection.deities).toBe(2);
-      expect(byCollection.heroes).toBe(1);
-    });
-
-    test('should search favorites', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', name: 'Zeus', description: 'King of gods', mythology: 'greek', type: 'deity', isFavorite: true, status: 'active', collection: 'deities' },
-        { id: '2', name: 'Athena', description: 'Goddess of wisdom', mythology: 'greek', type: 'deity', isFavorite: true, status: 'active', collection: 'deities' }
-      ];
-      dashboard.filter.search = 'zeus';
-
-      // Act
-      const filtered = dashboard.filterEntities();
-
-      // Assert
-      expect(filtered.length).toBeGreaterThan(0);
-      expect(filtered.some(e => e.name === 'Zeus')).toBe(true);
-    });
-
-    test('should export favorites list', () => {
-      // Arrange
-      dashboard.entities = [
-        { id: '1', name: 'Zeus', isFavorite: true },
-        { id: '2', name: 'Athena', isFavorite: true }
-      ];
-
-      // Act
-      const favorites = dashboard.entities.filter(e => e.isFavorite);
-      const exported = JSON.stringify(favorites);
-
-      // Assert
-      expect(exported).toContain('Zeus');
-      expect(exported).toContain('Athena');
-    });
-
-    test('should handle favorite count limit', () => {
-      // Arrange
-      const maxFavorites = 100;
-      dashboard.entities = Array.from({ length: 150 }, (_, i) => ({
-        id: `${i}`,
-        isFavorite: true
-      }));
-
-      // Act
-      const favorites = dashboard.entities.filter(e => e.isFavorite).slice(0, maxFavorites);
-
-      // Assert
-      expect(favorites.length).toBe(maxFavorites);
-    });
-  });
-
-  // ========================================
-  // 5. User Profile (6 tests)
-  // ========================================
-
-  describe('User Profile', () => {
-    test('should display user profile information', async () => {
-      // Arrange
-      mockAuth.currentUser = {
-        uid: 'user-123',
-        displayName: 'Test User',
-        email: 'test@example.com',
-        photoURL: 'https://example.com/photo.jpg'
-      };
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: []
-      });
-
-      // Act
-      const html = await dashboard.render();
-
-      // Assert
-      expect(html).toContain('Test User');
-      // Email is shown in dashboard-user-name with either displayName or email
-      expect(html).toContain('dashboard-user-name');
-    });
-
-    test('should show user avatar', async () => {
-      // Arrange
-      mockAuth.currentUser = {
-        uid: 'user-123',
-        photoURL: 'https://example.com/photo.jpg',
-        displayName: 'Test User'
-      };
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: []
-      });
-
-      // Act
-      const html = await dashboard.render();
-
-      // Assert
-      expect(html).toContain('https://example.com/photo.jpg');
-      expect(html).toContain('dashboard-avatar');
-    });
-
-    test('should display user level/XP', () => {
-      // Arrange
-      const userXP = 1500;
-      const level = Math.floor(userXP / 500) + 1;
-
-      // Act & Assert
-      expect(level).toBe(4);
-    });
-
-    test('should show account creation date', () => {
-      // Arrange
-      const createdAt = new Date('2023-01-01');
-
-      // Act
-      const formatted = dashboard.formatDate({ toDate: () => createdAt });
-
-      // Assert
-      expect(formatted).toBeTruthy();
-    });
-
-    test('should display user bio', async () => {
-      // Arrange
-      mockAuth.currentUser = {
-        uid: 'user-123',
-        displayName: 'Test User',
-        bio: 'Mythology enthusiast'
-      };
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: []
-      });
-
-      // Act
-      const html = await dashboard.render();
-
-      // Assert
-      expect(html).toContain('My Contributions');
-    });
-
-    test('should allow profile editing', () => {
-      // Arrange
-      const profile = {
-        displayName: 'Test User',
-        bio: 'Old bio'
-      };
-
-      // Act
-      profile.bio = 'New bio';
-
-      // Assert
-      expect(profile.bio).toBe('New bio');
-    });
-  });
-
-  // ========================================
-  // 6. Error Handling (5 tests)
-  // ========================================
-
-  describe('Error Handling', () => {
-    test('should handle Firestore fetch errors', async () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123' };
-      mockCRUDManager.getUserEntities.mockRejectedValue(new Error('Network error'));
-
-      // Act & Assert
-      await expect(dashboard.loadUserEntities()).rejects.toThrow();
-    });
-
-    test('should handle missing user data', async () => {
-      // Arrange
-      mockAuth.currentUser = null;
-
-      // Act
-      const html = await dashboard.render();
-
-      // Assert
-      expect(html).toContain('Authentication Required');
-    });
-
-    test('should show error for unauthenticated access', async () => {
-      // Arrange
-      mockAuth.currentUser = null;
-
-      // Act
-      const html = await dashboard.render();
-
-      // Assert
-      expect(html).toContain('sign in');
-    });
-
-    test('should handle network failures gracefully', async () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123' };
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: false,
-        error: 'Network error'
-      });
-
-      // Act
-      await dashboard.loadUserEntities();
-
-      // Assert
-      expect(dashboard.entities.length).toBe(0);
-    });
-
-    test('should recover from partial data load', async () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123' };
-      let callCount = 0;
-      mockCRUDManager.getUserEntities.mockImplementation(() => {
-        callCount++;
-        if (callCount === 1) {
-          return Promise.resolve({ success: true, data: [{ id: '1' }] });
-        }
-        return Promise.resolve({ success: false, error: 'Error' });
-      });
-
-      // Act
-      await dashboard.loadUserEntities();
-
-      // Assert
-      expect(dashboard.entities.length).toBeGreaterThan(0);
-    });
-  });
-
-  // ========================================
-  // Additional Integration Tests
-  // ========================================
-
-  describe('Integration Tests', () => {
-    test('should initialize dashboard with event listeners', async () => {
-      // Arrange
-      mockAuth.currentUser = {
-        uid: 'user-123',
-        displayName: 'Test User',
-        email: 'test@example.com'
-      };
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: []
-      });
-      const html = await dashboard.render();
-      mockContainer.innerHTML = html;
-
-      // Act
-      dashboard.initialize(mockContainer);
-
-      // Assert
-      const collectionFilter = mockContainer.querySelector('#collectionFilter');
-      expect(collectionFilter).toBeTruthy();
-    });
-
-    test('should handle collection filter change', async () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123', displayName: 'Test' };
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: []
-      });
-
-      // Set entities AFTER render (since render calls loadUserEntities which resets entities)
-      await dashboard.render();
-      dashboard.entities = [
-        { id: '1', collection: 'deities', status: 'active' },
-        { id: '2', collection: 'heroes', status: 'active' }
-      ];
-
-      // Act
-      dashboard.filter.collection = 'deities';
-      const filtered = dashboard.filterEntities();
-
-      // Assert
-      expect(filtered.length).toBe(1);
-      expect(filtered[0].collection).toBe('deities');
-    });
-
-    test('should handle delete action', async () => {
-      // Arrange
-      mockCRUDManager.delete.mockResolvedValue({ success: true });
-      mockCRUDManager.getUserEntities.mockResolvedValue({ success: true, data: [] });
-      global.confirm = jest.fn(() => true);
-
-      // Initialize container
-      mockAuth.currentUser = { uid: 'user-123', displayName: 'Test' };
-      const html = await dashboard.render();
-      mockContainer.innerHTML = html;
-      dashboard.initialize(mockContainer);
-
-      // Act
-      await dashboard.handleDelete('deities', 'zeus-123');
-
-      // Assert
-      expect(mockCRUDManager.delete).toHaveBeenCalledWith('deities', 'zeus-123', false);
-    });
-
-    test('should handle restore action', async () => {
-      // Arrange
-      mockCRUDManager.restore.mockResolvedValue({ success: true });
-      mockCRUDManager.getUserEntities.mockResolvedValue({ success: true, data: [] });
-
-      // Initialize container
-      mockAuth.currentUser = { uid: 'user-123', displayName: 'Test' };
-      const html = await dashboard.render();
-      mockContainer.innerHTML = html;
-      dashboard.initialize(mockContainer);
-
-      // Act
-      await dashboard.handleRestore('deities', 'zeus-123');
-
-      // Assert
-      expect(mockCRUDManager.restore).toHaveBeenCalledWith('deities', 'zeus-123');
-    });
-
-    test('should format dates correctly', () => {
-      // Arrange
-      const today = new Date();
-      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
-      const lastWeek = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-      // Act
-      const todayStr = dashboard.formatDate({ toDate: () => today });
-      const yesterdayStr = dashboard.formatDate({ toDate: () => yesterday });
-      const lastWeekStr = dashboard.formatDate({ toDate: () => lastWeek });
-
-      // Assert
-      expect(todayStr).toBe('Today');
-      expect(yesterdayStr).toBe('Yesterday');
-      expect(lastWeekStr).toContain('ago');
-    });
-
-    test('should truncate long text', () => {
-      // Arrange
-      const longText = 'This is a very long text that should be truncated to a specific length for display purposes';
-
-      // Act
-      const truncated = dashboard.truncate(longText, 50);
-
-      // Assert
-      expect(truncated.length).toBeLessThanOrEqual(53); // 50 + '...'
-      expect(truncated).toContain('...');
-    });
-
-    test('should handle view action', () => {
-      // Arrange
-      if (!global.window.EyesOfAzrael) {
-        global.window.EyesOfAzrael = {
-          navigation: {
-            navigate: jest.fn()
-          }
+        // Reset mocks
+        jest.clearAllMocks();
+
+        // Setup window mocks
+        window.EyesOfAzrael = {
+            navigation: {
+                navigate: jest.fn()
+            }
         };
-      }
-      global.window.EyesOfAzrael.navigation.navigate.mockClear();
+        window.toast = {
+            success: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn()
+        };
 
-      // Act
-      dashboard.handleView('deities', 'zeus-123');
+        // Create fresh dashboard instance
+        dashboard = new UserDashboard({
+            crudManager: mockCRUDManager,
+            auth: mockAuth
+        });
 
-      // Assert
-      expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalled();
+        // Create mock container
+        mockContainer = document.createElement('div');
+        document.body.appendChild(mockContainer);
     });
 
-    test('should render entity card with correct data', () => {
-      // Arrange
-      const entity = {
-        id: 'zeus-123',
-        name: 'Zeus',
-        collection: 'deities',
-        mythology: 'greek',
-        type: 'deity',
-        description: 'King of the gods',
-        status: 'active',
-        icon: '⚡',
-        createdAt: { toDate: () => new Date() }
-      };
-
-      // Act
-      const html = dashboard.renderEntityCard(entity);
-
-      // Assert
-      expect(html).toContain('Zeus');
-      expect(html).toContain('⚡');
-      expect(html).toContain('greek');
-      expect(html).toContain('deity');
+    afterEach(() => {
+        document.body.innerHTML = '';
     });
 
-    test('should show deleted badge for deleted entities', () => {
-      // Arrange
-      const entity = {
-        id: 'deleted-123',
-        name: 'Deleted Entity',
-        status: 'deleted',
-        collection: 'deities',
-        createdAt: { toDate: () => new Date() }
-      };
+    // ========================================
+    // 1. Dashboard Initialization (6 tests)
+    // ========================================
 
-      // Act
-      const html = dashboard.renderEntityCard(entity);
+    describe('Dashboard Initialization', () => {
+        test('should initialize with correct properties', () => {
+            // Assert
+            expect(dashboard.auth).toBe(mockAuth);
+            expect(dashboard.crudManager).toBe(mockCRUDManager);
+            expect(dashboard.submissions).toEqual([]);
+            expect(dashboard.favorites).toEqual([]);
+            expect(dashboard.notes).toEqual([]);
+        });
 
-      // Assert
-      expect(html).toContain('deleted-badge');
-      expect(html).toContain('Restore');
+        test('should initialize pagination state', () => {
+            expect(dashboard.pagination.submissions).toEqual({ page: 1, perPage: 8, total: 0 });
+            expect(dashboard.pagination.favorites).toEqual({ page: 1, perPage: 12, total: 0 });
+            expect(dashboard.pagination.notes).toEqual({ page: 1, perPage: 10, total: 0 });
+        });
+
+        test('should default to submissions tab', () => {
+            expect(dashboard.activeTab).toBe('submissions');
+        });
+
+        test('should initialize stats to zero', () => {
+            expect(dashboard.stats).toEqual({
+                submissions: 0,
+                favorites: 0,
+                notes: 0,
+                badges: 0
+            });
+        });
+
+        test('should render not-authenticated view when no user', async () => {
+            mockAuth.currentUser = null;
+            const html = await dashboard.render();
+            expect(html).toContain('Sign In');
+        });
+
+        test('should require authentication to show dashboard', async () => {
+            mockAuth.currentUser = null;
+            const html = await dashboard.render();
+            expect(html).not.toContain('user-dashboard');
+        });
     });
 
-    test('should load entities from all collections', async () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123' };
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: [{ id: '1', name: 'Test' }]
-      });
+    // ========================================
+    // 2. Data Loading (7 tests)
+    // ========================================
 
-      // Act
-      await dashboard.loadUserEntities();
+    describe('Data Loading', () => {
+        test('should load submissions from submissionWorkflow', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            const mockSubmissions = [{ id: '1', entityName: 'Zeus' }];
+            window.submissionWorkflow = {
+                getUserSubmissions: jest.fn().mockResolvedValue(mockSubmissions)
+            };
 
-      // Assert
-      expect(mockCRUDManager.getUserEntities).toHaveBeenCalledTimes(11); // 11 collections
+            const result = await dashboard.loadSubmissions();
+            expect(result).toEqual(mockSubmissions);
+
+            delete window.submissionWorkflow;
+        });
+
+        test('should return empty array when no user for submissions', async () => {
+            mockAuth.currentUser = null;
+            const result = await dashboard.loadSubmissions();
+            expect(result).toEqual([]);
+        });
+
+        test('should load favorites from EyesOfAzrael.favorites', async () => {
+            const mockFavorites = [{ entityId: '1', entityType: 'deities' }];
+            window.EyesOfAzrael.favorites = {
+                getFavorites: jest.fn().mockResolvedValue({ success: true, data: mockFavorites })
+            };
+
+            const result = await dashboard.loadFavorites();
+            expect(result).toEqual(mockFavorites);
+        });
+
+        test('should return empty array when favorites service unavailable', async () => {
+            delete window.EyesOfAzrael.favorites;
+            const result = await dashboard.loadFavorites();
+            expect(result).toEqual([]);
+        });
+
+        test('should load notes from notesService', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            const mockNotes = [{ id: 'n1', text: 'Test note' }];
+            window.notesService = {
+                getUserNotes: jest.fn().mockResolvedValue(mockNotes)
+            };
+
+            const result = await dashboard.loadNotes();
+            expect(result).toEqual(mockNotes);
+
+            delete window.notesService;
+        });
+
+        test('should return empty array when no user for notes', async () => {
+            mockAuth.currentUser = null;
+            const result = await dashboard.loadNotes();
+            expect(result).toEqual([]);
+        });
+
+        test('should handle errors in loadSubmissions gracefully', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            window.submissionWorkflow = {
+                getUserSubmissions: jest.fn().mockRejectedValue(new Error('Network error'))
+            };
+
+            const result = await dashboard.loadSubmissions();
+            expect(result).toEqual([]);
+
+            delete window.submissionWorkflow;
+        });
     });
 
-    test('should handle empty description when rendering entity card', () => {
-      // Arrange
-      const entity = {
-        id: 'zeus-123',
-        name: 'Zeus',
-        collection: 'deities',
-        mythology: 'greek',
-        type: 'deity',
-        description: '',
-        status: 'active',
-        icon: '⚡',
-        createdAt: { toDate: () => new Date() }
-      };
+    // ========================================
+    // 3. Action Handling (8 tests)
+    // ========================================
 
-      // Act
-      const html = dashboard.renderEntityCard(entity);
+    describe('Action Handling', () => {
+        test('should handle view submission', () => {
+            dashboard.submissions = [{ id: 's1', entityName: 'Zeus' }];
+            dashboard.handleViewSubmission('s1');
 
-      // Assert
-      expect(html).toContain('Zeus');
-      expect(html).not.toContain('entity-description');
+            expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/submission/s1');
+        });
+
+        test('should handle view submission when not found', () => {
+            dashboard.submissions = [];
+            dashboard.handleViewSubmission('nonexistent');
+
+            expect(window.EyesOfAzrael.navigation.navigate).not.toHaveBeenCalled();
+        });
+
+        test('should handle edit submission', () => {
+            dashboard.handleEditSubmission('s1');
+            expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/submission/s1/edit');
+        });
+
+        test('should handle delete submission with confirmation', async () => {
+            dashboard.submissions = [{ id: 's1', entityName: 'Zeus' }];
+            dashboard.container = mockContainer;
+            global.confirm.mockReturnValue(true);
+
+            window.submissionWorkflow = {
+                deleteSubmission: jest.fn().mockResolvedValue()
+            };
+
+            await dashboard.handleDeleteSubmission('s1');
+            expect(dashboard.submissions).toEqual([]);
+            expect(window.toast.success).toHaveBeenCalledWith('Submission deleted successfully');
+
+            delete window.submissionWorkflow;
+        });
+
+        test('should cancel delete when not confirmed', async () => {
+            dashboard.submissions = [{ id: 's1', entityName: 'Zeus' }];
+            global.confirm.mockReturnValue(false);
+
+            await dashboard.handleDeleteSubmission('s1');
+            expect(dashboard.submissions.length).toBe(1);
+        });
+
+        test('should handle view favorite', () => {
+            dashboard.handleViewFavorite('e1', 'deities');
+            expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith(
+                '#/mythology/user/deities/e1'
+            );
+        });
+
+        test('should handle create submission', () => {
+            dashboard.handleCreateSubmission();
+            expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/contribute');
+        });
+
+        test('should handle action dispatch', async () => {
+            const viewSpy = jest.spyOn(dashboard, 'handleViewSubmission');
+            await dashboard.handleAction('view', { id: 's1' });
+            expect(viewSpy).toHaveBeenCalledWith('s1');
+        });
     });
 
-    test('should handle sign in via handleSignIn', async () => {
-      // Arrange
-      const mockProvider = {};
-      global.firebase.auth.GoogleAuthProvider = jest.fn(() => mockProvider);
-      mockAuth.signInWithPopup.mockResolvedValue({ user: { uid: 'user-123' } });
-      global.window.location.reload = jest.fn();
+    // ========================================
+    // 4. Tab Management (5 tests)
+    // ========================================
 
-      // Act
-      await dashboard.handleSignIn();
+    describe('Tab Management', () => {
+        test('should switch active tab', () => {
+            // Setup tabs in container
+            mockContainer.innerHTML = `
+                <button class="dashboard-tab" data-tab="submissions" aria-selected="true"></button>
+                <button class="dashboard-tab" data-tab="favorites" aria-selected="false"></button>
+                <div class="dashboard-panel" id="panel-submissions"></div>
+                <div class="dashboard-panel" id="panel-favorites"></div>
+            `;
+            dashboard.container = mockContainer;
 
-      // Assert
-      expect(mockAuth.signInWithPopup).toHaveBeenCalledWith(mockProvider);
+            dashboard.switchTab('favorites');
+            expect(dashboard.activeTab).toBe('favorites');
+        });
+
+        test('should handle pagination', () => {
+            dashboard.container = mockContainer;
+            mockContainer.innerHTML = '<div id="panel-submissions"></div>';
+
+            dashboard.handlePagination('submissions', 3);
+            expect(dashboard.pagination.submissions.page).toBe(3);
+        });
+
+        test('should handle edit profile', () => {
+            dashboard.handleEditProfile();
+            expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/profile/edit');
+        });
+
+        test('should handle navigate with fallback', () => {
+            delete window.EyesOfAzrael.navigation;
+            dashboard.handleNavigate('#/mythologies');
+            expect(window.location.hash).toBe('#/mythologies');
+        });
+
+        test('should handle navigate with EyesOfAzrael', () => {
+            window.EyesOfAzrael.navigation = { navigate: jest.fn() };
+            dashboard.handleNavigate('#/mythologies');
+            expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/mythologies');
+        });
     });
 
-    test('should handle sign in error', async () => {
-      // Arrange
-      const mockProvider = {};
-      global.firebase.auth.GoogleAuthProvider = jest.fn(() => mockProvider);
-      mockAuth.signInWithPopup.mockRejectedValue(new Error('Sign in failed'));
-      console.error = jest.fn();
-      global.alert = jest.fn();
+    // ========================================
+    // 5. Utility Methods (8 tests)
+    // ========================================
 
-      // Act
-      await dashboard.handleSignIn();
+    describe('Utility Methods', () => {
+        test('should format dates correctly', () => {
+            const now = new Date();
+            expect(dashboard.formatDate(now)).toBe('Today');
+        });
 
-      // Assert
-      expect(console.error).toHaveBeenCalled();
-      expect(global.alert).toHaveBeenCalled();
+        test('should format yesterday', () => {
+            const yesterday = new Date(Date.now() - 86400000);
+            expect(dashboard.formatDate(yesterday)).toBe('Yesterday');
+        });
+
+        test('should handle null date', () => {
+            expect(dashboard.formatDate(null)).toBe('Unknown');
+        });
+
+        test('should handle Firestore timestamp format', () => {
+            const timestamp = { seconds: Math.floor(Date.now() / 1000) };
+            expect(dashboard.formatDate(timestamp)).toBe('Today');
+        });
+
+        test('should truncate long text', () => {
+            const longText = 'A'.repeat(200);
+            const result = dashboard.truncate(longText, 50);
+            expect(result.length).toBeLessThanOrEqual(53); // 50 + '...'
+            expect(result).toContain('...');
+        });
+
+        test('should not truncate short text', () => {
+            expect(dashboard.truncate('Hello', 50)).toBe('Hello');
+        });
+
+        test('should capitalize first letter', () => {
+            expect(dashboard.capitalizeFirst('deities')).toBe('Deities');
+            expect(dashboard.capitalizeFirst('')).toBe('');
+            expect(dashboard.capitalizeFirst(null)).toBe('');
+        });
+
+        test('should escape HTML', () => {
+            const result = dashboard.escapeHtml('<script>alert("xss")</script>');
+            expect(result).not.toContain('<script>');
+        });
     });
 
-    test('should handle filter change events', async () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123', displayName: 'Test' };
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: [{ id: '1', collection: 'deities', status: 'active' }]
-      });
-      const html = await dashboard.render();
-      mockContainer.innerHTML = html;
-      dashboard.initialize(mockContainer);
+    // ========================================
+    // 6. Toast Notifications (3 tests)
+    // ========================================
 
-      const collectionFilter = mockContainer.querySelector('#collectionFilter');
-      const statusFilter = mockContainer.querySelector('#statusFilter');
-      const searchInput = mockContainer.querySelector('#searchInput');
+    describe('Toast Notifications', () => {
+        test('should show success toast', () => {
+            dashboard.showToast('Done!', 'success');
+            expect(window.toast.success).toHaveBeenCalledWith('Done!');
+        });
 
-      // Act & Assert - Collection filter
-      collectionFilter.value = 'deities';
-      collectionFilter.dispatchEvent(new Event('change'));
-      expect(dashboard.filter.collection).toBe('deities');
+        test('should show error toast', () => {
+            dashboard.showToast('Failed!', 'error');
+            expect(window.toast.error).toHaveBeenCalledWith('Failed!');
+        });
 
-      // Act & Assert - Status filter
-      statusFilter.value = 'deleted';
-      statusFilter.dispatchEvent(new Event('change'));
-      expect(dashboard.filter.status).toBe('deleted');
-
-      // Act & Assert - Search input
-      searchInput.value = 'zeus';
-      searchInput.dispatchEvent(new Event('input'));
-      expect(dashboard.filter.search).toBe('zeus');
+        test('should fallback to console when toast not available', () => {
+            window.toast = null;
+            dashboard.showToast('Test message', 'info');
+            expect(console.log).toHaveBeenCalledWith('[INFO]', 'Test message');
+        });
     });
 
-    test('should handle showForm with entity creation', () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123', displayName: 'Test' };
-      mockContainer.innerHTML = '<div id="formContainer"></div>';
-      dashboard.container = mockContainer;
+    // ========================================
+    // 7. Error Handling (5 tests)
+    // ========================================
 
-      // Mock EntityForm
-      global.EntityForm = jest.fn(() => ({
-        render: jest.fn().mockResolvedValue('<div class="entity-form-container">Form</div>'),
-        initialize: jest.fn()
-      }));
+    describe('Error Handling', () => {
+        test('should handle loadFavorites errors gracefully', async () => {
+            window.EyesOfAzrael.favorites = {
+                getFavorites: jest.fn().mockRejectedValue(new Error('Network error'))
+            };
 
-      // Act
-      dashboard.showForm('deities');
+            const result = await dashboard.loadFavorites();
+            expect(result).toEqual([]);
+        });
 
-      // Assert
-      expect(global.EntityForm).toHaveBeenCalledWith(
-        expect.objectContaining({
-          collection: 'deities',
-          entityId: null
-        })
-      );
+        test('should handle loadNotes errors gracefully', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            window.notesService = {
+                getUserNotes: jest.fn().mockRejectedValue(new Error('DB error'))
+            };
+
+            const result = await dashboard.loadNotes();
+            expect(result).toEqual([]);
+
+            delete window.notesService;
+        });
+
+        test('should handle delete submission errors', async () => {
+            dashboard.submissions = [{ id: 's1', entityName: 'Zeus' }];
+            dashboard.container = mockContainer;
+            global.confirm.mockReturnValue(true);
+
+            window.submissionWorkflow = {
+                deleteSubmission: jest.fn().mockRejectedValue(new Error('Delete failed'))
+            };
+
+            await dashboard.handleDeleteSubmission('s1');
+            expect(window.toast.error).toHaveBeenCalledWith('Failed to delete submission: Delete failed');
+
+            delete window.submissionWorkflow;
+        });
+
+        test('should handle sign in errors', async () => {
+            mockAuth.signInWithPopup.mockRejectedValue(new Error('Auth failed'));
+
+            await dashboard.handleSignIn();
+            expect(window.toast.error).toHaveBeenCalledWith('Failed to sign in: Auth failed');
+        });
+
+        test('should handle delete submission not found', async () => {
+            dashboard.submissions = [];
+            await dashboard.handleDeleteSubmission('nonexistent');
+            expect(global.confirm).not.toHaveBeenCalled();
+        });
     });
 
-    test('should handle showForm with entity editing', () => {
-      // Arrange
-      mockAuth.currentUser = { uid: 'user-123', displayName: 'Test' };
-      mockContainer.innerHTML = '<div id="formContainer"></div>';
-      dashboard.container = mockContainer;
+    // ========================================
+    // 8. Default Avatar & Icons (4 tests)
+    // ========================================
 
-      // Mock EntityForm
-      global.EntityForm = jest.fn(() => ({
-        render: jest.fn().mockResolvedValue('<div class="entity-form-container">Form</div>'),
-        initialize: jest.fn()
-      }));
+    describe('Avatar and Icons', () => {
+        test('should generate default avatar SVG', () => {
+            const avatar = dashboard.getDefaultAvatar();
+            expect(avatar).toContain('data:image/svg+xml');
+        });
 
-      // Act
-      dashboard.showForm('deities', 'zeus-123');
+        test('should return type icon for known types', () => {
+            const icon = dashboard.getTypeIcon('deities');
+            expect(icon).toContain('svg');
+        });
 
-      // Assert
-      expect(global.EntityForm).toHaveBeenCalledWith(
-        expect.objectContaining({
-          collection: 'deities',
-          entityId: 'zeus-123'
-        })
-      );
+        test('should return fallback icon for unknown types', () => {
+            const icon = dashboard.getTypeIcon('unknown');
+            expect(icon).toContain('svg');
+        });
+
+        test('should return status icon', () => {
+            const icon = dashboard.getStatusIcon('approved');
+            expect(icon).toContain('svg');
+        });
     });
 
-    test('should handle create new entity prompt', async () => {
-      // Arrange
-      global.prompt = jest.fn(() => '1'); // Select deities
-      dashboard.showForm = jest.fn();
+    // ========================================
+    // 9. Format Member Since (2 tests)
+    // ========================================
 
-      // Act
-      await dashboard.handleCreateNew();
+    describe('Format Member Since', () => {
+        test('should format valid date', () => {
+            const result = dashboard.formatMemberSince('2024-01-15T00:00:00.000Z');
+            expect(result).toContain('2024');
+        });
 
-      // Assert
-      expect(dashboard.showForm).toHaveBeenCalledWith('deities');
+        test('should handle missing date', () => {
+            expect(dashboard.formatMemberSince(null)).toBe('Unknown');
+        });
     });
 
-    test('should handle create new entity prompt cancellation', async () => {
-      // Arrange
-      global.prompt = jest.fn(() => null); // Cancel
-      dashboard.showForm = jest.fn();
+    // ========================================
+    // 10. Render with Authenticated User
+    // ========================================
 
-      // Act
-      await dashboard.handleCreateNew();
+    describe('Render with authenticated user', () => {
+        beforeEach(() => {
+            mockAuth.currentUser = {
+                uid: 'user-123',
+                email: 'test@example.com',
+                displayName: 'Test User',
+                photoURL: 'https://photo.url/avatar.jpg',
+                metadata: { creationTime: '2024-01-01T00:00:00.000Z' }
+            };
+        });
 
-      // Assert
-      expect(dashboard.showForm).not.toHaveBeenCalled();
+        test('should render dashboard with user info', async () => {
+            // Mock loadAllUserData
+            jest.spyOn(dashboard, 'loadAllUserData').mockResolvedValue();
+            const html = await dashboard.render();
+            expect(html).toContain('user-dashboard');
+            expect(html).toContain('Test User');
+            expect(html).toContain('test@example.com');
+        });
+
+        test('should use email prefix when no displayName', async () => {
+            mockAuth.currentUser.displayName = null;
+            jest.spyOn(dashboard, 'loadAllUserData').mockResolvedValue();
+            const html = await dashboard.render();
+            expect(html).toContain('test');
+        });
+
+        test('should use default avatar when no photoURL', async () => {
+            mockAuth.currentUser.photoURL = null;
+            jest.spyOn(dashboard, 'loadAllUserData').mockResolvedValue();
+            const html = await dashboard.render();
+            expect(html).toContain('data:image/svg+xml');
+        });
+
+        test('should render tabs', async () => {
+            jest.spyOn(dashboard, 'loadAllUserData').mockResolvedValue();
+            const html = await dashboard.render();
+            expect(html).toContain('tab-submissions');
+            expect(html).toContain('tab-favorites');
+            expect(html).toContain('tab-notes');
+        });
+
+        test('should render stats section', async () => {
+            jest.spyOn(dashboard, 'loadAllUserData').mockResolvedValue();
+            const html = await dashboard.render();
+            expect(html).toContain('dashboard-stats');
+        });
     });
 
-    test('should show toast with window.toast', () => {
-      // Arrange
-      global.window.toast = {
-        success: jest.fn(),
-        error: jest.fn(),
-        info: jest.fn()
-      };
+    // ========================================
+    // 11. renderStatsCards
+    // ========================================
 
-      // Act
-      dashboard.showToast('Test message', 'success');
+    describe('renderStatsCards', () => {
+        test('should render 4 stat cards', () => {
+            const html = dashboard.renderStatsCards();
+            expect(html).toContain('stat-card--gold');
+            expect(html).toContain('stat-card--rose');
+            expect(html).toContain('stat-card--cyan');
+            expect(html).toContain('stat-card--purple');
+        });
 
-      // Assert
-      expect(window.toast.success).toHaveBeenCalledWith('Test message');
+        test('should include stat values', () => {
+            dashboard.stats = { submissions: 5, favorites: 10, notes: 3, badges: 2 };
+            dashboard.submissions = [
+                { status: 'draft' },
+                { status: 'pending' },
+                { status: 'approved' },
+                { status: 'approved' },
+                { status: 'rejected' }
+            ];
+            const html = dashboard.renderStatsCards();
+            expect(html).toContain('data-target="5"');
+            expect(html).toContain('data-target="10"');
+        });
     });
 
-    test('should show alert when window.toast is not available', () => {
-      // Arrange
-      const originalToast = global.window.toast;
-      global.window.toast = undefined;
-      global.alert = jest.fn();
+    // ========================================
+    // 12. getSubmissionBreakdown
+    // ========================================
 
-      // Act
-      dashboard.showToast('Test message', 'error');
-
-      // Assert
-      expect(global.alert).toHaveBeenCalledWith('Test message');
-
-      // Cleanup
-      global.window.toast = originalToast;
+    describe('getSubmissionBreakdown', () => {
+        test('should count each status correctly', () => {
+            dashboard.submissions = [
+                { status: 'draft' },
+                { status: 'draft' },
+                { status: 'pending' },
+                { status: 'approved' },
+                { status: 'rejected' }
+            ];
+            const html = dashboard.getSubmissionBreakdown();
+            expect(html).toContain('Draft: 2');
+            expect(html).toContain('Pending: 1');
+            expect(html).toContain('Approved: 1');
+            expect(html).toContain('Rejected: 1');
+        });
     });
 
-    test('should handle delete confirmation cancellation', async () => {
-      // Arrange
-      global.confirm = jest.fn(() => false);
-      mockCRUDManager.delete.mockClear();
+    // ========================================
+    // 13. renderSubmissionsTab
+    // ========================================
 
-      // Act
-      await dashboard.handleDelete('deities', 'zeus-123');
+    describe('renderSubmissionsTab', () => {
+        test('should render empty state when no submissions', () => {
+            dashboard.submissions = [];
+            const html = dashboard.renderSubmissionsTab();
+            expect(html).toContain('empty-state');
+            expect(html).toContain('No Submissions Yet');
+        });
 
-      // Assert
-      expect(mockCRUDManager.delete).not.toHaveBeenCalled();
+        test('should render submission cards with pagination', () => {
+            dashboard.submissions = Array.from({ length: 10 }, (_, i) => ({
+                id: `s${i}`,
+                entityName: `Entity ${i}`,
+                status: 'draft',
+                type: 'deity'
+            }));
+            dashboard.pagination.submissions = { page: 1, perPage: 8, total: 10 };
+            const html = dashboard.renderSubmissionsTab();
+            expect(html).toContain('submission-card');
+            expect(html).toContain('pagination');
+        });
     });
 
-    test('should handle delete error', async () => {
-      // Arrange
-      global.confirm = jest.fn(() => true);
-      mockCRUDManager.delete.mockResolvedValue({
-        success: false,
-        error: 'Delete failed'
-      });
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: []
-      });
-      mockAuth.currentUser = { uid: 'user-123', displayName: 'Test' };
-      const html = await dashboard.render();
-      mockContainer.innerHTML = html;
-      dashboard.initialize(mockContainer);
-      dashboard.showToast = jest.fn();
+    // ========================================
+    // 14. renderSubmissionCard
+    // ========================================
 
-      // Act
-      await dashboard.handleDelete('deities', 'zeus-123');
+    describe('renderSubmissionCard', () => {
+        test('should render card with name and status', () => {
+            const html = dashboard.renderSubmissionCard({
+                id: 's1',
+                entityName: 'Zeus',
+                status: 'approved',
+                type: 'deity',
+                submittedAt: new Date()
+            });
+            expect(html).toContain('Zeus');
+            expect(html).toContain('status--approved');
+            expect(html).toContain('Approved');
+        });
 
-      // Assert
-      expect(dashboard.showToast).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to delete'),
-        'error'
-      );
+        test('should show edit button for draft submissions', () => {
+            const html = dashboard.renderSubmissionCard({
+                id: 's1',
+                entityName: 'Draft Entity',
+                status: 'draft',
+                type: 'deity'
+            });
+            expect(html).toContain('action-btn--edit');
+            expect(html).toContain('action-btn--delete');
+        });
+
+        test('should show edit button for rejected submissions', () => {
+            const html = dashboard.renderSubmissionCard({
+                id: 's1',
+                entityName: 'Rejected Entity',
+                status: 'rejected',
+                type: 'deity'
+            });
+            expect(html).toContain('action-btn--edit');
+        });
+
+        test('should not show edit/delete for approved submissions', () => {
+            const html = dashboard.renderSubmissionCard({
+                id: 's1',
+                entityName: 'Approved Entity',
+                status: 'approved',
+                type: 'deity'
+            });
+            expect(html).not.toContain('action-btn--edit');
+            expect(html).not.toContain('action-btn--delete');
+        });
+
+        test('should use data.name when entityName missing', () => {
+            const html = dashboard.renderSubmissionCard({
+                id: 's1',
+                status: 'draft',
+                data: { name: 'Fallback Name' }
+            });
+            expect(html).toContain('Fallback Name');
+        });
     });
 
-    test('should handle restore error', async () => {
-      // Arrange
-      mockCRUDManager.restore.mockResolvedValue({
-        success: false,
-        error: 'Restore failed'
-      });
-      mockCRUDManager.getUserEntities.mockResolvedValue({
-        success: true,
-        data: []
-      });
-      mockAuth.currentUser = { uid: 'user-123', displayName: 'Test' };
-      const html = await dashboard.render();
-      mockContainer.innerHTML = html;
-      dashboard.initialize(mockContainer);
-      dashboard.showToast = jest.fn();
+    // ========================================
+    // 15. renderFavoritesTab
+    // ========================================
 
-      // Act
-      await dashboard.handleRestore('deities', 'zeus-123');
+    describe('renderFavoritesTab', () => {
+        test('should render empty state when no favorites', () => {
+            dashboard.favorites = [];
+            const html = dashboard.renderFavoritesTab();
+            expect(html).toContain('No Favorites Yet');
+        });
 
-      // Assert
-      expect(dashboard.showToast).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to restore'),
-        'error'
-      );
+        test('should render favorite cards', () => {
+            dashboard.favorites = [
+                { entityId: 'e1', entityType: 'deities', name: 'Zeus', mythology: 'Greek' },
+                { entityId: 'e2', entityType: 'heroes', name: 'Heracles', mythology: 'Greek' }
+            ];
+            dashboard.pagination.favorites = { page: 1, perPage: 12, total: 2 };
+            const html = dashboard.renderFavoritesTab();
+            expect(html).toContain('favorite-card');
+            expect(html).toContain('Showing all 2 items');
+        });
     });
-  });
+
+    // ========================================
+    // 16. renderFavoriteCard
+    // ========================================
+
+    describe('renderFavoriteCard', () => {
+        test('should render with name and mythology', () => {
+            const html = dashboard.renderFavoriteCard({
+                entityId: 'e1',
+                entityType: 'deities',
+                name: 'Zeus',
+                mythology: 'Greek'
+            });
+            expect(html).toContain('Zeus');
+            expect(html).toContain('Greek');
+            expect(html).toContain('remove-favorite');
+        });
+    });
+
+    // ========================================
+    // 17. renderNotesTab
+    // ========================================
+
+    describe('renderNotesTab', () => {
+        test('should render empty state when no notes', () => {
+            dashboard.notes = [];
+            const html = dashboard.renderNotesTab();
+            expect(html).toContain('No Notes Yet');
+        });
+
+        test('should render note cards', () => {
+            dashboard.notes = [
+                { id: 'n1', entityName: 'Zeus', content: 'King of gods', assetType: 'deities', assetId: 'zeus', createdAt: new Date() }
+            ];
+            dashboard.pagination.notes = { page: 1, perPage: 10, total: 1 };
+            const html = dashboard.renderNotesTab();
+            expect(html).toContain('note-card');
+        });
+    });
+
+    // ========================================
+    // 18. renderNoteCard
+    // ========================================
+
+    describe('renderNoteCard', () => {
+        test('should render with entity name and preview', () => {
+            const html = dashboard.renderNoteCard({
+                id: 'n1',
+                entityName: 'Zeus',
+                content: 'A very important note about Zeus the king of the Olympian gods.',
+                assetType: 'deities',
+                assetId: 'zeus',
+                createdAt: new Date(),
+                isEdited: true
+            });
+            expect(html).toContain('Zeus');
+            expect(html).toContain('(edited)');
+            expect(html).toContain('edit-note');
+            expect(html).toContain('delete-note');
+        });
+
+        test('should use assetId when entityName missing', () => {
+            const html = dashboard.renderNoteCard({
+                id: 'n1',
+                assetId: 'zeus-id',
+                content: 'Test',
+                assetType: 'deities'
+            });
+            expect(html).toContain('zeus-id');
+        });
+    });
+
+    // ========================================
+    // 19. renderEmptyState
+    // ========================================
+
+    describe('renderEmptyState', () => {
+        test('should render submissions empty state', () => {
+            const html = dashboard.renderEmptyState('submissions');
+            expect(html).toContain('No Submissions Yet');
+            expect(html).toContain('create-submission');
+        });
+
+        test('should render favorites empty state', () => {
+            const html = dashboard.renderEmptyState('favorites');
+            expect(html).toContain('No Favorites Yet');
+            expect(html).toContain('explore');
+        });
+
+        test('should render notes empty state', () => {
+            const html = dashboard.renderEmptyState('notes');
+            expect(html).toContain('No Notes Yet');
+            expect(html).toContain('browse');
+        });
+    });
+
+    // ========================================
+    // 20. renderPagination
+    // ========================================
+
+    describe('renderPagination', () => {
+        test('should show all items message for single page', () => {
+            const html = dashboard.renderPagination('submissions', 1, 1, 5);
+            expect(html).toContain('Showing all 5 items');
+        });
+
+        test('should render pagination controls for multiple pages', () => {
+            const html = dashboard.renderPagination('submissions', 2, 5, 40);
+            expect(html).toContain('pagination-btn--prev');
+            expect(html).toContain('pagination-btn--next');
+            expect(html).toContain('2 / 5');
+            expect(html).toContain('Showing 9-16 of 40');
+        });
+
+        test('should disable prev button on first page', () => {
+            const html = dashboard.renderPagination('submissions', 1, 5, 40);
+            expect(html).toContain('data-page="0"');
+        });
+    });
+
+    // ========================================
+    // 21. renderNotAuthenticated
+    // ========================================
+
+    describe('renderNotAuthenticated', () => {
+        test('should render auth required view', () => {
+            const html = dashboard.renderNotAuthenticated();
+            expect(html).toContain('Authentication Required');
+            expect(html).toContain('signInBtn');
+        });
+    });
+
+    // ========================================
+    // 22. loadAllUserData
+    // ========================================
+
+    describe('loadAllUserData', () => {
+        test('should skip when no user', async () => {
+            mockAuth.currentUser = null;
+            await dashboard.loadAllUserData();
+            expect(dashboard.submissions).toEqual([]);
+        });
+
+        test('should load all data in parallel', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            jest.spyOn(dashboard, 'loadSubmissions').mockResolvedValue([{ id: 's1' }]);
+            jest.spyOn(dashboard, 'loadFavorites').mockResolvedValue([{ entityId: 'f1' }, { entityId: 'f2' }]);
+            jest.spyOn(dashboard, 'loadNotes').mockResolvedValue([{ id: 'n1' }]);
+            jest.spyOn(dashboard, 'loadBadgeCount').mockResolvedValue(3);
+
+            await dashboard.loadAllUserData();
+
+            expect(dashboard.submissions).toEqual([{ id: 's1' }]);
+            expect(dashboard.favorites).toHaveLength(2);
+            expect(dashboard.notes).toHaveLength(1);
+            expect(dashboard.stats.badges).toBe(3);
+            expect(dashboard.pagination.submissions.total).toBe(1);
+        });
+
+        test('should handle loadAllUserData errors', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            jest.spyOn(dashboard, 'loadSubmissions').mockRejectedValue(new Error('fail'));
+
+            await dashboard.loadAllUserData(); // should not throw
+        });
+    });
+
+    // ========================================
+    // 23. loadBadgeCount
+    // ========================================
+
+    describe('loadBadgeCount', () => {
+        test('should return 0 when no user', async () => {
+            mockAuth.currentUser = null;
+            const count = await dashboard.loadBadgeCount();
+            expect(count).toBe(0);
+        });
+
+        test('should return badge count from Firestore', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            window.EyesOfAzrael.db = {
+                collection: jest.fn().mockReturnValue({
+                    doc: jest.fn().mockReturnValue({
+                        get: jest.fn().mockResolvedValue({
+                            exists: true,
+                            data: () => ({ badges: ['b1', 'b2', 'b3'] })
+                        })
+                    })
+                })
+            };
+
+            const count = await dashboard.loadBadgeCount();
+            expect(count).toBe(3);
+        });
+
+        test('should return 0 when user doc does not exist', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            window.EyesOfAzrael.db = {
+                collection: jest.fn().mockReturnValue({
+                    doc: jest.fn().mockReturnValue({
+                        get: jest.fn().mockResolvedValue({ exists: false })
+                    })
+                })
+            };
+
+            const count = await dashboard.loadBadgeCount();
+            expect(count).toBe(0);
+        });
+
+        test('should handle errors gracefully', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            window.EyesOfAzrael.db = {
+                collection: jest.fn().mockImplementation(() => { throw new Error('db error'); })
+            };
+
+            const count = await dashboard.loadBadgeCount();
+            expect(count).toBe(0);
+        });
+    });
+
+    // ========================================
+    // 24. initialize and event listeners
+    // ========================================
+
+    describe('initialize', () => {
+        test('should set container and call sub-methods', () => {
+            mockContainer.innerHTML = `
+                <div class="dashboard-tab" data-tab="submissions"></div>
+                <div class="dashboard-tab" data-tab="favorites"></div>
+                <div class="dashboard-panel" id="panel-submissions"></div>
+                <div class="dashboard-panel" id="panel-favorites"></div>
+                <div class="stat-value" data-target="5">0</div>
+            `;
+
+            const tabSpy = jest.spyOn(dashboard, 'initializeTabs');
+            const animSpy = jest.spyOn(dashboard, 'animateStatNumbers');
+            const eventSpy = jest.spyOn(dashboard, 'initializeEventListeners');
+            const kbSpy = jest.spyOn(dashboard, 'initializeKeyboardNavigation');
+
+            dashboard.initialize(mockContainer);
+
+            expect(dashboard.container).toBe(mockContainer);
+            expect(tabSpy).toHaveBeenCalled();
+            expect(animSpy).toHaveBeenCalled();
+            expect(eventSpy).toHaveBeenCalled();
+            expect(kbSpy).toHaveBeenCalled();
+        });
+    });
+
+    // ========================================
+    // 25. switchTab
+    // ========================================
+
+    describe('switchTab', () => {
+        test('should update tab states and panels', () => {
+            mockContainer.innerHTML = `
+                <button class="dashboard-tab active" data-tab="submissions" aria-selected="true"></button>
+                <button class="dashboard-tab" data-tab="favorites" aria-selected="false"></button>
+                <div class="dashboard-panel active" id="panel-submissions"></div>
+                <div class="dashboard-panel" id="panel-favorites"></div>
+            `;
+            dashboard.container = mockContainer;
+            jest.spyOn(dashboard, 'announceToScreenReader').mockImplementation(() => {});
+
+            dashboard.switchTab('favorites');
+
+            expect(dashboard.activeTab).toBe('favorites');
+            const favTab = mockContainer.querySelector('[data-tab="favorites"]');
+            expect(favTab.classList.contains('active')).toBe(true);
+            expect(favTab.getAttribute('aria-selected')).toBe('true');
+
+            const subTab = mockContainer.querySelector('[data-tab="submissions"]');
+            expect(subTab.classList.contains('active')).toBe(false);
+        });
+    });
+
+    // ========================================
+    // 26. animateStatNumbers
+    // ========================================
+
+    describe('animateStatNumbers', () => {
+        test('should mark animated and call animateNumber', () => {
+            mockContainer.innerHTML = `
+                <div class="stat-value" data-target="5">0</div>
+                <div class="stat-value" data-target="0">0</div>
+            `;
+            dashboard.container = mockContainer;
+            const spy = jest.spyOn(dashboard, 'animateNumber').mockImplementation(() => {});
+
+            dashboard.animateStatNumbers();
+
+            expect(dashboard.animatedStats).toBe(true);
+            expect(spy).toHaveBeenCalledTimes(2);
+        });
+
+        test('should not re-animate', () => {
+            dashboard.container = mockContainer;
+            dashboard.animatedStats = true;
+            const spy = jest.spyOn(dashboard, 'animateNumber').mockImplementation(() => {});
+
+            dashboard.animateStatNumbers();
+
+            expect(spy).not.toHaveBeenCalled();
+        });
+    });
+
+    // ========================================
+    // 27. animateNumber
+    // ========================================
+
+    describe('animateNumber', () => {
+        test('should set to 0 immediately when end is 0', () => {
+            const el = document.createElement('div');
+            dashboard.animateNumber(el, 0, 0, 1000);
+            expect(el.textContent).toBe('0');
+        });
+
+        test('should call requestAnimationFrame for non-zero end', () => {
+            const el = document.createElement('div');
+            const spy = jest.spyOn(window, 'requestAnimationFrame').mockImplementation(() => {});
+            dashboard.animateNumber(el, 0, 10, 1000);
+            expect(spy).toHaveBeenCalled();
+            spy.mockRestore();
+        });
+    });
+
+    // ========================================
+    // 28. refreshTab
+    // ========================================
+
+    describe('refreshTab', () => {
+        test('should refresh submissions tab', () => {
+            mockContainer.innerHTML = `
+                <div id="panel-submissions"></div>
+                <button data-tab="submissions"><span class="tab-count">0</span></button>
+                <article data-stat="submissions"><div class="stat-value">0</div></article>
+            `;
+            dashboard.container = mockContainer;
+            dashboard.submissions = [{ id: 's1', entityName: 'Zeus', status: 'draft', type: 'deity' }];
+            dashboard.stats.submissions = 1;
+            dashboard.pagination.submissions = { page: 1, perPage: 8, total: 1 };
+
+            dashboard.refreshTab('submissions');
+
+            expect(mockContainer.querySelector('#panel-submissions').innerHTML).toContain('submission-card');
+            expect(mockContainer.querySelector('.tab-count').textContent).toBe('1');
+        });
+
+        test('should handle missing panel', () => {
+            mockContainer.innerHTML = '';
+            dashboard.container = mockContainer;
+            expect(() => dashboard.refreshTab('submissions')).not.toThrow();
+        });
+
+        test('should refresh favorites tab', () => {
+            mockContainer.innerHTML = '<div id="panel-favorites"></div>';
+            dashboard.container = mockContainer;
+            dashboard.favorites = [];
+
+            dashboard.refreshTab('favorites');
+            expect(mockContainer.querySelector('#panel-favorites').innerHTML).toContain('No Favorites Yet');
+        });
+
+        test('should refresh notes tab', () => {
+            mockContainer.innerHTML = '<div id="panel-notes"></div>';
+            dashboard.container = mockContainer;
+            dashboard.notes = [];
+
+            dashboard.refreshTab('notes');
+            expect(mockContainer.querySelector('#panel-notes').innerHTML).toContain('No Notes Yet');
+        });
+    });
+
+    // ========================================
+    // 29. announceToScreenReader
+    // ========================================
+
+    describe('announceToScreenReader', () => {
+        test('should add and remove announcement element', () => {
+            jest.useFakeTimers();
+            dashboard.announceToScreenReader('Tab changed');
+            const el = document.querySelector('[role="status"]');
+            expect(el).not.toBeNull();
+            expect(el.textContent).toBe('Tab changed');
+
+            jest.advanceTimersByTime(1100);
+            expect(document.querySelector('[role="status"]')).toBeNull();
+            jest.useRealTimers();
+        });
+    });
+
+    // ========================================
+    // 30. handleAction dispatch
+    // ========================================
+
+    describe('handleAction dispatch', () => {
+        test('should dispatch edit action', async () => {
+            const spy = jest.spyOn(dashboard, 'handleEditSubmission');
+            await dashboard.handleAction('edit', { id: 's1' });
+            expect(spy).toHaveBeenCalledWith('s1');
+        });
+
+        test('should dispatch delete action', async () => {
+            const spy = jest.spyOn(dashboard, 'handleDeleteSubmission').mockResolvedValue();
+            await dashboard.handleAction('delete', { id: 's1' });
+            expect(spy).toHaveBeenCalledWith('s1');
+        });
+
+        test('should dispatch remove-favorite action', async () => {
+            const spy = jest.spyOn(dashboard, 'handleRemoveFavorite').mockResolvedValue();
+            await dashboard.handleAction('remove-favorite', { entityId: 'e1', entityType: 'deities' });
+            expect(spy).toHaveBeenCalledWith('e1', 'deities');
+        });
+
+        test('should dispatch view-favorite action', async () => {
+            const spy = jest.spyOn(dashboard, 'handleViewFavorite');
+            await dashboard.handleAction('view-favorite', { entityId: 'e1', entityType: 'deities' });
+            expect(spy).toHaveBeenCalledWith('e1', 'deities');
+        });
+
+        test('should dispatch edit-note action', async () => {
+            const spy = jest.spyOn(dashboard, 'handleEditNote');
+            await dashboard.handleAction('edit-note', { noteId: 'n1', assetType: 'deities', assetId: 'zeus' });
+            expect(spy).toHaveBeenCalledWith('n1', 'deities', 'zeus');
+        });
+
+        test('should dispatch delete-note action', async () => {
+            const spy = jest.spyOn(dashboard, 'handleDeleteNote').mockResolvedValue();
+            await dashboard.handleAction('delete-note', { noteId: 'n1', assetType: 'deities', assetId: 'zeus' });
+            expect(spy).toHaveBeenCalledWith('n1', 'deities', 'zeus');
+        });
+
+        test('should dispatch paginate action', async () => {
+            mockContainer.innerHTML = '<div id="panel-submissions"></div>';
+            dashboard.container = mockContainer;
+            const spy = jest.spyOn(dashboard, 'handlePagination');
+            await dashboard.handleAction('paginate', { type: 'submissions', page: '3' });
+            expect(spy).toHaveBeenCalledWith('submissions', 3);
+        });
+
+        test('should dispatch create-submission action', async () => {
+            const spy = jest.spyOn(dashboard, 'handleCreateSubmission');
+            await dashboard.handleAction('create-submission', {});
+            expect(spy).toHaveBeenCalled();
+        });
+
+        test('should dispatch explore action', async () => {
+            const spy = jest.spyOn(dashboard, 'handleNavigate');
+            await dashboard.handleAction('explore', {});
+            expect(spy).toHaveBeenCalledWith('#/mythologies');
+        });
+
+        test('should dispatch browse action', async () => {
+            const spy = jest.spyOn(dashboard, 'handleNavigate');
+            await dashboard.handleAction('browse', {});
+            expect(spy).toHaveBeenCalledWith('#/mythologies');
+        });
+    });
+
+    // ========================================
+    // 31. handleRemoveFavorite
+    // ========================================
+
+    describe('handleRemoveFavorite', () => {
+        test('should remove favorite and refresh', async () => {
+            dashboard.container = mockContainer;
+            mockContainer.innerHTML = '<div id="panel-favorites"></div>';
+            dashboard.favorites = [
+                { entityId: 'e1', entityType: 'deities' },
+                { entityId: 'e2', entityType: 'heroes' }
+            ];
+            dashboard.pagination.favorites = { page: 1, perPage: 12, total: 2 };
+
+            window.EyesOfAzrael.favorites = {
+                removeFavorite: jest.fn().mockResolvedValue()
+            };
+
+            await dashboard.handleRemoveFavorite('e1', 'deities');
+
+            expect(dashboard.favorites).toHaveLength(1);
+            expect(dashboard.stats.favorites).toBe(1);
+        });
+
+        test('should handle remove favorite errors', async () => {
+            dashboard.container = mockContainer;
+            dashboard.favorites = [{ entityId: 'e1', entityType: 'deities' }];
+
+            window.EyesOfAzrael.favorites = {
+                removeFavorite: jest.fn().mockRejectedValue(new Error('fail'))
+            };
+
+            await dashboard.handleRemoveFavorite('e1', 'deities');
+            expect(window.toast.error).toHaveBeenCalled();
+        });
+    });
+
+    // ========================================
+    // 32. handleEditNote and handleDeleteNote
+    // ========================================
+
+    describe('handleEditNote', () => {
+        test('should navigate to entity page with edit query', () => {
+            dashboard.handleEditNote('n1', 'deities', 'zeus');
+            expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith(
+                '#/mythology/user/deities/zeus?editNote=n1'
+            );
+        });
+    });
+
+    describe('handleDeleteNote', () => {
+        test('should delete note and refresh', async () => {
+            dashboard.container = mockContainer;
+            mockContainer.innerHTML = '<div id="panel-notes"></div>';
+            dashboard.notes = [{ id: 'n1' }, { id: 'n2' }];
+            dashboard.pagination.notes = { page: 1, perPage: 10, total: 2 };
+            global.confirm.mockReturnValue(true);
+
+            window.notesService = {
+                deleteNote: jest.fn().mockResolvedValue()
+            };
+
+            await dashboard.handleDeleteNote('n1', 'deities', 'zeus');
+
+            expect(dashboard.notes).toHaveLength(1);
+            expect(window.toast.success).toHaveBeenCalled();
+            delete window.notesService;
+        });
+
+        test('should cancel when not confirmed', async () => {
+            dashboard.notes = [{ id: 'n1' }];
+            global.confirm.mockReturnValue(false);
+
+            await dashboard.handleDeleteNote('n1', 'deities', 'zeus');
+            expect(dashboard.notes).toHaveLength(1);
+        });
+
+        test('should handle delete note errors', async () => {
+            dashboard.container = mockContainer;
+            dashboard.notes = [{ id: 'n1' }];
+            dashboard.pagination.notes = { page: 1, perPage: 10, total: 1 };
+            global.confirm.mockReturnValue(true);
+
+            window.notesService = {
+                deleteNote: jest.fn().mockRejectedValue(new Error('fail'))
+            };
+
+            await dashboard.handleDeleteNote('n1', 'deities', 'zeus');
+            expect(window.toast.error).toHaveBeenCalled();
+            delete window.notesService;
+        });
+    });
+
+    // ========================================
+    // 33. initializeEventListeners
+    // ========================================
+
+    describe('initializeEventListeners', () => {
+        test('should set up edit profile button listener', () => {
+            mockContainer.innerHTML = '<button id="editProfileBtn"></button>';
+            dashboard.container = mockContainer;
+            const spy = jest.spyOn(dashboard, 'handleEditProfile');
+
+            dashboard.initializeEventListeners();
+            mockContainer.querySelector('#editProfileBtn').click();
+
+            expect(spy).toHaveBeenCalled();
+        });
+
+        test('should set up delegated action handling', () => {
+            mockContainer.innerHTML = '<button data-action="view" data-id="s1">View</button>';
+            dashboard.container = mockContainer;
+            const spy = jest.spyOn(dashboard, 'handleAction').mockImplementation(() => {});
+
+            dashboard.initializeEventListeners();
+            mockContainer.querySelector('[data-action]').click();
+
+            expect(spy).toHaveBeenCalledWith('view', expect.any(DOMStringMap));
+        });
+    });
+
+    // ========================================
+    // 34. initializeKeyboardNavigation
+    // ========================================
+
+    describe('initializeKeyboardNavigation', () => {
+        test('should handle arrow key navigation', () => {
+            mockContainer.innerHTML = `
+                <button class="dashboard-tab" data-tab="submissions"></button>
+                <button class="dashboard-tab" data-tab="favorites"></button>
+                <button class="dashboard-tab" data-tab="notes"></button>
+                <div class="dashboard-panel" id="panel-submissions"></div>
+                <div class="dashboard-panel" id="panel-favorites"></div>
+                <div class="dashboard-panel" id="panel-notes"></div>
+            `;
+            dashboard.container = mockContainer;
+            jest.spyOn(dashboard, 'announceToScreenReader').mockImplementation(() => {});
+
+            dashboard.initializeKeyboardNavigation();
+
+            const tabs = mockContainer.querySelectorAll('.dashboard-tab');
+            const focusSpy = jest.spyOn(tabs[1], 'focus').mockImplementation(() => {});
+
+            tabs[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+            expect(focusSpy).toHaveBeenCalled();
+        });
+    });
+
+    // ========================================
+    // 35. loadSubmissions via Firestore fallback
+    // ========================================
+
+    describe('loadSubmissions Firestore fallback', () => {
+        test('should load from Firestore when submissionWorkflow unavailable', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            delete window.submissionWorkflow;
+            window.EyesOfAzrael.db = {
+                collection: jest.fn().mockReturnValue({
+                    where: jest.fn().mockReturnValue({
+                        orderBy: jest.fn().mockReturnValue({
+                            limit: jest.fn().mockReturnValue({
+                                get: jest.fn().mockResolvedValue({
+                                    docs: [
+                                        { id: 's1', data: () => ({ entityName: 'Zeus' }) },
+                                        { id: 's2', data: () => ({ entityName: 'Hera' }) }
+                                    ]
+                                })
+                            })
+                        })
+                    })
+                })
+            };
+
+            const result = await dashboard.loadSubmissions();
+            expect(result).toHaveLength(2);
+            expect(result[0]).toEqual({ id: 's1', entityName: 'Zeus' });
+        });
+
+        test('should return empty when no Firestore and no workflow', async () => {
+            mockAuth.currentUser = { uid: 'user-123' };
+            delete window.submissionWorkflow;
+            delete window.EyesOfAzrael.db;
+
+            const result = await dashboard.loadSubmissions();
+            expect(result).toEqual([]);
+        });
+    });
+
+    // ========================================
+    // 36. formatDate edge cases
+    // ========================================
+
+    describe('formatDate edge cases', () => {
+        test('should handle toDate() Firestore timestamp', () => {
+            const result = dashboard.formatDate({ toDate: () => new Date() });
+            expect(result).toBe('Today');
+        });
+
+        test('should format days ago', () => {
+            const threeDaysAgo = new Date(Date.now() - 3 * 86400000);
+            expect(dashboard.formatDate(threeDaysAgo)).toBe('3 days ago');
+        });
+
+        test('should format weeks ago', () => {
+            const twoWeeksAgo = new Date(Date.now() - 14 * 86400000);
+            expect(dashboard.formatDate(twoWeeksAgo)).toContain('weeks ago');
+        });
+
+        test('should format months ago', () => {
+            const twoMonthsAgo = new Date(Date.now() - 60 * 86400000);
+            expect(dashboard.formatDate(twoMonthsAgo)).toContain('months ago');
+        });
+
+        test('should format old dates', () => {
+            const oldDate = new Date('2020-01-01');
+            const result = dashboard.formatDate(oldDate);
+            expect(result).toContain('2020');
+        });
+    });
+
+    // ========================================
+    // 37. handleSignIn
+    // ========================================
+
+    describe('handleSignIn', () => {
+        test('should handle successful sign in', async () => {
+            mockAuth.signInWithPopup.mockResolvedValue({ user: { uid: '123' } });
+            // Mock location.reload
+            delete window.location;
+            window.location = { reload: jest.fn(), hash: '' };
+
+            await dashboard.handleSignIn();
+            expect(window.location.reload).toHaveBeenCalled();
+        });
+    });
 });

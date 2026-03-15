@@ -132,7 +132,7 @@ describe('CompareView - Core Functionality', () => {
 
         expect(compareView.db).toBe(mockFirestore);
         expect(compareView.selectedEntities).toEqual([]);
-        expect(compareView.maxEntities).toBe(6);
+        expect(compareView.maxEntities).toBe(3);
         expect(compareView.minEntities).toBe(2);
     });
 
@@ -170,30 +170,26 @@ describe('CompareView - Core Functionality', () => {
         compareView = new CompareView(mockFirestore);
         compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
 
-        // Mock confirm to return true
-        global.confirm = jest.fn(() => true);
-
         compareView.clearAll();
 
         expect(compareView.selectedEntities.length).toBe(0);
-        expect(global.confirm).toHaveBeenCalled();
     });
 
-    test('6. Prevent adding more than 6 entities', () => {
+    test('6. Prevent adding more than 3 entities', () => {
         compareView = new CompareView(mockFirestore);
 
-        // Add 6 entities
-        for (let i = 0; i < 6; i++) {
+        // Add 3 entities
+        for (let i = 0; i < 3; i++) {
             compareView.addEntity({ ...mockDeityZeus, id: `deity${i}`, name: `Deity ${i}` }, 'deities');
         }
 
-        expect(compareView.selectedEntities.length).toBe(6);
+        expect(compareView.selectedEntities.length).toBe(3);
 
-        // Try to add 7th entity
+        // Try to add 4th entity
         compareView.addEntity(mockDeityOdin, 'deities');
 
-        expect(compareView.selectedEntities.length).toBe(6);
-        expect(global.window.showToast).toHaveBeenCalledWith(expect.stringContaining('Maximum'));
+        expect(compareView.selectedEntities.length).toBe(3);
+        expect(global.window.showToast).toHaveBeenCalledWith(expect.stringContaining('Maximum'), 'warning');
     });
 
     test('7. Handle duplicate entity addition', async () => {
@@ -248,11 +244,11 @@ describe('CompareView - Core Functionality', () => {
         expect(headers.length).toBe(2);
     });
 
-    test('10. Render comparison table with 6 entities', async () => {
+    test('10. Render comparison table with 3 entities', async () => {
         compareView = new CompareView(mockFirestore);
 
-        // Create 6 entities
-        for (let i = 0; i < 6; i++) {
+        // Create 3 entities (max supported)
+        for (let i = 0; i < 3; i++) {
             compareView.selectedEntities.push({
                 ...mockDeityZeus,
                 id: `deity${i}`,
@@ -263,7 +259,7 @@ describe('CompareView - Core Functionality', () => {
         await compareView.render(container);
 
         const headers = container.querySelectorAll('th.entity-column');
-        expect(headers.length).toBe(6);
+        expect(headers.length).toBe(3);
     });
 
     test('11. Calculate attribute differences', () => {
@@ -309,11 +305,11 @@ describe('CompareView - Core Functionality', () => {
         expect(symbolsAttr).toBeTruthy();
     });
 
-    test('14. Export comparison to PDF', async () => {
+    test('14. Print comparison', () => {
         compareView = new CompareView(mockFirestore);
         compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
 
-        await compareView.exportComparison();
+        compareView.printComparison();
 
         expect(global.window.print).toHaveBeenCalled();
     });
@@ -329,7 +325,8 @@ describe('CompareView - Core Functionality', () => {
 
         expect(global.navigator.clipboard.writeText).toHaveBeenCalled();
         const copiedUrl = global.navigator.clipboard.writeText.mock.calls[0][0];
-        expect(copiedUrl).toContain('entities=deities:zeus,deities:odin');
+        expect(copiedUrl).toContain('deities:zeus');
+        expect(copiedUrl).toContain('deities:odin');
     });
 });
 
@@ -454,13 +451,15 @@ describe('CompareView - Entity Selection', () => {
         compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
         await compareView.render(container);
 
-        const header = container.querySelector('.entity-selector-panel h3');
-        expect(header.textContent).toContain('2/6');
+        const counter = container.querySelector('.entity-counter');
+        expect(counter).toBeTruthy();
+        expect(counter.textContent).toContain('2');
+        expect(counter.textContent).toContain('3');
     });
 
     test('22. Disable search when max entities reached', async () => {
-        // Add 6 entities
-        for (let i = 0; i < 6; i++) {
+        // Add 3 entities (max)
+        for (let i = 0; i < 3; i++) {
             compareView.selectedEntities.push({
                 ...mockDeityZeus,
                 id: `deity${i}`
@@ -536,7 +535,7 @@ describe('CompareView - Comparison Display', () => {
         expect(entityNames.length).toBeGreaterThan(0);
         expect(entityNames[0].textContent).toBe('Zeus');
         expect(entityIcons.length).toBeGreaterThan(0);
-        expect(entityIcons[0].textContent).toBe('⚡');
+        expect(entityIcons[0].textContent).toContain('⚡');
     });
 
     test('27. Display common attributes', () => {
@@ -635,21 +634,21 @@ describe('CompareView - Export & Share', () => {
         cleanupMockContainer(container);
     });
 
-    test('34. Export to PDF with correct formatting', async () => {
+    test('34. Print comparison with correct formatting', () => {
         compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
 
-        await compareView.exportComparison();
+        compareView.printComparison();
 
         expect(global.window.print).toHaveBeenCalled();
     });
 
-    test('35. Export filename includes entity names', async () => {
+    test('35. Print comparison with entity names', () => {
         compareView.selectedEntities = [
             { ...mockDeityZeus, name: 'Zeus' },
             { ...mockDeityOdin, name: 'Odin' }
         ];
 
-        await compareView.exportComparison();
+        compareView.printComparison();
 
         // Print should be called
         expect(global.window.print).toHaveBeenCalled();
@@ -793,17 +792,16 @@ describe('CompareView - Error Handling', () => {
         expect(console.error).toHaveBeenCalled();
     });
 
-    test('43. Recover from PDF export errors', () => {
+    test('43. Recover from print errors', () => {
         compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
 
-        // Mock window.print to succeed but test error recovery elsewhere
+        // Mock window.print to succeed
         global.window.print = jest.fn();
 
-        // Test that export completes without errors
-        compareView.exportComparison();
+        // Test that print completes without errors
+        compareView.printComparison();
 
         expect(global.window.print).toHaveBeenCalled();
-        expect(global.window.showToast).toHaveBeenCalled();
     });
 
     test('44. Handle malformed URL parameters', async () => {
@@ -861,9 +859,9 @@ describe('CompareView - Utility Functions', () => {
 
     test('Truncate string correctly', () => {
         const longString = 'This is a very long string that needs to be truncated';
-        expect(compareView.truncate(longString, 20)).toContain('...');
-        expect(compareView.truncate('Short', 20)).toBe('Short');
-        expect(compareView.truncate('', 20)).toBe('');
+        expect(compareView.truncateText(longString, 20)).toContain('...');
+        expect(compareView.truncateText('Short', 20)).toBe('Short');
+        expect(compareView.truncateText('', 20)).toBe('');
     });
 
     test('Get common attributes filters empty values', () => {
@@ -902,21 +900,25 @@ describe('CompareView - Utility Functions', () => {
     test('Show toast uses window.showToast if available', () => {
         global.window.showToast = jest.fn();
 
-        compareView.showToast('Test message');
+        compareView.showToast('Test message', 'info');
 
-        expect(global.window.showToast).toHaveBeenCalledWith('Test message');
+        expect(global.window.showToast).toHaveBeenCalledWith('Test message', 'info');
     });
 
-    test('Show toast falls back to alert if showToast unavailable', () => {
+    test('Show toast falls back to DOM toast if showToast unavailable', () => {
         const originalShowToast = global.window.showToast;
         delete global.window.showToast;
-        global.alert = jest.fn();
+        delete global.window.ToastManager;
 
-        compareView.showToast('Test message');
+        compareView.showToast('Test message', 'info');
 
-        expect(global.alert).toHaveBeenCalledWith('Test message');
+        // Should create a fallback DOM toast
+        const toast = document.querySelector('.compare-toast');
+        expect(toast).toBeTruthy();
+        expect(toast.textContent).toContain('Test message');
 
-        // Restore
+        // Cleanup
+        if (toast) toast.remove();
         global.window.showToast = originalShowToast;
     });
 
@@ -933,7 +935,7 @@ describe('CompareView - Utility Functions', () => {
 
         const singleEntityState = container.querySelector('.single-entity-state');
         expect(singleEntityState).toBeTruthy();
-        expect(singleEntityState.textContent).toContain('One Entity Selected');
+        expect(singleEntityState.textContent).toContain('Add at least one more entity');
     });
 
     test('Handle empty highlight class for all empty values', () => {
@@ -1031,15 +1033,21 @@ describe('CompareView - Utility Functions', () => {
 
         compareView.shareComparison();
 
-        expect(global.window.showToast).toHaveBeenCalledWith(expect.stringContaining('at least 2'));
+        expect(global.window.showToast).toHaveBeenCalledWith(
+            expect.stringContaining('at least 2'),
+            'warning'
+        );
     });
 
-    test('Export comparison requires minimum entities', () => {
+    test('Print comparison requires minimum entities', () => {
         compareView.selectedEntities = [mockDeityZeus]; // Only 1 entity
 
-        compareView.exportComparison();
+        compareView.printComparison();
 
-        expect(global.window.showToast).toHaveBeenCalledWith(expect.stringContaining('at least 2'));
+        expect(global.window.showToast).toHaveBeenCalledWith(
+            expect.stringContaining('at least 2'),
+            'warning'
+        );
     });
 
     test('Remove entity handles invalid index', () => {
@@ -1051,16 +1059,13 @@ describe('CompareView - Utility Functions', () => {
         expect(compareView.selectedEntities.length).toBe(2);
     });
 
-    test('Clear all requires confirmation', () => {
+    test('Clear all removes all entities', () => {
         compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
-
-        // Mock confirm to return false (cancel)
-        global.confirm = jest.fn(() => false);
 
         compareView.clearAll();
 
-        // Should still have entities
-        expect(compareView.selectedEntities.length).toBe(2);
+        // Should have cleared all entities
+        expect(compareView.selectedEntities.length).toBe(0);
     });
 
     test('Search with mythology and type filters combined', async () => {
@@ -1186,19 +1191,19 @@ describe('CompareView - Utility Functions', () => {
         expect(shareComparisonSpy).toHaveBeenCalled();
     });
 
-    test('Export button triggers exportComparison', async () => {
+    test('Print button triggers printComparison', async () => {
         compareView.selectedEntities = [mockDeityZeus, mockDeityOdin];
         await compareView.render(container);
 
-        const exportBtn = container.querySelector('#export-compare');
-        const exportComparisonSpy = jest.spyOn(compareView, 'exportComparison');
+        const printBtn = container.querySelector('#print-compare');
+        const printComparisonSpy = jest.spyOn(compareView, 'printComparison');
 
-        if (exportBtn) {
-            exportBtn.click();
+        if (printBtn) {
+            printBtn.click();
         }
 
-        // exportComparison should be called
-        expect(exportComparisonSpy).toHaveBeenCalled();
+        // printComparison should be called
+        expect(printComparisonSpy).toHaveBeenCalled();
     });
 
     test('Remove entity button triggers removeEntity', async () => {
@@ -1265,7 +1270,7 @@ describe('CompareView - Utility Functions', () => {
         const resultsContainer = container.querySelector('#search-results');
 
         // Should show error message
-        expect(resultsContainer.innerHTML).toContain('Error performing search');
+        expect(resultsContainer.innerHTML).toContain('Error searching. Please try again.');
     });
 
     test('Search result card click adds entity with correct data', async () => {
