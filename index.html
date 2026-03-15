@@ -453,6 +453,17 @@
     <!-- Firebase Config -->
     <script src="firebase-config.js"></script>
 
+    <!-- Early error catcher: track script load failures for diagnostics -->
+    <script>
+        window.__scriptErrors = [];
+        window.addEventListener('error', function(e) {
+            if (e.target && e.target.tagName === 'SCRIPT') {
+                window.__scriptErrors.push(e.target.src || 'unknown');
+                console.error('[Script Load Error]', e.target.src);
+            }
+        }, true);
+    </script>
+
     <!-- FOUC Prevention: Apply saved theme immediately before paint -->
     <script>
         (function() {

@@ -753,7 +753,29 @@ console.log('[App Init] Script loaded - starting execution');
         window.EyesOfAzrael.initState = initState; // Expose for debugging
 
         // Check optional dependencies and log warnings
-        checkDependencies(CONFIG.OPTIONAL_DEPENDENCIES, false);
+        let optionalMissing = checkDependencies(CONFIG.OPTIONAL_DEPENDENCIES, false);
+
+        // If optional dependencies are missing, wait briefly for scripts to finish loading
+        if (optionalMissing.length > 0) {
+            console.warn(`[App] ${optionalMissing.length} optional dependencies missing, waiting 1s for scripts to load...`);
+            // Log any script load errors detected by the early error catcher
+            if (window.__scriptErrors && window.__scriptErrors.length > 0) {
+                console.error('[App] Script load errors detected:', window.__scriptErrors);
+            }
+            await new Promise(r => setTimeout(r, 1000));
+            // Re-check after wait
+            const stillMissing = CONFIG.OPTIONAL_DEPENDENCIES.filter(dep => !dependencyExists(dep));
+            if (stillMissing.length < optionalMissing.length) {
+                console.log(`[App] ${optionalMissing.length - stillMissing.length} dependencies became available after wait`);
+                // Clear the stale missing deps from initState
+                initState.missingDependencies = initState.missingDependencies.filter(
+                    d => d.critical || stillMissing.includes(d.name)
+                );
+            }
+            if (stillMissing.length > 0) {
+                console.warn('[App] Still missing after retry:', stillMissing);
+            }
+        }
 
         // Step 7: Initialize AuthManager
         updateLoadingProgress(50, 'auth-manager', 'Initializing authentication...');
@@ -948,26 +970,56 @@ console.log('[App Init] Script loaded - starting execution');
         perfMark('navigation-start');
         console.log('[App] [10/15] Initializing Navigation...');
         if (dependencyExists('SPANavigation')) {
-            if (!window.EyesOfAzrael.renderer) {
-                console.error('[App] SPANavigation requires UniversalDisplayRenderer but it is not available');
-                initState.warnings.push('SPANavigation skipped - missing renderer dependency');
-                // Show fallback content since navigation won't work
-                showNavigationFallback();
-            } else {
+            // If renderer is missing, try creating it one more time
+            if (!window.EyesOfAzrael.renderer && dependencyExists('UniversalDisplayRenderer')) {
+                console.warn('[App] Renderer was null but class exists — retrying initialization');
                 try {
-                    window.EyesOfAzrael.navigation = new SPANavigation(
-                        db,
-                        window.EyesOfAzrael.auth,
-                        window.EyesOfAzrael.renderer
-                    );
-                    initState.navigationReady = true;
-                    console.log('[App] Navigation initialized');
-                } catch (error) {
-                    console.error('[App] SPANavigation initialization failed:', error);
-                    initState.warnings.push(`Navigation failed: ${error.message}`);
-                    // Show fallback content since navigation failed
-                    showNavigationFallback();
+                    window.EyesOfAzrael.renderer = new UniversalDisplayRenderer({
+                        enableHover: true,
+                        enableExpand: true,
+                        enableCorpusLinks: true
+                    });
+                    console.log('[App] Renderer initialized on retry');
+                } catch (retryError) {
+                    console.error('[App] Renderer retry failed:', retryError);
                 }
+            }
+
+            // If renderer is STILL null, create a minimal fallback so navigation can work
+            if (!window.EyesOfAzrael.renderer) {
+                console.warn('[App] Creating minimal fallback renderer for SPANavigation');
+                window.EyesOfAzrael.renderer = {
+                    render: function(entity, container) {
+                        if (container && entity) {
+                            container.innerHTML = '<div class="entity-content"><h2>' +
+                                (entity.name || entity.title || 'Entity') +
+                                '</h2><p>' + (entity.description || '') + '</p></div>';
+                        }
+                    },
+                    renderGrid: function(entities, container) {
+                        if (container) {
+                            container.innerHTML = entities.map(function(e) {
+                                return '<div class="entity-card"><h3>' + (e.name || e.title || '') + '</h3></div>';
+                            }).join('');
+                        }
+                    }
+                };
+                initState.warnings.push('Using fallback renderer - some display features limited');
+            }
+
+            try {
+                window.EyesOfAzrael.navigation = new SPANavigation(
+                    db,
+                    window.EyesOfAzrael.auth,
+                    window.EyesOfAzrael.renderer
+                );
+                initState.navigationReady = true;
+                console.log('[App] Navigation initialized');
+            } catch (error) {
+                console.error('[App] SPANavigation initialization failed:', error);
+                initState.warnings.push(`Navigation failed: ${error.message}`);
+                // Show fallback content since navigation failed
+                showNavigationFallback();
             }
         } else {
             console.warn('[App] SPANavigation not found - routing unavailable');
