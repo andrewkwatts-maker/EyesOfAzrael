@@ -3,7 +3,22 @@
  * Handles user submissions, admin approval queue, and notifications
  */
 
-import { ENTITY_COLLECTIONS } from './constants/entity-types.js';
+// Entity type to collection mappings (inline to avoid ES module import)
+const SUBMISSION_ENTITY_COLLECTIONS = (typeof window !== 'undefined' && window.ENTITY_COLLECTIONS) ? window.ENTITY_COLLECTIONS : {
+    deity: 'deities',
+    hero: 'heroes',
+    creature: 'creatures',
+    item: 'items',
+    place: 'places',
+    concept: 'concepts',
+    magic: 'magic',
+    ritual: 'rituals',
+    text: 'texts',
+    symbol: 'symbols',
+    theory: 'user_theories',
+    mythology: 'mythologies',
+    event: 'events'
+};
 
 class SubmissionWorkflow {
     constructor() {
@@ -19,8 +34,8 @@ class SubmissionWorkflow {
         if (this.initialized) return;
 
         try {
-            if (!firebase || !firebase.firestore || !firebase.auth) {
-                throw new Error('Firebase not initialized');
+            if (typeof firebase === 'undefined' || !firebase.firestore || !firebase.auth) {
+                throw new Error('Firebase not initialized. Please wait for Firebase to load.');
             }
 
             this.db = firebase.firestore();
@@ -397,7 +412,7 @@ class SubmissionWorkflow {
             const data = submission.data();
 
             // Determine target collection based on type
-            const targetCollection = ENTITY_COLLECTIONS[data.type];
+            const targetCollection = SUBMISSION_ENTITY_COLLECTIONS[data.type];
             if (!targetCollection) {
                 throw new Error('Invalid submission type: ' + data.type);
             }
@@ -702,7 +717,7 @@ class SubmissionWorkflow {
 
         try {
             // Check in main collections
-            const targetCollection = ENTITY_COLLECTIONS[type];
+            const targetCollection = SUBMISSION_ENTITY_COLLECTIONS[type];
             if (!targetCollection) {
                 return [];
             }
@@ -747,6 +762,7 @@ class SubmissionWorkflow {
 }
 
 // Create global instance
+window.SubmissionWorkflow = SubmissionWorkflow;
 window.submissionWorkflow = new SubmissionWorkflow();
 
 // Export for modules
