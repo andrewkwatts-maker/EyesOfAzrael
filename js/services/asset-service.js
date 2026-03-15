@@ -88,7 +88,7 @@ class AssetService {
             const userAssets = await this.getUserAssets(type, { mythology, limit });
 
             // Merge assets
-            const allAssets = [
+            const mergedAssets = [
                 ...standardAssets.map(asset => ({
                     ...asset,
                     isStandard: true,
@@ -101,6 +101,17 @@ class AssetService {
                     userId: asset.userId || asset.authorId || asset.contributedBy
                 }))
             ];
+
+            // Deduplicate by entity id, preferring standard assets
+            const seen = new Map();
+            for (const asset of mergedAssets) {
+                if (!asset.id) continue;
+                const existing = seen.get(asset.id);
+                if (!existing || (asset.isStandard && !existing.isStandard)) {
+                    seen.set(asset.id, asset);
+                }
+            }
+            const allAssets = Array.from(seen.values());
 
             // Sort merged assets
             allAssets.sort((a, b) => {
