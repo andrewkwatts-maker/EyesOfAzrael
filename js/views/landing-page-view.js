@@ -2754,7 +2754,7 @@ class LandingPageView {
         document.addEventListener('pull-to-refresh', this._pullToRefreshHandler);
 
         // Register cleanup callback with SPA navigation
-        if (window.SPANavigation) {
+        if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
             window.SPANavigation.registerViewCleanup(() => this.cleanup());
         }
 

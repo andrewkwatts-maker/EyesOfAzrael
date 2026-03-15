@@ -326,9 +326,11 @@ class ActivityFeed {
             const feedItem = e.target.closest('.activity-feed-item[data-asset-link]');
             if (feedItem) {
                 const link = feedItem.dataset.assetLink;
-                if (link && window.SPANavigation) {
+                if (link && window.SPANavigation && typeof window.SPANavigation.navigate === 'function') {
                     e.preventDefault();
                     window.SPANavigation.navigate(link);
+                } else if (link) {
+                    window.location.hash = link;
                 }
             }
         });
