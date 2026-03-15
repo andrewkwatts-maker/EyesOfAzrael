@@ -23,7 +23,7 @@
  * - Add truncateDescription() to prevent text overflow in card grids
  */
 
-const CACHE_VERSION = 'v2.28.0';
+const CACHE_VERSION = 'v3.0.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 
 // Separate caches for different content types
@@ -50,13 +50,21 @@ const PRECACHE_ASSETS = [
   '/themes/theme-base.css',
   '/manifest.json',
   '/firebase-config.js',
-  '/js/firebase-init.js',
   '/js/app-init-simple.js',
   '/js/spa-navigation.js',
   '/js/auth-guard-simple.js',
+  '/js/auth-manager.js',
   '/js/toast-notifications.js',
   '/js/shader-theme-picker.js',
-  '/js/sw-register.js'
+  '/js/shaders/shader-sources.js',
+  '/js/shaders/shader-themes.js',
+  '/js/sw-register.js',
+  '/js/firebase-cache-manager.js',
+  '/js/firebase-crud-manager.js',
+  '/js/components/universal-display-renderer.js',
+  '/js/components/corpus-search.js',
+  '/js/components/corpus-search-enhanced.js',
+  '/js/components/edit-entity-modal.js'
 ];
 
 // Additional assets to precache for enhanced offline experience
