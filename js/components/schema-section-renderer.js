@@ -619,6 +619,28 @@ class SchemaSectionRenderer {
     renderPlaceDetails(entity) {
         const sections = [];
 
+        // Characteristics (enriched field - string array)
+        if (entity.characteristics?.length) {
+            sections.push(this.renderPillsList(entity.characteristics, 'Characteristics', '📋'));
+        }
+
+        // Location (enriched field - object with cosmological)
+        if (entity.location && typeof entity.location === 'object') {
+            const locationText = entity.location.cosmological || entity.location.description || '';
+            if (locationText) {
+                sections.push(`
+                    <div class="location-section cultural-subsection">
+                        <h4 class="subsection-heading">
+                            <span>📍</span> Location
+                        </h4>
+                        <div class="glass-card legacy-card">
+                            ${this.renderFormattedText(locationText)}
+                        </div>
+                    </div>
+                `);
+            }
+        }
+
         // Features
         if (entity.features?.length) {
             sections.push(this.renderPillsList(entity.features, 'Notable Features', '🏔️'));
@@ -626,7 +648,20 @@ class SchemaSectionRenderer {
 
         // Significance
         if (entity.significance) {
-            sections.push(this.renderInfoGrid(entity.significance, 'Significance', '⭐'));
+            if (typeof entity.significance === 'string') {
+                sections.push(`
+                    <div class="significance-section cultural-subsection">
+                        <h4 class="subsection-heading">
+                            <span>⭐</span> Significance
+                        </h4>
+                        <div class="glass-card legacy-card">
+                            ${this.renderFormattedText(entity.significance)}
+                        </div>
+                    </div>
+                `);
+            } else {
+                sections.push(this.renderInfoGrid(entity.significance, 'Significance', '⭐'));
+            }
         }
 
         // Associated Deities
@@ -743,32 +778,38 @@ class SchemaSectionRenderer {
     renderCrossCulturalParallels(parallels) {
         if (!Array.isArray(parallels) || parallels.length === 0) return '';
 
-        const validParallels = parallels.filter(p => p && (p.name || p.id));
+        // Support both formats: {name, tradition, archetype} and {mythology, entity, category, similarity}
+        const validParallels = parallels.filter(p => p && (p.name || p.id || p.entity));
 
         if (validParallels.length === 0) return '';
 
         return `
-            <section class="cross-cultural-section" style="margin-top: 2rem;">
-                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <section class="cross-cultural-section">
+                <h2 class="section-heading">
                     <span>🌐</span>
                     Cross-Cultural Parallels
                 </h2>
-                <div class="glass-card" style="padding: 1.5rem;">
-                    <p style="opacity: 0.8; margin-bottom: 1rem; font-size: 0.9rem;">
-                        Similar deities and figures across world mythologies:
+                <div class="glass-card parallels-container">
+                    <p class="parallels-intro">
+                        Similar figures and concepts across world mythologies:
                     </p>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
-                        ${validParallels.map(p => `
-                            <a href="#/entity/deities/${p.id || this.slugify(p.name)}"
-                               class="glass-card parallel-card"
-                               style="padding: 0.75rem 1rem; text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 0.25rem; border-radius: 8px; transition: all 0.2s;">
-                                <span style="font-weight: 600; color: var(--mythos-primary, var(--color-primary));">
-                                    ${this.escapeHtml(p.name || p.id)}
+                    <div class="parallels-grid">
+                        ${validParallels.map(p => {
+                            const name = p.name || p.entity || p.id;
+                            const mythology = p.mythology || p.tradition || '';
+                            const category = p.category || '';
+                            const similarity = p.similarity || p.archetype || '';
+                            const linkCollection = category || 'deities';
+                            return `
+                            <a href="#/entity/${this.escapeHtml(linkCollection)}/${this.slugify(name)}"
+                               class="glass-card parallel-card">
+                                <span class="parallel-name">
+                                    ${this.escapeHtml(name)}
                                 </span>
-                                ${p.tradition ? `<span style="font-size: 0.8rem; opacity: 0.7;">📍 ${this.escapeHtml(p.tradition)}</span>` : ''}
-                                ${p.archetype ? `<span style="font-size: 0.75rem; opacity: 0.6;">🎭 ${this.escapeHtml(p.archetype)}</span>` : ''}
+                                ${mythology ? `<span class="parallel-mythology">📍 ${this.escapeHtml(mythology)}</span>` : ''}
+                                ${similarity ? `<span class="parallel-similarity">${this.escapeHtml(similarity)}</span>` : ''}
                             </a>
-                        `).join('')}
+                        `;}).join('')}
                     </div>
                 </div>
             </section>
@@ -803,13 +844,16 @@ class SchemaSectionRenderer {
                 ? cultural.worshipPractices
                 : [cultural.worshipPractices];
             sections.push(`
-                <div class="worship-practices" style="margin-bottom: 1.5rem;">
-                    <h4 style="color: var(--mythos-secondary, var(--color-secondary)); margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                <div class="worship-practices cultural-subsection">
+                    <h4 class="subsection-heading">
                         <span>🛕</span> Worship Practices
                     </h4>
                     ${practices.map(p => `
-                        <div class="glass-card" style="padding: 1rem; margin-bottom: 0.5rem; line-height: 1.7;">
-                            ${this.renderFormattedText(typeof p === 'object' ? p.description : p)}
+                        <div class="glass-card practice-card">
+                            ${typeof p === 'object' ? `
+                                ${p.name ? `<h5 class="practice-name">${this.escapeHtml(p.name)}</h5>` : ''}
+                                ${this.renderFormattedText(p.description || '')}
+                            ` : this.renderFormattedText(p)}
                         </div>
                     `).join('')}
                 </div>
@@ -819,20 +863,20 @@ class SchemaSectionRenderer {
         // Festivals
         if (cultural.festivals?.length) {
             sections.push(`
-                <div class="festivals" style="margin-bottom: 1.5rem;">
-                    <h4 style="color: var(--mythos-secondary, var(--color-secondary)); margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                <div class="festivals cultural-subsection">
+                    <h4 class="subsection-heading">
                         <span>🎉</span> Festivals & Ceremonies
                     </h4>
-                    <div style="display: grid; gap: 0.75rem;">
+                    <div class="festivals-grid">
                         ${cultural.festivals.map(f => `
-                            <div class="glass-card festival-card" style="padding: 1rem; border-radius: 8px;">
-                                <h5 style="color: var(--mythos-primary, var(--color-primary)); margin: 0 0 0.5rem 0; font-size: 1rem;">
+                            <div class="glass-card festival-card">
+                                <h5 class="festival-name">
                                     ${this.escapeHtml(f.name || 'Festival')}
                                 </h5>
-                                <p style="margin: 0; opacity: 0.9; line-height: 1.6; font-size: 0.9rem;">
+                                <p class="festival-description">
                                     ${this.escapeHtml(f.description || '')}
                                 </p>
-                                ${f.timing ? `<p style="margin: 0.5rem 0 0; opacity: 0.7; font-size: 0.85rem;">📅 ${this.escapeHtml(f.timing)}</p>` : ''}
+                                ${f.timing ? `<p class="festival-timing">📅 ${this.escapeHtml(f.timing)}</p>` : ''}
                             </div>
                         `).join('')}
                     </div>
@@ -847,11 +891,11 @@ class SchemaSectionRenderer {
                 : cultural.modernLegacy;
             if (legacy) {
                 sections.push(`
-                    <div class="modern-legacy" style="margin-bottom: 1.5rem;">
-                        <h4 style="color: var(--mythos-secondary, var(--color-secondary)); margin: 0 0 0.75rem 0; display: flex; align-items: center; gap: 0.5rem;">
+                    <div class="modern-legacy cultural-subsection">
+                        <h4 class="subsection-heading">
                             <span>🌟</span> Modern Legacy
                         </h4>
-                        <div class="glass-card" style="padding: 1rem; line-height: 1.7;">
+                        <div class="glass-card legacy-card">
                             ${this.renderFormattedText(legacy)}
                         </div>
                     </div>
@@ -862,8 +906,8 @@ class SchemaSectionRenderer {
         if (sections.length === 0) return '';
 
         return `
-            <section class="cultural-section" style="margin-top: 2rem;">
-                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <section class="cultural-section">
+                <h2 class="section-heading">
                     <span>🏛️</span>
                     Cultural Context
                 </h2>
@@ -890,18 +934,17 @@ class SchemaSectionRenderer {
         const myth = mythology || this.mythology || 'greek';
 
         return `
-            <section class="related-deities-section" style="margin-top: 2rem;">
-                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <section class="related-deities-section">
+                <h2 class="section-heading">
                     <span>⚡</span>
                     Related Deities
                 </h2>
-                <div class="related-deities-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem;">
+                <div class="related-deities-grid">
                     ${validDeities.map(deity => `
                         <a href="#/entity/deities/${deity.id || this.slugify(deity.name)}"
-                           class="glass-card deity-link"
-                           style="padding: 0.75rem 1rem; text-decoration: none; color: inherit; text-align: center; border-radius: 8px; transition: all 0.2s;">
-                            <span style="font-size: 1.5rem; display: block; margin-bottom: 0.25rem;">⚡</span>
-                            <span style="font-weight: 500;">${this.escapeHtml(deity.name || deity.id)}</span>
+                           class="glass-card deity-link">
+                            <span class="deity-link-icon">⚡</span>
+                            <span class="deity-link-name">${this.escapeHtml(deity.name || deity.id)}</span>
                         </a>
                     `).join('')}
                 </div>
@@ -919,18 +962,35 @@ class SchemaSectionRenderer {
     renderAssociations(associations) {
         if (!Array.isArray(associations) || associations.length === 0) return '';
 
+        const typeIcons = {
+            color: '🎨', element: '🌊', concept: '💡', animal: '🦁',
+            number: '🔢', celestial: '✨', plant: '🌿', symbol: '🔮',
+            deity: '⚡', place: '📍', default: '🔗'
+        };
+
         return `
-            <section class="associations-section" style="margin-top: 1.5rem;">
-                <h3 style="color: var(--mythos-secondary, var(--color-secondary)); margin: 0 0 0.75rem 0; font-size: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <section class="associations-section">
+                <h3 class="section-heading">
                     <span>🔗</span>
                     Associations
                 </h3>
-                <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                    ${associations.map(a => `
-                        <span class="association-pill" style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.1); color: var(--color-text-primary); padding: 0.4rem 0.8rem; border-radius: 20px; font-size: 0.85rem; border: 1px solid rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.2);">
-                            ${this.escapeHtml(a)}
-                        </span>
-                    `).join('')}
+                <div class="associations-grid">
+                    ${associations.map(a => {
+                        if (typeof a === 'string') {
+                            return `<span class="association-pill pill-badge">${this.escapeHtml(a)}</span>`;
+                        }
+                        const icon = typeIcons[a.type] || typeIcons.default;
+                        return `
+                            <div class="association-card glass-card">
+                                <div class="association-header">
+                                    <span class="association-icon">${icon}</span>
+                                    <span class="association-name">${this.escapeHtml(a.name || '')}</span>
+                                    ${a.type ? `<span class="association-type">${this.escapeHtml(a.type)}</span>` : ''}
+                                </div>
+                                ${a.significance ? `<p class="association-significance">${this.escapeHtml(a.significance)}</p>` : ''}
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             </section>
         `;
@@ -947,24 +1007,24 @@ class SchemaSectionRenderer {
         if (!Array.isArray(items) || items.length === 0) return '';
 
         return `
-            <section class="feats-section" style="margin-top: 2rem;">
-                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <section class="feats-section">
+                <h2 class="section-heading">
                     <span>${icon}</span>
                     ${this.escapeHtml(title)}
                 </h2>
-                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                <div class="feats-list">
                     ${items.map((item, i) => `
-                        <div class="glass-card feat-card" style="padding: 1.25rem; border-radius: 8px;">
-                            <div style="display: flex; align-items: flex-start; gap: 1rem;">
-                                <span style="font-size: 1.5rem; opacity: 0.8;">${i + 1}.</span>
-                                <div style="flex: 1;">
-                                    <h4 style="color: var(--mythos-primary, var(--color-primary)); margin: 0 0 0.5rem 0;">
+                        <div class="glass-card feat-card">
+                            <div class="feat-card-inner">
+                                <span class="feat-number">${i + 1}.</span>
+                                <div class="feat-content">
+                                    <h4 class="feat-title">
                                         ${this.escapeHtml(item.title || item.name || `${title} ${i + 1}`)}
                                     </h4>
-                                    <p style="margin: 0; opacity: 0.9; line-height: 1.7;">
+                                    <p class="feat-description">
                                         ${this.renderFormattedText(item.description || item.content || item.summary || '')}
                                     </p>
-                                    ${item.source ? `<p style="margin: 0.75rem 0 0; font-size: 0.85rem; opacity: 0.7;">📜 ${this.escapeHtml(item.source)}</p>` : ''}
+                                    ${item.source ? `<p class="feat-source">📜 ${this.escapeHtml(item.source)}</p>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -981,21 +1041,25 @@ class SchemaSectionRenderer {
         if (!Array.isArray(companions) || companions.length === 0) return '';
 
         return `
-            <section class="companions-section" style="margin-top: 2rem;">
-                <h2 style="color: var(--mythos-primary, var(--color-primary)); margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            <section class="companions-section">
+                <h2 class="section-heading">
                     <span>👥</span>
                     Companions & Allies
                 </h2>
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.75rem;">
-                    ${companions.map(c => `
-                        <div class="glass-card companion-card" style="padding: 1rem; border-radius: 8px;">
-                            <h4 style="color: var(--mythos-primary, var(--color-primary)); margin: 0 0 0.5rem 0; font-size: 1rem;">
+                <div class="companions-grid">
+                    ${companions.map(c => {
+                        const role = c.role || c.relationship || '';
+                        const category = c.category || '';
+                        return `
+                        <div class="glass-card companion-card">
+                            <h4 class="companion-name">
                                 ${this.escapeHtml(c.name || c.id || 'Companion')}
                             </h4>
-                            ${c.role ? `<p style="margin: 0 0 0.5rem; font-size: 0.85rem; opacity: 0.8;">🎭 ${this.escapeHtml(c.role)}</p>` : ''}
-                            ${c.description ? `<p style="margin: 0; font-size: 0.85rem; opacity: 0.9;">${this.escapeHtml(c.description)}</p>` : ''}
+                            ${role ? `<p class="companion-role">${this.escapeHtml(role)}</p>` : ''}
+                            ${category ? `<span class="companion-category">${this.escapeHtml(category)}</span>` : ''}
+                            ${c.description ? `<p class="companion-description">${this.escapeHtml(c.description)}</p>` : ''}
                         </div>
-                    `).join('')}
+                    `;}).join('')}
                 </div>
             </section>
         `;
@@ -1042,6 +1106,8 @@ class SchemaSectionRenderer {
             case 'significance':
             case 'associatedDeities':
             case 'inhabitants':
+            case 'characteristics':
+            case 'location':
                 return ''; // Handled in place-specific section
             case 'materials':
             case 'powers':

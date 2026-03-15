@@ -1599,7 +1599,7 @@ class FirebaseEntityRenderer {
                 'tags', 'searchTerms', 'cultural', 'cross_cultural_parallels', 'relatedDeities',
                 'associations', 'geography', 'realm', 'region', 'significance', 'features',
                 'inhabitants', 'sources', 'relatedEntities', 'texts', 'content', 'relatedEvents',
-                'companions'
+                'companions', 'characteristics', 'location'
             ])}
         `;
 
@@ -2758,12 +2758,46 @@ class FirebaseEntityRenderer {
     }
 
     /**
+     * Render contribute CTA section for entity detail pages
+     * @param {Object} entity - Entity data
+     * @returns {string} HTML for the contribute CTA
+     */
+    renderContributeCTA(entity) {
+        const mythology = entity.mythology || entity.primaryMythology || '';
+        const entityType = entity.type || 'entity';
+        return `
+            <section class="entity-contribute-cta" style="margin: 2rem 0; padding: 1.25rem; border-radius: 12px; background: rgba(139,127,255,0.08); border: 1px solid rgba(139,127,255,0.2); text-align: center;">
+                <p style="margin: 0 0 0.75rem; opacity: 0.85; font-size: 0.95rem;">Know more about <strong>${this.escapeHtml(entity.name || 'this entity')}</strong>?</p>
+                <button class="btn-primary btn-sm entity-contribute-btn" onclick="
+                    if(typeof BrowseCategoryView !== 'undefined') {
+                        const view = new BrowseCategoryView();
+                        view.openSubmissionWizard('${entityType}');
+                    } else if(window.ContentSubmissionWizard) {
+                        const modal = document.createElement('div');
+                        modal.id = 'submission-wizard-modal';
+                        modal.className = 'submission-wizard-modal';
+                        modal.innerHTML = '<div class=\\'submission-wizard-modal__backdrop\\'></div><div class=\\'submission-wizard-modal__content\\'><button class=\\'submission-wizard-modal__close\\' onclick=\\'this.closest(&quot;.submission-wizard-modal&quot;).style.display=&quot;none&quot;; document.body.classList.remove(&quot;modal-open&quot;)\\'>X</button><div id=\\'wizard-container\\'></div></div>';
+                        document.body.appendChild(modal);
+                        modal.style.display = 'flex';
+                        document.body.classList.add('modal-open');
+                        window.contentWizard = new ContentSubmissionWizard('#wizard-container');
+                        window.contentWizard.init();
+                    }
+                " style="font-size: 0.9rem; padding: 0.5rem 1.25rem;">
+                    Suggest an Edit or Add Info
+                </button>
+            </section>
+        `;
+    }
+
+    /**
      * Render the entity posts (discussion) section HTML
      * @param {Object} entity - Entity data
      * @returns {string} HTML for the posts section container
      */
     renderEntityPostsSection(entity) {
         return `
+            ${this.renderContributeCTA(entity)}
             <!-- Entity Discussion Posts -->
             <section class="entity-posts-wrapper" id="entityPostsWrapper"
                      data-entity-type="${entity.type}"

@@ -132,17 +132,18 @@ describe('UserDashboard Component', () => {
     // ========================================
 
     describe('Data Loading', () => {
-        test('should load submissions from submissionWorkflow', async () => {
+        test('should load submissions from contentSubmissionService', async () => {
             mockAuth.currentUser = { uid: 'user-123' };
             const mockSubmissions = [{ id: '1', entityName: 'Zeus' }];
-            window.submissionWorkflow = {
+            window.contentSubmissionService = {
+                ensureInit: jest.fn().mockResolvedValue(),
                 getUserSubmissions: jest.fn().mockResolvedValue(mockSubmissions)
             };
 
             const result = await dashboard.loadSubmissions();
             expect(result).toEqual(mockSubmissions);
 
-            delete window.submissionWorkflow;
+            delete window.contentSubmissionService;
         });
 
         test('should return empty array when no user for submissions', async () => {
