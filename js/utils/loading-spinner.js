@@ -310,7 +310,7 @@ class LoadingSpinner {
 
         const content = `
             <div class="loading-overlay-content">
-                ${this._getSacredSpinnerSVG('lg')}
+                <div class="spinner-container spinner-lg"><div class="spinner-ring"></div><div class="spinner-ring"></div><div class="spinner-ring"></div></div>
                 <p class="loading-overlay-message">${this._getAtmosphericMessage(message)}</p>
                 ${showProgress ? this._getProgressBarHTML() : ''}
                 ${steps ? this._getStepIndicatorHTML(steps) : ''}
@@ -380,7 +380,7 @@ class LoadingSpinner {
 
         const content = `
             <div class="modal-save-overlay-content">
-                ${this._getSacredSpinnerSVG('md')}
+                <div class="spinner-container"><div class="spinner-ring"></div><div class="spinner-ring"></div><div class="spinner-ring"></div></div>
                 <p class="modal-save-message">${atmosphericMessage}</p>
                 ${showProgress ? this._getProgressBarHTML() : ''}
             </div>
@@ -1095,11 +1095,15 @@ class LoadingSpinner {
     // ============================================
 
     _getSpinnerHTML({ message, size, spinnerId, className, showProgress }) {
-        const sizeClass = `spinner-${size}`;
+        const sizeClass = size === 'sm' ? 'spinner-sm' : size === 'lg' ? 'spinner-lg' : '';
 
         return `
             <div class="loading-spinner-wrapper ${className}" data-spinner-id="${spinnerId}">
-                ${this._getSacredSpinnerSVG(size)}
+                <div class="spinner-container ${sizeClass}">
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                    <div class="spinner-ring"></div>
+                </div>
                 ${message ? `<p class="spinner-message">${message}</p>` : ''}
                 ${showProgress ? this._getProgressBarHTML() : ''}
             </div>
@@ -1336,7 +1340,7 @@ class LoadingSpinner {
         const html = `
             <div class="multi-step-progress" data-progress-id="${progressId}">
                 <div class="multi-step-header">
-                    ${this._getSacredSpinnerSVG('md')}
+                    <div class="spinner-container"><div class="spinner-ring"></div><div class="spinner-ring"></div><div class="spinner-ring"></div></div>
                     <p class="multi-step-message">${atmosphericMessages ? this._getRandomMessage() : 'Processing...'}</p>
                 </div>
                 ${showPercentage ? `
@@ -1551,9 +1555,10 @@ class LoadingSpinner {
      * @returns {string} HTML string
      */
     getInlineLoadingHTML(message = '', size = 'sm') {
+        const sizeClass = size === 'sm' ? 'spinner-inline' : size === 'lg' ? 'spinner-lg' : 'spinner-sm';
         return `
             <span class="inline-loading">
-                ${this._getSacredSpinnerSVG(size)}
+                <span class="spinner-container ${sizeClass}"><span class="spinner-ring"></span><span class="spinner-ring"></span><span class="spinner-ring"></span></span>
                 ${message ? `<span class="inline-loading-text">${this._getAtmosphericMessage(message)}</span>` : ''}
             </span>
         `;
@@ -1572,7 +1577,7 @@ class LoadingSpinner {
             button.disabled = true;
             button.classList.add('btn-loading');
             button.innerHTML = `
-                <span class="btn-spinner">${this._getSacredSpinnerSVG('sm')}</span>
+                <span class="btn-spinner"><span class="spinner-container spinner-inline"><span class="spinner-ring"></span><span class="spinner-ring"></span><span class="spinner-ring"></span></span></span>
                 <span class="btn-loading-text">Working...</span>
             `;
         } else {
