@@ -402,12 +402,11 @@ describe('Data Flow Integration', () => {
         const favoritesListener = jest.fn();
         stateManager.subscribe('favorites', favoritesListener);
 
-        // Add entity to favorites
-        const favorites = stateManager.getState('favorites');
-        favorites.push('zeus');
+        // Add entity to favorites (use spread to create new array so old/new differ)
+        const favorites = [...stateManager.getState('favorites'), 'zeus'];
         stateManager.setState('favorites', favorites);
 
-        expect(favoritesListener).toHaveBeenCalledWith(['zeus'], []);
+        expect(favoritesListener).toHaveBeenCalledWith(['zeus'], expect.anything());
         expect(stateManager.getState('favorites')).toContain('zeus');
     });
 

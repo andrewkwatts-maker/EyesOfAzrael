@@ -233,9 +233,10 @@ describe('Throttle Implementation', () => {
         // Arrange
         const fn = jest.fn();
         const throttle = (fn, delay, options = {}) => {
-            let timeout, previous = 0;
+            let timeout, previous = 0, lastArgs;
             return (...args) => {
                 const now = Date.now();
+                lastArgs = args;
                 if (!previous && options.leading === false) previous = now;
                 const remaining = delay - (now - previous);
 
@@ -250,7 +251,7 @@ describe('Throttle Implementation', () => {
                     timeout = setTimeout(() => {
                         previous = options.leading === false ? 0 : Date.now();
                         timeout = null;
-                        fn(...args);
+                        fn(...lastArgs);
                     }, remaining);
                 }
             };
@@ -267,7 +268,7 @@ describe('Throttle Implementation', () => {
 
         jest.advanceTimersByTime(300);
 
-        // Assert - Trailing call executed
+        // Assert - Trailing call executed with latest args
         expect(fn).toHaveBeenCalledTimes(2);
         expect(fn).toHaveBeenLastCalledWith('third');
     });

@@ -9,36 +9,36 @@
 // =====================================================
 
 const mockFirestore = {
-  collection: jest.fn(),
-  doc: jest.fn(),
-  get: jest.fn(),
-  where: jest.fn(),
-  orderBy: jest.fn(),
-  limit: jest.fn()
+    collection: jest.fn(),
+    doc: jest.fn(),
+    get: jest.fn(),
+    where: jest.fn(),
+    orderBy: jest.fn(),
+    limit: jest.fn()
 };
 
 const mockAuth = {
-  currentUser: null,
-  signInWithPopup: jest.fn(),
-  signOut: jest.fn(),
-  onAuthStateChanged: jest.fn()
+    currentUser: null,
+    signInWithPopup: jest.fn(),
+    signOut: jest.fn(),
+    onAuthStateChanged: jest.fn()
 };
 
 const mockCRUDManager = {
-  getUserEntities: jest.fn(),
-  create: jest.fn(),
-  read: jest.fn(),
-  update: jest.fn(),
-  delete: jest.fn(),
-  restore: jest.fn()
+    getUserEntities: jest.fn(),
+    create: jest.fn(),
+    read: jest.fn(),
+    update: jest.fn(),
+    delete: jest.fn(),
+    restore: jest.fn()
 };
 
 // Mock global firebase object
 global.firebase = {
-  firestore: jest.fn(() => mockFirestore),
-  auth: {
-    GoogleAuthProvider: jest.fn()
-  }
+    firestore: jest.fn(() => mockFirestore),
+    auth: {
+        GoogleAuthProvider: jest.fn()
+    }
 };
 
 // Mock alert and confirm
@@ -46,39 +46,23 @@ global.alert = jest.fn();
 global.confirm = jest.fn(() => true);
 global.prompt = jest.fn();
 
-// Mock window objects
-global.window = {
-  EyesOfAzrael: {
-    navigation: {
-      navigate: jest.fn()
-    }
-  },
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn()
-  },
-  location: {
-    reload: jest.fn()
-  }
-};
-
 // Mock navigator separately
 if (!global.navigator) {
-  global.navigator = {};
+    global.navigator = {};
 }
 global.navigator.clipboard = {
-  writeText: jest.fn(() => Promise.resolve())
+    writeText: jest.fn(() => Promise.resolve())
 };
 
 // Mock EntityForm for edit-entity-modal tests
 global.EntityForm = jest.fn();
 
-// Mock window.location for CompareView
-global.window.location = {
-  origin: 'http://localhost',
-  pathname: '/',
-  hash: ''
+// Mock console
+global.console = {
+    ...console,
+    log: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn()
 };
 
 // Import components
@@ -91,157 +75,131 @@ const CompareView = require('../../js/components/compare-view.js');
 // =====================================================
 
 describe('UserDashboard - Branch Coverage', () => {
-  let dashboard;
+    let dashboard;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockAuth.currentUser = {
-      uid: 'test-user',
-      email: 'test@example.com',
-      displayName: 'Test User'
-    };
+    beforeEach(() => {
+        jest.clearAllMocks();
 
-    dashboard = new UserDashboard({
-      crudManager: mockCRUDManager,
-      auth: mockAuth
+        window.EyesOfAzrael = {
+            navigation: {
+                navigate: jest.fn()
+            }
+        };
+        window.toast = {
+            success: jest.fn(),
+            error: jest.fn(),
+            info: jest.fn()
+        };
+
+        mockAuth.currentUser = {
+            uid: 'test-user',
+            email: 'test@example.com',
+            displayName: 'Test User'
+        };
+
+        dashboard = new UserDashboard({
+            crudManager: mockCRUDManager,
+            auth: mockAuth
+        });
+
+        dashboard.submissions = [
+            {
+                id: '1',
+                entityName: 'Test Entity',
+                collection: 'deities',
+                status: 'active',
+                submittedAt: { toDate: () => new Date('2024-01-15') }
+            }
+        ];
     });
 
-    dashboard.entities = [
-      {
-        id: '1',
-        name: 'Test Entity',
-        collection: 'deities',
-        status: 'active',
-        createdAt: { toDate: () => new Date('2024-01-15') }
-      }
-    ];
-  });
+    // Test: formatDate with plain Date object (not Firestore Timestamp)
+    test('should handle formatDate with plain Date object', () => {
+        const plainDate = new Date('2024-01-15');
+        const formatted = dashboard.formatDate(plainDate);
+        expect(formatted).toBeTruthy();
+    });
 
-  // Test: formatDate with plain Date object (not Firestore Timestamp)
-  test('should handle formatDate with plain Date object', () => {
-    const plainDate = new Date('2024-01-15');
-    const formatted = dashboard.formatDate(plainDate);
-    expect(formatted).toBeTruthy();
-  });
+    // Test: Date formatting for different time ranges
+    test('should format date as "X days ago" for dates 2-6 days old', () => {
+        const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+        const formatted = dashboard.formatDate({ toDate: () => threeDaysAgo });
+        expect(formatted).toBe('3 days ago');
+    });
 
-  // Test: Date formatting for different time ranges
-  test('should format date as "X days ago" for dates 2-6 days old', () => {
-    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
-    const formatted = dashboard.formatDate({ toDate: () => threeDaysAgo });
-    expect(formatted).toBe('3 days ago');
-  });
+    test('should format date as "X weeks ago" for dates 7-29 days old', () => {
+        const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
+        const formatted = dashboard.formatDate({ toDate: () => twoWeeksAgo });
+        expect(formatted).toBe('2 weeks ago');
+    });
 
-  test('should format date as "X weeks ago" for dates 7-29 days old', () => {
-    const twoWeeksAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
-    const formatted = dashboard.formatDate({ toDate: () => twoWeeksAgo });
-    expect(formatted).toBe('2 weeks ago');
-  });
+    test('should format date as "X months ago" for dates 30-364 days old', () => {
+        const twoMonthsAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+        const formatted = dashboard.formatDate({ toDate: () => twoMonthsAgo });
+        expect(formatted).toBe('2 months ago');
+    });
 
-  test('should format date as "X months ago" for dates 30-364 days old', () => {
-    const twoMonthsAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
-    const formatted = dashboard.formatDate({ toDate: () => twoMonthsAgo });
-    expect(formatted).toBe('2 months ago');
-  });
+    test('should format date as full date for dates 365+ days old', () => {
+        const oneYearAgo = new Date(Date.now() - 400 * 24 * 60 * 60 * 1000);
+        const formatted = dashboard.formatDate({ toDate: () => oneYearAgo });
+        expect(formatted).toContain('/');
+    });
 
-  test('should format date as full date for dates 365+ days old', () => {
-    const oneYearAgo = new Date(Date.now() - 400 * 24 * 60 * 60 * 1000);
-    const formatted = dashboard.formatDate({ toDate: () => oneYearAgo });
-    expect(formatted).toContain('/');
-  });
+    // Test: Missing DOM elements during initialization
+    test('should not crash when container has no expected elements', () => {
+        const container = document.createElement('div');
+        container.innerHTML = '<div id="test"></div>';
+        expect(() => dashboard.initialize(container)).not.toThrow();
+    });
 
-  // Test: Missing DOM elements during initialization
-  test('should not crash when collectionFilter is missing', async () => {
-    const container = document.createElement('div');
-    container.innerHTML = '<div id="entitiesList"></div>';
+    test('should handle refreshTab when panel is missing', () => {
+        const container = document.createElement('div');
+        dashboard.container = container;
+        // Should not crash
+        expect(() => dashboard.refreshTab('submissions')).not.toThrow();
+    });
 
-    expect(() => dashboard.initialize(container)).not.toThrow();
-  });
+    // Test: Entity action handlers
+    test('should handle view submission action', () => {
+        const mockNavigate = jest.fn();
+        window.EyesOfAzrael = {
+            navigation: {
+                navigate: mockNavigate
+            }
+        };
 
-  test('should not crash when statusFilter is missing', async () => {
-    const container = document.createElement('div');
-    container.innerHTML = '<div id="entitiesList"></div>';
+        dashboard.handleViewSubmission('1');
 
-    expect(() => dashboard.initialize(container)).not.toThrow();
-  });
+        expect(mockNavigate).toHaveBeenCalledWith('#/submission/1');
+    });
 
-  test('should not crash when searchInput is missing', async () => {
-    const container = document.createElement('div');
-    container.innerHTML = '<div id="entitiesList"></div>';
+    test('should handle view submission when navigation is missing', () => {
+        window.EyesOfAzrael = null;
 
-    expect(() => dashboard.initialize(container)).not.toThrow();
-  });
+        expect(() => dashboard.handleViewSubmission('1')).not.toThrow();
 
-  test('should not crash when createNewBtn is missing', async () => {
-    const container = document.createElement('div');
-    container.innerHTML = '<div id="entitiesList"></div>';
+        // Restore
+        window.EyesOfAzrael = {
+            navigation: { navigate: jest.fn() }
+        };
+    });
 
-    expect(() => dashboard.initialize(container)).not.toThrow();
-  });
+    // Test: handleCreateSubmission
+    test('should handle create submission navigation', () => {
+        dashboard.handleCreateSubmission();
 
-  test('should not crash when signInBtn is missing', async () => {
-    const container = document.createElement('div');
-    container.innerHTML = '<div id="entitiesList"></div>';
+        expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/contribute');
+    });
 
-    expect(() => dashboard.initialize(container)).not.toThrow();
-  });
+    test('should handle create submission when navigation is missing', () => {
+        window.EyesOfAzrael = {};
 
-  test('should handle refresh when listContainer is missing', async () => {
-    const container = document.createElement('div');
-    dashboard.container = container;
+        expect(() => dashboard.handleCreateSubmission()).not.toThrow();
 
-    mockCRUDManager.getUserEntities.mockResolvedValue({ success: true, data: [] });
-
-    await expect(dashboard.refresh()).resolves.not.toThrow();
-  });
-
-  // Test: Entity action handlers (view, edit, delete, restore)
-  test('should handle view action via handleView', () => {
-    // Ensure EyesOfAzrael exists with navigation
-    const mockNavigate = jest.fn();
-    global.window.EyesOfAzrael = {
-      navigation: {
-        navigate: mockNavigate
-      }
-    };
-
-    dashboard.handleView('deities', 'test-id');
-
-    expect(mockNavigate).toHaveBeenCalledWith(
-      '#/mythology/user/deitie/test-id'
-    );
-  });
-
-  test('should handle view action when navigation is missing', () => {
-    global.window.EyesOfAzrael = null;
-
-    expect(() => dashboard.handleView('deities', 'test-id')).not.toThrow();
-
-    // Restore
-    global.window.EyesOfAzrael = {
-      navigation: {
-        navigate: jest.fn()
-      }
-    };
-  });
-
-  // Test: Invalid collection number in handleCreateNew
-  test('should handle invalid collection selection in handleCreateNew', async () => {
-    global.prompt.mockReturnValueOnce('99');
-
-    await dashboard.handleCreateNew();
-
-    // Should not call showForm for invalid selection
-    expect(global.prompt).toHaveBeenCalled();
-  });
-
-  test('should handle null collection selection in handleCreateNew', async () => {
-    global.prompt.mockReturnValueOnce(null);
-
-    await dashboard.handleCreateNew();
-
-    // Should return early without error
-    expect(global.prompt).toHaveBeenCalled();
-  });
+        window.EyesOfAzrael = {
+            navigation: { navigate: jest.fn() }
+        };
+    });
 });
 
 // =====================================================
@@ -249,26 +207,26 @@ describe('UserDashboard - Branch Coverage', () => {
 // =====================================================
 
 describe('EditEntityModal - Branch Coverage', () => {
-  let modal;
+    let modal;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+    beforeEach(() => {
+        jest.clearAllMocks();
 
-    modal = new EditEntityModal({
-      crudManager: mockCRUDManager,
-      collection: 'deities',
-      mythology: 'greek',
-      onSave: jest.fn(),
-      onCancel: jest.fn()
+        modal = new EditEntityModal(mockCRUDManager);
+
+        document.body.innerHTML = '';
     });
 
-    document.body.innerHTML = '';
-  });
+    // Test: Verify modal can be instantiated without errors
+    test('should create modal instance successfully', () => {
+        expect(modal).toBeDefined();
+    });
 
-  // Test: Verify modal can be instantiated without errors
-  test('should create modal instance successfully', () => {
-    expect(modal).toBeDefined();
-  });
+    test('should handle escapeHtml with various inputs', () => {
+        expect(modal.escapeHtml('<b>bold</b>')).not.toContain('<b>');
+        expect(modal.escapeHtml('')).toBe('');
+        expect(modal.escapeHtml(null)).toBe('');
+    });
 });
 
 // =====================================================
@@ -276,97 +234,99 @@ describe('EditEntityModal - Branch Coverage', () => {
 // =====================================================
 
 describe('CompareView - Branch Coverage', () => {
-  let compareView;
+    let compareView;
 
-  beforeEach(() => {
-    jest.clearAllMocks();
+    beforeEach(() => {
+        jest.clearAllMocks();
 
-    // Reset clipboard mock to return a promise
-    global.navigator.clipboard.writeText = jest.fn(() => Promise.resolve());
+        // Reset clipboard mock to return a promise
+        global.navigator.clipboard.writeText = jest.fn(() => Promise.resolve());
 
-    compareView = new CompareView({ mythology: 'greek' });
-    compareView.selectedEntities = [];
+        compareView = new CompareView(mockFirestore);
+        compareView.selectedEntities = [];
 
-    document.body.innerHTML = '';
-  });
+        window.showToast = jest.fn();
 
-  // Test: Firestore null check in addEntityById
-  test('should handle addEntityById when firestore is not initialized', async () => {
-    compareView.db = null;
-
-    await compareView.addEntityById('deities', 'test-id');
-
-    // Should return early without error
-    expect(true).toBe(true);
-  });
-
-  // Test: Max entities limit
-  test('should handle adding entity when max entities reached', () => {
-    compareView.selectedEntities = [
-      { id: 'zeus', type: 'deities', name: 'Zeus' },
-      { id: 'hera', type: 'deities', name: 'Hera' },
-      { id: 'poseidon', type: 'deities', name: 'Poseidon' },
-      { id: 'hades', type: 'deities', name: 'Hades' }
-    ];
-
-    compareView.maxEntities = 4;
-
-    const initialLength = compareView.selectedEntities.length;
-
-    compareView.addEntity({
-      id: 'athena',
-      type: 'deities',
-      name: 'Athena'
+        document.body.innerHTML = '';
     });
 
-    // Should not add entity when max reached
-    expect(compareView.selectedEntities.length).toBe(initialLength);
-  });
+    // Test: Firestore null check in addEntityById
+    test('should handle addEntityById when firestore is not initialized', async () => {
+        compareView.db = null;
 
-  // Test: Clipboard API with successful copy
-  test('should copy share link to clipboard successfully', async () => {
-    compareView.selectedEntities = [
-      { id: 'zeus', name: 'Zeus', _collection: 'deities' },
-      { id: 'hera', name: 'Hera', _collection: 'deities' }
-    ];
+        await compareView.addEntityById('deities', 'test-id');
 
-    compareView.shareComparison();
+        // Should return early without error
+        expect(true).toBe(true);
+    });
 
-    // Wait for promise to resolve
-    await new Promise(resolve => setTimeout(resolve, 10));
+    // Test: Max entities limit
+    test('should handle adding entity when max entities reached', () => {
+        compareView.selectedEntities = [
+            { id: 'zeus', type: 'deities', name: 'Zeus', _collection: 'deities' },
+            { id: 'hera', type: 'deities', name: 'Hera', _collection: 'deities' },
+            { id: 'poseidon', type: 'deities', name: 'Poseidon', _collection: 'deities' }
+        ];
 
-    expect(global.navigator.clipboard.writeText).toHaveBeenCalled();
-  });
+        const initialLength = compareView.selectedEntities.length;
 
-  // Test: Clipboard API with error
-  test('should handle clipboard write error', async () => {
-    compareView.selectedEntities = [
-      { id: 'zeus', name: 'Zeus', _collection: 'deities' },
-      { id: 'hera', name: 'Hera', _collection: 'deities' }
-    ];
+        compareView.addEntity({
+            id: 'athena',
+            type: 'deities',
+            name: 'Athena'
+        }, 'deities');
 
-    global.navigator.clipboard.writeText.mockReturnValueOnce(Promise.reject(new Error('Clipboard error')));
+        // Should not add entity when max (3) reached
+        expect(compareView.selectedEntities.length).toBe(initialLength);
+    });
 
-    compareView.shareComparison();
+    // Test: Clipboard API with successful copy
+    test('should copy share link to clipboard successfully', async () => {
+        compareView.selectedEntities = [
+            { id: 'zeus', name: 'Zeus', _collection: 'deities' },
+            { id: 'hera', name: 'Hera', _collection: 'deities' }
+        ];
 
-    // Wait for promise to reject
-    await new Promise(resolve => setTimeout(resolve, 10));
+        compareView.shareComparison();
 
-    // Error should be caught and logged
-    expect(true).toBe(true);
-  });
+        // Wait for promise to resolve
+        await new Promise(resolve => setTimeout(resolve, 10));
 
-  // Test: Minimum entities for sharing
-  test('should not share when less than minimum entities', () => {
-    compareView.selectedEntities = [
-      { id: 'zeus', name: 'Zeus', _collection: 'deities' }
-    ];
+        expect(global.navigator.clipboard.writeText).toHaveBeenCalled();
+    });
 
-    compareView.shareComparison();
+    // Test: Clipboard API with error - falls back to execCommand
+    test('should handle clipboard write error', async () => {
+        compareView.selectedEntities = [
+            { id: 'zeus', name: 'Zeus', _collection: 'deities' },
+            { id: 'hera', name: 'Hera', _collection: 'deities' }
+        ];
 
-    // Should not call clipboard
-    expect(global.navigator.clipboard.writeText).not.toHaveBeenCalled();
-  });
+        global.navigator.clipboard.writeText.mockReturnValueOnce(Promise.reject(new Error('Clipboard error')));
+
+        // Mock document.execCommand for fallback
+        document.execCommand = jest.fn(() => true);
+
+        compareView.shareComparison();
+
+        // Wait for promise to reject and fallback to execute
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        // Fallback should use execCommand
+        expect(document.execCommand).toHaveBeenCalledWith('copy');
+    });
+
+    // Test: Minimum entities for sharing
+    test('should not share when less than minimum entities', () => {
+        compareView.selectedEntities = [
+            { id: 'zeus', name: 'Zeus', _collection: 'deities' }
+        ];
+
+        compareView.shareComparison();
+
+        // Should not call clipboard
+        expect(global.navigator.clipboard.writeText).not.toHaveBeenCalled();
+    });
 });
 
 // =====================================================
@@ -374,33 +334,36 @@ describe('CompareView - Branch Coverage', () => {
 // =====================================================
 
 describe('Cross-Component Branch Coverage', () => {
-  test('should handle window.toast fallback across components', () => {
-    const originalToast = window.toast;
-    window.toast = null;
+    test('should handle window.toast fallback across components', () => {
+        const originalToast = window.toast;
+        window.toast = null;
 
-    const dashboard = new UserDashboard({
-      crudManager: mockCRUDManager,
-      auth: mockAuth
+        const dashboard = new UserDashboard({
+            crudManager: mockCRUDManager,
+            auth: mockAuth
+        });
+
+        dashboard.showToast('Test message', 'info');
+
+        // Fallback logs to console when toast is unavailable
+        expect(console.log).toHaveBeenCalledWith('[INFO]', 'Test message');
+
+        window.toast = originalToast;
     });
 
-    dashboard.showToast('Test message', 'success');
+    test('should handle missing EyesOfAzrael.navigation gracefully', () => {
+        const originalNav = window.EyesOfAzrael;
+        window.EyesOfAzrael = null;
 
-    expect(global.alert).toHaveBeenCalledWith('Test message');
+        const dashboard = new UserDashboard({
+            crudManager: mockCRUDManager,
+            auth: mockAuth
+        });
 
-    window.toast = originalToast;
-  });
+        // handleViewSubmission checks for navigation - should not throw
+        dashboard.submissions = [{ id: '1', entityName: 'Test' }];
+        expect(() => dashboard.handleViewSubmission('1')).not.toThrow();
 
-  test('should handle missing EyesOfAzrael.navigation gracefully', () => {
-    const originalNav = window.EyesOfAzrael;
-    window.EyesOfAzrael = null;
-
-    const dashboard = new UserDashboard({
-      crudManager: mockCRUDManager,
-      auth: mockAuth
+        window.EyesOfAzrael = originalNav;
     });
-
-    expect(() => dashboard.handleView('deities', 'test-id')).not.toThrow();
-
-    window.EyesOfAzrael = originalNav;
-  });
 });

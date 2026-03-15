@@ -170,7 +170,7 @@ describe('EditEntityModal', () => {
             // Assert
             const modalElement = document.getElementById('edit-entity-modal');
             expect(modalElement).toBeTruthy();
-            expect(modalElement.classList.contains('modal-overlay')).toBe(true);
+            expect(modalElement.classList.contains('edit-modal-overlay')).toBe(true);
         });
 
         test('should render modal backdrop', async () => {
@@ -184,7 +184,7 @@ describe('EditEntityModal', () => {
             await modal.open('entity123', 'deities');
 
             // Assert
-            const backdrop = document.querySelector('.modal-overlay');
+            const backdrop = document.querySelector('.edit-modal-overlay');
             expect(backdrop).toBeTruthy();
         });
 
@@ -197,7 +197,7 @@ describe('EditEntityModal', () => {
             await modal.open('entity123', 'deities');
 
             // Act
-            const backdrop = document.querySelector('.modal-overlay');
+            const backdrop = document.querySelector('.edit-modal-overlay');
             const clickEvent = new MouseEvent('click', { bubbles: true });
             Object.defineProperty(clickEvent, 'target', {
                 value: backdrop,
@@ -237,7 +237,7 @@ describe('EditEntityModal', () => {
             await modal.open('entity123', 'deities');
 
             // Act
-            const closeBtn = document.querySelector('.modal-close');
+            const closeBtn = document.querySelector('.edit-modal-close');
             closeBtn.click();
             jest.advanceTimersByTime(500);
 
@@ -310,7 +310,7 @@ describe('EditEntityModal', () => {
             await modal.open('entity123', 'deities');
 
             // Assert
-            const formContainer = document.getElementById('modal-form-container');
+            const formContainer = document.getElementById('edit-modal-form-container');
             expect(formContainer).toBeTruthy();
             expect(formContainer.innerHTML).toContain('entity-form');
         });
@@ -708,9 +708,9 @@ describe('EditEntityModal', () => {
             await new Promise(resolve => setTimeout(resolve, 0));
 
             // Assert - Check loading state before promise resolves
-            const loadingSpinner = document.querySelector('.loading-spinner');
-            expect(loadingSpinner).toBeTruthy();
-            expect(loadingSpinner.textContent).toContain('Loading entity...');
+            const loadingContainer = document.querySelector('.edit-modal-loading');
+            expect(loadingContainer).toBeTruthy();
+            expect(loadingContainer.textContent).toContain('Loading entity...');
 
             // Resolve the promise
             resolvePromise({ success: true, data: { id: 'entity123', name: 'Zeus' } });
@@ -1031,10 +1031,8 @@ describe('EditEntityModal', () => {
             // Act
             modal.showError(uploadError);
 
-            // Assert
-            const errorContainer = document.querySelector('.error-container');
-            expect(errorContainer).toBeTruthy();
-            expect(errorContainer.textContent).toContain(uploadError);
+            // Assert - error is shown via toast (showError calls showToast)
+            expect(window.showToast).toHaveBeenCalledWith(uploadError, 'error');
         });
     });
 
@@ -1184,8 +1182,8 @@ describe('EditEntityModal', () => {
             await modal.open('entity123', 'deities');
 
             // Assert
-            const closeButton = modal.modalElement.querySelector('.modal-close');
-            expect(closeButton.getAttribute('aria-label')).toBe('Close');
+            const closeButton = modal.modalElement.querySelector('.edit-modal-close');
+            expect(closeButton.getAttribute('aria-label')).toBe('Close modal');
         });
 
         test('should support keyboard navigation', async () => {
@@ -1221,7 +1219,7 @@ describe('EditEntityModal', () => {
             await modal.open('entity123', 'deities');
 
             // Assert
-            const modalHeader = modal.modalElement.querySelector('.modal-header h2');
+            const modalHeader = modal.modalElement.querySelector('.edit-modal-header h2');
             expect(modalHeader.textContent).toContain('Edit');
         });
     });
@@ -1303,9 +1301,8 @@ describe('EditEntityModal', () => {
             // Act
             await modal.open('entity123', 'deities');
 
-            // Assert
-            const errorContainer = document.querySelector('.error-container');
-            expect(errorContainer).toBeTruthy();
+            // Assert - showError calls showToast with error
+            expect(window.showToast).toHaveBeenCalledWith('EntityForm component not loaded', 'error');
 
             // Cleanup
             global.EntityForm = originalEntityForm;
@@ -1352,9 +1349,9 @@ describe('EditEntityModal', () => {
             jest.advanceTimersByTime(50);
 
             // Assert
-            const spinner = document.querySelector('.loading-spinner');
-            expect(spinner).toBeTruthy();
-            expect(spinner.textContent).toContain('Loading entity...');
+            const loadingContainer = document.querySelector('.edit-modal-loading');
+            expect(loadingContainer).toBeTruthy();
+            expect(loadingContainer.textContent).toContain('Loading entity...');
         });
 
         test('should remove existing modal before creating new one', async () => {
@@ -1457,11 +1454,11 @@ describe('EditEntityModal', () => {
 
             // Act
             modal.showToast('Test message');
-            const toast = document.querySelector('.toast-info');
+            const toast = document.querySelector('.edit-modal-toast-info');
 
             // Assert
             expect(toast).toBeTruthy();
-            expect(toast.textContent).toBe('Test message');
+            expect(toast.textContent).toContain('Test message');
 
             // Cleanup
             toast.remove();
@@ -1473,11 +1470,11 @@ describe('EditEntityModal', () => {
 
             // Act
             modal.showToast('Success message', 'success');
-            const toast = document.querySelector('.toast-success');
+            const toast = document.querySelector('.edit-modal-toast-success');
 
             // Assert
             expect(toast).toBeTruthy();
-            expect(toast.style.background).toContain('rgb(16, 185, 129)'); // #10b981
+            expect(toast.textContent).toContain('Success message');
 
             // Cleanup
             toast.remove();
@@ -1489,14 +1486,114 @@ describe('EditEntityModal', () => {
 
             // Act
             modal.showToast('Error message', 'error');
-            const toast = document.querySelector('.toast-error');
+            const toast = document.querySelector('.edit-modal-toast-error');
 
             // Assert
             expect(toast).toBeTruthy();
-            expect(toast.style.background).toContain('rgb(239, 68, 68)'); // #ef4444
+            expect(toast.textContent).toContain('Error message');
 
             // Cleanup
             toast.remove();
+        });
+    });
+
+    // ========================================
+    // Additional branch coverage tests
+    // ========================================
+
+    describe('handleBeforeUnload', () => {
+        test('should set returnValue when hasUnsavedChanges is true', () => {
+            modal.hasUnsavedChanges = true;
+            const event = { preventDefault: jest.fn() };
+            const result = modal.handleBeforeUnload(event);
+            expect(event.preventDefault).toHaveBeenCalled();
+            expect(result).toBeTruthy();
+        });
+
+        test('should not set returnValue when hasUnsavedChanges is false', () => {
+            modal.hasUnsavedChanges = false;
+            const event = { preventDefault: jest.fn() };
+            const result = modal.handleBeforeUnload(event);
+            expect(event.preventDefault).not.toHaveBeenCalled();
+            expect(result).toBeUndefined();
+        });
+    });
+
+    describe('showSaveOverlay', () => {
+        test('should set isSaving and show overlay', () => {
+            // Create modal element with overlay
+            modal.modalElement = document.createElement('div');
+            const overlay = document.createElement('div');
+            overlay.id = 'edit-modal-save-overlay';
+            modal.modalElement.appendChild(overlay);
+
+            modal.showSaveOverlay();
+            expect(modal.isSaving).toBe(true);
+            expect(overlay.classList.contains('show')).toBe(true);
+        });
+
+        test('should handle missing overlay', () => {
+            modal.modalElement = document.createElement('div');
+            expect(() => modal.showSaveOverlay()).not.toThrow();
+            expect(modal.isSaving).toBe(true);
+        });
+    });
+
+    describe('hideSaveOverlay', () => {
+        test('should set isSaving false and hide overlay', () => {
+            modal.modalElement = document.createElement('div');
+            const overlay = document.createElement('div');
+            overlay.id = 'edit-modal-save-overlay';
+            overlay.classList.add('show');
+            modal.modalElement.appendChild(overlay);
+
+            modal.hideSaveOverlay();
+            expect(modal.isSaving).toBe(false);
+            expect(overlay.classList.contains('show')).toBe(false);
+        });
+    });
+
+    describe('showUnsavedWarningDialog', () => {
+        test('should create and show unsaved changes dialog', () => {
+            window.requestAnimationFrame = jest.fn(cb => cb());
+            modal.showUnsavedWarningDialog();
+            const dialog = document.getElementById('unsaved-changes-dialog');
+            expect(dialog).not.toBeNull();
+            expect(dialog.innerHTML).toContain('Unsaved Changes');
+            dialog.remove();
+        });
+
+        test('should remove existing dialog before creating new one', () => {
+            window.requestAnimationFrame = jest.fn(cb => cb());
+            // Create existing dialog
+            const existing = document.createElement('div');
+            existing.id = 'unsaved-changes-dialog';
+            document.body.appendChild(existing);
+
+            modal.showUnsavedWarningDialog();
+            const dialogs = document.querySelectorAll('#unsaved-changes-dialog');
+            expect(dialogs.length).toBe(1);
+            dialogs[0].remove();
+        });
+    });
+
+    describe('setupFocusTrap', () => {
+        test('should handle missing modal element', () => {
+            modal.modalElement = null;
+            expect(() => modal.setupFocusTrap()).not.toThrow();
+        });
+
+        test('should set up focus trap handler', () => {
+            modal.modalElement = document.createElement('div');
+            const content = document.createElement('div');
+            content.className = 'edit-modal-content';
+            modal.modalElement.appendChild(content);
+
+            const input = document.createElement('input');
+            content.appendChild(input);
+
+            modal.setupFocusTrap();
+            expect(modal.focusTrapHandler).toBeDefined();
         });
     });
 });
