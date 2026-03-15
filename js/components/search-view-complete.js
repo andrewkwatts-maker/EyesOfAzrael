@@ -21,15 +21,23 @@ class SearchViewComplete {
         this.db = firestoreInstance;
         this.virtualScroller = null;
 
-        // Initialize search engine (prefer enhanced version)
+        // Initialize search engine (prefer enhanced version, then base, then global)
         if (typeof EnhancedCorpusSearch !== 'undefined') {
             this.searchEngine = new EnhancedCorpusSearch(firestoreInstance);
             console.log('[SearchView] Using EnhancedCorpusSearch');
         } else if (typeof CorpusSearch !== 'undefined') {
             this.searchEngine = new CorpusSearch(firestoreInstance);
             console.log('[SearchView] Using CorpusSearch');
+        } else if (window.EyesOfAzrael && window.EyesOfAzrael.search) {
+            this.searchEngine = window.EyesOfAzrael.search;
+            console.log('[SearchView] Using global search instance');
         } else {
-            throw new Error('CorpusSearch component not loaded');
+            console.error('[SearchView] No search engine available, using minimal fallback');
+            // Minimal fallback that returns empty results
+            this.searchEngine = {
+                search: async () => ({ items: [], total: 0 }),
+                getSuggestions: async () => []
+            };
         }
 
         // State
@@ -952,8 +960,8 @@ class SearchViewComplete {
         // Sort results
         const sortedResults = this.sortResults([...this.state.results]);
 
-        // Use virtual scrolling for large result sets
-        const useVirtualScrolling = sortedResults.length > 100;
+        // Use virtual scrolling for large result sets (only if VirtualScroller is available)
+        const useVirtualScrolling = sortedResults.length > 100 && typeof VirtualScroller !== 'undefined';
 
         if (useVirtualScrolling) {
             pagination.style.display = 'none';
