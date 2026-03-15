@@ -1393,7 +1393,21 @@ class SPANavigation {
             const entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
             if (entities.length > 0) {
-                container.innerHTML = this.renderer.render(entities, 'grid');
+                if (this.renderer && typeof this.renderer.render === 'function') {
+                    try {
+                        const html = this.renderer.render(entities, 'grid');
+                        if (typeof html === 'string') {
+                            container.innerHTML = html;
+                        } else {
+                            container.innerHTML = '<p>Featured entities loaded</p>';
+                        }
+                    } catch (renderError) {
+                        spaWarn('Renderer failed for featured entities:', renderError.message);
+                        container.innerHTML = '<p>Featured entities available</p>';
+                    }
+                } else {
+                    container.innerHTML = '<p>Featured entities available</p>';
+                }
             } else {
                 container.innerHTML = '<p>No featured entities found</p>';
             }
@@ -1406,6 +1420,11 @@ class SPANavigation {
     async renderMythologies() {
         spaLog('renderMythologies() called');
         const mainContent = document.getElementById('main-content');
+
+        if (!mainContent) {
+            spaError('CRITICAL: main-content element not found for mythologies!');
+            return;
+        }
 
         if (typeof MythologiesView !== 'undefined') {
             const mythologiesView = new MythologiesView(this.db);
@@ -1421,13 +1440,30 @@ class SPANavigation {
         spaLog(`renderBrowseCategory() called: ${category}${mythology ? ` (${mythology})` : ''}`);
         const mainContent = document.getElementById('main-content');
 
+        if (!mainContent) {
+            spaError('CRITICAL: main-content element not found for browse category!');
+            return;
+        }
+
         if (typeof BrowseCategoryView !== 'undefined') {
-            const browseView = new BrowseCategoryView(this.db);
-            await browseView.render(mainContent, { category, mythology });
-            spaLog('Browse category rendered');
+            try {
+                const browseView = new BrowseCategoryView(this.db);
+                await browseView.render(mainContent, { category, mythology });
+                spaLog('Browse category rendered');
+            } catch (error) {
+                spaError('BrowseCategoryView render failed:', error);
+                mainContent.innerHTML = this.getErrorHTML(
+                    `Failed to Load ${category}`,
+                    error.message || 'An unexpected error occurred while loading this category.'
+                );
+            }
         } else {
-            mainContent.innerHTML = `<div class="error-page"><h1>Browse View not available</h1></div>`;
-            spaError('BrowseCategoryView class not found');
+            spaError('BrowseCategoryView class not found, using basic fallback');
+            try {
+                mainContent.innerHTML = await this.renderBasicCategoryPage(mythology || '', category);
+            } catch (fallbackError) {
+                mainContent.innerHTML = this.getErrorHTML('Browse View not available', 'The browse view could not be loaded.');
+            }
         }
     }
 
@@ -1436,6 +1472,11 @@ class SPANavigation {
 
         try {
             const mainContent = document.getElementById('main-content');
+
+            if (!mainContent) {
+                spaError('CRITICAL: main-content element not found for mythology render!');
+                return;
+            }
 
             if (typeof MythologyOverview !== 'undefined') {
                 spaLog('MythologyOverview class available, using it...');
@@ -1541,6 +1582,11 @@ class SPANavigation {
         try {
             const mainContent = document.getElementById('main-content');
 
+            if (!mainContent) {
+                spaError('CRITICAL: main-content element not found for category render!');
+                return;
+            }
+
             if (typeof BrowseCategoryView !== 'undefined') {
                 spaLog('BrowseCategoryView class available, using it...');
                 const browseView = new BrowseCategoryView(this.db);
@@ -1605,6 +1651,11 @@ class SPANavigation {
 
         try {
             const mainContent = document.getElementById('main-content');
+
+            if (!mainContent) {
+                spaError('CRITICAL: main-content element not found for entity render!');
+                return;
+            }
 
             // Check for prefetched data from various sources
             if (!prefetchedData) {
@@ -2002,6 +2053,11 @@ class SPANavigation {
     renderError(error, failedRoute = null) {
         const mainContent = document.getElementById('main-content');
         const route = failedRoute || this.currentRoute || window.location.hash || '#/';
+
+        if (!mainContent) {
+            spaError('CRITICAL: main-content element not found for error display!');
+            return;
+        }
 
         mainContent.innerHTML = `
             <div class="error-page spa-error-recovery" style="text-align: center; padding: 4rem 2rem;">

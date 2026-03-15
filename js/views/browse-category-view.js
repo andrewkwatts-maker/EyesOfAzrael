@@ -20,8 +20,8 @@
 class BrowseCategoryView {
     constructor(firestore) {
         this.db = firestore;
-        this.cache = window.cacheManager || new FirebaseCacheManager({ db: firestore });
-        this.assetService = new AssetService();
+        this.cache = window.cacheManager || (typeof FirebaseCacheManager !== 'undefined' ? new FirebaseCacheManager({ db: firestore }) : { getList: async () => null, defaultTTL: {} });
+        this.assetService = typeof AssetService !== 'undefined' ? new AssetService() : null;
         this.entities = [];
         this.filteredEntities = [];
         this.displayedEntities = [];
@@ -137,17 +137,33 @@ class BrowseCategoryView {
 
         try {
             // Check user preference for community content
-            const prefsService = new UserPreferencesService();
-            await prefsService.init();
-            this.showUserContent = prefsService.shouldShowUserContent();
+            if (typeof UserPreferencesService !== 'undefined') {
+                try {
+                    const prefsService = new UserPreferencesService();
+                    await prefsService.init();
+                    this.showUserContent = prefsService.shouldShowUserContent();
+                } catch (prefsError) {
+                    console.warn('[Browse View] UserPreferencesService failed, using defaults:', prefsError.message);
+                    this.showUserContent = false;
+                }
+            } else {
+                console.warn('[Browse View] UserPreferencesService not available, using defaults');
+                this.showUserContent = false;
+            }
 
             // Fetch using AssetService (handles standard + community assets)
-            this.entities = await this.assetService.getAssets(this.category, {
-                mythology: this.mythology,
-                includeUserContent: this.showUserContent,
-                orderBy: 'name',
-                limit: 500
-            });
+            if (this.assetService) {
+                this.entities = await this.assetService.getAssets(this.category, {
+                    mythology: this.mythology,
+                    includeUserContent: this.showUserContent,
+                    orderBy: 'name',
+                    limit: 500
+                });
+            } else {
+                // Fallback: direct Firebase query
+                console.warn('[Browse View] AssetService not available, using direct Firebase query');
+                this.entities = await this.loadEntitiesDirect();
+            }
 
             // Add metadata for sorting
             this.entities = this.entities.map((entity, index) => ({
@@ -172,6 +188,28 @@ class BrowseCategoryView {
     }
 
     /**
+     * Fallback: load entities directly from Firebase when AssetService is unavailable
+     */
+    async loadEntitiesDirect() {
+        const db = this.db || firebase.firestore();
+        let query = db.collection(this.category);
+
+        if (this.mythology) {
+            query = query.where('mythology', '==', this.mythology);
+        }
+
+        query = query.orderBy('name').limit(500);
+
+        const snapshot = await query.get();
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+            isStandard: true,
+            source: 'standard'
+        }));
+    }
+
+    /**
      * Initialize content filter component
      */
     async initContentFilter() {
@@ -181,16 +219,25 @@ class BrowseCategoryView {
             return;
         }
 
-        // Create content filter instance
-        this.contentFilter = new ContentFilter({
-            container: filterContainer,
-            category: this.category,
-            mythology: this.mythology,
-            onToggle: async (showUserContent) => {
-                this.showUserContent = showUserContent;
-                await this.reloadEntities();
-            }
-        });
+        if (typeof ContentFilter === 'undefined') {
+            console.warn('[Browse View] ContentFilter class not available, skipping filter init');
+            return;
+        }
+
+        try {
+            // Create content filter instance
+            this.contentFilter = new ContentFilter({
+                container: filterContainer,
+                category: this.category,
+                mythology: this.mythology,
+                onToggle: async (showUserContent) => {
+                    this.showUserContent = showUserContent;
+                    await this.reloadEntities();
+                }
+            });
+        } catch (error) {
+            console.warn('[Browse View] ContentFilter initialization failed:', error.message);
+        }
     }
 
     /**
@@ -201,12 +248,16 @@ class BrowseCategoryView {
 
         try {
             // Re-fetch entities
-            this.entities = await this.assetService.getAssets(this.category, {
-                mythology: this.mythology,
-                includeUserContent: this.showUserContent,
-                orderBy: 'name',
-                limit: 500
-            });
+            if (this.assetService) {
+                this.entities = await this.assetService.getAssets(this.category, {
+                    mythology: this.mythology,
+                    includeUserContent: this.showUserContent,
+                    orderBy: 'name',
+                    limit: 500
+                });
+            } else {
+                this.entities = await this.loadEntitiesDirect();
+            }
 
             // Add metadata
             this.entities = this.entities.map((entity, index) => ({
@@ -1431,7 +1482,7 @@ class BrowseCategoryView {
         this.setupMobileContextMenus(signal);
 
         // Register cleanup with SPA navigation
-        if (window.SPANavigation) {
+        if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
             window.SPANavigation.registerViewCleanup(() => this.cleanup());
         }
     }

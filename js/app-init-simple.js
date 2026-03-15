@@ -1013,6 +1013,9 @@ console.log('[App Init] Script loaded - starting execution');
                     window.EyesOfAzrael.auth,
                     window.EyesOfAzrael.renderer
                 );
+                // Expose instance as window.SPANavigation so views can call
+                // instance methods like registerViewCleanup()
+                window.SPANavigation = window.EyesOfAzrael.navigation;
                 initState.navigationReady = true;
                 console.log('[App] Navigation initialized');
             } catch (error) {

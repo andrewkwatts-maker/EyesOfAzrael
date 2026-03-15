@@ -6,7 +6,7 @@
 class HomeView {
     constructor(firestore) {
         this.db = firestore;
-        this.cache = window.cacheManager || new FirebaseCacheManager({ db: firestore });
+        this.cache = window.cacheManager || (typeof FirebaseCacheManager !== 'undefined' ? new FirebaseCacheManager({ db: firestore }) : { getList: async () => null, defaultTTL: { mythologies: 3600000 }, getMetadata: async () => null });
         this.mythologies = [];
         this.loadingTimeout = null;
         this.loadingStartTime = null;
@@ -757,7 +757,7 @@ class HomeView {
         });
 
         // Register cleanup with SPA navigation
-        if (window.SPANavigation) {
+        if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
             window.SPANavigation.registerViewCleanup(() => this.cleanup());
         }
     }

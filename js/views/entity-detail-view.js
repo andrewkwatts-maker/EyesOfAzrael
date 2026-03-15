@@ -1184,7 +1184,7 @@
     window.EntityDetailView = EntityDetailView;
 
     // Auto-register with SPA navigation if available
-    if (window.SPANavigation) {
+    if (window.SPANavigation && typeof window.SPANavigation.registerView === 'function') {
         const entityDetailView = new EntityDetailView();
         window.SPANavigation.registerView('entity-detail', entityDetailView);
     }
