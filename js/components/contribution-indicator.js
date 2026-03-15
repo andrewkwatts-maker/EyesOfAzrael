@@ -775,12 +775,14 @@ ContributionIndicator.getLevelForScore = function(score) {
     return levels.STUB;
 };
 
-// ES Module Export
-export { ContributionIndicator };
-
-// Legacy global export
+// Global export (loaded as regular script, not ES module)
 if (typeof window !== 'undefined') {
     window.ContributionIndicator = ContributionIndicator;
+}
+
+// CommonJS export for tests
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ContributionIndicator;
 }
 
 /**
