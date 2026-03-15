@@ -23,7 +23,7 @@
  * - Add truncateDescription() to prevent text overflow in card grids
  */
 
-const CACHE_VERSION = 'v3.0.0';
+const CACHE_VERSION = 'v3.2.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 
 // Separate caches for different content types
