@@ -20,5 +20,12 @@ window.firebaseConfig = {
 // Also create local reference for backwards compatibility
 const firebaseConfig = window.firebaseConfig;
 
-// Don't initialize here - let app-init.js handle it
-console.log('✅ Firebase config loaded');
+// Initialize Firebase immediately so services are available to all scripts
+try {
+  if (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length === 0) {
+    firebase.initializeApp(firebaseConfig);
+    console.log('[Firebase] Initialized successfully');
+  }
+} catch (e) {
+  console.warn('[Firebase] Init error:', e.message);
+}

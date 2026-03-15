@@ -8,7 +8,7 @@
  *   ScrollManager.restore('/previous-path', true); // smooth scroll
  */
 
-const ScrollManager = {
+window.ScrollManager = {
     _positions: new Map(),
     _maxEntries: 50,
 
@@ -97,8 +97,5 @@ const ScrollManager = {
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = ScrollManager;
+    module.exports = window.ScrollManager;
 }
-
-// Export to window for browser usage
-window.ScrollManager = ScrollManager;

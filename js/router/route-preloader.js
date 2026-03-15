@@ -8,7 +8,7 @@
  *   RoutePreloader.clearCache();
  */
 
-const RoutePreloader = {
+window.RoutePreloader = {
     _cache: new Map(),
     _pending: new Map(),
     _maxCacheSize: 20,
@@ -173,8 +173,5 @@ const RoutePreloader = {
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = RoutePreloader;
+    module.exports = window.RoutePreloader;
 }
-
-// Export to window for browser usage
-window.RoutePreloader = RoutePreloader;
