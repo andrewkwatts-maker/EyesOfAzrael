@@ -30,7 +30,16 @@ class PrivateNotesService {
 
     async init() {
         if (this.initialized) return;
-        if (!firebase || !firebase.firestore) {
+
+        // Wait for Firebase to be available (retry up to 10 times)
+        let retries = 0;
+        while ((!window.firebase || !firebase.firestore) && retries < 10) {
+            await new Promise(resolve => setTimeout(resolve, 300));
+            retries++;
+        }
+
+        if (!window.firebase || !firebase.firestore) {
+            console.error('[PrivateNotesService] Firebase not available after retries');
             throw new Error('Firebase not initialized');
         }
         this.db = firebase.firestore();

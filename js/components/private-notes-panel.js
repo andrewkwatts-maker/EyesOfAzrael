@@ -27,6 +27,7 @@ class PrivateNotesPanel {
     async init() {
         if (!window.privateNotesService) {
             console.warn('[PrivateNotes] PrivateNotesService not available');
+            this.container.innerHTML = '';
             return;
         }
 
@@ -37,7 +38,14 @@ class PrivateNotesPanel {
             return;
         }
 
-        await window.privateNotesService.init();
+        try {
+            await window.privateNotesService.init();
+        } catch (err) {
+            console.error('[PrivateNotes] PrivateNotesService init failed:', err);
+            this.container.innerHTML = '';
+            return;
+        }
+
         this.render();
         await this.loadNotes();
     }
@@ -249,9 +257,27 @@ class PrivateNotesPanel {
         if (this.notes.length === 0) {
             listEl.innerHTML = `
                 <div class="private-notes-empty">
-                    <p>No private notes yet. Click "Add Note" to create one.</p>
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4" style="margin-bottom: 0.5rem;">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="12" y1="18" x2="12" y2="12"/>
+                        <line x1="9" y1="15" x2="15" y2="15"/>
+                    </svg>
+                    <p style="font-weight: 500; margin-bottom: 0.25rem;">No notes yet</p>
+                    <p style="opacity: 0.7; font-size: 0.85rem;">Add private annotations, reminders, or insights about <strong>${this._escapeHtml(this.entity.name || 'this entity')}</strong>. Only you can see these.</p>
+                    <button class="private-notes-add-btn private-notes-empty-cta" id="privateNotesEmptyAdd" style="margin-top: 0.75rem;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14M5 12h14"/>
+                        </svg>
+                        Add Your First Note
+                    </button>
                 </div>
             `;
+            // Bind the empty-state add button
+            document.getElementById('privateNotesEmptyAdd')?.addEventListener('click', () => {
+                this.editingNoteId = null;
+                this._showForm();
+            });
             return;
         }
 

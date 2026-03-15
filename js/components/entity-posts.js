@@ -24,10 +24,18 @@ class EntityPostsComponent {
     async init() {
         if (!window.postsService) {
             console.warn('[EntityPosts] PostsService not available');
+            this.container.innerHTML = '';
             return;
         }
 
-        await window.postsService.init();
+        try {
+            await window.postsService.init();
+        } catch (err) {
+            console.error('[EntityPosts] PostsService init failed:', err);
+            this.container.innerHTML = '';
+            return;
+        }
+
         this.render();
         await this.loadPosts();
     }
@@ -104,12 +112,13 @@ class EntityPostsComponent {
 
                 <div class="entity-posts-empty" id="entityPostsEmpty" style="display:none;">
                     <div class="entity-posts-empty-icon">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5">
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
                         </svg>
                     </div>
-                    <h3>No posts yet</h3>
-                    <p>Be the first to start a discussion about ${this._escapeHtml(this.entity.name || 'this entity')}!</p>
+                    <h3>Start the conversation</h3>
+                    <p>No one has discussed <strong>${this._escapeHtml(this.entity.name || 'this entity')}</strong> yet. Share your insights, ask a question, or start a debate!</p>
+                    ${user ? `<p class="entity-posts-empty-hint">Use the text box above to write the first post.</p>` : `<p class="entity-posts-empty-hint">Sign in to be the first to contribute.</p>`}
                 </div>
             </div>
         `;
