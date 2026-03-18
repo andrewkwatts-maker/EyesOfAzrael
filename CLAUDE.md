@@ -113,9 +113,24 @@ npm run test:ci      # CI mode with coverage
 npm run test:e2e     # Playwright E2E tests
 npm run lint         # ESLint (flat config, v10+)
 npm run validate:project  # Check index.html references + orphaned files
-npm run push         # Upload to Firebase
-npm run deploy       # Deploy to Firebase Hosting
+npm run push:dry-run # Preview what would be uploaded to Firebase (safe)
+npm run push         # Upload enriched assets to Firebase Firestore
+npm run deploy       # Deploy to Firebase Hosting (firebase deploy --only hosting)
 ```
+
+### Safe Firebase Push (`scripts/safe-firebase-sync.js`)
+
+Pushes local JSON assets from `firebase-assets-downloaded/` to Firestore safely:
+
+1. **Backs up** current Firebase state to `backups/` before any writes
+2. **Compares timestamps** — only uploads assets where local `enrichedAt` is newer than Firebase
+3. **Dry-run by default** — `npm run push:dry-run` previews changes without writing
+4. **Upload mode** — `npm run push` (or `--upload`) actually pushes to Firestore
+5. **Category filter** — `node scripts/safe-firebase-sync.js --upload --category=deities`
+
+**Requires:** A Firebase Admin SDK service account key file (`eyesofazrael-firebase-adminsdk-*.json`) in the project root. Generate from Firebase Console > Project Settings > Service Accounts. These files are gitignored.
+
+**Reports:** Saves sync results to `scripts/reports/sync-report.json`.
 
 ### Module Pattern
 
