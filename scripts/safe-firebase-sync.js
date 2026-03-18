@@ -64,7 +64,10 @@ class SafeFirebaseSync {
 
     async initializeFirebase() {
         try {
-            const serviceAccountPath = path.join(this.baseDir, 'eyesofazrael-firebase-adminsdk-fbsvc-8366e4dac5.json');
+            // Find any Firebase admin SDK key file in the project root
+            const keyFiles = fs.readdirSync(this.baseDir).filter(f => f.match(/eyesofazrael-firebase-adminsdk.*\.json$/));
+            if (keyFiles.length === 0) throw new Error('No Firebase admin SDK key file found. Generate one from Firebase Console > Project Settings > Service Accounts.');
+            const serviceAccountPath = path.join(this.baseDir, keyFiles[0]);
             const serviceAccount = require(serviceAccountPath);
 
             admin.initializeApp({
