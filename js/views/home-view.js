@@ -88,6 +88,25 @@ class HomeView {
             </div>
         `;
 
+        // Setup early abort controller for retry delegation (before attachEventListeners)
+        if (this._abortController) {
+            this._abortController.abort();
+        }
+        this._abortController = new AbortController();
+
+        // Delegated retry handler - works for timeout and error states
+        container.addEventListener('click', (e) => {
+            const retryBtn = e.target.closest('[data-action="retry"]');
+            if (retryBtn) {
+                this.render(container);
+            }
+        }, { signal: this._abortController.signal });
+
+        // Register cleanup with SPA navigation
+        if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
+            window.SPANavigation.registerViewCleanup(() => this.cleanup());
+        }
+
         // Set timeout fallback
         this.loadingTimeout = setTimeout(() => {
             this.handleLoadingTimeout(container);
@@ -206,8 +225,8 @@ class HomeView {
                         This could be due to a slow connection or Firebase issues.
                     </p>
                     <div class="timeout-actions" style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                        <button class="btn-primary" onclick="location.reload()">
-                            🔄 Retry Loading
+                        <button class="btn-primary" data-action="retry">
+                            Retry Loading
                         </button>
                         <button class="btn-secondary" id="useCachedDataBtn">
                             💾 Use Cached Data
@@ -681,18 +700,8 @@ class HomeView {
 
                 <!-- Action buttons -->
                 <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <button onclick="location.reload()" style="
-                        padding: 0.75rem 1.5rem;
-                        background: var(--color-primary, #8b7fff);
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        font-size: 1rem;
-                        transition: all 0.3s ease;
-                    " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 12px rgba(139, 127, 255, 0.4)'"
-                       onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                        🔄 Retry Loading
+                    <button class="btn-primary" data-action="retry">
+                        Retry Loading
                     </button>
 
                     <button id="useFallbackBtn" style="
@@ -744,8 +753,10 @@ class HomeView {
      * Attach event listeners with proper cleanup
      */
     attachEventListeners() {
-        // Initialize cleanup tracking
-        this._abortController = new AbortController();
+        // Reuse abort controller from render(), or create if needed
+        if (!this._abortController) {
+            this._abortController = new AbortController();
+        }
         const signal = this._abortController.signal;
 
         // Add hover effects or click tracking if needed
@@ -755,11 +766,6 @@ class HomeView {
                 console.log('[Home View] Hovering over:', card.dataset.mythology);
             }, { signal });
         });
-
-        // Register cleanup with SPA navigation
-        if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
-            window.SPANavigation.registerViewCleanup(() => this.cleanup());
-        }
     }
 
     /**

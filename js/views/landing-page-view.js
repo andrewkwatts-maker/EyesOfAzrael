@@ -313,15 +313,16 @@ class LandingPageView {
                     <div class="error-container" role="alert" style="padding: 2rem; text-align: center; color: #ef4444;">
                         <h2>Error Loading Landing Page</h2>
                         <p>${this.escapeHTML(error.message)}</p>
-                        <button onclick="location.reload()"
-                                style="margin-top: 1rem; padding: 0.75rem 1.5rem; cursor: pointer;
-                                       background: #ef4444; color: white; border: none; border-radius: 8px;
-                                       font-size: 1rem; min-height: 44px;"
+                        <button class="btn-primary" data-action="retry"
                                 aria-label="Retry loading the page">
                             Retry
                         </button>
                     </div>
                 `;
+                const retryBtn = container.querySelector('[data-action="retry"]');
+                if (retryBtn) {
+                    retryBtn.addEventListener('click', () => this.render(container));
+                }
             }
             throw error; // Re-throw so SPA can catch it too
         }
