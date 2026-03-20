@@ -21,6 +21,7 @@ class MythologiesView {
             };
         }
         this.mythologies = [];
+        this._abortController = null;
     }
 
     /**
@@ -28,6 +29,12 @@ class MythologiesView {
      */
     async render(container) {
         console.log('[Mythologies View] Rendering...');
+
+        // Abort any previous listeners
+        if (this._abortController) {
+            this._abortController.abort();
+        }
+        this._abortController = new AbortController();
 
         // Show loading with skeleton state
         container.innerHTML = this.getLoadingHTML();
@@ -63,6 +70,11 @@ class MythologiesView {
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: { view: 'mythologies', timestamp: Date.now() }
             }));
+
+            // Register cleanup with SPA navigation
+            if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
+                window.SPANavigation.registerViewCleanup(() => this.cleanup());
+            }
 
             console.log('[Mythologies View] Render complete');
 
@@ -188,12 +200,12 @@ class MythologiesView {
                             <span class="region-index-subtitle">${Object.keys(regions).length} cultural regions</span>
                         </div>
                         <div class="region-index-chips">
-                            <button class="region-chip active" data-region="all" onclick="document.querySelectorAll('.mythology-card').forEach(c=>c.style.display='');document.querySelectorAll('.region-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');">
+                            <button class="region-chip active" data-region="all">
                                 All Traditions
                                 <span class="region-chip-count">${this.mythologies.length}</span>
                             </button>
                             ${Object.entries(regions).map(([region, myths]) => `
-                                <button class="region-chip" data-region="${region}" onclick="document.querySelectorAll('.mythology-card').forEach(c=>{c.style.display=c.dataset.region==='${region}'?'':'none'});document.querySelectorAll('.region-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active');">
+                                <button class="region-chip" data-region="${region}">
                                     ${region}
                                     <span class="region-chip-count">${myths.length}</span>
                                 </button>
@@ -209,7 +221,7 @@ class MythologiesView {
 
                 <!-- Back to top -->
                 <div class="mythologies-back-to-top">
-                    <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" class="back-to-top-link">Back to top</a>
+                    <button class="back-to-top-btn">Back to top</button>
                 </div>
             </div>
         `;
@@ -326,13 +338,48 @@ class MythologiesView {
      * Attach event listeners
      */
     attachEventListeners() {
+        const signal = this._abortController ? this._abortController.signal : undefined;
+
+        // Card click listeners
         const cards = document.querySelectorAll('.mythology-card');
         cards.forEach(card => {
             card.addEventListener('click', () => {
                 const mythology = card.dataset.mythology;
                 console.log('[Mythologies View] Selected:', mythology);
-            });
+            }, { signal });
         });
+
+        // Region chip filtering via event delegation
+        const chipsContainer = document.querySelector('.region-index-chips');
+        if (chipsContainer) {
+            chipsContainer.addEventListener('click', (e) => {
+                const chip = e.target.closest('.region-chip');
+                if (!chip) return;
+
+                const region = chip.dataset.region;
+                const allCards = document.querySelectorAll('.mythology-card');
+                const allChips = document.querySelectorAll('.region-chip');
+
+                allChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+
+                if (region === 'all') {
+                    allCards.forEach(c => c.style.display = '');
+                } else {
+                    allCards.forEach(c => {
+                        c.style.display = c.dataset.region === region ? '' : 'none';
+                    });
+                }
+            }, { signal });
+        }
+
+        // Back to top button
+        const backToTopBtn = document.querySelector('.back-to-top-btn');
+        if (backToTopBtn) {
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, { signal });
+        }
     }
 
     /**
@@ -344,9 +391,27 @@ class MythologiesView {
                 <div class="error-icon">⚠️</div>
                 <h2>Failed to Load Mythologies</h2>
                 <p>${error.message}</p>
-                <button onclick="location.reload()" class="btn-primary">Retry</button>
+                <button class="btn-primary" data-action="retry">Retry</button>
             </div>
         `;
+
+        // Delegated retry handler
+        const signal = this._abortController ? this._abortController.signal : undefined;
+        container.addEventListener('click', (e) => {
+            if (e.target.closest('[data-action="retry"]')) {
+                this.render(container);
+            }
+        }, { signal });
+    }
+
+    /**
+     * Cleanup event listeners and resources
+     */
+    cleanup() {
+        if (this._abortController) {
+            this._abortController.abort();
+            this._abortController = null;
+        }
     }
 }
 
