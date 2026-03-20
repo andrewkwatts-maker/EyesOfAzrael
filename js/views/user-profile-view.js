@@ -107,6 +107,11 @@ class UserProfileView {
             // Load initial tab content
             await this._loadTabContent(this.currentTab);
 
+            // Register cleanup with SPA
+            if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
+                window.SPANavigation.registerViewCleanup(() => this.cleanup());
+            }
+
         } catch (error) {
             console.error('[UserProfileView] Error loading profile:', error);
             this.container.innerHTML = this._getErrorHTML(error.message);
@@ -757,6 +762,21 @@ class UserProfileView {
             console.error('[UserProfileView] Error blocking user:', error);
             alert('Failed to block user: ' + error.message);
         }
+    }
+
+    /**
+     * Cleanup - called by SPA navigation on view change
+     */
+    cleanup() {
+        // Unsubscribe from Firebase listeners
+        this.unsubscribers.forEach(unsub => {
+            if (typeof unsub === 'function') unsub();
+        });
+        this.unsubscribers = [];
+
+        // Null out references
+        this.container = null;
+        this.profileData = null;
     }
 
     /**
