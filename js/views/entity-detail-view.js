@@ -52,6 +52,8 @@
             this.currentEntity = null;
             this.currentRoute = null;
             this.isLoading = false;
+            this._abortController = null;
+            this.container = null;
 
             // Initialize components
             this.initializeComponents();
@@ -102,7 +104,12 @@
          * @param {Object} route - Route information { mythology, entityType, entityId }
          * @returns {string} Initial HTML (loading state)
          */
-        async render(route) {
+        async render(route, container) {
+            // Cleanup previous instance
+            if (this._abortController) this._abortController.abort();
+            this._abortController = new AbortController();
+            this.container = container;
+
             this.currentRoute = route;
             const { mythology, entityType, entityId } = route;
 
@@ -113,6 +120,10 @@
             setTimeout(() => {
                 this.loadAndRenderEntity(mythology, entityType, entityId);
             }, 0);
+
+            if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
+                window.SPANavigation.registerViewCleanup(() => this.cleanup());
+            }
 
             return loadingHtml;
         }
@@ -540,7 +551,7 @@
                         The ${this.getEntityTypeLabel(entityType).toLowerCase()} "${this.escapeHtml(entityId)}" could not be found.
                     </p>
                     <div class="edv-not-found__actions">
-                        <button class="edv-btn edv-btn--primary" onclick="window.history.back()">
+                        <button class="edv-btn edv-btn--primary" data-action="go-back">
                             Go Back
                         </button>
                         <a href="#/browse/${entityType}" class="edv-btn edv-btn--secondary">
@@ -549,6 +560,8 @@
                     </div>
                 </div>
             `;
+
+            this.attachEventListeners();
         }
 
         /**
@@ -564,15 +577,17 @@
                     <h2 class="edv-error__title">Error Loading Entity</h2>
                     <p class="edv-error__message">${this.escapeHtml(message || 'An unexpected error occurred.')}</p>
                     <div class="edv-error__actions">
-                        <button class="edv-btn edv-btn--primary" onclick="window.location.reload()">
+                        <button class="edv-btn edv-btn--primary" data-action="retry">
                             Retry
                         </button>
-                        <button class="edv-btn edv-btn--secondary" onclick="window.history.back()">
+                        <button class="edv-btn edv-btn--secondary" data-action="go-back">
                             Go Back
                         </button>
                     </div>
                 </div>
             `;
+
+            this.attachEventListeners();
         }
 
         /**
@@ -631,9 +646,32 @@
                 case 'print':
                     window.print();
                     break;
+                case 'go-back':
+                    window.history.back();
+                    break;
+                case 'retry':
+                    if (this.container && this.currentRoute) {
+                        this.render(this.currentRoute, this.container);
+                    } else {
+                        window.location.reload();
+                    }
+                    break;
                 default:
                     console.log('[EntityDetailView] Unknown action:', action);
             }
+        }
+
+        /**
+         * Cleanup view resources
+         */
+        cleanup() {
+            if (this._abortController) {
+                this._abortController.abort();
+                this._abortController = null;
+            }
+            this.currentEntity = null;
+            this.currentRoute = null;
+            this.container = null;
         }
 
         /**

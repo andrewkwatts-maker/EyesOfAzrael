@@ -36,6 +36,7 @@ class UserDashboardView {
 
         // Listeners for cleanup
         this.unsubscribers = [];
+        this._abortController = null;
 
         // Options
         this.options = {
@@ -269,6 +270,17 @@ class UserDashboardView {
             return;
         }
 
+        // Setup abort controller for this render cycle
+        if (this._abortController) {
+            this._abortController.abort();
+        }
+        this._abortController = new AbortController();
+
+        // Register cleanup with SPA navigation
+        if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
+            window.SPANavigation.registerViewCleanup(() => this.cleanup());
+        }
+
         // Show loading state
         this.container.innerHTML = this._getLoadingHTML();
 
@@ -282,6 +294,14 @@ class UserDashboardView {
             console.error('[UserDashboard] Error rendering:', error);
             this.container.innerHTML = this._getErrorHTML(error.message);
         }
+
+        // Delegated retry handler for error states
+        this.container.addEventListener('click', (e) => {
+            const retryBtn = e.target.closest('[data-action="retry"]');
+            if (retryBtn) {
+                this.render(this.container);
+            }
+        }, { signal: this._abortController.signal });
     }
 
     /**
@@ -291,13 +311,10 @@ class UserDashboardView {
         return `
             <div class="user-dashboard user-dashboard--loading">
                 <div class="dashboard-loader">
-                    <div class="loader-spinner">
-                        <svg viewBox="0 0 50 50" class="spinner-svg">
-                            <circle cx="25" cy="25" r="20" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
-                                <animate attributeName="stroke-dasharray" dur="1.5s" repeatCount="indefinite" values="1,150;90,150;90,150"/>
-                                <animate attributeName="stroke-dashoffset" dur="1.5s" repeatCount="indefinite" values="0;-35;-125"/>
-                            </circle>
-                        </svg>
+                    <div class="spinner-container">
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
+                        <div class="spinner-ring"></div>
                     </div>
                     <span class="loader-text">Loading your dashboard...</span>
                 </div>
@@ -321,7 +338,7 @@ class UserDashboardView {
                     </div>
                     <h2>Unable to load dashboard</h2>
                     <p>${this._escapeHtml(message)}</p>
-                    <button class="btn btn-primary" onclick="location.reload()">Try Again</button>
+                    <button class="btn btn-primary" data-action="retry">Try Again</button>
                 </div>
             </div>
         `;
@@ -1522,7 +1539,7 @@ class UserDashboardView {
             container.innerHTML = `
                 <div class="error-state">
                     <p>Failed to load contributions</p>
-                    <button class="btn btn-secondary" onclick="location.reload()">Retry</button>
+                    <button class="btn btn-secondary" data-action="retry">Retry</button>
                 </div>
             `;
         }
@@ -1638,14 +1655,27 @@ class UserDashboardView {
     }
 
     /**
-     * Cleanup
+     * Cleanup - called by SPA navigation on view change
      */
-    destroy() {
-        // Unsubscribe from listeners
+    cleanup() {
+        console.log('[UserDashboard] Running cleanup');
+
+        if (this._abortController) {
+            this._abortController.abort();
+            this._abortController = null;
+        }
+
         this.unsubscribers.forEach(unsub => {
             if (typeof unsub === 'function') unsub();
         });
         this.unsubscribers = [];
+    }
+
+    /**
+     * Full teardown
+     */
+    destroy() {
+        this.cleanup();
 
         // Destroy sub-components
         if (this.badgeDisplay) {
