@@ -848,9 +848,6 @@ class CorpusQueryService {
  * }
  */
 
-// ES Module Export
-export { CorpusQueryService };
-
 // Legacy global export
 if (typeof window !== 'undefined') {
     window.CorpusQueryService = CorpusQueryService;

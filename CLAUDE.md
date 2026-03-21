@@ -1,5 +1,9 @@
 # Eyes of Azrael - Project Documentation
 
+## Philosophy
+
+Let the mathematics and source material lead. Do not water down theories or omit rigorous connections out of fear of peer criticism. Core aspects of the theory have been lost in the past by being too sheepish to commit to what the evidence shows. Present findings with confidence — if the maths supports it, include it. Peer review is a process to sharpen work, not a reason to self-censor before it even happens.
+
 ## Overview
 
 Eyes of Azrael is a mythology encyclopedia web application built with vanilla JavaScript and Firebase.

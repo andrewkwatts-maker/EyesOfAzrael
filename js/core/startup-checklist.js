@@ -312,6 +312,7 @@ const StartupChecklist = {
 
     /**
      * Show modal with optional failure details
+     * @param {Object} results - Results from runAll()
      * @private
      */
     _showWarningModal(results) {
@@ -346,6 +347,7 @@ const StartupChecklist = {
 
     /**
      * Log results to console
+     * @param {Object} results - Results from runAll()
      * @private
      */
     _logResults(results) {

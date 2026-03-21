@@ -925,4 +925,3 @@ if (typeof window !== 'undefined') {
   window.FirebaseContentLoader = FirebaseContentLoader;
 }
 
-export { FirebaseContentLoader };

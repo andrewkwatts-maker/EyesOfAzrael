@@ -1,3 +1,4 @@
+/* eslint-disable no-undef -- COLORS is undefined; this file is unused (entity-types.js provides icons) */
 /**
  * Inline SVG Icons for Eyes of Azrael
  *

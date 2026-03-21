@@ -1,30 +1,11 @@
 /**
- * Content Filter Service
- * Eyes of Azrael Project
- *
- * Handles filtering, sorting, and pagination for user-submitted content.
- * Provides comprehensive tools for organizing and displaying community content.
- *
- * Features:
- * - Multiple sort options (popularity, controversy, date, contribution size)
- * - Controversy score calculation
- * - Contribution size/richness calculation
- * - Multiple filter functions (mythology, type, owner, status, date range)
- * - Pagination with page info
- * - Firestore query helpers
- *
- * Usage:
- *   const filterService = new ContentFilterService();
- *   const sorted = filterService.sortByOption(assets, SortOptions.MOST_POPULAR);
- *   const filtered = filterService.combineFilters(assets, [
- *     { type: 'mythology', value: 'greek' },
- *     { type: 'status', value: 'approved' }
- *   ]);
- *   const page = filterService.paginate(filtered, 1, 20);
+ * @module ContentFilterService
+ * @description Content Filter Service - Handles filtering, sorting, and pagination for user-submitted content.
  */
 
 /**
  * Sort options enumeration
+ * @enum {string}
  */
 const SortOptions = {
     MOST_POPULAR: 'most_popular',
@@ -39,6 +20,7 @@ const SortOptions = {
 
 /**
  * Filter types enumeration
+ * @enum {string}
  */
 const FilterTypes = {
     MYTHOLOGY: 'mythology',
@@ -50,6 +32,7 @@ const FilterTypes = {
 
 /**
  * Content status enumeration
+ * @enum {string}
  */
 const ContentStatus = {
     PENDING: 'pending',
@@ -58,6 +41,10 @@ const ContentStatus = {
     REJECTED: 'rejected'
 };
 
+/**
+ * @class ContentFilterService
+ * Handles filtering, sorting, and pagination for user-submitted content
+ */
 class ContentFilterService {
     constructor() {
         this.db = null;
@@ -67,6 +54,7 @@ class ContentFilterService {
 
     /**
      * Initialize the service with Firebase
+     * @returns {Promise<boolean>} True if initialization succeeded
      */
     async init() {
         if (this.initialized) return true;
@@ -259,6 +247,12 @@ class ContentFilterService {
 
     // Private helper methods for contribution size calculation
 
+    /**
+     * Extract all text content from an asset
+     * @param {Object} asset - The asset object
+     * @returns {string} Concatenated text content
+     * @private
+     */
     _extractTextContent(asset) {
         let text = '';
 
@@ -301,6 +295,12 @@ class ContentFilterService {
         return text;
     }
 
+    /**
+     * Count content sections in an asset
+     * @param {Object} asset - The asset object
+     * @returns {number} Section count
+     * @private
+     */
     _countSections(asset) {
         let count = 0;
 
@@ -324,6 +324,12 @@ class ContentFilterService {
         return count;
     }
 
+    /**
+     * Count relationships in an asset
+     * @param {Object} asset - The asset object
+     * @returns {number} Relationship count
+     * @private
+     */
     _countRelationships(asset) {
         let count = 0;
 
@@ -351,6 +357,12 @@ class ContentFilterService {
         return count;
     }
 
+    /**
+     * Count sources and citations in an asset
+     * @param {Object} asset - The asset object
+     * @returns {number} Source count
+     * @private
+     */
     _countSources(asset) {
         let count = 0;
 
@@ -378,6 +390,12 @@ class ContentFilterService {
         return count;
     }
 
+    /**
+     * Count images in an asset
+     * @param {Object} asset - The asset object
+     * @returns {number} Image count
+     * @private
+     */
     _countImages(asset) {
         let count = 0;
 
@@ -399,6 +417,12 @@ class ContentFilterService {
         return count;
     }
 
+    /**
+     * Count corpus queries in an asset
+     * @param {Object} asset - The asset object
+     * @returns {number} Corpus query count
+     * @private
+     */
     _countCorpusQueries(asset) {
         let count = 0;
 
@@ -470,6 +494,8 @@ class ContentFilterService {
 
     /**
      * Sort by most popular (upvotes DESC)
+     * @param {Array} assets - Assets to sort (mutates in place)
+     * @returns {Array} Sorted assets
      */
     sortByMostPopular(assets) {
         return assets.sort((a, b) => {
@@ -481,6 +507,8 @@ class ContentFilterService {
 
     /**
      * Sort by least popular (upvotes ASC)
+     * @param {Array} assets - Assets to sort (mutates in place)
+     * @returns {Array} Sorted assets
      */
     sortByLeastPopular(assets) {
         return assets.sort((a, b) => {
@@ -492,6 +520,8 @@ class ContentFilterService {
 
     /**
      * Sort by most controversial (controversy score DESC)
+     * @param {Array} assets - Assets to sort (mutates in place)
+     * @returns {Array} Sorted assets
      */
     sortByMostControversial(assets) {
         return assets.sort((a, b) => {
@@ -503,6 +533,8 @@ class ContentFilterService {
 
     /**
      * Sort by least controversial (controversy score ASC)
+     * @param {Array} assets - Assets to sort (mutates in place)
+     * @returns {Array} Sorted assets
      */
     sortByLeastControversial(assets) {
         return assets.sort((a, b) => {
@@ -514,6 +546,8 @@ class ContentFilterService {
 
     /**
      * Sort by newest (createdAt DESC)
+     * @param {Array} assets - Assets to sort (mutates in place)
+     * @returns {Array} Sorted assets
      */
     sortByNewest(assets) {
         return assets.sort((a, b) => {
@@ -525,6 +559,8 @@ class ContentFilterService {
 
     /**
      * Sort by oldest (createdAt ASC)
+     * @param {Array} assets - Assets to sort (mutates in place)
+     * @returns {Array} Sorted assets
      */
     sortByOldest(assets) {
         return assets.sort((a, b) => {
@@ -536,6 +572,8 @@ class ContentFilterService {
 
     /**
      * Sort by biggest contribution (content size DESC)
+     * @param {Array} assets - Assets to sort (mutates in place)
+     * @returns {Array} Sorted assets
      */
     sortByBiggestContribution(assets) {
         return assets.sort((a, b) => {
@@ -547,6 +585,8 @@ class ContentFilterService {
 
     /**
      * Sort by smallest contribution (content size ASC)
+     * @param {Array} assets - Assets to sort (mutates in place)
+     * @returns {Array} Sorted assets
      */
     sortBySmallestContribution(assets) {
         return assets.sort((a, b) => {
@@ -558,6 +598,12 @@ class ContentFilterService {
 
     // Private helpers for sorting
 
+    /**
+     * Get upvote count from an asset
+     * @param {Object} asset - The asset object
+     * @returns {number} Upvote count
+     * @private
+     */
     _getUpvotes(asset) {
         // Check various field names for upvote counts
         if (typeof asset.upvotes === 'number') return asset.upvotes;
@@ -567,12 +613,24 @@ class ContentFilterService {
         return 0;
     }
 
+    /**
+     * Get downvote count from an asset
+     * @param {Object} asset - The asset object
+     * @returns {number} Downvote count
+     * @private
+     */
     _getDownvotes(asset) {
         if (typeof asset.downvotes === 'number') return asset.downvotes;
         if (typeof asset.downvoteCount === 'number') return asset.downvoteCount;
         return 0;
     }
 
+    /**
+     * Get or calculate controversy score for an asset
+     * @param {Object} asset - The asset object
+     * @returns {number} Controversy score
+     * @private
+     */
     _getControversyScore(asset) {
         // Use pre-calculated score if available
         if (typeof asset.controversyScore === 'number') {
@@ -591,6 +649,12 @@ class ContentFilterService {
         return this.calculateControversyScore(upvotes, downvotes);
     }
 
+    /**
+     * Get timestamp in milliseconds from an asset
+     * @param {Object} asset - The asset object
+     * @returns {number} Timestamp in milliseconds, or 0 if not found
+     * @private
+     */
     _getTimestamp(asset) {
         // Check various timestamp fields
         let timestamp = asset.createdAt || asset.submittedAt || asset.timestamp || asset.date;
@@ -799,7 +863,12 @@ class ContentFilterService {
         return result;
     }
 
-    // Helper for date normalization
+    /**
+     * Normalize a date value to a timestamp in milliseconds
+     * @param {Date|number|string|Object} date - Date to normalize
+     * @returns {number|null} Timestamp in milliseconds, or null if invalid
+     * @private
+     */
     _normalizeDate(date) {
         if (!date) return null;
 

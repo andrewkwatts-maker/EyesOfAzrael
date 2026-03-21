@@ -1,13 +1,13 @@
 /**
- * Loading Spinner Utility
- * Provides consistent loading states across all Firebase data fetches
- * Features: Sacred geometry spinners, skeleton screens, rotating messages,
- * minimum display time, progress indicators, modal overlays, and smooth transitions
- *
+ * @module LoadingSpinner
+ * @description Loading Spinner Utility - consistent loading states with sacred geometry spinners, skeleton screens, and progress indicators.
  * @version 2.0.0
- * Polished loading experiences for Eyes of Azrael mythology encyclopedia
  */
 
+/**
+ * @class LoadingSpinner
+ * Manages loading spinners, skeleton screens, overlays, and multi-step progress indicators
+ */
 class LoadingSpinner {
     constructor() {
         this.activeSpinners = new Map();
@@ -1094,6 +1094,17 @@ class LoadingSpinner {
     // PRIVATE METHODS
     // ============================================
 
+    /**
+     * Generate spinner HTML markup
+     * @param {Object} config - Spinner configuration
+     * @param {string} config.message - Loading message
+     * @param {string} config.size - Spinner size (sm, md, lg)
+     * @param {string} config.spinnerId - Unique spinner ID
+     * @param {string} config.className - Additional CSS class
+     * @param {boolean} config.showProgress - Whether to show progress bar
+     * @returns {string} HTML string
+     * @private
+     */
     _getSpinnerHTML({ message, size, spinnerId, className, showProgress }) {
         const sizeClass = size === 'sm' ? 'spinner-sm' : size === 'lg' ? 'spinner-lg' : '';
 
@@ -1110,6 +1121,12 @@ class LoadingSpinner {
         `;
     }
 
+    /**
+     * Generate sacred geometry spinner SVG
+     * @param {string} size - Spinner size (sm, md, lg)
+     * @returns {string} HTML string with SVG
+     * @private
+     */
     _getSacredSpinnerSVG(size = 'md') {
         const sizes = { sm: 16, md: 32, lg: 48 };
         const s = sizes[size] || 32;
@@ -1155,6 +1172,11 @@ class LoadingSpinner {
         `;
     }
 
+    /**
+     * Generate progress bar HTML
+     * @returns {string} HTML string
+     * @private
+     */
     _getProgressBarHTML() {
         return `
             <div class="progress-container">
@@ -1166,6 +1188,12 @@ class LoadingSpinner {
         `;
     }
 
+    /**
+     * Generate step indicator HTML
+     * @param {Array<string>} steps - Step labels
+     * @returns {string} HTML string
+     * @private
+     */
     _getStepIndicatorHTML(steps) {
         const stepItems = steps.map((step, i) => `
             <div class="step-indicator-item ${i === 0 ? 'active' : ''}">
@@ -1177,6 +1205,12 @@ class LoadingSpinner {
         return `<div class="step-indicator">${stepItems}</div>`;
     }
 
+    /**
+     * Generate error state HTML
+     * @param {Error} error - The error object
+     * @returns {string} HTML string
+     * @private
+     */
     _getErrorHTML(error) {
         const message = error?.message || 'An unexpected error occurred';
         return `
@@ -1197,6 +1231,13 @@ class LoadingSpinner {
         `;
     }
 
+    /**
+     * Transform a generic message into a mythology-themed atmospheric message
+     * @param {string} message - Original message
+     * @param {string} context - Context key for message selection
+     * @returns {string} Atmospheric message
+     * @private
+     */
     _getAtmosphericMessage(message, context = 'default') {
         const transforms = {
             'Loading...': () => this._getRandomMessage(context),
@@ -1252,11 +1293,23 @@ class LoadingSpinner {
         return this._getAtmosphericMessage('Loading...', context);
     }
 
+    /**
+     * Get a random message for a given context
+     * @param {string} context - Context key
+     * @returns {string} Random message
+     * @private
+     */
     _getRandomMessage(context = 'default') {
         const messages = this.contextMessages[context] || this.contextMessages.default;
         return messages[Math.floor(Math.random() * messages.length)];
     }
 
+    /**
+     * Start rotating messages for a spinner
+     * @param {string} spinnerId - Spinner ID
+     * @param {string} context - Context key for message selection
+     * @private
+     */
     _startMessageRotation(spinnerId, context = 'default') {
         if (!this.activeSpinners.has(spinnerId)) return;
 
@@ -1272,6 +1325,10 @@ class LoadingSpinner {
         this.messageIntervals.set(spinnerId, interval);
     }
 
+    /**
+     * Start rotating messages for the overlay spinner
+     * @private
+     */
     _startOverlayMessageRotation() {
         if (!this.overlayElement) return;
 
@@ -1398,6 +1455,13 @@ class LoadingSpinner {
         };
     }
 
+    /**
+     * Set the status of a step in a multi-step progress tracker
+     * @param {string} progressId - Progress tracker ID
+     * @param {number} stepIndex - Step index (0-based)
+     * @param {string} status - Step status (active, completed, error)
+     * @private
+     */
     _setMultiStep(progressId, stepIndex, status) {
         const state = this.progressState.get(progressId);
         if (!state) return;
@@ -1426,6 +1490,12 @@ class LoadingSpinner {
         state.currentStep = stepIndex;
     }
 
+    /**
+     * Update the progress bar for a multi-step tracker
+     * @param {string} progressId - Progress tracker ID
+     * @param {number} percent - Progress percentage (0-100)
+     * @private
+     */
     _setMultiStepProgress(progressId, percent) {
         const state = this.progressState.get(progressId);
         if (!state) return;
@@ -1442,6 +1512,12 @@ class LoadingSpinner {
         }
     }
 
+    /**
+     * Update the message for a multi-step tracker
+     * @param {string} progressId - Progress tracker ID
+     * @param {string} message - New message text
+     * @private
+     */
     _setMultiStepMessage(progressId, message) {
         const state = this.progressState.get(progressId);
         if (!state) return;
@@ -1458,6 +1534,13 @@ class LoadingSpinner {
         }
     }
 
+    /**
+     * Complete a multi-step progress tracker and optionally replace content
+     * @param {string} progressId - Progress tracker ID
+     * @param {string|null} replacementHTML - HTML to replace the tracker with
+     * @returns {Promise<void>}
+     * @private
+     */
     async _completeMultiStep(progressId, replacementHTML = null) {
         const state = this.progressState.get(progressId);
         if (!state) return;
@@ -1505,6 +1588,13 @@ class LoadingSpinner {
         }, 400);
     }
 
+    /**
+     * Set a multi-step progress tracker to error state
+     * @param {string} progressId - Progress tracker ID
+     * @param {string} errorMessage - Error message to display
+     * @param {string|null} errorHTML - Optional error HTML to replace the tracker
+     * @private
+     */
     _errorMultiStep(progressId, errorMessage, errorHTML = null) {
         const state = this.progressState.get(progressId);
         if (!state) return;

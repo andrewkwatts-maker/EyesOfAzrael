@@ -1,8 +1,6 @@
 /**
- * Render Helpers - Shared utility functions for icon rendering and text truncation
- *
- * @fileoverview Provides common rendering utilities used across components
- * for consistent icon display, text handling, and truncation.
+ * @module RenderHelpers
+ * @description Shared utility functions for icon rendering, text truncation, and consistent display.
  */
 
 /* ============================================

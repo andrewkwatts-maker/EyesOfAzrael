@@ -44,8 +44,14 @@
  * - Item A: 100 up, 98 down = (198 * 1000) - 2 = 197,998 (very contested!)
  * - Item B: 50 up, 2 down = (52 * 1000) - 48 = 51,952 (not contested)
  * - Item C: 200 up, 5 down = (205 * 1000) - 195 = 204,805 (popular, not contested)
+ *
+ * @module services/vote-service
  */
 
+/**
+ * @class VoteService
+ * @classdesc Handles upvote/downvote operations with Firestore transactions, rate limiting, and controversy tracking.
+ */
 class VoteService {
     /**
      * @param {firebase.firestore.Firestore} db - Firestore instance
@@ -114,7 +120,7 @@ class VoteService {
      * @param {string} itemId - Item ID (asset or note)
      * @param {string} itemType - 'assets' or 'notes'
      * @param {number} voteValue - 1 for upvote, -1 for downvote
-     * @returns {Promise<{success: boolean, newVotes?: number, voteDelta?: number, userVote?: number, error?: string}>}
+     * @returns {Promise<Object>} Result with success, newVotes, voteDelta, userVote, error
      */
     async handleVote(itemId, itemType, voteValue) {
         try {
@@ -254,7 +260,7 @@ class VoteService {
      * Get user's current vote for an item
      * @param {string} itemId - Item ID
      * @param {string} itemType - 'assets' or 'notes'
-     * @returns {Promise<{success: boolean, vote?: number, error?: string}>}
+     * @returns {Promise<Object>} Result with success, vote, error
      */
     async getUserVote(itemId, itemType) {
         try {
@@ -292,7 +298,7 @@ class VoteService {
      * Get vote counts for an item
      * @param {string} itemId - Item ID
      * @param {string} itemType - 'assets' or 'notes'
-     * @returns {Promise<{success: boolean, upvotes?: number, downvotes?: number, total?: number, error?: string}>}
+     * @returns {Promise<Object>} Result with success, upvotes, downvotes, total, error
      */
     async getVoteCounts(itemId, itemType) {
         try {
@@ -330,7 +336,7 @@ class VoteService {
      * Get total votes from cached value on item
      * @param {string} itemId - Item ID
      * @param {string} itemType - 'assets' or 'notes'
-     * @returns {Promise<{success: boolean, votes?: number, error?: string}>}
+     * @returns {Promise<Object>} Result with success, votes, error
      */
     async getTotalVotes(itemId, itemType) {
         try {
@@ -411,7 +417,7 @@ class VoteService {
      * Get most upvoted items in a collection
      * @param {string} itemType - 'assets' or 'notes'
      * @param {number} limit - Number of items to return
-     * @returns {Promise<{success: boolean, items?: Array, error?: string}>}
+     * @returns {Promise<Object>} Result with success, items, error
      */
     async getMostUpvoted(itemType, limit = 10) {
         try {
@@ -445,7 +451,7 @@ class VoteService {
      * Get most controversial items (high total engagement)
      * @param {string} itemType - 'assets' or 'notes'
      * @param {number} limit - Number of items to return
-     * @returns {Promise<{success: boolean, items?: Array, error?: string}>}
+     * @returns {Promise<Object>} Result with success, items, error
      */
     async getMostControversial(itemType, limit = 10) {
         try {
@@ -495,7 +501,7 @@ class VoteService {
      * @param {string} itemType - 'assets' or 'notes'
      * @param {number} limit - Number of items to return
      * @param {number} minEngagement - Minimum total engagement (default: 10)
-     * @returns {Promise<{success: boolean, items?: Array, error?: string}>}
+     * @returns {Promise<Object>} Result with success, items, error
      */
     async getMostContested(itemType, limit = 10, minEngagement = 10) {
         try {
@@ -528,7 +534,7 @@ class VoteService {
     /**
      * Get user's voting history
      * @param {string} userId - User ID (optional, defaults to current user)
-     * @returns {Promise<{success: boolean, votes?: Array, error?: string}>}
+     * @returns {Promise<Object>} Result with success, votes, error
      */
     async getUserVotingHistory(userId = null) {
         try {

@@ -559,7 +559,7 @@ class EntityPostsComponent {
                     try {
                         const vote = await window.postsService.getUserVote(this.collection, this.entity.id, reply.id);
                         this.userVotes.set(reply.id, vote);
-                    } catch (e) {}
+                    } catch (e) { console.warn('[EntityPosts] Vote load failed:', e.message); }
                 }
             }
 

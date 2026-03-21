@@ -1,13 +1,6 @@
 /**
- * Modal Helper Utilities
- * Eyes of Azrael Project
- *
- * Provides convenient helper functions for common modal operations:
- * - Confirmation dialogs
- * - Alert dialogs
- * - Prompt dialogs
- * - Loading overlays
- * - Focus management
+ * @module ModalHelpers
+ * @description Modal Helper Utilities - confirmation, alert, prompt dialogs, loading overlays, and focus management.
  */
 
 const ModalHelpers = {

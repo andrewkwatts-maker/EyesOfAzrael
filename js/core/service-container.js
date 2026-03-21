@@ -24,6 +24,10 @@
  * @module core/service-container
  */
 
+/**
+ * @class ServiceContainer
+ * @classdesc Lightweight DI container with singleton support, interface validation, and circular dependency detection.
+ */
 class ServiceContainer {
     /**
      * Create a new service container
@@ -307,6 +311,10 @@ class ServiceContainer {
 
     /**
      * Validate that an instance implements required methods
+     * @param {string} name - Service name
+     * @param {*} instance - The service instance to validate
+     * @param {string[]} requiredMethods - Methods the instance must implement
+     * @throws {Error} If instance is missing required methods
      * @private
      */
     _validateInterface(name, instance, requiredMethods) {
