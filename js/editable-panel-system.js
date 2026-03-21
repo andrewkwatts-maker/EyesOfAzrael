@@ -600,7 +600,7 @@ class EditablePanelSystem {
       <p>You must be logged in to edit or submit content.</p>
       <div class="form-actions">
         <button class="btn-cancel">Cancel</button>
-        <button class="btn-submit" onclick="window.location.href='/login.html'">Login</button>
+        <button class="btn-submit" onclick="if(window.AuthManager&&window.AuthManager.showLoginOverlay){window.AuthManager.showLoginOverlay();}else if(typeof firebase!=='undefined'&&firebase.auth){firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider());}">Login</button>
       </div>
     `;
     document.body.appendChild(modal);

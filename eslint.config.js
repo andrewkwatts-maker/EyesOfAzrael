@@ -170,6 +170,13 @@ module.exports = [
     }
   },
   {
+    // ES module files (use import/export)
+    files: ['js/entity-loader.js', 'js/constants/**/*.js'],
+    languageOptions: {
+      sourceType: 'module',
+    }
+  },
+  {
     // Ignore patterns
     ignores: [
       'node_modules/**',
