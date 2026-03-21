@@ -1103,7 +1103,7 @@ class BrowseCategoryView {
                         </svg>
                         Compare (${count}/3)
                     </span>
-                    <button class="compare-tray-close" onclick="document.getElementById('compareTray').classList.toggle('collapsed')" aria-label="Toggle compare tray">
+                    <button class="compare-tray-close" data-action="toggle-compare-tray" aria-label="Toggle compare tray">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
                             <polyline points="6 9 12 15 18 9"/>
                         </svg>
@@ -1113,7 +1113,7 @@ class BrowseCategoryView {
                     ${compareEntities.map(entity => `
                         <div class="compare-tray-entity" data-id="${entity.id}" data-collection="${entity._collection}">
                             <span class="tray-entity-name">${this.truncateDescription(entity.name, 15)}</span>
-                            <button class="tray-entity-remove" onclick="window.BrowseCategoryView && window.BrowseCategoryView.removeFromCompare && window.BrowseCategoryView.removeFromCompare('${entity.id}', '${entity._collection}')" title="Remove from compare">
+                            <button class="tray-entity-remove" data-action="remove-from-compare" data-entity-id="${entity.id}" data-entity-collection="${entity._collection}" title="Remove from compare">
                                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                                     <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
                                 </svg>
@@ -1132,7 +1132,7 @@ class BrowseCategoryView {
                     ` : `
                         <span class="compare-tray-hint">Add ${2 - count} more to compare</span>
                     `}
-                    <button class="compare-tray-btn compare-clear" onclick="window.BrowseCategoryView && window.BrowseCategoryView.clearCompare && window.BrowseCategoryView.clearCompare()">
+                    <button class="compare-tray-btn compare-clear" data-action="clear-compare">
                         Clear All
                     </button>
                 </div>
@@ -1505,6 +1505,36 @@ class BrowseCategoryView {
 
         // Add context menu support to entity cards
         this.setupMobileContextMenus(signal);
+
+        // Compare tray actions (delegated)
+        const compareTray = document.getElementById('compareTray');
+        if (compareTray) {
+            compareTray.addEventListener('click', (e) => {
+                const action = e.target.closest('[data-action]');
+                if (!action) return;
+
+                const actionType = action.dataset.action;
+                if (actionType === 'toggle-compare-tray') {
+                    compareTray.classList.toggle('collapsed');
+                } else if (actionType === 'remove-from-compare') {
+                    this.removeFromCompare(action.dataset.entityId, action.dataset.entityCollection);
+                } else if (actionType === 'clear-compare') {
+                    this.clearCompare();
+                }
+            }, { signal });
+        }
+
+        // Error retry button (delegated)
+        const mainContent = document.getElementById('main-content');
+        if (mainContent) {
+            mainContent.addEventListener('click', (e) => {
+                const retryBtn = e.target.closest('[data-action="retry"]');
+                if (retryBtn) {
+                    e.preventDefault();
+                    this.render(this.category, this.mythology);
+                }
+            }, { signal });
+        }
 
         // Register cleanup with SPA navigation
         if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
@@ -4170,7 +4200,7 @@ class BrowseCategoryView {
                     ${error.message}
                 </p>
                 <button
-                    onclick="location.reload()"
+                    data-action="retry"
                     class="btn-primary"
                     style="
                         padding: 1rem 2rem;
