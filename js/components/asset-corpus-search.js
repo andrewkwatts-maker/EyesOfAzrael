@@ -396,7 +396,7 @@ class AssetCorpusSearch {
                 ${this.generatedQueries.length === 0 ? `
                     <div class="corpus-empty-state">
                         <p>No corpus queries available for this entity.</p>
-                        <a href="/corpus-explorer.html" class="explore-link">
+                        <a href="#/corpus-explorer" class="explore-link">
                             Explore the full corpus →
                         </a>
                     </div>

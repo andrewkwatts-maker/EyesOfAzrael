@@ -30,6 +30,7 @@ class SPALinkValidator {
             mythology: /^#?\/mythology\/([^\/]+)\/?$/,
             entity: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/([^\/]+)\/?$/,
             entity_alt: /^#?\/entity\/([^\/]+)\/([^\/]+)\/([^\/]+)\/?$/,
+            entity_simple: /^#?\/entity\/([^\/]+)\/([^\/]+)\/?$/,
             category: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/?$/,
             search: /^#?\/search\/?$/,
             compare: /^#?\/compare\/?$/,
@@ -170,6 +171,7 @@ class SPALinkValidator {
         if (this.routes.browse_category_mythology.test(cleanUrl)) return 'browse-category-mythology';
         if (this.routes.browse_category.test(cleanUrl)) return 'browse-category';
         if (this.routes.entity_alt.test(cleanUrl)) return 'entity-alt';
+        if (this.routes.entity_simple.test(cleanUrl)) return 'entity-simple';
         if (this.routes.entity.test(cleanUrl)) return 'entity';
         if (this.routes.category.test(cleanUrl)) return 'category';
         if (this.routes.mythology.test(cleanUrl)) return 'mythology';
@@ -226,6 +228,7 @@ class SPALinkValidator {
 
             case 'entity':
             case 'entity-alt':
+            case 'entity-simple':
                 return this.validateEntity(cleanUrl, type);
 
             default:

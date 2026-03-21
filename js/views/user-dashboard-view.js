@@ -672,7 +672,7 @@ class UserDashboardView {
                         </button>
                     </div>
 
-                    <a href="theories/user-submissions/submit.html" class="btn btn-primary btn-sm">
+                    <a href="#/browse/deities" data-action="new-submission" class="btn btn-primary btn-sm">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14">
                             <line x1="12" y1="5" x2="12" y2="19"/>
                             <line x1="5" y1="12" x2="19" y2="12"/>
@@ -1520,7 +1520,7 @@ class UserDashboardView {
                         </svg>
                         <h3>No contributions yet</h3>
                         <p>Start by submitting your first entity!</p>
-                        <a href="theories/user-submissions/submit.html" class="btn btn-primary">Make a Submission</a>
+                        <a href="#/browse/deities" data-action="new-submission" class="btn btn-primary">Make a Submission</a>
                     </div>
                 `;
                 return;

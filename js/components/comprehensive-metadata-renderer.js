@@ -883,7 +883,7 @@
                             const archetypeName = typeof archetype === 'string' ? archetype : archetype.name;
                             const archetypeId = typeof archetype === 'string' ? archetype : archetype.id;
                             return `
-                                <a href="/archetypes/${this.escapeHtml(archetypeId)}/index.html" class="archetype-card">
+                                <a href="#/entity/archetypes/${this.escapeHtml(archetypeId)}" class="archetype-card">
                                     <span class="archetype-icon">🎭</span>
                                     <span class="archetype-name">${this.capitalize(archetypeName.replace(/-/g, ' '))}</span>
                                 </a>

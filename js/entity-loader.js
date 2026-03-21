@@ -456,7 +456,7 @@ class EntityLoader {
                 <div class="not-found-icon">❌</div>
                 <h2>${type} "${id}" not found</h2>
                 <p>This ${type} may have been removed or the link is incorrect.</p>
-                <a href="/${type}s.html" class="btn-back">Browse All ${type}s</a>
+                <a href="#/browse/${type}s" class="btn-back">Browse All ${type}s</a>
             </div>
         `;
     }
