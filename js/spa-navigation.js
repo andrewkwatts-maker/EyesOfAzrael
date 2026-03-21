@@ -328,7 +328,8 @@ class SPANavigation {
             about: /^#?\/about\/?$/,
             privacy: /^#?\/privacy\/?$/,
             terms: /^#?\/terms\/?$/,
-            user_profile: /^#?\/user\/([^\/]+)\/?$/
+            user_profile: /^#?\/user\/([^\/]+)\/?$/,
+            guidelines: /^#?\/guidelines\/?$/
         };
 
         // Route display names for a11y announcements
@@ -349,7 +350,8 @@ class SPANavigation {
             about: 'About',
             privacy: 'Privacy Policy',
             terms: 'Terms of Service',
-            user_profile: 'User Profile'
+            user_profile: 'User Profile',
+            guidelines: 'Community Guidelines'
         };
 
         // Check currentUser OR optimistic auth synchronously first
@@ -1040,6 +1042,9 @@ class SPANavigation {
             } else if (this.routes.terms.test(path)) {
                 spaLog('Matched TERMS route');
                 await this.renderTerms();
+            } else if (this.routes.guidelines.test(path)) {
+                spaLog('Matched GUIDELINES route - rendering about page');
+                await this.renderAbout();
             } else if (this.routes.user_profile.test(path)) {
                 const match = path.match(this.routes.user_profile);
                 spaLog('Matched USER PROFILE route:', match[1]);
@@ -1896,19 +1901,10 @@ class SPANavigation {
                 return;
             }
 
-            if (typeof FirebaseCRUDManager === 'undefined') {
-                spaError('FirebaseCRUDManager class not loaded');
-                mainContent.innerHTML = `
-                    <div class="error-page">
-                        <h1>Error</h1>
-                        <p>CRUD manager not loaded. Please refresh the page.</p>
-                    </div>
-                `;
-                return;
-            }
-
-            spaLog('UserDashboard and dependencies available');
-            const crudManager = new FirebaseCRUDManager(this.db, firebase.auth());
+            spaLog('UserDashboard available, initializing...');
+            const crudManager = typeof FirebaseCRUDManager !== 'undefined'
+                ? new FirebaseCRUDManager(this.db, firebase.auth())
+                : null;
             const dashboard = new UserDashboard({
                 crudManager: crudManager,
                 auth: firebase.auth()

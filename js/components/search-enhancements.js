@@ -74,7 +74,6 @@ class SearchEnhancements {
         // Bind methods
         this.handleKeydown = this.handleKeydown.bind(this);
         this.handleGlobalKeydown = this.handleGlobalKeydown.bind(this);
-        this.handleClickOutside = this.handleClickOutside.bind(this);
     }
 
     /**

@@ -42,7 +42,6 @@ class HeaderNavController {
         this.handleMobileClose = this.handleMobileClose.bind(this);
         this.handleMobileLinkClick = this.handleMobileLinkClick.bind(this);
         this.handleResize = this.handleResize.bind(this);
-        this.handleScroll = this.handleScroll.bind(this);
         this.handleUserMenuClick = this.handleUserMenuClick.bind(this);
         this.handleThemePickerClick = this.handleThemePickerClick.bind(this);
     }

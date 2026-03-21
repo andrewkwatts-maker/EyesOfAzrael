@@ -39,11 +39,13 @@ class SPALinkValidator {
             terms: /^#?\/terms\/?$/,
             archetypes: /^#?\/archetypes\/?$/,
             magic: /^#?\/magic\/?$/,
+            guidelines: /^#?\/guidelines\/?$/,
         };
 
         this.categories = [
             'deities', 'heroes', 'creatures', 'texts', 'rituals',
-            'herbs', 'cosmology', 'magic', 'items', 'places', 'symbols'
+            'herbs', 'cosmology', 'magic', 'items', 'places', 'symbols',
+            'archetypes'
         ];
 
         this.mythologies = [
@@ -179,6 +181,7 @@ class SPALinkValidator {
         if (this.routes.terms.test(cleanUrl)) return 'terms';
         if (this.routes.archetypes.test(cleanUrl)) return 'archetypes';
         if (this.routes.magic.test(cleanUrl)) return 'magic';
+        if (this.routes.guidelines.test(cleanUrl)) return 'guidelines';
 
         return 'unknown';
     }
@@ -373,6 +376,8 @@ class SPALinkValidator {
 
         for (const linkData of links) {
             const result = await this.validateLink(linkData);
+            result.url = result.url || linkData.url;
+            result.type = result.type || linkData.type;
             result.sources = linkData.sources;
             validationResults.push(result);
 

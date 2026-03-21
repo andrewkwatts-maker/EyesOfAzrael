@@ -35,6 +35,25 @@ class PrivateNotesPanel {
         const user = firebase.auth?.()?.currentUser;
         if (!user) {
             this.container.innerHTML = '';
+            // Reactively show when user signs in
+            const authInstance = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth() : null;
+            if (authInstance?.onAuthStateChanged) {
+                this._authUnsubscribe = authInstance.onAuthStateChanged(async (u) => {
+                    if (u) {
+                        try {
+                            await window.privateNotesService.init();
+                            this.render();
+                            await this.loadNotes();
+                        } catch (err) {
+                            console.error('[PrivateNotes] Init after auth failed:', err);
+                        }
+                        if (this._authUnsubscribe) {
+                            this._authUnsubscribe();
+                            this._authUnsubscribe = null;
+                        }
+                    }
+                });
+            }
             return;
         }
 

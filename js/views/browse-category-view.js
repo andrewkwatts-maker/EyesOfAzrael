@@ -969,13 +969,32 @@ class BrowseCategoryView {
      */
     getAddNewCardHTML() {
         const isAuth = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
+        const categoryLabel = this.category ? this.category.replace(/s$/, '') : 'entity';
+
         if (!isAuth) {
             // Auth may not be resolved yet; listen for auth state change and re-render add card
             this.listenForAuthStateChange();
-            return '';
+            // Show a subtle "sign in to contribute" hint
+            return `
+                <button class="entity-card entity-card--add-new entity-card--add-new-hint"
+                        type="button"
+                        aria-label="Sign in to contribute"
+                        data-action="sign-in-to-contribute"
+                        data-category="${this.category || ''}">
+                    <div class="add-new-card__content">
+                        <div class="add-new-card__icon" style="opacity:0.5">
+                            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="16"></line>
+                                <line x1="8" y1="12" x2="16" y2="12"></line>
+                            </svg>
+                        </div>
+                        <h3 class="add-new-card__title" style="font-size:0.9rem">Sign in to Contribute</h3>
+                        <p class="add-new-card__desc">Add a new ${categoryLabel}</p>
+                    </div>
+                </button>
+            `;
         }
-
-        const categoryLabel = this.category ? this.category.replace(/s$/, '') : 'entity';
 
         return `
             <button class="entity-card entity-card--add-new"
@@ -1009,12 +1028,18 @@ class BrowseCategoryView {
         if (typeof firebase !== 'undefined' && firebase.auth) {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
-                    // User signed in: inject the add card into the grid if not already present
+                    // User signed in: replace hint card with real "+" card
                     const grid = document.getElementById('entityGrid');
-                    if (grid && !grid.querySelector('.entity-card--add-new')) {
-                        const addCardHTML = this.getAddNewCardHTML();
-                        if (addCardHTML) {
-                            grid.insertAdjacentHTML('beforeend', addCardHTML);
+                    if (grid) {
+                        const hintCard = grid.querySelector('.entity-card--add-new-hint');
+                        if (hintCard) {
+                            hintCard.remove();
+                        }
+                        if (!grid.querySelector('.entity-card--add-new')) {
+                            const addCardHTML = this.getAddNewCardHTML();
+                            if (addCardHTML) {
+                                grid.insertAdjacentHTML('beforeend', addCardHTML);
+                            }
                         }
                     }
                 }
@@ -1628,6 +1653,20 @@ class BrowseCategoryView {
         if (!grid) return;
 
         grid.addEventListener('click', (e) => {
+            // Check if "Sign in to contribute" hint was clicked
+            const signInHint = e.target.closest('[data-action="sign-in-to-contribute"]');
+            if (signInHint) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (window.AuthManager && window.AuthManager.showLoginOverlay) {
+                    window.AuthManager.showLoginOverlay();
+                } else if (typeof firebase !== 'undefined' && firebase.auth) {
+                    const provider = new firebase.auth.GoogleAuthProvider();
+                    firebase.auth().signInWithPopup(provider);
+                }
+                return;
+            }
+
             // Check if "Add New" card was clicked
             const addNewCard = e.target.closest('.entity-card--add-new');
             if (addNewCard) {
@@ -1690,22 +1729,20 @@ class BrowseCategoryView {
      * Open the content submission wizard modal
      */
     openSubmissionWizard(category) {
-        // Reuse the ContributeMenu's wizard launcher if available
-        if (window.ContributeMenu && window.ContributeMenu.prototype._openSubmissionWizard) {
-            const menu = new ContributeMenu();
-            menu._openSubmissionWizard();
-            return;
+        // Force-load submission CSS if lazy-loaded
+        const cssLink = document.querySelector('link[href*="content-submission"]');
+        if (cssLink && cssLink.media === 'print') {
+            cssLink.media = 'all';
         }
 
-        // Fallback: create modal directly
-        let modal = document.getElementById('submission-wizard-modal');
-        if (modal) {
-            modal.style.display = 'flex';
-            document.body.classList.add('modal-open');
-            return;
+        // Remove existing modal to get fresh wizard state
+        const existing = document.getElementById('submission-wizard-modal');
+        if (existing) {
+            existing.remove();
         }
 
-        modal = document.createElement('div');
+        // Create modal
+        const modal = document.createElement('div');
         modal.id = 'submission-wizard-modal';
         modal.className = 'submission-wizard-modal';
         modal.innerHTML = `
@@ -1721,11 +1758,29 @@ class BrowseCategoryView {
             </div>
         `;
         document.body.appendChild(modal);
+        modal.style.display = 'flex';
         document.body.classList.add('modal-open');
 
+        // Initialize wizard with category pre-selection
         if (window.ContentSubmissionWizard) {
             window.contentWizard = new window.ContentSubmissionWizard('#wizard-container');
             window.contentWizard.init();
+
+            // Pre-select content type based on current browse category
+            if (category) {
+                const categoryToType = {
+                    deities: 'deity', heroes: 'hero', creatures: 'creature',
+                    items: 'item', places: 'place', concepts: 'concept',
+                    archetypes: 'concept', magic: 'magic', rituals: 'ritual',
+                    texts: 'text', symbols: 'symbol', herbs: 'herb'
+                };
+                const contentType = categoryToType[category] || null;
+                if (contentType && window.contentWizard.contentTypes[contentType]) {
+                    window.contentWizard.formData.type = contentType;
+                    window.contentWizard.currentStep = 2;
+                    window.contentWizard.render();
+                }
+            }
         }
 
         const closeBtn = modal.querySelector('.submission-wizard-modal__close');
