@@ -125,6 +125,23 @@ class EntityPostsComponent {
 
         this._populateSectionFilters();
         this._bindEvents();
+
+        // Reactively show compose form when user signs in after render
+        const authInstance = typeof firebase !== 'undefined' && firebase.auth ? firebase.auth() : null;
+        if (!authInstance?.currentUser && authInstance?.onAuthStateChanged) {
+            this._authUnsubscribe = authInstance.onAuthStateChanged((user) => {
+                if (user) {
+                    // Re-render to show compose form
+                    this.render();
+                    this.loadPosts();
+                    // Unsubscribe after first auth resolution
+                    if (this._authUnsubscribe) {
+                        this._authUnsubscribe();
+                        this._authUnsubscribe = null;
+                    }
+                }
+            });
+        }
     }
 
     /**
@@ -672,6 +689,10 @@ class EntityPostsComponent {
     destroy() {
         if (window.postsService) {
             window.postsService.stopAllListeners();
+        }
+        if (this._authUnsubscribe) {
+            this._authUnsubscribe();
+            this._authUnsubscribe = null;
         }
     }
 }

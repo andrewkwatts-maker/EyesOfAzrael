@@ -1969,7 +1969,7 @@ class ContentSubmissionWizard {
                         <button class="csw-btn csw-btn-primary" onclick="contentWizard.reset()">
                             Submit Another
                         </button>
-                        <a href="dashboard.html" class="csw-btn csw-btn-secondary">
+                        <a href="#/dashboard" class="csw-btn csw-btn-secondary" onclick="document.getElementById('submission-wizard-modal').style.display='none'; document.body.classList.remove('modal-open');">
                             View My Submissions
                         </a>
                     </div>

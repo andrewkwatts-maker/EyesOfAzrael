@@ -132,6 +132,16 @@ service cloud.firestore {
 
       // No deletions (prevents orphaned content)
       allow delete: if false;
+
+      // User favorites subcollection - only the owner can read/write
+      match /user_favorites/{favoriteId} {
+        allow read, write: if isOwner(userId);
+      }
+
+      // Favorite folders subcollection - only the owner can read/write
+      match /favorite_folders/{folderId} {
+        allow read, write: if isOwner(userId);
+      }
     }
 
     // ===== THEORIES COLLECTION =====
@@ -1319,7 +1329,8 @@ service cloud.firestore {
     match /entity_posts/{entityKey} {
       allow read: if true;
       allow create: if isAuthenticated();
-      allow update: if isAdminEmail();
+      // Allow authenticated users to update metadata (postCount, lastPostAt)
+      allow update: if isAuthenticated();
 
       match /posts/{postId} {
         allow read: if true;
@@ -1327,7 +1338,11 @@ service cloud.firestore {
                       && request.resource.data.authorId == request.auth.uid
                       && request.resource.data.content.size() >= 10
                       && request.resource.data.netVotes == 0;
+        // Author can edit their own post content
         allow update: if isOwner(resource.data.authorId)
+                      && request.resource.data.authorId == resource.data.authorId;
+        // Any authenticated user can update vote counts and reply counts
+        allow update: if isAuthenticated()
                       && request.resource.data.authorId == resource.data.authorId;
         // Admin can also update (for moderation status changes)
         allow update: if isAdminEmail();

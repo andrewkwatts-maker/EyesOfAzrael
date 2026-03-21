@@ -755,15 +755,20 @@ class UserDashboard {
             const user = this.auth.currentUser;
             if (!user) return [];
 
-            // Try to get from window.submissionWorkflow if available
-            if (window.submissionWorkflow) {
-                const result = await window.submissionWorkflow.getUserSubmissions(user.uid);
-                return result || [];
+            // Try ContentSubmissionService first (primary path)
+            if (window.contentSubmissionService) {
+                try {
+                    await window.contentSubmissionService.ensureInit();
+                    return await window.contentSubmissionService.getUserSubmissions();
+                } catch (e) {
+                    console.warn('[UserDashboard] ContentSubmissionService failed, trying fallback:', e.message);
+                }
             }
 
             // Fallback: Try direct Firestore query
-            if (window.EyesOfAzrael?.db) {
-                const snapshot = await window.EyesOfAzrael.db
+            const db = window.EyesOfAzrael?.db || (typeof firebase !== 'undefined' && firebase.firestore ? firebase.firestore() : null);
+            if (db) {
+                const snapshot = await db
                     .collection('submissions')
                     .where('submittedBy', '==', user.uid)
                     .orderBy('submittedAt', 'desc')
@@ -789,10 +794,27 @@ class UserDashboard {
      */
     async loadFavorites() {
         try {
+            // Try FavoritesService if available
             if (window.EyesOfAzrael?.favorites) {
                 const result = await window.EyesOfAzrael.favorites.getFavorites({ returnResultObject: true });
                 return result.success ? result.data : [];
             }
+
+            // Fallback: read from localStorage
+            const stored = localStorage.getItem('eoa_favorites');
+            if (stored) {
+                const keys = JSON.parse(stored);
+                return keys.map(key => {
+                    const [collection, entityId] = key.split(':');
+                    return {
+                        entityId: entityId || key,
+                        entityType: collection || 'unknown',
+                        name: entityId || key,
+                        mythology: ''
+                    };
+                });
+            }
+
             return [];
         } catch (error) {
             console.error('[UserDashboard] Error loading favorites:', error);
@@ -809,10 +831,29 @@ class UserDashboard {
             const user = this.auth.currentUser;
             if (!user) return [];
 
+            // Try legacy notesService first
             if (window.notesService) {
                 const notes = await window.notesService.getUserNotes(user.uid, 100);
                 return notes || [];
             }
+
+            // Fallback: query private_notes directly via Firestore
+            const db = window.EyesOfAzrael?.db || (typeof firebase !== 'undefined' && firebase.firestore ? firebase.firestore() : null);
+            if (db) {
+                const snapshot = await db
+                    .collection('private_notes')
+                    .where('userId', '==', user.uid)
+                    .where('status', '==', 'active')
+                    .orderBy('createdAt', 'desc')
+                    .limit(100)
+                    .get();
+
+                return snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+            }
+
             return [];
         } catch (error) {
             console.error('[UserDashboard] Error loading notes:', error);
