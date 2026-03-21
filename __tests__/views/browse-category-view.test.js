@@ -371,13 +371,13 @@ describe('BrowseCategoryView', () => {
 
             const html = view.getCompareTrayHTML();
 
-            // NOTE: These 4 inline onclick handlers are known tech debt.
-            // The compare tray uses onclick for toggle collapse, remove entity,
-            // and clear all. This is documented and tracked for future refactoring.
+            // Inline onclick handlers have been replaced with data-action delegation
             const onclickCount = (html.match(/onclick=/g) || []).length;
-            expect(onclickCount).toBeGreaterThan(0);
-            // Current known count is up to 4 (collapse toggle + per-entity remove + clear all)
-            expect(onclickCount).toBeLessThanOrEqual(5);
+            expect(onclickCount).toBe(0);
+            // Verify data-action attributes are present instead
+            expect(html).toContain('data-action="toggle-compare-tray"');
+            expect(html).toContain('data-action="remove-from-compare"');
+            expect(html).toContain('data-action="clear-compare"');
         });
 
         test('compare tray shows "Compare Now" link when 2+ entities', () => {
