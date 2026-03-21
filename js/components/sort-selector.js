@@ -599,9 +599,6 @@ class SortSelector {
     }
 }
 
-// ES Module Export
-export { SortSelector };
-
 // Legacy global export
 if (typeof window !== 'undefined') {
     window.SortSelector = SortSelector;

@@ -290,10 +290,10 @@
          */
         toggleSaveEntity(btn, entity) {
             try {
-                var saved = JSON.parse(localStorage.getItem('eoa_saved_entities') || '[]');
-                var entityId = entity.id || '';
-                var existingIndex = -1;
-                for (var i = 0; i < saved.length; i++) {
+                const saved = JSON.parse(localStorage.getItem('eoa_saved_entities') || '[]');
+                const entityId = entity.id || '';
+                let existingIndex = -1;
+                for (let i = 0; i < saved.length; i++) {
                     if (saved[i].id === entityId) {
                         existingIndex = i;
                         break;

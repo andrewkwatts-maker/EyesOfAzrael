@@ -1812,12 +1812,12 @@ class SPANavigation {
                             resultsDiv.innerHTML = '<p style="text-align:center; opacity:0.7;">No results found.</p>';
                         } else {
                             resultsDiv.innerHTML = result.items.map(function(entity) {
-                                var name = entity.name || 'Unknown';
-                                var desc = entity.description || entity.subtitle || '';
+                                const name = entity.name || 'Unknown';
+                                let desc = entity.description || entity.subtitle || '';
                                 if (desc.length > 120) desc = desc.substring(0, 120) + '...';
-                                var mythology = entity.mythology || 'unknown';
-                                var type = entity.type || entity.collection || 'entity';
-                                var id = entity.id || name.toLowerCase().replace(/\\s+/g, '-');
+                                const mythology = entity.mythology || 'unknown';
+                                const type = entity.type || entity.collection || 'entity';
+                                const id = entity.id || name.toLowerCase().replace(/\\s+/g, '-');
                                 return '<a href="#/mythology/' + mythology + '/' + type + '/' + id + '" style="display:block; padding:1rem; margin-bottom:0.5rem; background:rgba(255,255,255,0.05); border-radius:8px; text-decoration:none; color:inherit; border:1px solid rgba(255,255,255,0.1);">' +
                                     '<strong style="color:var(--color-primary,#8b7fff);">' + name + '</strong>' +
                                     '<p style="margin:0.25rem 0 0; opacity:0.7; font-size:0.9rem;">' + desc + '</p>' +

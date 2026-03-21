@@ -144,6 +144,10 @@ module.exports = [
         prompt: 'readonly',
         self: 'readonly',
         d3: 'readonly',
+        PerformanceObserver: 'readonly',
+        VersionTracker: 'writable',
+        GitHubBrowser: 'writable',
+        themeManager: 'writable',
         db: 'writable',
         waitForFirebase: 'readonly',
         // Init-time functions (defined by error-monitoring.js, etc.)
@@ -171,7 +175,20 @@ module.exports = [
   },
   {
     // ES module files (use import/export)
-    files: ['js/entity-loader.js', 'js/constants/**/*.js'],
+    files: [
+      'js/entity-loader.js',
+      'js/constants/**/*.js',
+      'js/svg-icons.js',
+      'js/error-monitoring.js',
+      'js/components/feedback-widget.js',
+      'js/components/responsive-image.js',
+      'js/components/virtual-scroller-performance.js',
+      'js/utils/error-boundary.js',
+      'js/utils/lazy-image-loader.js',
+      'js/utils/performance-monitoring.js',
+      'js/utils/responsive-image-renderer.js',
+      'js/utils/webp-detection.js',
+    ],
     languageOptions: {
       sourceType: 'module',
     }

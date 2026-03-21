@@ -241,6 +241,8 @@ const Assertions = {
 
     /**
      * Get the type of a value (more specific than typeof)
+     * @param {*} value - Value to inspect
+     * @returns {string} Type string ('null', 'undefined', 'array', or typeof result)
      * @private
      */
     _getType(value) {
@@ -252,6 +254,11 @@ const Assertions = {
 
     /**
      * Handle assertion failure
+     * @param {string} assertion - Assertion method name
+     * @param {string} context - Context for the failure
+     * @param {string} message - Error message
+     * @returns {undefined} Always returns undefined if throwOnFailure is false
+     * @throws {Error} If config.throwOnFailure is true
      * @private
      */
     _fail(assertion, context, message) {
@@ -289,6 +296,8 @@ const Assertions = {
 
     /**
      * Get guidance for loading a missing dependency
+     * @param {string} dep - Dependency name
+     * @returns {string} Guidance message
      * @private
      */
     _getDependencyGuidance(dep) {

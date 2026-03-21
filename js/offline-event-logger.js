@@ -236,7 +236,7 @@ const OfflineEventLogger = {
         Object.keys(this._stats).forEach(k => this._stats[k] = 0);
         try {
             sessionStorage.removeItem('eoa_offline_log');
-        } catch (e) { /* ignore */ }
+        } catch (_e) { /* localStorage cleanup is best-effort */ }
         console.log('[OfflineLog] Cleared');
     },
 

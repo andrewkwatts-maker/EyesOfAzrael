@@ -1204,7 +1204,7 @@ class NotesService {
         // Update persisted queue
         try {
             localStorage.setItem('notes_retry_queue', JSON.stringify(this.retryQueue));
-        } catch (e) {}
+        } catch (e) { console.warn('[NotesService] localStorage persist failed:', e.message); }
 
         this.isProcessingQueue = false;
     }

@@ -8,6 +8,8 @@
  * - Liskov Substitution: Works with any entity following IEntity interface
  * - Interface Segregation: Clean, minimal API surface
  * - Dependency Inversion: Depends on abstract storage interface
+ *
+ * @module services/favorites-service
  */
 
 /**
@@ -48,6 +50,10 @@
  * @property {'authenticated'|'not_authenticated'|'error'} status - Result status
  */
 
+/**
+ * @class FavoritesService
+ * @classdesc Manages user favorites with Firebase persistence, offline support, and optimistic UI updates.
+ */
 class FavoritesService {
     /**
      * @param {Object} options - Configuration options
@@ -440,6 +446,8 @@ class FavoritesService {
 
     /**
      * Internal method to fetch favorites from Firebase
+     * @param {string} userId - Firebase user ID
+     * @returns {Promise<FavoriteEntity[]>} Array of favorites
      * @private
      */
     async _fetchFavoritesFromFirebase(userId) {
@@ -468,6 +476,8 @@ class FavoritesService {
 
     /**
      * Update cache from localStorage fallback (with shorter TTL)
+     * @param {string} userId - Firebase user ID
+     * @param {FavoriteEntity[]} favorites - Favorites array from localStorage
      * @private
      */
     _updateCacheFromLocalStorage(userId, favorites) {
@@ -674,6 +684,11 @@ class FavoritesService {
 
     /**
      * Add favorite in offline mode
+     * @param {string} userId - Firebase user ID
+     * @param {string} docId - Document ID
+     * @param {Object} favoriteData - Favorite entity data
+     * @param {string} compositeKey - Composite lookup key
+     * @returns {{success: boolean, data?: Object, offline?: boolean, error?: string}}
      * @private
      */
     _addFavoriteOffline(userId, docId, favoriteData, compositeKey) {
@@ -786,6 +801,13 @@ class FavoritesService {
 
     /**
      * Remove favorite in offline mode
+     * @param {string} userId - Firebase user ID
+     * @param {string} docId - Document ID
+     * @param {string} entityId - Entity ID
+     * @param {string} entityType - Entity type
+     * @param {string} compositeKey - Composite lookup key
+     * @param {string} entityName - Entity display name for toast
+     * @returns {{success: boolean, offline?: boolean, error?: string}}
      * @private
      */
     _removeFavoriteOffline(userId, docId, entityId, entityType, compositeKey, entityName) {
@@ -1469,6 +1491,8 @@ class FavoritesService {
 
     /**
      * Clear all favorites in offline mode
+     * @param {string} userId - Firebase user ID
+     * @returns {{success: boolean, offline?: boolean, error?: string}}
      * @private
      */
     _clearAllOffline(userId) {
@@ -1527,6 +1551,8 @@ class FavoritesService {
 
     /**
      * Emit event to all listeners
+     * @param {string} event - Event name
+     * @param {Object} data - Event payload
      * @private
      */
     _emit(event, data) {
@@ -1550,6 +1576,7 @@ class FavoritesService {
 
     /**
      * Get current authenticated user
+     * @returns {Object|null} Firebase user object or null
      * @private
      */
     _getCurrentUser() {
@@ -1565,6 +1592,8 @@ class FavoritesService {
 
     /**
      * Validate entity data
+     * @param {Object} entity - Entity to validate
+     * @returns {{valid: boolean, error?: string}}
      * @private
      */
     _validateEntity(entity) {
@@ -1590,6 +1619,9 @@ class FavoritesService {
 
     /**
      * Generate document ID from entity
+     * @param {string} entityId - Entity ID
+     * @param {string} entityType - Entity type
+     * @returns {string} Document ID
      * @private
      */
     _generateDocId(entityId, entityType) {
@@ -1602,6 +1634,8 @@ class FavoritesService {
 
     /**
      * Check if cache is still valid
+     * @param {string} userId - Firebase user ID
+     * @returns {boolean} True if cache exists and is within TTL
      * @private
      */
     _isCacheValid(userId) {
@@ -1613,6 +1647,8 @@ class FavoritesService {
 
     /**
      * Update cache with favorites and rebuild lookup Set
+     * @param {string} userId - Firebase user ID
+     * @param {FavoriteEntity[]} favorites - Favorites array
      * @private
      */
     _updateCache(userId, favorites) {
@@ -1633,6 +1669,9 @@ class FavoritesService {
 
     /**
      * Add single item to cache
+     * @param {string} userId - Firebase user ID
+     * @param {string} docId - Document ID
+     * @param {Object} data - Favorite data
      * @private
      */
     _addToCache(userId, docId, data) {
@@ -1644,6 +1683,8 @@ class FavoritesService {
 
     /**
      * Remove item from cache
+     * @param {string} userId - Firebase user ID
+     * @param {string} docId - Document ID
      * @private
      */
     _removeFromCache(userId, docId) {
@@ -1654,6 +1695,8 @@ class FavoritesService {
 
     /**
      * Add to O(1) lookup Set
+     * @param {string} userId - Firebase user ID
+     * @param {string} compositeKey - Composite lookup key
      * @private
      */
     _addToLookup(userId, compositeKey) {
@@ -1665,6 +1708,8 @@ class FavoritesService {
 
     /**
      * Remove from O(1) lookup Set
+     * @param {string} userId - Firebase user ID
+     * @param {string} compositeKey - Composite lookup key
      * @private
      */
     _removeFromLookup(userId, compositeKey) {
@@ -1713,6 +1758,7 @@ class FavoritesService {
 
     /**
      * Check if browser is online
+     * @returns {boolean} True if navigator reports online status
      * @private
      */
     _isOnline() {
@@ -1725,6 +1771,8 @@ class FavoritesService {
 
     /**
      * Track pending add for later sync
+     * @param {string} userId - Firebase user ID
+     * @param {Object} change - Change data with docId and data
      * @private
      */
     _trackPendingAdd(userId, change) {
@@ -1748,6 +1796,8 @@ class FavoritesService {
 
     /**
      * Track pending remove for later sync
+     * @param {string} userId - Firebase user ID
+     * @param {Object} change - Change data with docId, entityId, entityType
      * @private
      */
     _trackPendingRemove(userId, change) {
@@ -1771,6 +1821,7 @@ class FavoritesService {
 
     /**
      * Save pending changes to localStorage
+     * @param {string} userId - Firebase user ID
      * @private
      */
     _savePendingChanges(userId) {
@@ -1789,6 +1840,8 @@ class FavoritesService {
 
     /**
      * Load pending changes from localStorage
+     * @param {string} userId - Firebase user ID
+     * @returns {{adds: Array, removes: Array}} Pending changes
      * @private
      */
     _loadPendingChanges(userId) {
@@ -1807,6 +1860,7 @@ class FavoritesService {
 
     /**
      * Clear pending changes after successful sync
+     * @param {string} userId - Firebase user ID
      * @private
      */
     _clearPendingChanges(userId) {
@@ -1961,6 +2015,8 @@ class FavoritesService {
 
     /**
      * Get storage key for user
+     * @param {string} userId - Firebase user ID
+     * @returns {string} localStorage key
      * @private
      */
     _getStorageKey(userId) {
@@ -1969,6 +2025,7 @@ class FavoritesService {
 
     /**
      * Save to localStorage
+     * @param {string} userId - Firebase user ID
      * @private
      */
     _saveToLocalStorage(userId) {
@@ -1985,6 +2042,8 @@ class FavoritesService {
 
     /**
      * Get from localStorage
+     * @param {string} userId - Firebase user ID
+     * @returns {FavoriteEntity[]} Favorites array or empty array
      * @private
      */
     _getFromLocalStorage(userId) {
@@ -1999,6 +2058,7 @@ class FavoritesService {
 
     /**
      * Clear localStorage
+     * @param {string} userId - Firebase user ID
      * @private
      */
     _clearLocalStorage(userId) {

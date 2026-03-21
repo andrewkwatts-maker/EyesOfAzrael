@@ -1,8 +1,12 @@
 /**
- * Security Helper Utilities
- * Provides reusable security functions for sanitization, validation, and protection
+ * @module SecurityHelpers
+ * @description Security Helper Utilities - reusable functions for sanitization, validation, and protection.
  */
 
+/**
+ * @class SecurityHelpers
+ * Static utility class for security operations including XSS prevention, input validation, and rate limiting
+ */
 class SecurityHelpers {
     /**
      * Escape HTML to prevent XSS attacks

@@ -1341,9 +1341,6 @@ class SortFilterControls {
     }
 }
 
-// Export for ES modules
-export { SortFilterControls };
-
 // Global export for browser usage
 if (typeof window !== 'undefined') {
     window.SortFilterControls = SortFilterControls;

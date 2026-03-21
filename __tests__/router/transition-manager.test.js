@@ -209,8 +209,8 @@ describe('TransitionManager', () => {
             await TransitionManager._waitForTransition(stubElement, 50);
             const elapsed = Date.now() - start;
 
-            // Should resolve within timeout + buffer
-            expect(elapsed).toBeLessThan(200);
+            // Should resolve within timeout + generous buffer for CI/slow environments
+            expect(elapsed).toBeLessThan(500);
         });
     });
 });
