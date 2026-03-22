@@ -473,7 +473,6 @@ class LandingPageView {
                 <!-- Asset Type Grid -->
                 <section class="landing-categories-section">
                     <h2 class="landing-section-header">
-                        <span class="landing-section-icon">&#128450;</span>
                         Explore by Category
                     </h2>
                     <p class="landing-section-subtitle">
@@ -487,8 +486,7 @@ class LandingPageView {
                 <!-- Featured Entities Section - Dynamically loaded if data available -->
                 <section class="landing-featured-section" id="featured-entities-section" style="display: none;">
                     <h2 class="landing-section-header">
-                        <span class="landing-section-icon">&#11088;</span>
-                        Featured Entities
+Featured Entities
                     </h2>
                     <p class="landing-section-subtitle">
                         Popular mythological beings and artifacts
@@ -501,8 +499,7 @@ class LandingPageView {
                 <!-- Stats & Social Proof Section -->
                 <section class="landing-stats-section" id="stats-section">
                     <h2 class="landing-section-header">
-                        <span class="landing-section-icon">&#128202;</span>
-                        Our Growing Collection
+Our Growing Collection
                     </h2>
                     <p class="landing-section-subtitle">
                         A living encyclopedia of world mythology
@@ -550,8 +547,7 @@ class LandingPageView {
                 <!-- Recent Additions Section -->
                 <section class="landing-recent-section" id="recent-additions-section" style="display: none;">
                     <h2 class="landing-section-header">
-                        <span class="landing-section-icon">&#9200;</span>
-                        Recently Added
+Recently Added
                     </h2>
                     <p class="landing-section-subtitle">
                         Fresh discoveries from our community
@@ -570,8 +566,7 @@ class LandingPageView {
                 <!-- Features Section -->
                 <section class="landing-features-section">
                     <h2 class="landing-section-header">
-                        <span class="landing-section-icon">&#10024;</span>
-                        Discover & Explore
+Discover & Explore
                     </h2>
                     <p class="landing-section-subtitle">
                         Powerful tools for mythology research
