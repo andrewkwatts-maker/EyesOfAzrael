@@ -1439,8 +1439,29 @@ class SPANavigation {
             await mythologiesView.render(mainContent);
             spaLog('Mythologies grid rendered');
         } else {
-            mainContent.innerHTML = `<div class="error-page"><h1>Mythologies View not available</h1></div>`;
-            spaError('MythologiesView class not found');
+            // Attempt dynamic script load as fallback
+            spaError('MythologiesView class not found, attempting dynamic load');
+            try {
+                await Promise.race([
+                    new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'js/views/mythologies-view.js';
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    }),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Script load timeout')), 3000))
+                ]);
+                if (typeof MythologiesView !== 'undefined') {
+                    const mythologiesView = new MythologiesView(this.db);
+                    await mythologiesView.render(mainContent);
+                    spaLog('Mythologies grid rendered (dynamic load)');
+                    return;
+                }
+            } catch (e) {
+                spaError('Dynamic load of MythologiesView failed:', e);
+            }
+            mainContent.innerHTML = `<div class="error-page"><h1>Unable to load Mythologies</h1><p>Please try refreshing the page.</p></div>`;
         }
     }
 

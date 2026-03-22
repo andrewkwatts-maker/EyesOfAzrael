@@ -698,7 +698,7 @@ describe('SPANavigation', () => {
             spa = ctx.spa;
             window.MythologiesView = undefined;
             await spa.renderMythologies();
-            expect(ctx.mainContent.innerHTML).toContain('not available');
+            expect(ctx.mainContent.innerHTML).toContain('Unable to load Mythologies');
         });
     });
 

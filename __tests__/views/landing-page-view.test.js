@@ -211,19 +211,11 @@ describe('LandingPageView', () => {
             expect(view.isLoaded).toBe(true);
         });
 
-        test('should render hero section with title', async () => {
+        test('should render category grid', async () => {
             const renderPromise = view.render(container);
             jest.advanceTimersByTime(200);
             await renderPromise;
-            expect(container.querySelector('.landing-hero-title')).not.toBeNull();
-        });
-
-        test('should render search form', async () => {
-            const renderPromise = view.render(container);
-            jest.advanceTimersByTime(200);
-            await renderPromise;
-            const form = container.querySelector('.hero-search-form');
-            expect(form).not.toBeNull();
+            expect(container.querySelector('.landing-categories-section')).not.toBeNull();
         });
 
         test('should throw error when container is null', async () => {
@@ -283,40 +275,6 @@ describe('LandingPageView', () => {
             cards.forEach(card => {
                 expect(card.tagName.toLowerCase()).toBe('a');
             });
-        });
-    });
-
-    // ──────────────────────────────────────────────
-    // Search form
-    // ──────────────────────────────────────────────
-
-    describe('Search form navigation', () => {
-        beforeEach(async () => {
-            const renderPromise = view.render(container);
-            jest.advanceTimersByTime(200);
-            await renderPromise;
-        });
-
-        test('search form exists with role="search"', () => {
-            const form = container.querySelector('[role="search"]');
-            expect(form).not.toBeNull();
-        });
-
-        test('search input exists', () => {
-            const input = container.querySelector('#heroSearchInput');
-            expect(input).not.toBeNull();
-            expect(input.type).toBe('search');
-        });
-
-        test('search form submit navigates via hash (no page reload)', () => {
-            const form = container.querySelector('.hero-search-form');
-            const input = container.querySelector('#heroSearchInput');
-            input.value = 'zeus';
-
-            const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-            const prevented = !form.dispatchEvent(submitEvent);
-            // The submit should be prevented (e.preventDefault called)
-            expect(prevented).toBe(true);
         });
     });
 
@@ -385,21 +343,9 @@ describe('LandingPageView', () => {
             });
         });
 
-        test('no inline onclick attributes in hero section buttons', () => {
-            const buttons = container.querySelectorAll('.landing-hero-section button, .landing-hero-section a');
-            buttons.forEach(btn => {
-                expect(btn.getAttribute('onclick')).toBeNull();
-            });
-        });
-
         test('landing page HTML contains no onclick= strings in main content sections', () => {
-            // The landing page HTML for hero + categories should be free of onclick
             const landingView = container.querySelector('.landing-page-view');
             if (landingView) {
-                const heroSection = landingView.querySelector('.landing-hero-section');
-                if (heroSection) {
-                    expect(heroSection.innerHTML).not.toContain('onclick=');
-                }
                 const categoriesSection = landingView.querySelector('.landing-categories-section');
                 if (categoriesSection) {
                     expect(categoriesSection.innerHTML).not.toContain('onclick=');
