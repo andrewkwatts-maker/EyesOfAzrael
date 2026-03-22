@@ -2344,7 +2344,7 @@ class BrowseCategoryView {
                     this.updatePagination();
 
                     // Scroll to top
-                    document.getElementById('entityContainer').scrollTo({ top: 0, behavior: 'smooth' });
+                    document.getElementById('entityContainer')?.scrollTo({ top: 0, behavior: 'smooth' });
                 }
             });
         });
