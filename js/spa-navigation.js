@@ -879,19 +879,12 @@ class SPANavigation {
     async handleRoute(isPopState = false) {
         // Prevent concurrent route handling (race condition guard)
         if (this._isNavigating) {
-            const now = Date.now();
-            if (this._navigationStartTime && (now - this._navigationStartTime > 10000)) {
-                spaWarn('Navigation lock stuck for >10s, force-releasing');
-                this._isNavigating = false;
-            } else {
-                spaLog('Navigation already in progress, skipping');
-                return;
-            }
+            spaLog('Route handling already in progress, skipping');
+            return;
         }
 
         // Acquire navigation lock
         this._isNavigating = true;
-        this._navigationStartTime = Date.now();
         const navigationId = Date.now() + Math.random();
         this._currentNavigationId = navigationId;
         this._activeNavigationId = navigationId;
@@ -1061,7 +1054,7 @@ class SPANavigation {
                 await this.renderUserProfile(match[1]);
             } else {
                 spaLog('No route matched, rendering 404');
-                await this.render404();
+                await this.render404(path);
             }
 
             NavigationMetrics.recordPhase(metric, 'render');
@@ -1120,6 +1113,12 @@ class SPANavigation {
 
             this.renderError(error, path);
             this._announceLoading(false);
+
+            // Dispatch first-render-complete to prevent stuck loading states
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { route: 'error', path: path, error: error.message, timestamp: Date.now() }
+            }));
+
             NavigationMetrics.finishNavigation(metric);
         } finally {
             if (this._currentNavigationId === navigationId) {
@@ -1219,40 +1218,131 @@ class SPANavigation {
 
         if (!mainContent) {
             spaError('CRITICAL: main-content element not found!');
-            return;
-        }
-
-        mainContent.innerHTML = this.getLoadingHTML('Loading...');
-
-        if (typeof LandingPageView === 'undefined') {
-            spaError('LandingPageView not available');
-            mainContent.innerHTML = this.getErrorHTML('Unable to load home page. Please refresh.', 'home');
-            document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { route: 'home', renderer: 'error', timestamp: Date.now() }
+            document.dispatchEvent(new CustomEvent('render-error', {
+                detail: { route: 'home', error: 'main-content element not found', timestamp: Date.now() }
             }));
             return;
         }
 
-        try {
-            const landingView = new LandingPageView(this.db);
-            await landingView.render(mainContent);
+        mainContent.innerHTML = this.getLoadingHTML('Loading home page...');
+
+        if (typeof LandingPageView !== 'undefined') {
+            spaLog('LandingPageView class available, using it...');
+            try {
+                const landingView = new LandingPageView(this.db);
+                await landingView.render(mainContent);
+
+                if (!this.isNavigationValid()) {
+                    spaLog('renderHome: Navigation superseded after LandingPageView render, aborting');
+                    return;
+                }
+
+                spaLog('Landing page rendered via LandingPageView');
+                document.dispatchEvent(new CustomEvent('first-render-complete', {
+                    detail: { route: 'home', renderer: 'LandingPageView', timestamp: Date.now() }
+                }));
+                return;
+            } catch (error) {
+                spaError('LandingPageView.render() failed:', error);
+                if (!this.isNavigationValid()) {
+                    spaLog('renderHome: Navigation superseded after error, aborting fallback');
+                    return;
+                }
+            }
+        } else {
+            spaWarn('LandingPageView NOT available - will try fallbacks');
+        }
+
+        if (typeof PageAssetRenderer !== 'undefined') {
+            spaLog('PageAssetRenderer class available, trying...');
+            try {
+                const renderer = new PageAssetRenderer(this.db);
+                const pageData = await renderer.loadPage('home');
+
+                if (!this.isNavigationValid()) {
+                    spaLog('renderHome: Navigation superseded during PageAssetRenderer load, aborting');
+                    return;
+                }
+
+                if (pageData) {
+                    spaLog('Home page data loaded from Firebase');
+                    await renderer.renderPage('home', mainContent);
+
+                    if (!this.isNavigationValid()) {
+                        spaLog('renderHome: Navigation superseded after PageAssetRenderer render, aborting');
+                        return;
+                    }
+
+                    spaLog('Home page rendered via PageAssetRenderer');
+                    document.dispatchEvent(new CustomEvent('first-render-complete', {
+                        detail: { route: 'home', renderer: 'PageAssetRenderer', timestamp: Date.now() }
+                    }));
+                    return;
+                } else {
+                    spaLog('Home page not found in Firebase, falling back to HomeView');
+                }
+            } catch (error) {
+                spaWarn('PageAssetRenderer failed, falling back to HomeView:', error);
+                if (!this.isNavigationValid()) return;
+            }
+        }
+
+        if (typeof HomeView !== 'undefined') {
+            spaLog('HomeView class available, using it...');
+            const homeView = new HomeView(this.db);
+            await homeView.render(mainContent);
 
             if (!this.isNavigationValid()) {
-                spaLog('renderHome: Navigation superseded after LandingPageView render, aborting');
+                spaLog('renderHome: Navigation superseded after HomeView render, aborting');
                 return;
             }
 
-            spaLog('Landing page rendered via LandingPageView');
+            spaLog('Home page rendered via HomeView');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { route: 'home', renderer: 'LandingPageView', timestamp: Date.now() }
+                detail: { route: 'home', renderer: 'HomeView', timestamp: Date.now() }
             }));
-        } catch (error) {
-            spaError('LandingPageView.render() failed:', error);
-            mainContent.innerHTML = this.getErrorHTML('Something went wrong. Please refresh.', 'home');
-            document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { route: 'home', renderer: 'error', timestamp: Date.now() }
-            }));
+            return;
         }
+
+        // Fallback inline rendering
+        spaWarn('Using inline fallback rendering (no HomeView or PageAssetRenderer)');
+        this._renderFallbackHome(mainContent);
+    }
+
+    /**
+     * Fallback home page rendering
+     */
+    _renderFallbackHome(mainContent) {
+        const mythologies = [
+            { id: 'greek', name: 'Greek', icon: 'temple', color: '#4A90E2' },
+            { id: 'norse', name: 'Norse', icon: 'sword', color: '#7C4DFF' },
+            { id: 'egyptian', name: 'Egyptian', icon: 'pyramid', color: '#FFB300' },
+            { id: 'hindu', name: 'Hindu', icon: 'om', color: '#E91E63' },
+            { id: 'chinese', name: 'Chinese', icon: 'dragon', color: '#F44336' },
+            { id: 'japanese', name: 'Japanese', icon: 'torii', color: '#FF5722' },
+            { id: 'celtic', name: 'Celtic', icon: 'shamrock', color: '#4CAF50' },
+            { id: 'babylonian', name: 'Babylonian', icon: 'vessel', color: '#795548' }
+        ];
+
+        mainContent.innerHTML = `
+            <div class="home-container">
+                <div class="hero-section">
+                    <h1 class="hero-title">Explore World Mythologies</h1>
+                    <p class="hero-subtitle">Discover deities, heroes, creatures, and sacred texts from cultures across the globe</p>
+                </div>
+                <div class="mythologies-grid">
+                    ${mythologies.map(myth => `
+                        <a href="#/mythology/${myth.id}" class="mythology-card" data-mythology="${myth.id}">
+                            <h3 class="myth-name">${myth.name}</h3>
+                        </a>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        document.dispatchEvent(new CustomEvent('first-render-complete', {
+            detail: { route: 'home', renderer: 'inline-fallback', timestamp: Date.now() }
+        }));
     }
 
     /**
@@ -1960,22 +2050,44 @@ class SPANavigation {
         }
     }
 
-    async render404() {
-        spaLog('render404() called');
+    async render404(path) {
+        spaLog('render404() called for path:', path);
 
         try {
             const mainContent = document.getElementById('main-content');
+            if (!mainContent) return;
+
+            const displayPath = path || window.location.hash.replace('#', '') || '/unknown';
+
             mainContent.innerHTML = `
-                <div class="error-page" style="text-align: center; padding: 4rem 2rem;">
-                    <h1 style="font-size: 6rem; margin-bottom: 1rem; color: var(--color-primary);">404</h1>
-                    <p style="font-size: 1.25rem; margin-bottom: 2rem; opacity: 0.8;">Page not found</p>
-                    <a href="#/" class="btn-primary" style="padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 8px;">Return Home</a>
+                <div class="error-page" role="alert" style="text-align: center; padding: 4rem 2rem; max-width: 600px; margin: 0 auto;">
+                    <div style="font-size: 6rem; margin-bottom: 1rem; opacity: 0.3; color: var(--color-text-primary, #f8f9fa); font-weight: 700; line-height: 1;">404</div>
+                    <h1 style="font-size: 1.5rem; color: var(--color-text-primary, #f8f9fa); margin-bottom: 0.5rem;">Page Not Found</h1>
+                    <p style="color: var(--color-text-secondary, #adb5bd); margin-bottom: 2rem;">
+                        The page <code style="background: rgba(139,127,255,0.1); padding: 0.2rem 0.5rem; border-radius: 4px;">${this.escapeHtml(displayPath)}</code> doesn't exist.
+                    </p>
+                    <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                        <a href="#/" class="btn btn-primary" style="padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; background: var(--color-primary, #8b7fff); color: white; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                                <polyline points="9,22 9,12 15,12 15,22"/>
+                            </svg>
+                            Go Home
+                        </a>
+                        <a href="#/search" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; background: rgba(255,255,255,0.1); color: inherit; display: inline-flex; align-items: center; gap: 0.5rem;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                            </svg>
+                            Search
+                        </a>
+                    </div>
                 </div>
             `;
 
-            spaLog('404 page rendered');
+            spaLog('404 page rendered for:', displayPath);
             document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { route: '404', timestamp: Date.now() }
+                detail: { route: '404', path: displayPath, timestamp: Date.now() }
             }));
         } catch (error) {
             spaError('404 page render failed:', error);

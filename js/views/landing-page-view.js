@@ -307,10 +307,6 @@ class LandingPageView {
 
         } catch (error) {
             console.error('[Landing Page] RENDER ERROR:', error);
-            // Still dispatch to prevent stuck loading
-            document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { view: 'landing', error: true, timestamp: Date.now() }
-            }));
             // Show error message in container
             if (container) {
                 container.innerHTML = `
@@ -428,7 +424,7 @@ class LandingPageView {
                     border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.25);
                     border-radius: 14px;
                     padding: 22px 20px;
-                    min-height: 175px;
+                    min-height: 180px;
                     display: flex;
                     flex-direction: column;
                     opacity: 0;
@@ -844,9 +840,8 @@ Discover & Explore
                 /* Category Grid - Compact Panel Grid for 4+ columns on desktop */
                 .landing-category-grid {
                     display: grid;
-                    /* Compact cards: 200px min for proper panel sizing - ensures 4+ columns on 900px+ screens */
-                    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-                    gap: 16px; /* 2x8px grid - tighter for compact look */
+                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                    gap: 1.5rem;
                     contain: layout style;
                 }
 
@@ -871,7 +866,7 @@ Discover & Explore
                     overflow: hidden;
 
                     /* POLISHED: Consistent card dimensions - prevents layout shift */
-                    min-height: 175px;
+                    min-height: 180px;
                     height: 100%;
 
                     display: flex;
@@ -894,19 +889,19 @@ Discover & Explore
 
                     /* Staggered fade-in animation with calc for delay */
                     opacity: 0;
-                    animation: cardFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-                    animation-delay: calc(var(--card-index, 0) * 0.06s);
+                    animation: cardFadeIn 0.4s ease forwards;
+                    animation-delay: calc(var(--card-index, 0) * 50ms);
                 }
 
                 /* Staggered card fade-in animation */
                 @keyframes cardFadeIn {
                     from {
                         opacity: 0;
-                        transform: translateY(16px) scale(0.98);
+                        transform: translateY(12px);
                     }
                     to {
                         opacity: 1;
-                        transform: translateY(0) scale(1);
+                        transform: translateY(0);
                     }
                 }
 
@@ -1653,7 +1648,7 @@ Discover & Explore
                     }
 
                     .landing-category-card {
-                        min-height: 175px;
+                        min-height: 180px;
                         padding: 22px 20px;
                     }
 
