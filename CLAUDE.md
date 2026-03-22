@@ -18,6 +18,8 @@ Eyes of Azrael is a mythology encyclopedia web application built with vanilla Ja
 - `js/app-init-simple.js` - Application initialization sequence
 - `js/auth-guard-simple.js` - Authentication and session management
 - `js/firebase-cache-manager.js` - Multi-layer cache (memory + localStorage)
+- `css/site-header.css` - Site header styles (includes body padding, merged from header-fix.css)
+- `css/buttons.css` - Canonical button styles (single source of truth for all buttons)
 
 ### Router Modules (`js/router/`)
 
@@ -65,10 +67,7 @@ Mythologies, Deities, Heroes, Creatures, Items, Places, Archetypes, Magic System
 
 ### View Priority (renderHome)
 
-1. **LandingPageView** (priority) - Static 12-category grid
-2. **PageAssetRenderer** - Loads `pages/home` from Firebase
-3. **HomeView** - Legacy mythologies grid
-4. **Inline fallback** - Hardcoded mythologies
+Single-path rendering: **LandingPageView** only (static 12-category grid). No fallback chain. Safety timeout is 2 seconds.
 
 ## Authentication
 
@@ -170,3 +169,11 @@ All page renders should show:
 ### Error Handling
 
 Use `getErrorHTML()` and `getLoadingHTML()` methods in SPANavigation for consistent error/loading states.
+
+### CSS Merges
+
+The following CSS files were consolidated during refactoring:
+- `header-fix.css` merged into `site-header.css`
+- `user-dashboard-polished.css` merged into `user-dashboard.css`
+- `user-profile-polished.css` merged into `user-profile.css`
+- `card-truncation.css` merged into `entity-card-polish.css`

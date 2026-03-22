@@ -73,6 +73,7 @@ const PRECACHE_ENHANCED = [
   '/css/skeleton-screens.css',
   '/css/mythology-ambiance.css',
   '/css/entity-card-polish.css',
+  '/css/buttons.css',
   '/css/home-page.css',
   '/js/views/landing-page-view.js',
   '/js/views/browse-category-view.js',
