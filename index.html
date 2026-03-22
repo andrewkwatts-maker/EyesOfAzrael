@@ -90,15 +90,19 @@
             color: var(--color-text-primary);
             line-height: 1.6;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             -webkit-font-smoothing: antialiased;
         }
 
         /* CRITICAL: Ensure main content is visible by default */
         /* Auth-guard CSS will override when needed for auth flow */
+        /* flex: 1 ensures footer sticks to bottom on short-content pages */
         #main-content {
             display: block;
             opacity: 1;
             visibility: visible;
+            flex: 1;
         }
 
         /* Safety: Landing page must always be visible once rendered */
@@ -115,6 +119,25 @@
         #main-content.content-loaded {
             opacity: 1 !important;
             visibility: visible !important;
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 9999;
+            background: rgba(var(--color-bg-card-rgb), 0.95);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(var(--color-border-primary-rgb), 0.8);
+        }
+
+        .header-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0.75rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 2rem;
         }
 
         .loading-container {
@@ -247,7 +270,6 @@
     <link rel="stylesheet" href="themes/theme-base.css">
     <link rel="stylesheet" href="themes/mythology-colors.css">
     <link rel="stylesheet" href="css/firebase-themes.css">
-    <link rel="stylesheet" href="css/buttons.css">
     <link rel="stylesheet" href="css/site-header.css">
     <link rel="stylesheet" href="css/spinner.css">
     <link rel="stylesheet" href="css/loading-spinner.css">
@@ -272,7 +294,7 @@
     <link rel="stylesheet" href="css/search-view.css">
     <link rel="stylesheet" href="css/visual-polish.css">
     <link rel="stylesheet" href="css/dynamic-views.css">
-    <!-- header-fix.css merged into site-header.css -->
+    <link rel="stylesheet" href="css/header-fix.css">
     <link rel="stylesheet" href="css/loading-states.css">
 
     <!-- DEFERRED CSS - Non-blocking async load -->
@@ -617,7 +639,7 @@
                 <div id="userInfo" class="user-info" style="display: none;" role="region" aria-label="User account">
                     <img id="userAvatar" class="user-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%231a1f3a'/%3E%3Ccircle cx='20' cy='15' r='7' fill='%238b7fff'/%3E%3Cpath d='M6 35c0-8 6-14 14-14s14 6 14 14' fill='%238b7fff'/%3E%3C/svg%3E" alt="User profile picture" loading="lazy">
                     <span id="userName" aria-live="polite"></span>
-                    <a href="#/dashboard" class="btn-secondary btn-sm" aria-label="View your dashboard">Dashboard</a>
+                    <a href="#/dashboard" class="btn-secondary btn-sm" aria-label="View your dashboard" style="text-decoration:none;">Dashboard</a>
                     <button id="signOutBtn" class="btn-secondary btn-sm" aria-label="Sign out of your account">Sign Out</button>
                 </div>
             </nav>
@@ -635,7 +657,7 @@
                 <div class="spinner-ring"></div>
                 <div class="spinner-ring"></div>
             </div>
-            <p class="loading-message">Loading...</p>
+            <p class="loading-message">Initializing...</p>
         </div>
     </main>
 
