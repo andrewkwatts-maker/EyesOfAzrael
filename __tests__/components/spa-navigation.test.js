@@ -840,7 +840,7 @@ describe('SPANavigation', () => {
             spa = ctx.spa;
             await spa.render404();
             expect(ctx.mainContent.innerHTML).toContain('404');
-            expect(ctx.mainContent.innerHTML).toContain('Page not found');
+            expect(ctx.mainContent.innerHTML).toContain('Page Not Found');
         });
     });
 
