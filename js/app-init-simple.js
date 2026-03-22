@@ -917,11 +917,11 @@ console.log('[App Init] Script loaded - starting execution');
             emitAppReady(`render-error:${route}`);
         });
 
-        // SAFETY TIMEOUT: Force content visibility after 5 seconds if first-render-complete never fires
+        // SAFETY TIMEOUT: Force content visibility after 2 seconds if first-render-complete never fires
         // This prevents blank page scenarios due to race conditions or uncaught errors
         const safetyTimeout = setTimeout(() => {
             if (!loadingHidden) {
-                console.warn('[App Init] SAFETY TIMEOUT: first-render-complete not received after 5s, forcing visibility');
+                console.warn('[App Init] SAFETY TIMEOUT: first-render-complete not received after 2s, forcing visibility');
 
                 // Force main content to be visible
                 const mainContent = document.getElementById('main-content');
@@ -958,7 +958,7 @@ console.log('[App Init] Script loaded - starting execution');
                 hideAllLoadingIndicators('safety-timeout');
                 emitAppReady('safety-timeout');
             }
-        }, 5000);
+        }, 2000);
 
         // Clear safety timeout if render completes normally
         document.addEventListener('first-render-complete', () => {

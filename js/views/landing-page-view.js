@@ -307,6 +307,10 @@ class LandingPageView {
 
         } catch (error) {
             console.error('[Landing Page] RENDER ERROR:', error);
+            // Still dispatch to prevent stuck loading
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'landing', error: true, timestamp: Date.now() }
+            }));
             // Show error message in container
             if (container) {
                 container.innerHTML = `
