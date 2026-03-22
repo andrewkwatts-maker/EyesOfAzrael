@@ -1106,14 +1106,31 @@
             if (!icon) return '';
 
             if (icon.startsWith('<svg') || icon.startsWith('<?xml')) {
-                return icon;
+                // Sanitize SVG to prevent XSS via embedded event handlers
+                return this.sanitizeSvg(icon);
             }
 
             if (icon.startsWith('http') || icon.startsWith('/') || icon.startsWith('./')) {
                 return `<img src="${this.escapeAttr(icon)}" alt="" class="edv-icon-img" loading="lazy" />`;
             }
 
-            return `<span class="edv-icon-emoji">${icon}</span>`;
+            return `<span class="edv-icon-emoji">${this.escapeHtml(icon)}</span>`;
+        }
+
+        /**
+         * Sanitize SVG string by stripping event handlers and dangerous elements
+         */
+        sanitizeSvg(svg) {
+            if (!svg) return '';
+            // Strip event handler attributes (onclick, onerror, onload, etc.)
+            let clean = svg.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
+            // Strip javascript: URIs
+            clean = clean.replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"');
+            // Strip <script> tags
+            clean = clean.replace(/<script[\s>][\s\S]*?<\/script>/gi, '');
+            // Strip <foreignObject> which can embed HTML
+            clean = clean.replace(/<foreignObject[\s>][\s\S]*?<\/foreignObject>/gi, '');
+            return clean;
         }
 
         /**
@@ -1122,13 +1139,18 @@
         renderMarkdown(text) {
             if (!text) return '';
 
-            // Use marked.js if available
+            // Use marked.js if available (with sanitize option)
             if (window.marked) {
-                return window.marked.parse(text);
+                try {
+                    return window.marked.parse(text, { breaks: true });
+                } catch (_e) {
+                    // Fall through to basic conversion
+                }
             }
 
-            // Basic markdown conversion
-            return text
+            // Escape HTML first to prevent XSS, then apply markdown formatting
+            const escaped = this.escapeHtml(text);
+            return escaped
                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                 .replace(/\*(.*?)\*/g, '<em>$1</em>')
                 .replace(/\n\n/g, '</p><p>')
