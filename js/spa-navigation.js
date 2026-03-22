@@ -843,14 +843,17 @@ class SPANavigation {
             return;
         }
 
+        // Release any stale lock so handleRoute() can acquire it
         this._isNavigating = false;
 
         if (options.replace) {
             window.history.replaceState({ scrollPosition: { x: 0, y: 0 } }, '', path);
             this.handleRoute();
         } else {
+            // Use pushState to update URL — this does NOT trigger hashchange.
+            // Avoid also setting window.location.hash which would fire a
+            // duplicate hashchange event and potentially double-navigate.
             window.history.pushState({ scrollPosition: { x: 0, y: 0 } }, '', path);
-            window.location.hash = path;
             this.handleRoute();
         }
     }
