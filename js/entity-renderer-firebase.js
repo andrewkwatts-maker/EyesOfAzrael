@@ -2310,9 +2310,10 @@ class FirebaseEntityRenderer {
             return fallbackIcon;
         }
 
-        // Check if icon is inline SVG - render directly without escaping
+        // Check if icon is inline SVG - sanitize before rendering
         if (typeof icon === 'string' && icon.trim().startsWith('<svg')) {
-            return `<span class="entity-icon-svg">${icon}</span>`;
+            const sanitized = (window.RenderHelpers && window.RenderHelpers.sanitizeSvg) ? window.RenderHelpers.sanitizeSvg(icon) : icon.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
+            return `<span class="entity-icon-svg">${sanitized}</span>`;
         }
 
         // Check if icon is an image URL
