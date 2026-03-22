@@ -292,7 +292,7 @@ class LandingPageView {
 
             // DIAGNOSTIC: Log innerHTML length to verify content exists
             console.log('[Landing Page] Content length:', container.innerHTML.length, 'chars');
-            console.log('[Landing Page] Has .landing-hero-title:', !!container.querySelector('.landing-hero-title'));
+            console.log('[Landing Page] Has .landing-categories-section:', !!container.querySelector('.landing-categories-section'));
 
             this.attachEventListeners();
             this.loadEntityCounts();
@@ -345,23 +345,6 @@ class LandingPageView {
 
         return `
             <div class="landing-page-view landing-skeleton-container">
-                <!-- Skeleton Hero Section -->
-                <section class="landing-hero-section landing-skeleton-hero">
-                    <div class="skeleton-hero-glow" aria-hidden="true"></div>
-                    <div class="skeleton-hero-icon-wrapper">
-                        <div class="skeleton-hero-icon"></div>
-                        <div class="skeleton-hero-ring"></div>
-                    </div>
-                    <div class="skeleton-hero-title-small"></div>
-                    <div class="skeleton-hero-title"></div>
-                    <div class="skeleton-hero-subtitle"></div>
-                    <div class="skeleton-hero-description"></div>
-                    <div class="skeleton-hero-actions">
-                        <div class="skeleton-button skeleton-button-primary"></div>
-                        <div class="skeleton-button skeleton-button-secondary"></div>
-                    </div>
-                </section>
-
                 <!-- Skeleton Category Grid -->
                 <section class="landing-categories-section">
                     <div class="skeleton-section-header"></div>
@@ -408,7 +391,7 @@ class LandingPageView {
                 }
 
                 /* Base skeleton element styles */
-                .landing-skeleton-container [class*="skeleton-"]:not(.landing-skeleton-card):not(.landing-skeleton-hero):not(.landing-skeleton-container) {
+                .landing-skeleton-container [class*="skeleton-"]:not(.landing-skeleton-card):not(.landing-skeleton-container) {
                     background: linear-gradient(
                         90deg,
                         rgba(var(--color-primary-rgb, 139, 127, 255), 0.08) 0%,
@@ -419,96 +402,6 @@ class LandingPageView {
                     background-size: 200% 100%;
                     animation: skeletonShimmer 2s ease-in-out infinite;
                     border-radius: var(--radius-md, 8px);
-                }
-
-                /* Skeleton Hero - Enhanced */
-                .landing-skeleton-hero {
-                    position: relative;
-                    padding: 72px 40px 64px !important;
-                }
-
-                .skeleton-hero-glow {
-                    position: absolute;
-                    inset: 0;
-                    background: radial-gradient(
-                        circle at center,
-                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.08) 0%,
-                        transparent 60%
-                    );
-                    animation: skeletonPulse 3s ease-in-out infinite;
-                }
-
-                .skeleton-hero-icon-wrapper {
-                    position: relative;
-                    width: 90px;
-                    height: 90px;
-                    margin: 0 auto 24px;
-                }
-
-                .skeleton-hero-icon {
-                    width: 70px;
-                    height: 70px;
-                    border-radius: 50%;
-                    margin: 10px auto;
-                }
-
-                .skeleton-hero-ring {
-                    position: absolute;
-                    inset: 0;
-                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
-                    border-radius: 50%;
-                    animation: skeletonPulse 2s ease-in-out infinite;
-                }
-
-                .skeleton-hero-title-small {
-                    width: 120px;
-                    height: 18px;
-                    margin: 0 auto 8px;
-                    border-radius: 4px;
-                }
-
-                .skeleton-hero-title {
-                    width: 280px;
-                    max-width: 80%;
-                    height: 52px;
-                    margin: 0 auto 20px;
-                    border-radius: 8px;
-                }
-
-                .skeleton-hero-subtitle {
-                    width: 420px;
-                    max-width: 90%;
-                    height: 24px;
-                    margin: 0 auto 16px;
-                }
-
-                .skeleton-hero-description {
-                    width: 520px;
-                    max-width: 85%;
-                    height: 40px;
-                    margin: 0 auto 32px;
-                    border-radius: 8px;
-                }
-
-                .skeleton-hero-actions {
-                    display: flex;
-                    gap: 16px;
-                    justify-content: center;
-                    flex-wrap: wrap;
-                }
-
-                .skeleton-button {
-                    height: 52px;
-                    border-radius: 14px;
-                }
-
-                .skeleton-button-primary {
-                    width: 200px;
-                }
-
-                .skeleton-button-secondary {
-                    width: 180px;
-                    opacity: 0.7;
                 }
 
                 /* Skeleton Section Header */
@@ -567,31 +460,6 @@ class LandingPageView {
                 }
 
                 /* Responsive skeleton adjustments */
-                @media (max-width: 767px) {
-                    .skeleton-hero-icon-wrapper {
-                        width: 70px;
-                        height: 70px;
-                    }
-
-                    .skeleton-hero-icon {
-                        width: 50px;
-                        height: 50px;
-                    }
-
-                    .skeleton-hero-title {
-                        height: 40px;
-                    }
-
-                    .skeleton-hero-actions {
-                        flex-direction: column;
-                        align-items: center;
-                    }
-
-                    .skeleton-button {
-                        width: 100%;
-                        max-width: 280px;
-                    }
-                }
             </style>
         `;
     }
@@ -602,83 +470,6 @@ class LandingPageView {
     getLandingHTML() {
         return `
             <div class="landing-page-view">
-                <!-- Hero Section - Enhanced with animated background and quick search -->
-                <section class="landing-hero-section" role="banner">
-                    <div class="hero-background-glow" aria-hidden="true"></div>
-                    <div class="hero-particles" aria-hidden="true">
-                        <div class="particle particle-1"></div>
-                        <div class="particle particle-2"></div>
-                        <div class="particle particle-3"></div>
-                        <div class="particle particle-4"></div>
-                        <div class="particle particle-5"></div>
-                    </div>
-                    <div class="hero-sacred-geometry" aria-hidden="true">
-                        <svg class="sacred-svg" viewBox="0 0 200 200" width="400" height="400">
-                            <circle cx="100" cy="100" r="80" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.1"/>
-                            <circle cx="100" cy="100" r="60" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.15"/>
-                            <circle cx="100" cy="100" r="40" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.2"/>
-                            <polygon points="100,20 170,140 30,140" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.1"/>
-                            <polygon points="100,180 30,60 170,60" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.1"/>
-                        </svg>
-                    </div>
-                    <div class="hero-content-wrapper">
-                        <div class="hero-icon-display" aria-hidden="true">
-                            <span class="hero-eye-icon">&#128065;</span>
-                            <div class="hero-icon-ring"></div>
-                            <div class="hero-icon-ring hero-icon-ring-outer"></div>
-                        </div>
-                        <h1 class="landing-hero-title">
-                            <span class="title-line title-line-1">Eyes of</span>
-                            <span class="title-line title-line-2">Azrael</span>
-                        </h1>
-                        <p class="landing-hero-subtitle">
-                            Unveil the Sacred Wisdom of Ancient Worlds
-                        </p>
-                        <p class="landing-hero-description">
-                            Journey through 6000+ years of mythology, from the ziggurats of Sumer to the sacred groves of the Celts.
-                            Discover divine beings, legendary heroes, mythical creatures, and the timeless wisdom that shaped civilizations.
-                        </p>
-
-                        <!-- Quick Search -->
-                        <div class="hero-search-container">
-                            <form class="hero-search-form" role="search" aria-label="Search mythology database">
-                                <div class="hero-search-input-wrapper">
-                                    <span class="hero-search-icon" aria-hidden="true">&#128269;</span>
-                                    <input type="search"
-                                           class="hero-search-input"
-                                           id="heroSearchInput"
-                                           placeholder="Search deities, creatures, myths..."
-                                           autocomplete="off"
-                                           aria-label="Search mythology database">
-                                    <button type="submit" class="hero-search-btn" aria-label="Search">
-                                        <span class="btn-text">Search</span>
-                                        <span class="btn-arrow">&#8594;</span>
-                                    </button>
-                                </div>
-                                <div class="hero-search-suggestions" aria-live="polite">
-                                    <span class="search-suggestion-label">Popular:</span>
-                                    <a href="#/browse/deities?q=zeus" class="search-suggestion-tag">Zeus</a>
-                                    <a href="#/browse/creatures?q=dragon" class="search-suggestion-tag">Dragons</a>
-                                    <a href="#/browse/heroes?q=hercules" class="search-suggestion-tag">Hercules</a>
-                                    <a href="#/mythologies/norse" class="search-suggestion-tag">Norse</a>
-                                    <a href="#/browse/items?q=excalibur" class="search-suggestion-tag">Excalibur</a>
-                                </div>
-                            </form>
-                        </div>
-
-                        <div class="landing-hero-actions">
-                            <a href="#/mythologies" class="landing-btn landing-btn-primary">
-                                <span class="btn-icon">&#127963;</span>
-                                <span class="btn-text">Explore Mythologies</span>
-                            </a>
-                            <a href="#/search" class="landing-btn landing-btn-secondary">
-                                <span class="btn-icon">&#128218;</span>
-                                <span class="btn-text">Browse Database</span>
-                            </a>
-                        </div>
-                    </div>
-                </section>
-
                 <!-- Asset Type Grid -->
                 <section class="landing-categories-section">
                     <h2 class="landing-section-header">
@@ -882,213 +673,6 @@ class LandingPageView {
                 /* Loaded state with fade-in */
                 .landing-loaded .landing-page-view {
                     animation: landingFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-                }
-
-                /* === Hero Section - Enhanced Glass-morphism === */
-                .landing-hero-section {
-                    /* Multi-layer glass effect */
-                    background:
-                        linear-gradient(135deg,
-                            rgba(var(--color-primary-rgb, 139, 127, 255), 0.12),
-                            rgba(var(--color-secondary-rgb, 251, 191, 36), 0.08)),
-                        linear-gradient(180deg,
-                            rgba(255, 255, 255, 0.06),
-                            transparent);
-
-                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.25);
-                    border-radius: 28px; /* Slightly larger radius */
-                    padding: 72px 40px 64px; /* Extra top padding for visual balance */
-                    text-align: center;
-                    margin-bottom: 56px;
-                    position: relative;
-                    overflow: hidden;
-                    contain: layout style paint;
-
-                    /* Enhanced glass-morphism */
-                    backdrop-filter: blur(20px) saturate(180%);
-                    -webkit-backdrop-filter: blur(20px) saturate(180%);
-
-                    /* Layered shadows for depth */
-                    box-shadow:
-                        0 12px 40px rgba(0, 0, 0, 0.35),
-                        0 1px 0 rgba(255, 255, 255, 0.08) inset,
-                        0 -1px 0 rgba(0, 0, 0, 0.2) inset,
-                        0 0 100px rgba(var(--color-primary-rgb, 139, 127, 255), 0.08);
-
-                    /* Performance optimization */
-                    will-change: transform;
-                }
-
-                /* Animated background glow */
-                .hero-background-glow {
-                    position: absolute;
-                    inset: -50%;
-                    background:
-                        radial-gradient(circle at 30% 20%, rgba(var(--color-primary-rgb, 139, 127, 255), 0.15) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 80%, rgba(var(--color-secondary-rgb, 251, 191, 36), 0.1) 0%, transparent 50%);
-                    animation: heroGlowShift 20s ease-in-out infinite;
-                    pointer-events: none;
-                    z-index: 0;
-                }
-
-                @keyframes heroGlowShift {
-                    0%, 100% {
-                        transform: translate(0, 0) rotate(0deg);
-                        opacity: 0.8;
-                    }
-                    33% {
-                        transform: translate(5%, 3%) rotate(60deg);
-                        opacity: 1;
-                    }
-                    66% {
-                        transform: translate(-3%, -2%) rotate(120deg);
-                        opacity: 0.9;
-                    }
-                }
-
-                .hero-content-wrapper {
-                    position: relative;
-                    z-index: 1;
-                }
-
-                /* Hero Icon - Enhanced with Ring Animation */
-                .hero-icon-display {
-                    position: relative;
-                    margin-bottom: 24px;
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    width: clamp(80px, 12vw, 100px);
-                    height: clamp(80px, 12vw, 100px);
-                }
-
-                .hero-eye-icon {
-                    font-size: clamp(3rem, 6vw, 4.5rem);
-                    line-height: 1;
-                    filter: drop-shadow(0 4px 16px rgba(var(--color-primary-rgb, 139, 127, 255), 0.5))
-                            drop-shadow(0 0 32px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3));
-                    animation: smoothFloat 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-                    will-change: transform;
-                    position: relative;
-                    z-index: 2;
-                }
-
-                .hero-icon-ring {
-                    position: absolute;
-                    inset: -8px;
-                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-                    border-radius: 50%;
-                    animation: ringPulse 3s ease-in-out infinite;
-                }
-
-                .hero-icon-ring::before {
-                    content: '';
-                    position: absolute;
-                    inset: -12px;
-                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
-                    border-radius: 50%;
-                    animation: ringPulse 3s ease-in-out infinite 0.5s;
-                }
-
-                @keyframes ringPulse {
-                    0%, 100% {
-                        transform: scale(1);
-                        opacity: 0.5;
-                    }
-                    50% {
-                        transform: scale(1.1);
-                        opacity: 0.8;
-                    }
-                }
-
-                @keyframes smoothFloat {
-                    0%, 100% {
-                        transform: translateY(0) scale(1);
-                    }
-                    50% {
-                        transform: translateY(-8px) scale(1.03);
-                    }
-                }
-
-                /* Hero Title - Enhanced Typography with Split Lines */
-                .landing-hero-title {
-                    font-family: var(--font-heading, Georgia, serif);
-                    font-size: clamp(2.5rem, 5.5vw, 4rem);
-                    font-weight: 800;
-                    margin-bottom: 20px;
-                    letter-spacing: -0.03em;
-                    line-height: 1.05;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 0;
-                }
-
-                .title-line {
-                    display: block;
-                    background: linear-gradient(
-                        135deg,
-                        var(--color-primary, #8b7fff) 0%,
-                        var(--color-secondary, #fbbf24) 50%,
-                        var(--color-primary, #8b7fff) 100%
-                    );
-                    background-size: 200% 200%;
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    background-clip: text;
-                    animation: gradientShift 8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-                }
-
-                .title-line-1 {
-                    font-size: 0.65em;
-                    font-weight: 600;
-                    letter-spacing: 0.08em;
-                    text-transform: uppercase;
-                    opacity: 0.9;
-                    margin-bottom: 4px;
-                }
-
-                .title-line-2 {
-                    font-size: 1em;
-                    font-weight: 800;
-                    letter-spacing: -0.02em;
-                    text-shadow: 0 0 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-                }
-
-                @keyframes gradientShift {
-                    0%, 100% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                }
-
-                /* Hero Subtitle - Golden Ratio */
-                .landing-hero-subtitle {
-                    /* Golden ratio: base 1rem x 1.618 = 1.618rem */
-                    font-size: clamp(1.25rem, 3vw, 1.618rem);
-                    color: var(--color-text-primary, #e5e7eb);
-                    margin-bottom: 24px; /* 3x8px grid */
-                    font-weight: 500;
-                    letter-spacing: 0.01em;
-                    line-height: 1.618; /* Golden ratio line height */
-                    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-                }
-
-                /* Hero Description */
-                .landing-hero-description {
-                    font-size: clamp(1rem, 2vw, 1.125rem);
-                    color: var(--color-text-secondary, #9ca3af);
-                    max-width: min(800px, 90%);
-                    margin: 0 auto 32px; /* 4x8px grid */
-                    line-height: 1.75;
-                    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-                }
-
-                /* Hero Actions */
-                .landing-hero-actions {
-                    display: flex;
-                    gap: 16px; /* 2x8px grid */
-                    justify-content: center;
-                    flex-wrap: wrap;
-                    margin-top: 32px; /* 4x8px grid */
                 }
 
                 /* Button Icon */
@@ -1611,188 +1195,6 @@ class LandingPageView {
                     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
                 }
 
-                /* === Hero Search Container === */
-                .hero-search-container {
-                    max-width: 650px;
-                    margin: 0 auto 32px;
-                    position: relative;
-                    z-index: 2;
-                }
-
-                .hero-search-form {
-                    width: 100%;
-                }
-
-                .hero-search-input-wrapper {
-                    display: flex;
-                    align-items: center;
-                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.9);
-                    backdrop-filter: blur(20px);
-                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-                    border-radius: 16px;
-                    padding: 4px 4px 4px 20px;
-                    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-                    box-shadow:
-                        0 8px 32px rgba(0, 0, 0, 0.2),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-                }
-
-                .hero-search-input-wrapper:focus-within {
-                    border-color: var(--color-primary, #8b7fff);
-                    box-shadow:
-                        0 8px 40px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3),
-                        0 0 0 4px rgba(var(--color-primary-rgb, 139, 127, 255), 0.1),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-                }
-
-                .hero-search-icon {
-                    font-size: 1.25rem;
-                    color: var(--color-text-secondary, #9ca3af);
-                    margin-right: 12px;
-                    flex-shrink: 0;
-                }
-
-                .hero-search-input {
-                    flex: 1;
-                    background: transparent;
-                    border: none;
-                    color: var(--color-text-primary, #f8f9fa);
-                    font-size: 1.1rem;
-                    font-family: inherit;
-                    padding: 14px 12px 14px 0;
-                    outline: none;
-                    min-width: 0;
-                }
-
-                .hero-search-input::placeholder {
-                    color: var(--color-text-muted, #6c757d);
-                }
-
-                .hero-search-btn {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    background: linear-gradient(135deg, var(--color-primary, #8b7fff), #a78bfa);
-                    color: white;
-                    border: none;
-                    border-radius: 12px;
-                    padding: 14px 24px;
-                    font-size: 1rem;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    white-space: nowrap;
-                }
-
-                .hero-search-btn:hover {
-                    transform: translateY(-2px);
-                    box-shadow: 0 8px 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
-                }
-
-                .hero-search-btn .btn-arrow {
-                    transition: transform 0.2s ease;
-                }
-
-                .hero-search-btn:hover .btn-arrow {
-                    transform: translateX(4px);
-                }
-
-                .hero-search-suggestions {
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                    margin-top: 16px;
-                    flex-wrap: wrap;
-                    justify-content: center;
-                }
-
-                .search-suggestion-label {
-                    font-size: 0.875rem;
-                    color: var(--color-text-secondary, #9ca3af);
-                }
-
-                .search-suggestion-tag {
-                    font-size: 0.8rem;
-                    color: var(--color-text-secondary, #9ca3af);
-                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
-                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
-                    padding: 4px 12px;
-                    border-radius: 20px;
-                    text-decoration: none;
-                    transition: all 0.2s ease;
-                }
-
-                .search-suggestion-tag:hover {
-                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
-                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
-                    color: var(--color-primary, #8b7fff);
-                }
-
-                /* === Hero Particles Animation === */
-                .hero-particles {
-                    position: absolute;
-                    inset: 0;
-                    overflow: hidden;
-                    pointer-events: none;
-                }
-
-                .particle {
-                    position: absolute;
-                    width: 4px;
-                    height: 4px;
-                    background: var(--color-primary, #8b7fff);
-                    border-radius: 50%;
-                    opacity: 0.4;
-                    animation: particleFloat 15s infinite ease-in-out;
-                }
-
-                .particle-1 { left: 10%; top: 20%; animation-delay: 0s; }
-                .particle-2 { left: 30%; top: 60%; animation-delay: 3s; }
-                .particle-3 { left: 60%; top: 15%; animation-delay: 6s; }
-                .particle-4 { left: 80%; top: 50%; animation-delay: 9s; }
-                .particle-5 { left: 50%; top: 80%; animation-delay: 12s; }
-
-                @keyframes particleFloat {
-                    0%, 100% {
-                        transform: translate(0, 0) scale(1);
-                        opacity: 0.4;
-                    }
-                    25% {
-                        transform: translate(20px, -30px) scale(1.2);
-                        opacity: 0.7;
-                    }
-                    50% {
-                        transform: translate(-10px, 20px) scale(0.8);
-                        opacity: 0.3;
-                    }
-                    75% {
-                        transform: translate(30px, 10px) scale(1.1);
-                        opacity: 0.6;
-                    }
-                }
-
-                /* === Sacred Geometry Background === */
-                .hero-sacred-geometry {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    pointer-events: none;
-                    opacity: 0.3;
-                    color: var(--color-primary, #8b7fff);
-                    animation: sacredRotate 60s linear infinite;
-                }
-
-                @keyframes sacredRotate {
-                    from { transform: translate(-50%, -50%) rotate(0deg); }
-                    to { transform: translate(-50%, -50%) rotate(360deg); }
-                }
-
-                .hero-icon-ring-outer {
-                    inset: -20px !important;
-                    animation-delay: 1s !important;
-                }
-
                 /* === Stats Section === */
                 .landing-stats-section {
                     margin: 80px 0;
@@ -2021,40 +1423,6 @@ class LandingPageView {
 
                 /* === Responsive Design - Production Quality === */
 
-                /* Mobile search adjustments */
-                @media (max-width: 600px) {
-                    .hero-search-input-wrapper {
-                        flex-direction: column;
-                        padding: 12px;
-                        gap: 8px;
-                    }
-
-                    .hero-search-icon {
-                        display: none;
-                    }
-
-                    .hero-search-input {
-                        width: 100%;
-                        padding: 12px;
-                        text-align: center;
-                    }
-
-                    .hero-search-btn {
-                        width: 100%;
-                        justify-content: center;
-                        padding: 14px 20px;
-                    }
-
-                    .hero-search-suggestions {
-                        gap: 6px;
-                    }
-
-                    .search-suggestion-tag {
-                        font-size: 0.75rem;
-                        padding: 3px 10px;
-                    }
-                }
-
                 /* Stats responsive */
                 @media (max-width: 767px) {
                     .landing-stats-grid {
@@ -2120,34 +1488,6 @@ class LandingPageView {
                         padding: 0 12px 32px;
                     }
 
-                    .landing-hero-section {
-                        padding: 40px 16px 32px;
-                        margin-bottom: 32px;
-                        border-radius: 20px;
-                    }
-
-                    .hero-icon-display {
-                        width: 70px;
-                        height: 70px;
-                        margin-bottom: 16px;
-                    }
-
-                    .hero-eye-icon {
-                        font-size: 2.5rem;
-                    }
-
-                    .hero-icon-ring {
-                        inset: -6px;
-                    }
-
-                    .hero-icon-ring::before {
-                        inset: -10px;
-                    }
-
-                    .title-line-1 {
-                        font-size: 0.7em;
-                    }
-
                     /* POLISHED: 2 columns on mobile */
                     .landing-category-grid {
                         grid-template-columns: repeat(2, 1fr);
@@ -2176,32 +1516,11 @@ class LandingPageView {
                         touch-action: manipulation;
                     }
 
-                    .landing-hero-actions {
-                        flex-direction: column;
-                        align-items: stretch;
-                        gap: 12px;
-                        margin-top: 24px;
-                    }
-
                     .landing-btn {
                         width: 100%;
                         justify-content: center;
                         padding: 14px 20px;
                         font-size: 0.95rem;
-                    }
-
-                    .landing-hero-title {
-                        font-size: 2rem;
-                    }
-
-                    .landing-hero-subtitle {
-                        font-size: 1rem;
-                        margin-bottom: 16px;
-                    }
-
-                    .landing-hero-description {
-                        font-size: 0.9rem;
-                        margin-bottom: 24px;
                     }
 
                     .landing-section-header {
@@ -2245,11 +1564,6 @@ class LandingPageView {
                 @media (min-width: 480px) and (max-width: 767px) {
                     .landing-page-view {
                         padding: 0 16px 48px;
-                    }
-
-                    .landing-hero-section {
-                        padding: 48px 24px;
-                        margin-bottom: 40px;
                     }
 
                     /* POLISHED: 2 columns for category cards on mobile */
@@ -2428,12 +1742,6 @@ class LandingPageView {
                         font-size: 2rem;
                     }
 
-                    /* Ensure links have adequate touch targets */
-                    .landing-hero-actions a {
-                        min-height: 44px;
-                        min-width: 44px;
-                    }
-
                     /* Feature cards also need touch optimization */
                     .landing-feature-card {
                         touch-action: manipulation;
@@ -2452,14 +1760,6 @@ class LandingPageView {
                     }
 
                     .landing-page-view {
-                        animation: none;
-                    }
-
-                    .hero-icon-display {
-                        animation: none;
-                    }
-
-                    .landing-hero-title {
                         animation: none;
                     }
 
@@ -2484,7 +1784,6 @@ class LandingPageView {
 
                 /* High Contrast Mode */
                 @media (prefers-contrast: high) {
-                    .landing-hero-section,
                     .landing-category-card,
                     .landing-feature-card {
                         border-width: 3px;
@@ -2501,7 +1800,6 @@ class LandingPageView {
 
                 /* Dark Mode Adjustments (if needed beyond CSS vars) */
                 @media (prefers-color-scheme: dark) {
-                    .landing-hero-section,
                     .landing-category-card,
                     .landing-feature-card {
                         box-shadow:
@@ -2517,7 +1815,6 @@ class LandingPageView {
                         padding: 0;
                     }
 
-                    .landing-hero-section,
                     .landing-category-card,
                     .landing-feature-card {
                         background: white;
@@ -2726,26 +2023,6 @@ class LandingPageView {
                 console.log('[Landing Page] Quick view:', type);
             }, { signal });
         });
-
-        // Hero search form handling
-        const searchForm = document.querySelector('.hero-search-form');
-        const searchInput = document.getElementById('heroSearchInput');
-        if (searchForm && searchInput) {
-            searchForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                const query = searchInput.value.trim();
-                if (query) {
-                    window.location.hash = `#/search?q=${encodeURIComponent(query)}`;
-                }
-            }, { signal });
-
-            searchInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    searchForm.dispatchEvent(new Event('submit'));
-                }
-            }, { signal });
-        }
 
         // Pull-to-refresh handler (document level - MUST be cleaned up)
         this._pullToRefreshHandler = async () => {

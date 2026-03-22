@@ -101,11 +101,11 @@ const CACHE_TTL = {
 
 // Maximum cache sizes per cache type
 const MAX_CACHE_SIZE = {
-  static: 100,
+  static: 75,
   dynamic: 50,
-  images: 150,
+  images: 50,
   fonts: 20,
-  pages: 30
+  pages: 20
 };
 
 // Route patterns and their strategies with cache types
