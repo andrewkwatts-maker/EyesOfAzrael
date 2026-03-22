@@ -18,9 +18,10 @@ function renderIcon(icon, cssClass = 'entity-icon') {
 
     const trimmed = String(icon).trim();
 
-    // Inline SVG - render directly without escaping
+    // Inline SVG - sanitize before rendering to prevent XSS
     if (trimmed.toLowerCase().startsWith('<svg')) {
-        return `<span class="${cssClass}-svg" aria-hidden="true">${icon}</span>`;
+        const sanitized = sanitizeSvg(icon);
+        return `<span class="${cssClass}-svg" aria-hidden="true">${sanitized}</span>`;
     }
 
     // URL - use img tag
@@ -52,6 +53,24 @@ function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+/**
+ * Sanitize SVG string by stripping event handlers and dangerous elements
+ * @param {string} svg - SVG markup string
+ * @returns {string} Sanitized SVG string
+ */
+function sanitizeSvg(svg) {
+    if (!svg) return '';
+    // Strip event handler attributes (onclick, onerror, onload, etc.)
+    let clean = svg.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
+    // Strip javascript: URIs
+    clean = clean.replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"');
+    // Strip <script> tags
+    clean = clean.replace(/<script[\s>][\s\S]*?<\/script>/gi, '');
+    // Strip <foreignObject> which can embed HTML
+    clean = clean.replace(/<foreignObject[\s>][\s\S]*?<\/foreignObject>/gi, '');
+    return clean;
 }
 
 /* ============================================
@@ -536,6 +555,7 @@ window.RenderHelpers = {
     // Icon rendering
     renderIcon,
     escapeHtml,
+    sanitizeSvg,
 
     // Text truncation
     truncateText,
