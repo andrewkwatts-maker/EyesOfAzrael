@@ -879,12 +879,19 @@ class SPANavigation {
     async handleRoute(isPopState = false) {
         // Prevent concurrent route handling (race condition guard)
         if (this._isNavigating) {
-            spaLog('Route handling already in progress, skipping');
-            return;
+            const now = Date.now();
+            if (this._navigationStartTime && (now - this._navigationStartTime > 10000)) {
+                spaWarn('Navigation lock stuck for >10s, force-releasing');
+                this._isNavigating = false;
+            } else {
+                spaLog('Navigation already in progress, skipping');
+                return;
+            }
         }
 
         // Acquire navigation lock
         this._isNavigating = true;
+        this._navigationStartTime = Date.now();
         const navigationId = Date.now() + Math.random();
         this._currentNavigationId = navigationId;
         this._activeNavigationId = navigationId;
@@ -1212,131 +1219,40 @@ class SPANavigation {
 
         if (!mainContent) {
             spaError('CRITICAL: main-content element not found!');
-            document.dispatchEvent(new CustomEvent('render-error', {
-                detail: { route: 'home', error: 'main-content element not found', timestamp: Date.now() }
+            return;
+        }
+
+        mainContent.innerHTML = this.getLoadingHTML('Loading...');
+
+        if (typeof LandingPageView === 'undefined') {
+            spaError('LandingPageView not available');
+            mainContent.innerHTML = this.getErrorHTML('Unable to load home page. Please refresh.', 'home');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { route: 'home', renderer: 'error', timestamp: Date.now() }
             }));
             return;
         }
 
-        mainContent.innerHTML = this.getLoadingHTML('Loading home page...');
-
-        if (typeof LandingPageView !== 'undefined') {
-            spaLog('LandingPageView class available, using it...');
-            try {
-                const landingView = new LandingPageView(this.db);
-                await landingView.render(mainContent);
-
-                if (!this.isNavigationValid()) {
-                    spaLog('renderHome: Navigation superseded after LandingPageView render, aborting');
-                    return;
-                }
-
-                spaLog('Landing page rendered via LandingPageView');
-                document.dispatchEvent(new CustomEvent('first-render-complete', {
-                    detail: { route: 'home', renderer: 'LandingPageView', timestamp: Date.now() }
-                }));
-                return;
-            } catch (error) {
-                spaError('LandingPageView.render() failed:', error);
-                if (!this.isNavigationValid()) {
-                    spaLog('renderHome: Navigation superseded after error, aborting fallback');
-                    return;
-                }
-            }
-        } else {
-            spaWarn('LandingPageView NOT available - will try fallbacks');
-        }
-
-        if (typeof PageAssetRenderer !== 'undefined') {
-            spaLog('PageAssetRenderer class available, trying...');
-            try {
-                const renderer = new PageAssetRenderer(this.db);
-                const pageData = await renderer.loadPage('home');
-
-                if (!this.isNavigationValid()) {
-                    spaLog('renderHome: Navigation superseded during PageAssetRenderer load, aborting');
-                    return;
-                }
-
-                if (pageData) {
-                    spaLog('Home page data loaded from Firebase');
-                    await renderer.renderPage('home', mainContent);
-
-                    if (!this.isNavigationValid()) {
-                        spaLog('renderHome: Navigation superseded after PageAssetRenderer render, aborting');
-                        return;
-                    }
-
-                    spaLog('Home page rendered via PageAssetRenderer');
-                    document.dispatchEvent(new CustomEvent('first-render-complete', {
-                        detail: { route: 'home', renderer: 'PageAssetRenderer', timestamp: Date.now() }
-                    }));
-                    return;
-                } else {
-                    spaLog('Home page not found in Firebase, falling back to HomeView');
-                }
-            } catch (error) {
-                spaWarn('PageAssetRenderer failed, falling back to HomeView:', error);
-                if (!this.isNavigationValid()) return;
-            }
-        }
-
-        if (typeof HomeView !== 'undefined') {
-            spaLog('HomeView class available, using it...');
-            const homeView = new HomeView(this.db);
-            await homeView.render(mainContent);
+        try {
+            const landingView = new LandingPageView(this.db);
+            await landingView.render(mainContent);
 
             if (!this.isNavigationValid()) {
-                spaLog('renderHome: Navigation superseded after HomeView render, aborting');
+                spaLog('renderHome: Navigation superseded after LandingPageView render, aborting');
                 return;
             }
 
-            spaLog('Home page rendered via HomeView');
+            spaLog('Landing page rendered via LandingPageView');
             document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { route: 'home', renderer: 'HomeView', timestamp: Date.now() }
+                detail: { route: 'home', renderer: 'LandingPageView', timestamp: Date.now() }
             }));
-            return;
+        } catch (error) {
+            spaError('LandingPageView.render() failed:', error);
+            mainContent.innerHTML = this.getErrorHTML('Something went wrong. Please refresh.', 'home');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { route: 'home', renderer: 'error', timestamp: Date.now() }
+            }));
         }
-
-        // Fallback inline rendering
-        spaWarn('Using inline fallback rendering (no HomeView or PageAssetRenderer)');
-        this._renderFallbackHome(mainContent);
-    }
-
-    /**
-     * Fallback home page rendering
-     */
-    _renderFallbackHome(mainContent) {
-        const mythologies = [
-            { id: 'greek', name: 'Greek', icon: 'temple', color: '#4A90E2' },
-            { id: 'norse', name: 'Norse', icon: 'sword', color: '#7C4DFF' },
-            { id: 'egyptian', name: 'Egyptian', icon: 'pyramid', color: '#FFB300' },
-            { id: 'hindu', name: 'Hindu', icon: 'om', color: '#E91E63' },
-            { id: 'chinese', name: 'Chinese', icon: 'dragon', color: '#F44336' },
-            { id: 'japanese', name: 'Japanese', icon: 'torii', color: '#FF5722' },
-            { id: 'celtic', name: 'Celtic', icon: 'shamrock', color: '#4CAF50' },
-            { id: 'babylonian', name: 'Babylonian', icon: 'vessel', color: '#795548' }
-        ];
-
-        mainContent.innerHTML = `
-            <div class="home-container">
-                <div class="hero-section">
-                    <h1 class="hero-title">Explore World Mythologies</h1>
-                    <p class="hero-subtitle">Discover deities, heroes, creatures, and sacred texts from cultures across the globe</p>
-                </div>
-                <div class="mythologies-grid">
-                    ${mythologies.map(myth => `
-                        <a href="#/mythology/${myth.id}" class="mythology-card" data-mythology="${myth.id}">
-                            <h3 class="myth-name">${myth.name}</h3>
-                        </a>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-
-        document.dispatchEvent(new CustomEvent('first-render-complete', {
-            detail: { route: 'home', renderer: 'inline-fallback', timestamp: Date.now() }
-        }));
     }
 
     /**
