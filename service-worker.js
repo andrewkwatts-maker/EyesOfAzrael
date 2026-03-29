@@ -77,7 +77,16 @@ const PRECACHE_ENHANCED = [
   '/css/home-page.css',
   '/js/views/landing-page-view.js',
   '/js/views/browse-category-view.js',
+  '/js/views/home-view.js',
+  '/js/views/mythologies-view.js',
+  '/js/views/user-profile-view.js',
+  '/js/views/user-dashboard-view.js',
   '/js/components/entity-card.js',
+  '/js/components/about-page.js',
+  '/js/components/privacy-page.js',
+  '/js/components/terms-page.js',
+  '/js/components/search-view-complete.js',
+  '/js/components/compare-view.js',
   '/js/utils/loading-spinner.js'
 ];
 
