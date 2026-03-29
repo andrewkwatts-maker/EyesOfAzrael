@@ -76,6 +76,9 @@ class UserDashboardView {
 
     /**
      * Load user data from Firebase
+     * TODO: Dashboard stats (contribution counts, reputation, badges) are only loaded
+     * once during init and do not refresh while the dashboard remains open. Consider
+     * adding a manual refresh button or periodic polling for long-lived sessions.
      */
     async _loadUserData() {
         const db = firebase.firestore();
@@ -293,6 +296,10 @@ class UserDashboardView {
         } catch (error) {
             console.error('[UserDashboard] Error rendering:', error);
             this.container.innerHTML = this._getErrorHTML(error.message);
+        } finally {
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { route: 'dashboard', timestamp: Date.now() }
+            }));
         }
 
         // Delegated retry handler for error states
@@ -468,7 +475,7 @@ class UserDashboardView {
                 <!-- Navigation Tabs -->
                 <nav class="dashboard-tabs" role="tablist" aria-label="Dashboard sections">
                     <button class="dashboard-tab ${this.activeTab === 'overview' ? 'active' : ''}"
-                            data-tab="overview" role="tab" aria-selected="${this.activeTab === 'overview'}">
+                            data-tab="overview" role="tab" aria-selected="${this.activeTab === 'overview'}" aria-controls="dashboard-tabpanel" id="dashboard-tab-overview">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="3" width="7" height="7"/>
                             <rect x="14" y="3" width="7" height="7"/>
@@ -478,7 +485,7 @@ class UserDashboardView {
                         Overview
                     </button>
                     <button class="dashboard-tab ${this.activeTab === 'contributions' ? 'active' : ''}"
-                            data-tab="contributions" role="tab" aria-selected="${this.activeTab === 'contributions'}">
+                            data-tab="contributions" role="tab" aria-selected="${this.activeTab === 'contributions'}" aria-controls="dashboard-tabpanel" id="dashboard-tab-contributions">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                             <polyline points="14 2 14 8 20 8"/>
@@ -487,14 +494,14 @@ class UserDashboardView {
                         ${u.counts.pending > 0 ? `<span class="tab-badge">${u.counts.pending}</span>` : ''}
                     </button>
                     <button class="dashboard-tab ${this.activeTab === 'favorites' ? 'active' : ''}"
-                            data-tab="favorites" role="tab" aria-selected="${this.activeTab === 'favorites'}">
+                            data-tab="favorites" role="tab" aria-selected="${this.activeTab === 'favorites'}" aria-controls="dashboard-tabpanel" id="dashboard-tab-favorites">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                         </svg>
                         Favorites
                     </button>
                     <button class="dashboard-tab ${this.activeTab === 'achievements' ? 'active' : ''}"
-                            data-tab="achievements" role="tab" aria-selected="${this.activeTab === 'achievements'}">
+                            data-tab="achievements" role="tab" aria-selected="${this.activeTab === 'achievements'}" aria-controls="dashboard-tabpanel" id="dashboard-tab-achievements">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="8" r="6"/>
                             <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/>
@@ -502,7 +509,7 @@ class UserDashboardView {
                         Achievements
                     </button>
                     <button class="dashboard-tab ${this.activeTab === 'settings' ? 'active' : ''}"
-                            data-tab="settings" role="tab" aria-selected="${this.activeTab === 'settings'}">
+                            data-tab="settings" role="tab" aria-selected="${this.activeTab === 'settings'}" aria-controls="dashboard-tabpanel" id="dashboard-tab-settings">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="12" cy="12" r="3"/>
                             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -512,7 +519,7 @@ class UserDashboardView {
                 </nav>
 
                 <!-- Tab Content -->
-                <div class="dashboard-content" role="tabpanel">
+                <div class="dashboard-content" role="tabpanel" id="dashboard-tabpanel" aria-labelledby="dashboard-tab-${this.activeTab}">
                     ${this._getTabContent(this.activeTab)}
                 </div>
             </div>
@@ -1229,6 +1236,9 @@ class UserDashboardView {
      * Initialize badge display
      */
     _initBadgeDisplay() {
+        // Skip re-initialization if badges are already rendered for this tab cycle
+        if (this._badgesInitialized) return;
+
         const showcaseContainer = this.container.querySelector('#badges-showcase');
         const fullContainer = this.container.querySelector('#badges-full-display');
 
@@ -1266,6 +1276,7 @@ class UserDashboardView {
                     : '<span class="no-badges">No badges earned yet</span>';
             }
         }
+        this._badgesInitialized = true;
     }
 
     /**
@@ -1285,6 +1296,9 @@ class UserDashboardView {
 
         this.activeTab = tabId;
 
+        // Reset badge initialization flag when switching away from achievements
+        this._badgesInitialized = false;
+
         // Update tab buttons
         this.container.querySelectorAll('.dashboard-tab').forEach(t => {
             const isActive = t.dataset.tab === tabId;
@@ -1295,6 +1309,7 @@ class UserDashboardView {
         // Update content
         const contentContainer = this.container.querySelector('.dashboard-content');
         if (contentContainer) {
+            contentContainer.setAttribute('aria-labelledby', `dashboard-tab-${tabId}`);
             contentContainer.innerHTML = this._getTabContent(tabId);
 
             // Re-bind events for new content

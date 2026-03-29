@@ -1416,4 +1416,25 @@ if (typeof module !== 'undefined' && module.exports) {
 if (typeof window !== 'undefined') {
     window.UniversalDisplayRenderer = UniversalDisplayRenderer;
     console.log('[UniversalDisplayRenderer] Class registered globally');
+
+    // Document-level fallback delegation for expand-pills / collapse-pills buttons.
+    // This ensures pills work even when attachEventListeners() was not called on
+    // the specific container that holds the rendered pills.
+    document.addEventListener('click', function(e) {
+        var pillsButton = e.target.closest('[data-action="expand-pills"], [data-action="collapse-pills"]');
+        if (!pillsButton) return;
+        e.preventDefault();
+        var targetId = pillsButton.dataset.target;
+        var container = document.querySelector('[data-pills-id="' + targetId + '"]');
+        if (container) {
+            var isExpanding = pillsButton.dataset.action === 'expand-pills';
+            container.classList.toggle('pills-expanded', isExpanding);
+            pillsButton.setAttribute('aria-expanded', isExpanding);
+
+            var hiddenPills = container.querySelector('[data-pills-hidden="' + targetId + '"]');
+            if (hiddenPills) {
+                hiddenPills.setAttribute('aria-hidden', !isExpanding);
+            }
+        }
+    });
 }

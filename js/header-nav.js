@@ -382,6 +382,21 @@ class HeaderNavController {
         if (!this.userMenuBtn) return;
 
         this.userMenuBtn.addEventListener('click', this.handleUserMenuClick);
+
+        // Ensure sign-out button has a handler (defensive — app-init-simple.js also sets this up)
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn && !signOutBtn._headerNavHandlerAttached) {
+            signOutBtn._headerNavHandlerAttached = true;
+            signOutBtn.addEventListener('click', async () => {
+                try {
+                    if (typeof firebase !== 'undefined' && firebase.auth) {
+                        await firebase.auth().signOut();
+                    }
+                } catch (error) {
+                    console.error('[HeaderNav] Sign out error:', error);
+                }
+            });
+        }
     }
 
     /**
@@ -392,6 +407,37 @@ class HeaderNavController {
 
         // Only show dropdown on desktop
         this.themePickerBtn.addEventListener('click', this.handleThemePickerClick);
+
+        // Arrow key navigation within theme picker dropdown
+        if (this.themePickerDropdown) {
+            this.themePickerDropdown.addEventListener('keydown', (e) => {
+                const items = Array.from(this.themePickerDropdown.querySelectorAll('button, [role="option"], .theme-option, [data-theme]'));
+                if (items.length === 0) return;
+
+                const currentIndex = items.indexOf(document.activeElement);
+
+                switch (e.key) {
+                    case 'ArrowDown':
+                        e.preventDefault();
+                        items[(currentIndex + 1) % items.length].focus();
+                        break;
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        items[(currentIndex - 1 + items.length) % items.length].focus();
+                        break;
+                    case 'Enter':
+                        if (document.activeElement && items.includes(document.activeElement)) {
+                            document.activeElement.click();
+                        }
+                        break;
+                    case 'Escape':
+                        this.themeMenuOpen = false;
+                        this.updateThemePickerState();
+                        this.themePickerBtn.focus();
+                        break;
+                }
+            });
+        }
     }
 
     /**

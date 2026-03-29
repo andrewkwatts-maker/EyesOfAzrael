@@ -8,7 +8,7 @@
  * - List/Grid view toggle with smooth transitions
  * - Advanced filtering: Multi-select mythology, domain tags, search
  * - Enhanced sorting: Name, Mythology, Popularity, Date added
- * - Virtual scrolling for 100+ entities
+ * - Paginated loading for large entity sets
  * - Rich entity cards with hover previews
  * - Tag overflow handling (max 4, "+X more")
  * - Quick filter chips
@@ -48,11 +48,10 @@ class BrowseCategoryView {
         this.contentFilter = null;
         this.showUserContent = false;
 
-        // Pagination/Virtual scrolling
+        // Pagination
         this.currentPage = 1;
-        this.itemsPerPage = 24;
-        this.useVirtualScrolling = true; // Auto-enable for 100+ items
-        this.visibleRange = { start: 0, end: 24 };
+        this.itemsPerPage = window.innerWidth < 768 ? 12 : 24;
+        this.visibleRange = { start: 0, end: this.itemsPerPage };
 
         // Infinite scroll
         this.infiniteScrollObserver = null;
@@ -207,7 +206,12 @@ class BrowseCategoryView {
             throw new Error('Firestore not available');
         }
 
-        let baseQuery = db.collection(this.category);
+        const collectionMap = {
+            'archetypes': 'concepts',
+            'cosmologies': 'cosmology'
+        };
+        const collectionName = collectionMap[this.category] || this.category;
+        let baseQuery = db.collection(collectionName);
 
         if (this.mythology) {
             baseQuery = baseQuery.where('mythology', '==', this.mythology);
@@ -273,6 +277,28 @@ class BrowseCategoryView {
     async reloadEntities() {
         console.log(`[Browse View] Reloading with showUserContent: ${this.showUserContent}`);
 
+        // Show loading overlay on the grid during async reload
+        const grid = document.getElementById('entityGrid');
+        if (grid) {
+            grid.style.position = 'relative';
+            const overlay = document.createElement('div');
+            overlay.className = 'browse-reload-overlay';
+            overlay.setAttribute('aria-live', 'polite');
+            overlay.setAttribute('role', 'status');
+            overlay.innerHTML = '<div class="browse-reload-spinner"></div>';
+            Object.assign(overlay.style, {
+                position: 'absolute', top: '0', left: '0', width: '100%', height: '100%',
+                background: 'rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', zIndex: '10', borderRadius: 'inherit'
+            });
+            Object.assign(overlay.querySelector('.browse-reload-spinner').style, {
+                width: '36px', height: '36px', border: '3px solid rgba(255,255,255,0.3)',
+                borderTopColor: '#fff', borderRadius: '50%',
+                animation: 'spin 0.8s linear infinite'
+            });
+            grid.appendChild(overlay);
+        }
+
         try {
             // Re-fetch entities
             if (this.assetService) {
@@ -307,6 +333,12 @@ class BrowseCategoryView {
 
         } catch (error) {
             console.error('[Browse View] Error reloading entities:', error);
+        } finally {
+            // Remove loading overlay
+            if (grid) {
+                const overlay = grid.querySelector('.browse-reload-overlay');
+                if (overlay) overlay.remove();
+            }
         }
     }
 
@@ -898,7 +930,7 @@ class BrowseCategoryView {
         const isFavorited = favorites.includes(`${this.category}:${entity.id}`);
 
         return `
-            <a href="#/entity/${this.category}/${entity.mythology}/${entity.id}"
+            <a href="#/entity/${this.category}/${entity.mythology || 'unknown'}/${entity.id}"
                class="entity-card card-strict-height ${entity.isStandard ? '' : 'entity-card-community'}"
                data-entity-id="${entity.id}"
                data-mythology="${entity.mythology}"
@@ -906,7 +938,7 @@ class BrowseCategoryView {
                data-collection="${this.category}"
                data-name="${entity.name.toLowerCase()}"
                role="article"
-               aria-label="${this.escapeHtml(entity.name)} - ${this.capitalize(entity.mythology)} ${this.category.replace(/s$/, '')}">
+               aria-label="${this.escapeHtml(entity.name)} - ${this.capitalize(entity.mythology || '')} ${this.category.replace(/s$/, '')}">
                 ${badgeHTML}
 
                 <!-- Quick Actions -->
@@ -969,7 +1001,7 @@ class BrowseCategoryView {
                 <!-- Hover Preview -->
                 <div class="entity-preview">
                     <div class="preview-content">
-                        ${entity.altNames && entity.altNames.length > 0 ? `
+                        ${Array.isArray(entity.altNames) && entity.altNames.length > 0 ? `
                             <div class="preview-section">
                                 <strong>Also known as:</strong> ${entity.altNames.slice(0, 3).join(', ')}
                             </div>
@@ -979,7 +1011,7 @@ class BrowseCategoryView {
                                 <strong>All domains:</strong> ${allTags.join(', ')}
                             </div>
                         ` : ''}
-                        ${entity.symbols && entity.symbols.length > 0 ? `
+                        ${Array.isArray(entity.symbols) && entity.symbols.length > 0 ? `
                             <div class="preview-section">
                                 <strong>Symbols:</strong> ${entity.symbols.slice(0, 5).join(', ')}
                             </div>
@@ -1289,9 +1321,9 @@ class BrowseCategoryView {
                             <span class="btn-icon">&#10006;</span>
                             Clear All Filters
                         </button>
-                        <a href="#/browse/${this.category}" class="btn-secondary">
+                        <button class="btn-secondary" id="browseAllFromEmpty">
                             Browse All ${categoryInfo.name}
-                        </a>
+                        </button>
                     </div>
                 ` : `
                     <div class="empty-state__actions">
@@ -1392,8 +1424,7 @@ class BrowseCategoryView {
                          class="entity-icon-img"
                          loading="lazy"
                          decoding="async"
-                         onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none'"
-                         onerror="this.style.display='none'" />
+                         data-entity-icon />
                 </div>`;
         }
 
@@ -1405,6 +1436,7 @@ class BrowseCategoryView {
      * Capitalize string
      */
     capitalize(str) {
+        if (!str) return '';
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
@@ -1416,6 +1448,23 @@ class BrowseCategoryView {
         this._abortController = new AbortController();
         const signal = this._abortController.signal;
         this._documentListeners = [];
+
+        // Event delegation for entity icon load/error (CSP-safe, replaces inline handlers)
+        const entityGrid = document.getElementById('entityGrid');
+        if (entityGrid) {
+            entityGrid.addEventListener('load', (e) => {
+                if (e.target.matches('img[data-entity-icon]')) {
+                    e.target.classList.add('loaded');
+                    const placeholder = e.target.previousElementSibling;
+                    if (placeholder) placeholder.style.display = 'none';
+                }
+            }, { capture: true, signal });
+            entityGrid.addEventListener('error', (e) => {
+                if (e.target.matches('img[data-entity-icon]')) {
+                    e.target.style.display = 'none';
+                }
+            }, { capture: true, signal });
+        }
 
         // Quick filter chips
         document.querySelectorAll('.filter-chip').forEach(chip => {
@@ -1431,6 +1480,11 @@ class BrowseCategoryView {
         const clearFromEmpty = document.getElementById('clearFiltersFromEmpty');
         if (clearFromEmpty) {
             clearFromEmpty.addEventListener('click', () => this.clearAllFilters(), { signal });
+        }
+
+        const browseAllFromEmpty = document.getElementById('browseAllFromEmpty');
+        if (browseAllFromEmpty) {
+            browseAllFromEmpty.addEventListener('click', () => this.clearAllFilters(), { signal });
         }
 
         // Search filter with debouncing
@@ -1558,7 +1612,7 @@ class BrowseCategoryView {
                 const retryBtn = e.target.closest('[data-action="retry"]');
                 if (retryBtn) {
                     e.preventDefault();
-                    this.render(this.category, this.mythology);
+                    this.render(this.container, { category: this.category, mythology: this.mythology });
                 }
             }, { signal });
         }
@@ -1604,6 +1658,12 @@ class BrowseCategoryView {
         if (this.scrollTimeout) {
             clearTimeout(this.scrollTimeout);
             this.scrollTimeout = null;
+        }
+
+        // Disconnect infinite scroll observer
+        if (this.infiniteScrollObserver) {
+            this.infiniteScrollObserver.disconnect();
+            this.infiniteScrollObserver = null;
         }
     }
 
@@ -2118,10 +2178,14 @@ class BrowseCategoryView {
         if (this.filteredEntities.length === 0) {
             grid.innerHTML = this.getEmptyStateHTML();
 
-            // Re-attach event listener for clear button in empty state
+            // Re-attach event listeners for buttons in empty state
             const clearFromEmpty = document.getElementById('clearFiltersFromEmpty');
             if (clearFromEmpty) {
                 clearFromEmpty.addEventListener('click', () => this.clearAllFilters());
+            }
+            const browseAllFromEmpty = document.getElementById('browseAllFromEmpty');
+            if (browseAllFromEmpty) {
+                browseAllFromEmpty.addEventListener('click', () => this.clearAllFilters());
             }
 
             // Hide load more container when empty
@@ -2248,7 +2312,8 @@ class BrowseCategoryView {
             this.currentPage++;
 
             const grid = document.getElementById('entityGrid');
-            if (!grid) {
+            // Validate grid exists and is still attached to the document
+            if (!grid || !document.body.contains(grid)) {
                 this.isLoadingMore = false;
                 return;
             }

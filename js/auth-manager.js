@@ -185,7 +185,7 @@ class AuthManager {
                         </div>
                     </div>
                 `;
-                userInfo.style.display = 'block';
+                userInfo.classList.remove('hidden');
             }
 
             if (signInBtn) signInBtn.style.display = 'none';
@@ -197,7 +197,7 @@ class AuthManager {
 
             if (userInfo) {
                 userInfo.innerHTML = '';
-                userInfo.style.display = 'none';
+                userInfo.classList.add('hidden');
             }
 
             if (signInBtn) signInBtn.style.display = 'block';
@@ -217,19 +217,23 @@ class AuthManager {
         if (!userInfo) return;
 
         if (user) {
-            userInfo.style.display = 'flex';
+            userInfo.classList.remove('hidden');
             if (userName) {
                 userName.textContent = user.displayName || user.email;
             }
             if (userAvatar && user.photoURL) {
                 userAvatar.src = user.photoURL;
                 userAvatar.alt = user.displayName || 'User';
+                userAvatar.onerror = function() {
+                    this.onerror = null;
+                    this.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%231a1f3a'/%3E%3Ccircle cx='20' cy='15' r='7' fill='%238b7fff'/%3E%3Cpath d='M6 35c0-8 6-14 14-14s14 6 14 14' fill='%238b7fff'/%3E%3C/svg%3E";
+                };
             }
             if (signOutBtn) {
                 signOutBtn.style.display = 'block';
             }
         } else {
-            userInfo.style.display = 'none';
+            userInfo.classList.add('hidden');
         }
     }
 

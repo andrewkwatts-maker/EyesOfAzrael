@@ -155,18 +155,21 @@
                     container.outerHTML = html;
                 }
 
-                // Initialize interactive components
-                requestAnimationFrame(() => {
-                    this.attachEventListeners();
-                    this.initializeInteractiveFeatures();
-                    this.loadAdditionalData(entity, mythology, entityType);
-                });
+                // Initialize interactive components sequentially
+                // (no requestAnimationFrame to avoid race between attachEventListeners
+                // and initializeInteractiveFeatures)
+                this.attachEventListeners();
+                this.initializeInteractiveFeatures();
+                this.loadAdditionalData(entity, mythology, entityType);
 
             } catch (error) {
                 console.error('[EntityDetailView] Error loading entity:', error);
                 this.renderError(error.message);
             } finally {
                 this.isLoading = false;
+                document.dispatchEvent(new CustomEvent('first-render-complete', {
+                    detail: { route: 'entity-detail', entityId: entityId, entityType: entityType, timestamp: Date.now() }
+                }));
             }
         }
 
@@ -505,9 +508,9 @@
                         <li class="edv-breadcrumb__item">
                             <a href="#/browse/${entityType}" class="edv-breadcrumb__link">${this.getEntityTypeLabel(entityType)}</a>
                         </li>
-                        <li class="edv-breadcrumb__item">
-                            <a href="#/mythologies/${mythology}" class="edv-breadcrumb__link">${this.capitalize(mythology)}</a>
-                        </li>
+                        ${mythology ? `<li class="edv-breadcrumb__item">
+                            <a href="#/mythology/${mythology}" class="edv-breadcrumb__link">${this.capitalize(mythology)}</a>
+                        </li>` : ''}
                         <li class="edv-breadcrumb__item edv-breadcrumb__item--current" aria-current="page">
                             <span>${this.escapeHtml(entityName)}</span>
                         </li>
@@ -588,6 +591,10 @@
             `;
 
             this.attachEventListeners();
+
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { route: 'entity-detail', error: message, timestamp: Date.now() }
+            }));
         }
 
         /**
@@ -652,8 +659,14 @@
                 case 'retry':
                     if (this.container && this.currentRoute) {
                         this.render(this.currentRoute, this.container);
+                    } else if (window.SPANavigation && window.SPANavigation.handleRoute) {
+                        // Re-trigger the current route through the SPA router
+                        window.SPANavigation.handleRoute(window.location.hash || '#/');
                     } else {
-                        window.location.reload();
+                        // Last resort: re-navigate to current hash to trigger route handling
+                        const currentHash = window.location.hash;
+                        window.location.hash = '';
+                        window.location.hash = currentHash || '#/';
                     }
                     break;
                 default:
@@ -669,6 +682,14 @@
                 this._abortController.abort();
                 this._abortController = null;
             }
+
+            // Clear collapsed section state so it doesn't persist across entities
+            try {
+                sessionStorage.removeItem('edv_collapsed_sections');
+            } catch (e) {
+                // Ignore storage errors
+            }
+
             this.currentEntity = null;
             this.currentRoute = null;
             this.container = null;
@@ -1006,7 +1027,14 @@
 
             const panelId = tab.getAttribute('aria-controls');
             const panel = document.getElementById(panelId);
-            if (panel) panel.classList.add('active');
+            if (panel) {
+                panel.classList.add('active');
+
+                // On mobile, scroll the tab panel into view for better UX
+                if (window.innerWidth < 768) {
+                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
 
             if (focus) tab.focus();
         }
@@ -1122,15 +1150,48 @@
          */
         sanitizeSvg(svg) {
             if (!svg) return '';
-            // Strip event handler attributes (onclick, onerror, onload, etc.)
-            let clean = svg.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
-            // Strip javascript: URIs
-            clean = clean.replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"');
-            // Strip <script> tags
-            clean = clean.replace(/<script[\s>][\s\S]*?<\/script>/gi, '');
-            // Strip <foreignObject> which can embed HTML
-            clean = clean.replace(/<foreignObject[\s>][\s\S]*?<\/foreignObject>/gi, '');
-            return clean;
+            try {
+                // Parse as text/html (more forgiving than XML) and extract the SVG
+                const doc = new DOMParser().parseFromString(svg, 'text/html');
+                const svgEl = doc.querySelector('svg');
+                if (!svgEl) return '';
+
+                // Remove dangerous elements
+                const dangerousElements = svgEl.querySelectorAll('script, foreignObject, iframe, object, embed, use[href^="data:"], use[xlink\\:href^="data:"]');
+                dangerousElements.forEach(el => el.remove());
+
+                // Remove event handler attributes from all elements
+                const allElements = svgEl.querySelectorAll('*');
+                allElements.forEach(el => {
+                    const attrs = Array.from(el.attributes);
+                    attrs.forEach(attr => {
+                        if (/^on/i.test(attr.name)) {
+                            el.removeAttribute(attr.name);
+                        }
+                        // Strip javascript: URLs in any attribute
+                        if (typeof attr.value === 'string' && /^\s*javascript:/i.test(attr.value)) {
+                            el.removeAttribute(attr.name);
+                        }
+                    });
+                });
+
+                // Also check the SVG element itself for event handlers
+                const svgAttrs = Array.from(svgEl.attributes);
+                svgAttrs.forEach(attr => {
+                    if (/^on/i.test(attr.name)) {
+                        svgEl.removeAttribute(attr.name);
+                    }
+                });
+
+                return svgEl.outerHTML;
+            } catch (e) {
+                // Fallback to regex-based sanitization if DOMParser fails
+                let clean = svg.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
+                clean = clean.replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"');
+                clean = clean.replace(/<script[\s>][\s\S]*?<\/script>/gi, '');
+                clean = clean.replace(/<foreignObject[\s>][\s\S]*?<\/foreignObject>/gi, '');
+                return clean;
+            }
         }
 
         /**
@@ -1142,7 +1203,14 @@
             // Use marked.js if available (with sanitize option)
             if (window.marked) {
                 try {
-                    return window.marked.parse(text, { breaks: true });
+                    let html = window.marked.parse(text, { breaks: true });
+                    // Sanitize marked output: strip script tags, on* event handlers, javascript: URLs
+                    html = html.replace(/<script[\s>][\s\S]*?<\/script>/gi, '');
+                    html = html.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
+                    html = html.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '');
+                    html = html.replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"');
+                    html = html.replace(/src\s*=\s*["']javascript:[^"']*["']/gi, 'src=""');
+                    return html;
                 } catch (_e) {
                     // Fall through to basic conversion
                 }

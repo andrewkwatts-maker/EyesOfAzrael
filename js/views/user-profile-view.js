@@ -44,24 +44,32 @@ class UserProfileView {
         if (typeof window.ReputationService !== 'undefined') {
             this.reputationService = new window.ReputationService();
             await this.reputationService.init();
+        } else {
+            console.warn('[UserProfileView] ReputationService unavailable - reputation features disabled');
         }
 
         // Initialize perspective service
         if (typeof window.PerspectiveService !== 'undefined') {
             this.perspectiveService = new window.PerspectiveService();
             await this.perspectiveService.init();
+        } else {
+            console.warn('[UserProfileView] PerspectiveService unavailable - perspective features disabled');
         }
 
         // Initialize notes service
         if (typeof window.NotesService !== 'undefined') {
             this.notesService = new window.NotesService();
             await this.notesService.init();
+        } else {
+            console.warn('[UserProfileView] NotesService unavailable - notes features disabled');
         }
 
         // Initialize user preferences
         if (typeof window.UserPreferencesService !== 'undefined') {
             this.userPreferencesService = new window.UserPreferencesService();
             await this.userPreferencesService.init();
+        } else {
+            console.warn('[UserProfileView] UserPreferencesService unavailable - preferences features disabled');
         }
     }
 
@@ -76,6 +84,12 @@ class UserProfileView {
 
         if (!this.container) {
             console.error('[UserProfileView] No container provided');
+            return;
+        }
+
+        // Validate user ID upfront
+        if (!userId || typeof userId !== 'string' || userId.trim().length === 0) {
+            this.container.innerHTML = this._getErrorHTML('Invalid or missing user ID.');
             return;
         }
 
@@ -126,10 +140,21 @@ class UserProfileView {
             throw new Error('User ID is required');
         }
 
-        const db = firebase.firestore();
+        let db;
+        try {
+            db = firebase.firestore();
+        } catch (e) {
+            throw new Error('Unable to connect to database. Please try again later.');
+        }
 
         // Load user document
-        const userDoc = await db.collection('users').doc(this.userId).get();
+        let userDoc;
+        try {
+            userDoc = await db.collection('users').doc(this.userId).get();
+        } catch (e) {
+            console.error('[UserProfileView] Error fetching user document:', e);
+            throw new Error('Unable to load user profile. Please check your connection and try again.');
+        }
 
         if (!userDoc.exists) {
             throw new Error('User not found');
@@ -139,21 +164,29 @@ class UserProfileView {
 
         // Load reputation data
         let reputationData = null;
-        if (this.reputationService) {
-            reputationData = await this.reputationService.getReputation(this.userId);
+        try {
+            if (this.reputationService) {
+                reputationData = await this.reputationService.getReputation(this.userId);
+            }
+        } catch (e) {
+            console.warn('[UserProfileView] Error loading reputation:', e);
         }
 
         // Load badges
-        const badgesSnapshot = await db.collection('badge_awards')
-            .where('userId', '==', this.userId)
-            .orderBy('awardedAt', 'desc')
-            .limit(50)
-            .get();
+        let badges = [];
+        try {
+            const badgesSnapshot = await db.collection('badge_awards')
+                .where('userId', '==', this.userId)
+                .orderBy('awardedAt', 'desc')
+                .limit(50)
+                .get();
 
-        const badges = [];
-        badgesSnapshot.forEach(doc => {
-            badges.push({ id: doc.id, ...doc.data() });
-        });
+            badgesSnapshot.forEach(doc => {
+                badges.push({ id: doc.id, ...doc.data() });
+            });
+        } catch (e) {
+            console.warn('[UserProfileView] Error loading badges:', e);
+        }
 
         // Load contribution counts
         const counts = await this._getContributionCounts();
@@ -465,6 +498,10 @@ class UserProfileView {
 
         if (tabId === this.currentTab) return;
 
+        // Debounce: prevent concurrent tab loads
+        if (this._isLoadingTab) return;
+        this._isLoadingTab = true;
+
         // Update active tab
         this.container.querySelectorAll('.activity-tab').forEach(t => {
             t.classList.remove('active');
@@ -476,7 +513,11 @@ class UserProfileView {
         this.currentTab = tabId;
 
         // Load tab content
-        await this._loadTabContent(tabId);
+        try {
+            await this._loadTabContent(tabId);
+        } finally {
+            this._isLoadingTab = false;
+        }
     }
 
     /**

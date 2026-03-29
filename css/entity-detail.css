@@ -50,7 +50,7 @@
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    gap: var(--entity-spacing-xs);
+    gap: var(--entity-spacing-sm, 0.5rem);
     list-style: none;
     margin: 0;
     padding: 0;
@@ -319,10 +319,14 @@
     padding: var(--entity-spacing-xs) var(--entity-spacing-sm);
     background: rgba(118, 75, 162, 0.2);
     border: 1px solid rgba(118, 75, 162, 0.3);
-    color: #c9b8ff;
+    color: var(--color-epithet, #c9b8ff);
     font-size: var(--font-size-xs, 0.75rem);
     font-style: italic;
     border-radius: var(--entity-radius-sm);
+    max-width: 200px;
+    word-break: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .epithet-more {
@@ -432,7 +436,7 @@
 }
 
 .hero-action-btn--favorite.active {
-    color: #ffd700;
+    color: var(--color-favorite, #ffd700);
     border-color: rgba(255, 215, 0, 0.3);
 }
 
@@ -484,8 +488,8 @@
 }
 
 .quick-action-btn.bookmarked {
-    color: #ffd700;
-    border-color: #ffd700;
+    color: var(--color-favorite, #ffd700);
+    border-color: var(--color-favorite, #ffd700);
 }
 
 .quick-action-btn.quick-action-primary {
@@ -1089,7 +1093,7 @@
 
 .entity-description.prose em {
     font-style: italic;
-    color: #c9b8ff;
+    color: var(--color-epithet, #c9b8ff);
 }
 
 /* ==========================================
@@ -1768,11 +1772,11 @@
 }
 
 /* Element-specific colors */
-.element-fire { border-color: #ff6b6b; }
-.element-water { border-color: #4ecdc4; }
-.element-earth { border-color: #a8e6cf; }
-.element-air { border-color: #dfe6e9; }
-.element-spirit { border-color: #9b59b6; }
+.element-fire { border-color: var(--color-element-fire, #ff6b6b); }
+.element-water { border-color: var(--color-element-water, #4ecdc4); }
+.element-earth { border-color: var(--color-element-earth, #a8e6cf); }
+.element-air { border-color: var(--color-element-air, #dfe6e9); }
+.element-spirit { border-color: var(--color-element-spirit, #9b59b6); }
 
 /* ==========================================
    ARCHETYPES SECTION
@@ -2090,7 +2094,7 @@
 }
 
 .discussion-action.liked {
-    color: #ff6b6b;
+    color: var(--color-liked, #ff6b6b);
 }
 
 /* Nested Replies */
@@ -3328,9 +3332,40 @@ body.lightbox-open {
 
     .entity-layout {
         grid-template-columns: 1fr;
+        padding: var(--entity-spacing-lg);
+    }
+
+    .entity-hero-enhanced {
+        padding: var(--entity-spacing-xl) var(--entity-spacing-lg);
+        min-height: 260px;
+    }
+
+    .entity-icon-large {
+        width: 100px;
+        height: 100px;
+    }
+
+    .entity-title {
+        font-size: clamp(1.5rem, 3.5vw, 2.25rem);
+    }
+
+    .entity-attributes-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .related-entities-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .gallery-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .festivals-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .archetypes-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
