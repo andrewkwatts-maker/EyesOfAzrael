@@ -889,6 +889,15 @@ class SPANavigation {
         this._currentNavigationId = navigationId;
         this._activeNavigationId = navigationId;
 
+        // Auto-release navigation lock after 10 seconds to prevent permanent stuck state
+        const lockTimeout = setTimeout(() => {
+            if (this._isNavigating && this._currentNavigationId === navigationId) {
+                spaLog('WARNING: Navigation lock auto-released after 10s timeout');
+                this._isNavigating = false;
+                this._activeNavigationId = null;
+            }
+        }, 10000);
+
         const hash = window.location.hash || '#/';
         const path = hash.replace('#', '');
 
@@ -1020,8 +1029,21 @@ class SPANavigation {
                 await this.renderCategory(match[1], match[2]);
             } else if (this.routes.mythology.test(path)) {
                 const match = path.match(this.routes.mythology);
-                spaLog('Matched MYTHOLOGY route:', match[1]);
-                await this.renderMythology(match[1]);
+                const mythologyId = match[1];
+                // Validate mythology ID: reject "undefined", empty, or IDs with special characters
+                if (!mythologyId || mythologyId === 'undefined' || mythologyId === 'null' || /[^a-zA-Z0-9_-]/.test(mythologyId)) {
+                    spaWarn('Invalid mythology ID:', mythologyId);
+                    const mainContent = document.getElementById('main-content');
+                    if (mainContent) {
+                        mainContent.innerHTML = this.getErrorHTML(
+                            'Mythology Not Found',
+                            'The requested mythology could not be found. Please check the URL and try again.'
+                        );
+                    }
+                } else {
+                    spaLog('Matched MYTHOLOGY route:', mythologyId);
+                    await this.renderMythology(mythologyId);
+                }
             } else if (this.routes.search.test(path)) {
                 spaLog('Matched SEARCH route');
                 await this.renderSearch();
@@ -1121,6 +1143,7 @@ class SPANavigation {
 
             NavigationMetrics.finishNavigation(metric);
         } finally {
+            clearTimeout(lockTimeout);
             if (this._currentNavigationId === navigationId) {
                 this._isNavigating = false;
                 this._activeNavigationId = null;
@@ -1435,39 +1458,45 @@ class SPANavigation {
         spaLog('renderMythologies() called');
         const mainContent = document.getElementById('main-content');
 
-        if (!mainContent) {
-            spaError('CRITICAL: main-content element not found for mythologies!');
-            return;
-        }
-
-        if (typeof MythologiesView !== 'undefined') {
-            const mythologiesView = new MythologiesView(this.db);
-            await mythologiesView.render(mainContent);
-            spaLog('Mythologies grid rendered');
-        } else {
-            // Attempt dynamic script load as fallback
-            spaError('MythologiesView class not found, attempting dynamic load');
-            try {
-                await Promise.race([
-                    new Promise((resolve, reject) => {
-                        const script = document.createElement('script');
-                        script.src = 'js/views/mythologies-view.js';
-                        script.onload = resolve;
-                        script.onerror = reject;
-                        document.head.appendChild(script);
-                    }),
-                    new Promise((_, reject) => setTimeout(() => reject(new Error('Script load timeout')), 3000))
-                ]);
-                if (typeof MythologiesView !== 'undefined') {
-                    const mythologiesView = new MythologiesView(this.db);
-                    await mythologiesView.render(mainContent);
-                    spaLog('Mythologies grid rendered (dynamic load)');
-                    return;
-                }
-            } catch (e) {
-                spaError('Dynamic load of MythologiesView failed:', e);
+        try {
+            if (!mainContent) {
+                spaError('CRITICAL: main-content element not found for mythologies!');
+                return;
             }
-            mainContent.innerHTML = `<div class="error-page"><h1>Unable to load Mythologies</h1><p>Please try refreshing the page.</p></div>`;
+
+            if (typeof MythologiesView !== 'undefined') {
+                const mythologiesView = new MythologiesView(this.db);
+                await mythologiesView.render(mainContent);
+                spaLog('Mythologies grid rendered');
+            } else {
+                // Attempt dynamic script load as fallback
+                spaError('MythologiesView class not found, attempting dynamic load');
+                try {
+                    await Promise.race([
+                        new Promise((resolve, reject) => {
+                            const script = document.createElement('script');
+                            script.src = 'js/views/mythologies-view.js';
+                            script.onload = resolve;
+                            script.onerror = reject;
+                            document.head.appendChild(script);
+                        }),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Script load timeout')), 3000))
+                    ]);
+                    if (typeof MythologiesView !== 'undefined') {
+                        const mythologiesView = new MythologiesView(this.db);
+                        await mythologiesView.render(mainContent);
+                        spaLog('Mythologies grid rendered (dynamic load)');
+                        return;
+                    }
+                } catch (e) {
+                    spaError('Dynamic load of MythologiesView failed:', e);
+                }
+                mainContent.innerHTML = `<div class="error-page"><h1>Unable to load Mythologies</h1><p>Please try refreshing the page.</p></div>`;
+            }
+        } finally {
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { route: 'mythologies', timestamp: Date.now() }
+            }));
         }
     }
 
@@ -1518,6 +1547,7 @@ class SPANavigation {
                 const mythologyView = new MythologyOverview({ db: this.db, router: this });
                 const html = await mythologyView.render({ mythology: mythologyId });
                 mainContent.innerHTML = html;
+                mythologyView.attachEventListeners();
                 spaLog('Mythology page rendered via MythologyOverview');
             } else {
                 spaLog('MythologyOverview not available, trying PageAssetRenderer...');
@@ -1536,16 +1566,16 @@ class SPANavigation {
                     spaLog('Mythology page rendered (basic fallback)');
                 }
             }
-
-            document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { route: 'mythology', mythologyId: mythologyId, timestamp: Date.now() }
-            }));
         } catch (error) {
             spaError('Mythology page render failed:', error);
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: { route: 'mythology', mythologyId: mythologyId, error: error.message, timestamp: Date.now() }
             }));
             throw error;
+        } finally {
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { route: 'mythology', mythologyId: mythologyId, timestamp: Date.now() }
+            }));
         }
     }
 
@@ -1905,12 +1935,13 @@ class SPANavigation {
             spaLog('Rendering CompareView...');
             await compareView.render(mainContent);
             spaLog('Compare page rendered successfully');
-            document.dispatchEvent(new CustomEvent('first-render-complete', {
-                detail: { route: 'compare', timestamp: Date.now() }
-            }));
         } catch (error) {
             spaError('Compare page render failed:', error);
             throw error;
+        } finally {
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { route: 'compare', timestamp: Date.now() }
+            }));
         }
     }
 
@@ -1919,6 +1950,25 @@ class SPANavigation {
 
         try {
             const mainContent = document.getElementById('main-content');
+
+            // Auth check - dashboard requires authentication
+            const currentUser = firebase.auth().currentUser;
+            if (!currentUser) {
+                spaLog('No authenticated user for dashboard, showing sign-in prompt');
+                mainContent.innerHTML = `
+                    <div class="error-page" style="text-align: center; padding: 4rem 2rem;">
+                        <h1 style="margin-bottom: 1rem;">Sign In Required</h1>
+                        <p style="margin-bottom: 2rem; opacity: 0.8;">You need to be signed in to view your dashboard.</p>
+                        <button onclick="document.getElementById('login-btn')?.click()" class="btn btn-primary" style="cursor: pointer;">
+                            Sign In
+                        </button>
+                    </div>
+                `;
+                document.dispatchEvent(new CustomEvent('first-render-complete', {
+                    detail: { route: 'dashboard', authRequired: true, timestamp: Date.now() }
+                }));
+                return;
+            }
 
             if (typeof UserDashboard === 'undefined') {
                 spaError('UserDashboard class not loaded');
@@ -1942,6 +1992,11 @@ class SPANavigation {
 
             spaLog('Rendering UserDashboard...');
             const dashboardHTML = await dashboard.render();
+            // Note: There is a brief window between innerHTML assignment and
+            // initialize() where buttons are visible but have no event handlers.
+            // This is inherent to the innerHTML-then-bind pattern and is typically
+            // imperceptible (<1ms) but cannot be fully eliminated without a
+            // different rendering approach (e.g., DocumentFragment with pre-bound listeners).
             mainContent.innerHTML = dashboardHTML;
             spaLog('Initializing dashboard event listeners...');
             dashboard.initialize(mainContent);
@@ -2292,7 +2347,8 @@ class SPANavigation {
         const pathParts = path.replace(/^\//, '').split('/');
 
         if (!pathParts[0]) {
-            return { type: 'home' };
+            // Home page — no breadcrumb needed
+            return null;
         }
 
         const route = {};

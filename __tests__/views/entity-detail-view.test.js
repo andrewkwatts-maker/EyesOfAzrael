@@ -405,18 +405,14 @@ describe('EntityDetailView', () => {
             expect(renderSpy).toHaveBeenCalledWith(view.currentRoute, view.container);
         });
 
-        test('retry should reload page when container or route not set', () => {
+        test('retry should use SPA navigation when container or route not set', () => {
             view.container = null;
             view.currentRoute = null;
-            // location.reload is not easily mockable in jsdom, wrap in try
-            const reloadMock = jest.fn();
-            Object.defineProperty(window, 'location', {
-                value: { ...window.location, reload: reloadMock },
-                writable: true,
-                configurable: true
-            });
+            const handleRouteMock = jest.fn();
+            window.SPANavigation = { handleRoute: handleRouteMock };
             view.handleAction('retry', document.createElement('button'), new Event('click'));
-            expect(reloadMock).toHaveBeenCalled();
+            expect(handleRouteMock).toHaveBeenCalled();
+            delete window.SPANavigation;
         });
 
         test('print should call window.print()', () => {
@@ -659,7 +655,7 @@ describe('EntityDetailView', () => {
 
         test('should include mythology link', () => {
             const html = view.renderBreadcrumb('greek', 'deities', 'Zeus');
-            expect(html).toContain('href="#/mythologies/greek"');
+            expect(html).toContain('href="#/mythology/greek"');
         });
 
         test('should include entity name as current page', () => {

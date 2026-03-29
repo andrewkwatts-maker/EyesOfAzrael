@@ -83,6 +83,9 @@ class LandingPageView {
                 name: 'World Mythologies',
                 icon: 'icons/categories/mythologies.svg',
                 description: 'Explore gods, heroes, and legends from cultures around the world',
+                // Intentionally uses #/mythologies instead of #/browse/mythologies —
+                // mythologies has its own dedicated MythologiesView (grid of mythology cards),
+                // unlike the other 11 categories which share the BrowseCategoryView.
                 route: '#/mythologies',
                 color: '#8b7fff',
                 order: 1
@@ -333,8 +336,9 @@ class LandingPageView {
      * Shows placeholder cards while content loads with staggered animations
      */
     getSkeletonHTML() {
-        // Generate 12 skeleton cards to match the 12 categories
-        const skeletonCards = Array(12).fill('').map((_, index) => `
+        // Generate skeleton cards to match the number of asset type categories
+        const skeletonCount = this.assetTypes ? this.assetTypes.length : 12;
+        const skeletonCards = Array(skeletonCount).fill('').map((_, index) => `
             <div class="landing-skeleton-card" style="--skeleton-index: ${index};">
                 <div class="skeleton-icon"></div>
                 <div class="skeleton-title"></div>
@@ -470,6 +474,7 @@ class LandingPageView {
     getLandingHTML() {
         return `
             <div class="landing-page-view">
+                <h1 class="sr-only">Eyes of Azrael — Mythology Encyclopedia</h1>
                 <!-- Asset Type Grid -->
                 <section class="landing-categories-section">
                     <h2 class="landing-section-header">
@@ -537,9 +542,9 @@ Our Growing Collection
                         </div>
                         <div class="landing-stat-card" style="--stat-index: 5;">
                             <div class="stat-icon">&#128101;</div>
-                            <div class="stat-number" id="stat-contributors">1000+</div>
+                            <div class="stat-number" id="stat-contributors">Community</div>
                             <div class="stat-label">Contributors</div>
-                            <div class="stat-description">Community members</div>
+                            <div class="stat-description">Open collaboration</div>
                         </div>
                     </div>
                 </section>
@@ -1863,7 +1868,9 @@ Discover & Explore
             herbs: '&#127807;',      // Herb
             rituals: '&#128367;',    // Candle
             texts: '&#128220;',      // Scroll
-            symbols: '&#9775;'       // Yin Yang
+            symbols: '&#9775;',      // Yin Yang
+            concepts: '&#128161;',   // Lightbulb
+            conspiracies: '&#128269;' // Magnifying glass
         };
     }
 
@@ -1874,8 +1881,10 @@ Discover & Explore
      * @returns {string} - Truncated text with ellipsis if needed
      */
     truncateText(text, maxLength = 100) {
-        if (!text || text.length <= maxLength) {
-            return text || '';
+        if (text == null) return '';
+        if (typeof text !== 'string') text = String(text);
+        if (text.length <= maxLength) {
+            return text;
         }
         // Find last space before maxLength to avoid cutting words
         const truncated = text.substring(0, maxLength);
@@ -1893,14 +1902,14 @@ Discover & Explore
      * @param {string} cssClass - CSS class for the icon element
      * @returns {string} - HTML string for the icon
      */
-    renderIconHTML(icon, fallbackId, cssClass = 'landing-category-icon') {
-        const emojiFallback = this.getEmojiFallbacks()[fallbackId] || '&#128196;';
+    renderIconHTML(icon, fallbackId, cssClass = 'landing-category-icon', explicitFallback = null) {
+        const emojiFallback = explicitFallback || this.getEmojiFallbacks()[fallbackId] || '&#128196;';
 
         // Check if icon is inline SVG (starts with <svg)
         if (icon && typeof icon === 'string' && icon.trim().startsWith('<svg')) {
             return `
                 <span class="entity-icon-svg ${cssClass}" aria-hidden="true">${icon}</span>
-                <span class="landing-category-icon-fallback" style="display: none;" aria-hidden="true">${emojiFallback}</span>
+                <span class="landing-category-icon-fallback" style="display: none;">${emojiFallback}</span>
             `;
         }
 
@@ -1908,20 +1917,20 @@ Discover & Explore
         if (icon && typeof icon === 'string' && !icon.includes('/') && !icon.includes('.')) {
             // Likely an emoji or short text, render directly
             return `
-                <span class="landing-category-icon-fallback" aria-hidden="true">${icon}</span>
+                <span class="landing-category-icon-fallback">${icon}</span>
             `;
         }
 
         // Default: treat as URL path with img tag and fallback
+        // Note: onerror handled via event delegation in attachEventListeners()
         return `
             <img src="${icon}"
                  alt=""
                  class="${cssClass}"
                  loading="lazy"
                  decoding="async"
-                 aria-hidden="true"
-                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-            <span class="landing-category-icon-fallback" style="display: none;" aria-hidden="true">${emojiFallback}</span>
+                 data-icon-fallback />
+            <span class="landing-category-icon-fallback" style="display: none;">${emojiFallback}</span>
         `;
     }
 
@@ -1950,7 +1959,9 @@ Discover & Explore
                     el.classList.add('has-count');
                 }
             } catch (err) {
-                // Collection may not exist, silently skip
+                // Collection may not exist or query failed - show "?" so badge isn't blank
+                el.textContent = '?';
+                el.classList.add('has-count');
             }
         }
     }
@@ -1974,10 +1985,10 @@ Discover & Explore
                style="--card-color: ${type.color}; --card-index: ${index};"
                aria-label="${type.name} - ${truncatedDescription}"
                tabindex="0">
-                ${this.renderIconHTML(type.icon, type.id, 'landing-category-icon')}
+                ${this.renderIconHTML(type.icon, type.id, 'landing-category-icon', type.fallbackIcon)}
                 <h3 class="landing-category-name card-title-truncate">${type.name}</h3>
                 <p class="landing-category-description card-desc-truncate">${truncatedDescription}</p>
-                <span class="landing-category-count" data-count-for="${type.collection || type.id}"></span>
+                <span class="landing-category-count" data-count-for="${type.id}"></span>
             </a>
         `;
     }
@@ -1990,6 +2001,18 @@ Discover & Explore
         this._eventListeners = [];
         this._abortController = new AbortController();
         const signal = this._abortController.signal;
+
+        // Event delegation for icon load errors (CSP-safe, replaces inline onerror)
+        const categoryGrid = document.querySelector('.landing-category-grid');
+        if (categoryGrid) {
+            categoryGrid.addEventListener('error', (e) => {
+                if (e.target.matches('img[data-icon-fallback]')) {
+                    e.target.style.display = 'none';
+                    const fallback = e.target.nextElementSibling;
+                    if (fallback) fallback.style.display = 'flex';
+                }
+            }, { capture: true, signal });
+        }
 
         const cards = document.querySelectorAll('.landing-category-card');
         cards.forEach(card => {
@@ -2030,14 +2053,19 @@ Discover & Explore
             window.SPANavigation.registerViewCleanup(() => this.cleanup());
         }
 
-        // Load featured entities if database is available
-        this.loadFeaturedEntities();
-
-        // Load recent additions
-        this.loadRecentAdditions();
-
-        // Load real stats from database
-        this.loadStats();
+        // Load featured entities, recent additions, and stats in parallel
+        // Using Promise.allSettled so individual failures don't crash the others
+        Promise.allSettled([
+            this.loadFeaturedEntities(),
+            this.loadRecentAdditions(),
+            this.loadStats()
+        ]).then(results => {
+            results.forEach((result, i) => {
+                if (result.status === 'rejected') {
+                    console.warn(`[Landing Page] Async load ${i} failed:`, result.reason);
+                }
+            });
+        });
 
         // Mark images as loaded for lazy loading
         this.initLazyImages();
@@ -2114,21 +2142,8 @@ Discover & Explore
             window.mobileGestures.showToast(message);
         } else {
             const toast = document.createElement('div');
-            toast.className = 'simple-toast';
+            toast.className = 'landing-toast';
             toast.textContent = message;
-            toast.style.cssText = `
-                position: fixed;
-                bottom: 80px;
-                left: 50%;
-                transform: translateX(-50%);
-                background: rgba(26, 31, 58, 0.95);
-                color: #f8f9fa;
-                padding: 0.875rem 1.5rem;
-                border-radius: 12px;
-                font-size: 0.9375rem;
-                z-index: 10002;
-                animation: fadeIn 0.3s ease;
-            `;
             document.body.appendChild(toast);
             setTimeout(() => toast.remove(), 2000);
         }
@@ -2197,12 +2212,17 @@ Discover & Explore
         const description = this.truncateText(entity.description || entity.summary || '', 80);
         const mythology = entity.mythology || entity.tradition || '';
         const icon = entity.icon || this.getEmojiFallbacks()[entity.type] || '&#128196;';
-        const route = `#/${entity.type}/${entity.id}`;
+        const route = mythology
+            ? `#/entity/${entity.type}/${mythology}/${entity.id}`
+            : `#/entity/${entity.type}/${entity.id}`;
+
+        // Use entity-specific color based on type, fall back to primary
+        const entityColor = entity.color || (this.assetTypes.find(t => t.id === entity.type) || {}).color || 'var(--color-primary, #8b7fff)';
 
         return `
             <a href="${route}"
                class="landing-featured-card landing-category-card"
-               style="--card-color: var(--color-primary, #8b7fff); --card-index: ${index};"
+               style="--card-color: ${entityColor}; --card-index: ${index};"
                aria-label="${name}${mythology ? ' - ' + mythology : ''}">
                 ${this.renderIconHTML(icon, entity.type, 'landing-category-icon')}
                 <h3 class="landing-category-name card-title-truncate">${this.escapeHTML(name)}</h3>

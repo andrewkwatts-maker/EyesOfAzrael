@@ -48,7 +48,18 @@ class MythologyOverview {
             return this.generateHTML(mythologyData, sections);
         } catch (error) {
             console.error('[MythologyOverview] Render error:', error);
-            throw error;
+            return `
+                <div class="mythology-error" role="alert" style="padding: 2rem; text-align: center; max-width: 600px; margin: 2rem auto;">
+                    <h2 style="color: var(--color-error, #ef4444); margin-bottom: 1rem;">Unable to Load Mythology</h2>
+                    <p style="margin-bottom: 1.5rem; color: var(--color-text-secondary, #a0a0a0);">
+                        We could not load the mythology details. This may be a temporary issue with the connection.
+                    </p>
+                    <button class="btn-primary mythology-retry-btn"
+                            style="cursor: pointer;">
+                        Retry
+                    </button>
+                </div>
+            `;
         }
     }
 
@@ -151,7 +162,7 @@ class MythologyOverview {
 
                 <!-- Back to top -->
                 <div class="mythology-back-to-top">
-                    <a href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});return false;" class="back-to-top-link">Back to top</a>
+                    <button type="button" class="back-to-top-link mythology-back-to-top-btn">Back to top</button>
                 </div>
             </div>
         `;
@@ -211,8 +222,7 @@ class MythologyOverview {
                 </div>
                 <div class="mythology-toc-links">
                     ${sections.map(section => `
-                        <a href="#section-${section.plural}" class="mythology-toc-link"
-                           onclick="document.getElementById('section-${section.plural}')?.scrollIntoView({behavior:'smooth',block:'start'});return false;">
+                        <a href="#section-${section.plural}" class="mythology-toc-link" data-scroll-target="section-${section.plural}">
                             <span class="toc-icon">${section.icon}</span>
                             <span class="toc-label">${section.label}</span>
                             <span class="toc-count">${section.count}</span>
@@ -310,8 +320,13 @@ class MythologyOverview {
             subText = domains.slice(0, 2).map(d => this.escapeHtml(d)).join(' · ');
         }
 
-        // Link can use either entity route or mythology route
-        const href = `#/entity/${collection}/${entityId}`;
+        // Normalize collection name for routing (e.g., archetypes->concepts in Firestore)
+        const collectionRouteMap = {
+            'archetypes': 'concepts',
+            'cosmologies': 'cosmology'
+        };
+        const normalizedCollection = collectionRouteMap[collection] || collection;
+        const href = `#/entity/${normalizedCollection}/${entityId}`;
 
         return `
             <a href="${href}" class="entity-mini-card" data-entity-id="${entityId}">
@@ -348,6 +363,40 @@ class MythologyOverview {
                 </div>
             </div>
         `;
+    }
+
+    /**
+     * Attach event listeners after DOM insertion (CSP-safe, replaces inline handlers)
+     */
+    attachEventListeners() {
+        // Back to top button
+        const backToTopBtn = document.querySelector('.mythology-back-to-top-btn');
+        if (backToTopBtn) {
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        }
+
+        // TOC smooth scroll links
+        const tocLinks = document.querySelectorAll('.mythology-toc-link[data-scroll-target]');
+        tocLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.dataset.scrollTarget;
+                const target = document.getElementById(targetId);
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Retry button in error state
+        const retryBtn = document.querySelector('.mythology-retry-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+                window.location.reload();
+            });
+        }
     }
 
     capitalize(str) {

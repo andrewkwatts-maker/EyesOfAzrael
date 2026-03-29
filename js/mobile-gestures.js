@@ -1007,6 +1007,11 @@ class MobileBackButton {
         this.backBtn = document.getElementById('mobileBackBtn');
         if (!this.backBtn) return;
 
+        // Click handler (CSP-safe, replaces inline onclick)
+        this.backBtn.addEventListener('click', () => {
+            window.history.back();
+        });
+
         // Listen for route changes
         window.addEventListener('hashchange', () => this.updateVisibility());
         window.addEventListener('popstate', () => this.updateVisibility());

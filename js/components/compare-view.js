@@ -126,11 +126,21 @@ class CompareView {
      * Setup persistence on page navigation
      */
     setupPersistence() {
+        // Remove previous listeners if they exist (prevents stacking on re-init)
+        if (this._beforeUnloadHandler) {
+            window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+        }
+        if (this._hashChangeHandler) {
+            window.removeEventListener('hashchange', this._hashChangeHandler);
+        }
+
         // Save state before page unload
-        window.addEventListener('beforeunload', () => this.persistEntities());
+        this._beforeUnloadHandler = () => this.persistEntities();
+        window.addEventListener('beforeunload', this._beforeUnloadHandler);
 
         // Also persist when hash changes (SPA navigation)
-        window.addEventListener('hashchange', () => this.persistEntities());
+        this._hashChangeHandler = () => this.persistEntities();
+        window.addEventListener('hashchange', this._hashChangeHandler);
     }
 
     /**
@@ -859,11 +869,19 @@ class CompareView {
 
         if (arrays.length < 2) return [];
 
-        return arrays.reduce((overlap, arr) =>
-            overlap.filter(item =>
-                arr.some(a => this.normalizeValue(a) === this.normalizeValue(item))
-            )
+        // Use Set intersection for O(n) instead of O(n^2)
+        const normalizedArrays = arrays.map(arr =>
+            new Set(arr.map(item => this.normalizeValue(item)))
         );
+
+        let intersection = normalizedArrays[0];
+        for (let i = 1; i < normalizedArrays.length; i++) {
+            const nextSet = normalizedArrays[i];
+            intersection = new Set([...intersection].filter(item => nextSet.has(item)));
+        }
+
+        // Map back to original values from first array
+        return arrays[0].filter(item => intersection.has(this.normalizeValue(item)));
     }
 
     /**
@@ -930,6 +948,9 @@ class CompareView {
 
     /**
      * Render desktop comparison table
+     * TODO: For entities with very large attribute sets (50+), consider
+     * implementing virtual scrolling to reduce DOM node count and improve
+     * rendering performance. Currently renders all rows at once.
      */
     renderComparisonTable() {
         const attributes = this.getCommonAttributes();
@@ -1190,46 +1211,83 @@ class CompareView {
     }
 
     /**
-     * Get list of common attributes to compare
+     * Get list of common attributes to compare.
+     * Accepts an optional array of entity objects; defaults to this.selectedEntities.
+     * Returns keys present (with non-empty values) across ALL entities using Set intersection,
+     * excluding internal/metadata fields.
      */
-    getCommonAttributes() {
-        const baseAttributes = [
-            { key: 'name', label: 'Name' },
-            { key: 'title', label: 'Title' },
-            { key: 'mythology', label: 'Mythology' },
-            { key: 'type', label: 'Type' },
-            { key: 'description', label: 'Description' },
-            { key: 'domain', label: 'Domain' },
-            { key: 'domains', label: 'Domains' },
-            { key: 'symbols', label: 'Symbols' },
-            { key: 'attributes', label: 'Attributes' },
-            { key: 'powers', label: 'Powers' },
-            { key: 'epithets', label: 'Epithets' },
-            { key: 'family', label: 'Family' },
-            { key: 'parents', label: 'Parents' },
-            { key: 'children', label: 'Children' },
-            { key: 'consort', label: 'Consort' },
-            { key: 'siblings', label: 'Siblings' },
-            { key: 'sacred_animals', label: 'Sacred Animals' },
-            { key: 'sacred_plants', label: 'Sacred Plants' },
-            { key: 'festivals', label: 'Festivals' },
-            { key: 'temples', label: 'Temples' },
-            { key: 'weapons', label: 'Weapons' },
-            { key: 'myths', label: 'Associated Myths' },
-            { key: 'cultural_significance', label: 'Cultural Significance' },
-            { key: 'modern_influence', label: 'Modern Influence' },
-            { key: 'related_entities', label: 'Related Entities' }
-        ];
+    getCommonAttributes(entities) {
+        const entitiesToCompare = entities || this.selectedEntities;
+        if (!entitiesToCompare || entitiesToCompare.length === 0) return [];
 
-        return baseAttributes.filter(attr =>
-            this.selectedEntities.some(entity => {
-                const value = entity[attr.key];
-                return value !== null && value !== undefined &&
-                       (!Array.isArray(value) || value.length > 0) &&
-                       (typeof value !== 'object' || Object.keys(value).length > 0) &&
-                       (typeof value !== 'string' || value.trim() !== '');
-            })
-        );
+        // Internal fields to exclude from comparison
+        const excludedKeys = new Set([
+            'id', 'isStandard', 'source', 'userId', '_collection',
+            'createdAt', 'updatedAt', 'enrichedAt', 'lastModified',
+            'searchKeywords', 'slug', 'docId'
+        ]);
+
+        // Known label mappings for common fields
+        const labelMap = {
+            'name': 'Name',
+            'title': 'Title',
+            'mythology': 'Mythology',
+            'type': 'Type',
+            'description': 'Description',
+            'domain': 'Domain',
+            'domains': 'Domains',
+            'symbols': 'Symbols',
+            'attributes': 'Attributes',
+            'powers': 'Powers',
+            'epithets': 'Epithets',
+            'family': 'Family',
+            'parents': 'Parents',
+            'children': 'Children',
+            'consort': 'Consort',
+            'siblings': 'Siblings',
+            'sacred_animals': 'Sacred Animals',
+            'sacred_plants': 'Sacred Plants',
+            'festivals': 'Festivals',
+            'temples': 'Temples',
+            'weapons': 'Weapons',
+            'myths': 'Associated Myths',
+            'cultural_significance': 'Cultural Significance',
+            'modern_influence': 'Modern Influence',
+            'related_entities': 'Related Entities'
+        };
+
+        /**
+         * Check whether a value is non-empty (not null/undefined, non-empty
+         * string, non-empty array, non-empty object).
+         */
+        function hasValue(value) {
+            if (value === null || value === undefined) return false;
+            if (typeof value === 'string') return value.trim() !== '';
+            if (Array.isArray(value)) return value.length > 0;
+            if (typeof value === 'object') return Object.keys(value).length > 0;
+            return true;
+        }
+
+        // Build union of non-empty keys across all entities (any entity having a
+        // value is enough to include the attribute in the comparison)
+        const allKeys = new Set();
+
+        for (const entity of entitiesToCompare) {
+            for (const key of Object.keys(entity)) {
+                if (!excludedKeys.has(key) && hasValue(entity[key])) {
+                    allKeys.add(key);
+                }
+            }
+        }
+
+        const commonKeys = allKeys;
+        if (!commonKeys || commonKeys.size === 0) return [];
+
+        // Convert to {key, label} format, generating labels for dynamic keys
+        return [...commonKeys].map(key => ({
+            key: key,
+            label: labelMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
+        }));
     }
 
     /**
@@ -1359,7 +1417,12 @@ class CompareView {
      * Setup delegated event handlers
      */
     setupDelegatedEvents() {
-        document.addEventListener('click', (e) => {
+        // Remove previous delegated handler to prevent listener stacking on refresh
+        if (this._delegatedClickHandler) {
+            document.removeEventListener('click', this._delegatedClickHandler);
+        }
+
+        this._delegatedClickHandler = (e) => {
             const target = e.target;
 
             // Remove entity buttons
@@ -1385,15 +1448,23 @@ class CompareView {
             // Search result cards
             if (target.closest('.search-result-card')) {
                 const card = target.closest('.search-result-card');
-                const entityData = JSON.parse(card.dataset.entity);
-                this.addEntity(entityData, card.dataset.collection);
+                try {
+                    const entityData = JSON.parse(card.dataset.entity);
+                    this.addEntity(entityData, card.dataset.collection);
+                } catch (parseError) {
+                    console.error('[CompareView] Failed to parse search result entity data:', parseError);
+                }
             }
 
             // Suggestion cards
             if (target.closest('.suggestion-card')) {
                 const card = target.closest('.suggestion-card');
-                const entityData = JSON.parse(card.dataset.entity);
-                this.addEntity(entityData, card.dataset.collection);
+                try {
+                    const entityData = JSON.parse(card.dataset.entity);
+                    this.addEntity(entityData, card.dataset.collection);
+                } catch (parseError) {
+                    console.error('[CompareView] Failed to parse suggestion entity data:', parseError);
+                }
             }
 
             // Recent comparison items
@@ -1410,7 +1481,9 @@ class CompareView {
                     searchInput.focus();
                 }
             }
-        });
+        };
+
+        document.addEventListener('click', this._delegatedClickHandler);
     }
 
     /**
@@ -1545,7 +1618,12 @@ class CompareView {
      * Setup keyboard navigation
      */
     setupKeyboardNavigation() {
-        document.addEventListener('keydown', (e) => {
+        // Remove previous handler to prevent stacking
+        if (this._keydownHandler) {
+            document.removeEventListener('keydown', this._keydownHandler);
+        }
+
+        this._keydownHandler = (e) => {
             // Arrow key navigation for mobile view
             if (window.innerWidth <= 768) {
                 if (e.key === 'ArrowLeft') {
@@ -1554,7 +1632,8 @@ class CompareView {
                     this.navigateMobile(1);
                 }
             }
-        });
+        };
+        document.addEventListener('keydown', this._keydownHandler);
     }
 
     /**
@@ -1750,25 +1829,35 @@ class CompareView {
     }
 
     /**
-     * Load suggestions based on selected entity
+     * Load suggestions based on selected entity.
+     * Populates this.suggestedEntities with related entities from Firestore.
+     * If there are selected entities, queries the same collection for entities
+     * with the same mythology. If no entities selected, returns empty array.
+     * Wrapped in try-catch so failures never crash the page.
      */
     async loadSuggestions() {
-        if (this.selectedEntities.length !== 1 || !this.db) return;
+        this.suggestedEntities = [];
+
+        if (this.selectedEntities.length === 0 || !this.db) return;
 
         const currentEntity = this.selectedEntities[0];
-        this.suggestedEntities = [];
+
+        // Guard: need _collection and mythology to query
+        if (!currentEntity._collection || !currentEntity.mythology) return;
 
         try {
             // Suggest similar entities from same mythology
             const sameMyth = await this.db.collection(currentEntity._collection)
                 .where('mythology', '==', currentEntity.mythology)
-                .limit(3)
+                .limit(6)
                 .get();
 
             sameMyth.docs.forEach(doc => {
-                if (doc.id !== currentEntity.id) {
+                if (doc.id !== currentEntity.id &&
+                    !this.selectedEntities.some(e => e.id === doc.id)) {
                     this.suggestedEntities.push({
                         id: doc.id,
+                        _collection: currentEntity._collection,
                         collection: currentEntity._collection,
                         reason: 'Same mythology',
                         ...doc.data()
@@ -1786,9 +1875,11 @@ class CompareView {
 
                 similarDomain.docs.forEach(doc => {
                     if (doc.id !== currentEntity.id &&
+                        !this.selectedEntities.some(e => e.id === doc.id) &&
                         !this.suggestedEntities.some(e => e.id === doc.id)) {
                         this.suggestedEntities.push({
                             id: doc.id,
+                            _collection: currentEntity._collection,
                             collection: currentEntity._collection,
                             reason: `Also ${domain}`,
                             ...doc.data()
@@ -1811,6 +1902,11 @@ class CompareView {
             const doc = await this.db.collection(collection).doc(id).get();
             if (doc.exists) {
                 const entityData = { id: doc.id, ...doc.data() };
+                // Validate entity has required fields before adding
+                if (!entityData.id || !entityData.name) {
+                    console.warn('[CompareView] Entity missing required fields (id, name):', entityData.id);
+                    return;
+                }
                 this.addEntity(entityData, collection);
             }
         } catch (error) {
@@ -2016,6 +2112,40 @@ class CompareView {
     }
 
     /**
+     * Clean up event listeners and DOM references to prevent listener
+     * stacking when the view is re-rendered.
+     */
+    destroy() {
+        // Remove delegated click handler from document
+        if (this._delegatedClickHandler) {
+            document.removeEventListener('click', this._delegatedClickHandler);
+            this._delegatedClickHandler = null;
+        }
+
+        // Remove keyboard navigation listener
+        if (this._keydownHandler) {
+            document.removeEventListener('keydown', this._keydownHandler);
+            this._keydownHandler = null;
+        }
+
+        // Remove persistence listeners
+        if (this._beforeUnloadHandler) {
+            window.removeEventListener('beforeunload', this._beforeUnloadHandler);
+            this._beforeUnloadHandler = null;
+        }
+        if (this._hashChangeHandler) {
+            window.removeEventListener('hashchange', this._hashChangeHandler);
+            this._hashChangeHandler = null;
+        }
+
+        // Remove the compare-view DOM subtree (render() will recreate it)
+        const container = document.querySelector('.compare-view');
+        if (container) {
+            container.remove();
+        }
+    }
+
+    /**
      * Refresh the view
      */
     refresh() {
@@ -2023,6 +2153,10 @@ class CompareView {
         if (!container) return;
 
         const parent = container.parentElement;
+
+        // Clean up old listeners before re-rendering
+        this.destroy();
+
         this.render(parent);
     }
 

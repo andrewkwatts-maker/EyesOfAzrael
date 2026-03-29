@@ -740,11 +740,11 @@ class ProgressiveLazyLoader {
         if (!userInfo) return;
 
         if (user) {
-            userInfo.style.display = 'flex';
+            userInfo.classList.remove('hidden');
             if (userName) userName.textContent = user.displayName || user.email;
             if (userAvatar && user.photoURL) userAvatar.src = user.photoURL;
         } else {
-            userInfo.style.display = 'none';
+            userInfo.classList.add('hidden');
         }
     }
 

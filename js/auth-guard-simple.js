@@ -1541,7 +1541,7 @@
         if (user) {
             // User is logged in
             if (userInfo) {
-                userInfo.style.display = 'flex';
+                userInfo.classList.remove('hidden');
             }
             if (userName) {
                 userName.textContent = user.displayName || user.email || 'User';
@@ -1581,7 +1581,7 @@
         } else {
             // User is logged out
             if (userInfo) {
-                userInfo.style.display = 'none';
+                userInfo.classList.add('hidden');
             }
             if (userAvatar) {
                 userAvatar.src = '';

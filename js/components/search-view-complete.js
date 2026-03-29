@@ -237,7 +237,7 @@ class SearchViewComplete {
                     <!-- Results Header -->
                     <div id="results-header" class="results-header" style="display: none;">
                         <div class="results-count-info">
-                            <span id="results-count" class="results-count"></span>
+                            <span id="results-count" class="results-count" role="status" aria-live="polite"></span>
                             <span id="pagination-info" class="pagination-info"></span>
                         </div>
                         <div class="results-controls">
@@ -516,6 +516,12 @@ class SearchViewComplete {
 
         // Set global instance for pagination
         window.searchViewInstance = this;
+
+        // Register cleanup with SPA navigation
+        if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
+            window.SPANavigation.registerViewCleanup(() => this.destroy());
+        }
+
         console.log('[SearchView] Initialization complete');
     }
 
@@ -747,24 +753,40 @@ class SearchViewComplete {
     }
 
     /**
-     * Initialize example query buttons
+     * Initialize example query buttons (guarded against duplicate calls)
      */
     initExampleQueries() {
-        document.querySelectorAll('.example-query').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const query = e.target.dataset.query;
-                this.elements.searchInput.value = query;
+        if (this._exampleQueriesInitialized) return;
+        this._exampleQueriesInitialized = true;
+
+        // Use delegated listener on results container to handle example queries
+        // even after DOM re-renders, without stacking listeners
+        const resultsContainer = document.getElementById('results-container');
+        if (resultsContainer) {
+            resultsContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('.example-query');
+                if (!btn) return;
+                const query = btn.dataset.query;
+                if (this.elements.searchInput) {
+                    this.elements.searchInput.value = query;
+                }
                 this.performSearch(query);
             });
-        });
+        }
     }
 
     /**
-     * Show autocomplete suggestions
+     * Show autocomplete suggestions (with stale-response guard)
      */
     async showAutocomplete(query) {
+        // Guard against stale async responses overwriting newer ones
+        const requestId = ++this._autocompleteRequestId || (this._autocompleteRequestId = 1);
         try {
             const suggestions = await this.searchEngine.getSuggestions(query, 8);
+
+            // Discard if a newer request was issued while awaiting
+            if (this._autocompleteRequestId !== requestId) return;
+
             const container = document.getElementById('autocomplete-results');
 
             if (!container) return;
@@ -952,10 +974,16 @@ class SearchViewComplete {
         const startIdx = (this.state.currentPage - 1) * this.state.resultsPerPage + 1;
         const endIdx = Math.min(this.state.currentPage * this.state.resultsPerPage, this.state.totalResults);
 
-        document.getElementById('results-count').innerHTML = `
-            Found <strong>${this.state.totalResults}</strong> result${this.state.totalResults !== 1 ? 's' : ''} for "<em>${this.escapeHtml(this.state.query)}</em>"
-        `;
-        document.getElementById('pagination-info').textContent = `Showing ${startIdx}-${endIdx} of ${this.state.totalResults}`;
+        const resultsCountEl = document.getElementById('results-count');
+        if (resultsCountEl) {
+            resultsCountEl.innerHTML = `
+                Found <strong>${this.state.totalResults}</strong> result${this.state.totalResults !== 1 ? 's' : ''} for "<em>${this.escapeHtml(this.state.query)}</em>"
+            `;
+        }
+        const paginationInfoEl = document.getElementById('pagination-info');
+        if (paginationInfoEl) {
+            paginationInfoEl.textContent = `Showing ${startIdx}-${endIdx} of ${this.state.totalResults}`;
+        }
 
         // Sort results
         const sortedResults = this.sortResults([...this.state.results]);
@@ -1277,7 +1305,7 @@ class SearchViewComplete {
     }
 
     /**
-     * Render pagination
+     * Render pagination (uses delegated click handler instead of inline onclick)
      */
     renderPagination() {
         const paginationContainer = document.getElementById('pagination');
@@ -1298,7 +1326,7 @@ class SearchViewComplete {
         html += `
             <button class="pagination-btn ${this.state.currentPage === 1 ? 'disabled' : ''}"
                     ${this.state.currentPage === 1 ? 'disabled' : ''}
-                    onclick="searchViewInstance.goToPage(${this.state.currentPage - 1})"
+                    data-page="${this.state.currentPage - 1}"
                     aria-label="Previous page">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="15 18 9 12 15 6"></polyline>
@@ -1317,14 +1345,14 @@ class SearchViewComplete {
         }
 
         if (startPage > 1) {
-            html += `<button class="pagination-btn" onclick="searchViewInstance.goToPage(1)">1</button>`;
+            html += `<button class="pagination-btn" data-page="1">1</button>`;
             if (startPage > 2) html += '<span class="pagination-ellipsis">...</span>';
         }
 
         for (let i = startPage; i <= endPage; i++) {
             html += `
                 <button class="pagination-btn ${i === this.state.currentPage ? 'active' : ''}"
-                        onclick="searchViewInstance.goToPage(${i})"
+                        data-page="${i}"
                         ${i === this.state.currentPage ? 'aria-current="page"' : ''}>
                     ${i}
                 </button>
@@ -1333,14 +1361,14 @@ class SearchViewComplete {
 
         if (endPage < totalPages) {
             if (endPage < totalPages - 1) html += '<span class="pagination-ellipsis">...</span>';
-            html += `<button class="pagination-btn" onclick="searchViewInstance.goToPage(${totalPages})">${totalPages}</button>`;
+            html += `<button class="pagination-btn" data-page="${totalPages}">${totalPages}</button>`;
         }
 
         // Next button
         html += `
             <button class="pagination-btn ${this.state.currentPage === totalPages ? 'disabled' : ''}"
                     ${this.state.currentPage === totalPages ? 'disabled' : ''}
-                    onclick="searchViewInstance.goToPage(${this.state.currentPage + 1})"
+                    data-page="${this.state.currentPage + 1}"
                     aria-label="Next page">
                 Next
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1350,6 +1378,19 @@ class SearchViewComplete {
         `;
 
         paginationContainer.innerHTML = html;
+
+        // Attach delegated click handler (replaces inline onclick)
+        if (!this._paginationHandlerAttached) {
+            this._paginationHandlerAttached = true;
+            paginationContainer.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-page]');
+                if (!btn || btn.disabled) return;
+                const page = parseInt(btn.dataset.page, 10);
+                if (!isNaN(page)) {
+                    this.goToPage(page);
+                }
+            });
+        }
     }
 
     /**
@@ -1530,6 +1571,11 @@ class SearchViewComplete {
             this.elements.sortSelect.removeEventListener('change', this.boundHandlers.onSort);
         }
         document.removeEventListener('click', this.boundHandlers.onDocClick);
+
+        // Reset guard flags
+        this._exampleQueriesInitialized = false;
+        this._paginationHandlerAttached = false;
+        this._autocompleteRequestId = 0;
 
         this.isDestroyed = true;
     }

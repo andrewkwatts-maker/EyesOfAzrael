@@ -464,9 +464,9 @@ describe('SPANavigation', () => {
             spa = new SPANavigation(mockFirestore, mockAuth, mockRenderer);
         });
 
-        test('should return home for root path', () => {
+        test('should return null for root path (no breadcrumb on home)', () => {
             const result = spa._parseRouteForBreadcrumb('/');
-            expect(result.type).toBe('home');
+            expect(result).toBeNull();
         });
 
         test('should return search type', () => {
@@ -764,19 +764,28 @@ describe('SPANavigation', () => {
             spa = ctx.spa;
             global.UserDashboard = jest.fn().mockImplementation(function() { this.render = jest.fn().mockReturnValue('<div>dashboard</div>'); this.initialize = jest.fn(); });
             global.FirebaseCRUDManager = jest.fn().mockImplementation(function() {});
-            global.firebase = { auth: jest.fn().mockReturnValue({}) };
+            global.firebase = { auth: jest.fn().mockReturnValue({ currentUser: { uid: 'test-user', email: 'test@test.com' } }) };
             await spa.renderDashboard();
             expect(global.UserDashboard).toHaveBeenCalled();
             delete global.UserDashboard;
             delete global.FirebaseCRUDManager;
         });
 
+        test('should show sign-in prompt when not authenticated', async () => {
+            const ctx = createSpaWithMainContent();
+            spa = ctx.spa;
+            global.firebase = { auth: jest.fn().mockReturnValue({ currentUser: null }) };
+            await spa.renderDashboard();
+            expect(ctx.mainContent.innerHTML).toContain('Sign In Required');
+        });
+
         test('should show error when UserDashboard not available', async () => {
             const ctx = createSpaWithMainContent();
             spa = ctx.spa;
+            global.firebase = { auth: jest.fn().mockReturnValue({ currentUser: { uid: 'test' } }) };
             window.UserDashboard = undefined;
             await spa.renderDashboard();
-            expect(ctx.mainContent.innerHTML).toContain('not loaded');
+            expect(ctx.mainContent.innerHTML).toContain('Dashboard component not loaded');
         });
     });
 
@@ -1399,8 +1408,8 @@ describe('SPANavigation', () => {
             spa = ctx.spa;
         });
 
-        test('should return home for empty path', () => {
-            expect(spa._parseRouteForBreadcrumb('/')).toEqual({ type: 'home' });
+        test('should return null for empty path (no breadcrumb on home)', () => {
+            expect(spa._parseRouteForBreadcrumb('/')).toBeNull();
         });
 
         test('should return search type', () => {

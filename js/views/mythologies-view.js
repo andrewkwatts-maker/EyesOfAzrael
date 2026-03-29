@@ -91,8 +91,12 @@ class MythologiesView {
 
     /**
      * Load mythologies from Firebase
+     * Uses a generation counter to discard stale async responses.
      */
     async loadMythologies() {
+        // Increment generation counter so stale async fetches are discarded
+        const generation = ++this._loadGeneration || (this._loadGeneration = 1);
+
         try {
             // Try cache first
             const cached = localStorage.getItem('mythologies_cache');
@@ -110,14 +114,20 @@ class MythologiesView {
                 orderBy: 'order asc'
             });
 
+            // Discard if a newer loadMythologies() call was initiated
+            if (this._loadGeneration !== generation) {
+                console.log('[Mythologies View] Discarding stale response');
+                return;
+            }
+
             if (mythologies && mythologies.length > 0) {
                 this.mythologies = mythologies;
                 localStorage.setItem('mythologies_cache', JSON.stringify({
                     data: mythologies,
                     timestamp: Date.now()
                 }));
-            } else {
-                // Use fallback
+            } else if (!this.mythologies || this.mythologies.length === 0) {
+                // Use fallback only if we don't already have cached data
                 this.mythologies = this.getFallbackMythologies();
             }
 
@@ -125,7 +135,9 @@ class MythologiesView {
 
         } catch (error) {
             console.error('[Mythologies View] Error loading:', error);
-            this.mythologies = this.getFallbackMythologies();
+            if (this._loadGeneration === generation && (!this.mythologies || this.mythologies.length === 0)) {
+                this.mythologies = this.getFallbackMythologies();
+            }
         }
     }
 
@@ -200,12 +212,12 @@ class MythologiesView {
                             <span class="region-index-subtitle">${Object.keys(regions).length} cultural regions</span>
                         </div>
                         <div class="region-index-chips">
-                            <button class="region-chip active" data-region="all">
+                            <button class="region-chip active" data-region="all" aria-label="Filter: All Traditions (${this.mythologies.length})" aria-pressed="true">
                                 All Traditions
                                 <span class="region-chip-count">${this.mythologies.length}</span>
                             </button>
                             ${Object.entries(regions).map(([region, myths]) => `
-                                <button class="region-chip" data-region="${region}">
+                                <button class="region-chip" data-region="${region}" aria-label="Filter: ${region} (${myths.length})" aria-pressed="false">
                                     ${region}
                                     <span class="region-chip-count">${myths.length}</span>
                                 </button>
@@ -275,7 +287,7 @@ class MythologiesView {
                            /\.(svg|png|jpg|jpeg|webp|gif)$/i.test(icon);
         const fallbackEmoji = '📖';
         const iconHTML = isImageUrl
-            ? `<img src="${icon}" alt="" class="mythology-icon" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';" /><span class="mythology-icon mythology-icon-fallback" style="display:none;">${fallbackEmoji}</span>`
+            ? `<img src="${icon}" alt="" class="mythology-icon" loading="lazy" data-mythology-icon /><span class="mythology-icon mythology-icon-fallback" style="display:none;">${fallbackEmoji}</span>`
             : `<span class="mythology-icon">${icon || fallbackEmoji}</span>`;
 
         const region = mythology.region || this.inferRegion(mythology.id);
@@ -340,6 +352,18 @@ class MythologiesView {
     attachEventListeners() {
         const signal = this._abortController ? this._abortController.signal : undefined;
 
+        // Event delegation for mythology icon errors (CSP-safe, replaces inline onerror)
+        const mythGrid = document.querySelector('.mythology-grid');
+        if (mythGrid) {
+            mythGrid.addEventListener('error', (e) => {
+                if (e.target.matches('img[data-mythology-icon]')) {
+                    e.target.style.display = 'none';
+                    const fallback = e.target.nextElementSibling;
+                    if (fallback) fallback.style.display = 'flex';
+                }
+            }, { capture: true, signal });
+        }
+
         // Card click listeners
         const cards = document.querySelectorAll('.mythology-card');
         cards.forEach(card => {
@@ -360,8 +384,12 @@ class MythologiesView {
                 const allCards = document.querySelectorAll('.mythology-card');
                 const allChips = document.querySelectorAll('.region-chip');
 
-                allChips.forEach(c => c.classList.remove('active'));
+                allChips.forEach(c => {
+                    c.classList.remove('active');
+                    c.setAttribute('aria-pressed', 'false');
+                });
                 chip.classList.add('active');
+                chip.setAttribute('aria-pressed', 'true');
 
                 if (region === 'all') {
                     allCards.forEach(c => c.style.display = '');

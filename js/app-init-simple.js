@@ -252,7 +252,7 @@ console.log('[App Init] Script loaded - starting execution');
         panel.innerHTML = `
             <div class="diagnostic-header">
                 <span class="diagnostic-title">Startup Diagnostics</span>
-                <button class="diagnostic-close" onclick="this.closest('.startup-diagnostic-panel').remove()">&times;</button>
+                <button class="diagnostic-close" data-action="close-diagnostics">&times;</button>
             </div>
             <div class="diagnostic-content">
                 <div class="diagnostic-section">
@@ -303,8 +303,8 @@ console.log('[App Init] Script loaded - starting execution');
                 </div>
             </div>
             <div class="diagnostic-actions">
-                <button class="diagnostic-btn" onclick="location.reload()">Reload</button>
-                <button class="diagnostic-btn diagnostic-btn-secondary" onclick="window.debugApp && console.log(window.debugApp())">Log Debug Info</button>
+                <button class="diagnostic-btn" data-action="reload">Reload</button>
+                <button class="diagnostic-btn diagnostic-btn-secondary" data-action="log-debug">Log Debug Info</button>
             </div>
         `;
 
@@ -327,6 +327,23 @@ console.log('[App Init] Script loaded - starting execution');
         `;
 
         document.body.appendChild(panel);
+
+        // Attach event listeners (CSP-safe, replaces inline onclick)
+        panel.addEventListener('click', (e) => {
+            const action = e.target.closest('[data-action]');
+            if (!action) return;
+            switch (action.dataset.action) {
+                case 'close-diagnostics':
+                    panel.remove();
+                    break;
+                case 'reload':
+                    location.reload();
+                    break;
+                case 'log-debug':
+                    if (window.debugApp) console.log(window.debugApp());
+                    break;
+            }
+        });
 
         // Auto-hide after 30 seconds unless there are errors
         if (!diagnostics.hasErrors) {
@@ -906,7 +923,7 @@ console.log('[App Init] Script loaded - starting execution');
             console.log(`[App Init] First render complete for route: ${route}`);
             hideAllLoadingIndicators(`first-render-complete:${route}`);
             emitAppReady(`first-render-complete:${route}`);
-        });
+        }, { once: true });
 
         // Also listen for render errors to hide loading on failure
         document.addEventListener('render-error', (event) => {
@@ -917,8 +934,8 @@ console.log('[App Init] Script loaded - starting execution');
             emitAppReady(`render-error:${route}`);
         });
 
-        // SAFETY TIMEOUT: Force content visibility after 2 seconds if first-render-complete never fires
-        // This prevents blank page scenarios due to race conditions or uncaught errors
+        // SAFETY TIMEOUT: Force content visibility after 2s if first-render-complete never fires
+        // This is the initial-load safety timeout (distinct from CONFIG.LOADING_HIDE_TIMEOUT which is the general fallback)
         const safetyTimeout = setTimeout(() => {
             if (!loadingHidden) {
                 console.warn('[App Init] SAFETY TIMEOUT: first-render-complete not received after 2s, forcing visibility');
@@ -1407,9 +1424,15 @@ console.log('[App Init] Script loaded - starting execution');
                         <summary style="cursor: pointer;">Technical Details</summary>
                         <pre style="margin-top: 0.5rem; white-space: pre-wrap; font-size: 0.85rem;">${safeStack}</pre>
                     </details>
-                    <button onclick="location.reload()" class="btn-primary" style="margin-top: 1rem;">Reload Page</button>
+                    <button class="btn-primary" data-action="reload-page" style="margin-top: 1rem;">Reload Page</button>
                 </div>
             `;
+
+            // Attach reload handler (CSP-safe)
+            const reloadBtn = mainContent.querySelector('[data-action="reload-page"]');
+            if (reloadBtn) {
+                reloadBtn.addEventListener('click', () => location.reload());
+            }
         }
     }
 
@@ -1444,11 +1467,17 @@ console.log('[App Init] Script loaded - starting execution');
                             Search
                         </a>
                     </div>
-                    <button onclick="location.reload()" class="btn-secondary" style="padding: 0.5rem 1rem; cursor: pointer;">
+                    <button class="btn-secondary" data-action="reload-fallback" style="padding: 0.5rem 1rem; cursor: pointer;">
                         Reload Page
                     </button>
                 </div>
             `;
+
+            // Attach reload handler (CSP-safe)
+            const reloadFallbackBtn = mainContent.querySelector('[data-action="reload-fallback"]');
+            if (reloadFallbackBtn) {
+                reloadFallbackBtn.addEventListener('click', () => location.reload());
+            }
 
             // Dispatch first-render-complete so loading indicators are hidden
             document.dispatchEvent(new CustomEvent('first-render-complete', {
