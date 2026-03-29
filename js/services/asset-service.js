@@ -17,7 +17,12 @@
 
 class AssetService {
     constructor() {
-        this.db = firebase.firestore();
+        try {
+            this.db = firebase.firestore();
+        } catch (e) {
+            console.error('[AssetService] Failed to get Firestore instance:', e);
+            this.db = null;
+        }
         this.cache = window.cacheManager || null;
 
         // Cache for queries
@@ -30,7 +35,6 @@ class AssetService {
         this.collectionMap = {
             'archetypes': 'concepts',    // archetypes maps to concepts collection
             'cosmologies': 'cosmology',  // plural to singular
-            // Add more mappings as needed
         };
     }
 
@@ -146,9 +150,14 @@ class AssetService {
     async getStandardAssets(type, options = {}) {
         const { mythology = null, orderBy = 'name', limit = 500 } = options;
 
+        if (!this.db) {
+            console.error(`[AssetService] No Firestore instance available for ${type}`);
+            throw new Error('Firestore not initialized');
+        }
+
         // Map URL category to Firebase collection name
         const collectionName = this.getCollectionName(type);
-        console.log(`[AssetService] Mapping category "${type}" → collection "${collectionName}"`);
+        console.log(`[AssetService] Querying "${collectionName}" (from "${type}"), orderBy="${orderBy}", limit=${limit}${mythology ? `, mythology="${mythology}"` : ''}`);
 
         // Try cache manager first, fall through to direct query on failure
         if (this.cache) {
@@ -160,36 +169,51 @@ class AssetService {
                     limit
                 });
                 if (cached && cached.length > 0) {
-                    console.log(`[AssetService] Cache returned ${cached.length} ${type}`);
+                    console.log(`[AssetService] Cache hit: ${cached.length} ${type}`);
                     return cached;
                 }
-                console.log(`[AssetService] Cache returned empty for ${type}, falling through to direct query`);
+                console.log(`[AssetService] Cache empty for ${type}, trying direct query`);
             } catch (cacheError) {
-                console.warn(`[AssetService] Cache error for ${type}, falling through to direct query:`, cacheError.message);
+                console.warn(`[AssetService] Cache error for ${type}:`, cacheError.message, '- trying direct query');
             }
         }
 
         // Direct Firebase query (primary path when cache misses or unavailable)
+        let query = this.db.collection(collectionName);
+
+        if (mythology) {
+            query = query.where('mythology', '==', mythology);
+        }
+
+        // Try with orderBy first, fall back to unordered if index is missing
         try {
-            let query = this.db.collection(collectionName);
-
-            if (mythology) {
-                query = query.where('mythology', '==', mythology);
-            }
-
-            query = query.orderBy(orderBy).limit(limit);
-
-            const snapshot = await query.get();
+            const orderedQuery = query.orderBy(orderBy).limit(limit);
+            const snapshot = await orderedQuery.get();
             const results = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             }));
-            console.log(`[AssetService] Direct query returned ${results.length} ${type}`);
+            console.log(`[AssetService] Direct query: ${results.length} ${type}`);
             return results;
+        } catch (orderError) {
+            console.warn(`[AssetService] Ordered query failed for ${type}:`, orderError.code || orderError.message);
 
-        } catch (error) {
-            console.error(`[AssetService] Error fetching standard ${type}:`, error);
-            return [];
+            // Fallback: query without orderBy (works without composite index)
+            try {
+                const fallbackQuery = query.limit(limit);
+                const snapshot = await fallbackQuery.get();
+                const results = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                // Sort client-side
+                results.sort((a, b) => (a[orderBy] || '').localeCompare(b[orderBy] || ''));
+                console.log(`[AssetService] Fallback query: ${results.length} ${type} (sorted client-side)`);
+                return results;
+            } catch (fallbackError) {
+                console.error(`[AssetService] All queries failed for ${type}:`, fallbackError);
+                throw fallbackError;
+            }
         }
     }
 

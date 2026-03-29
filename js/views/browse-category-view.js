@@ -21,7 +21,12 @@ class BrowseCategoryView {
     constructor(firestore) {
         this.db = firestore;
         this.cache = window.cacheManager || (typeof FirebaseCacheManager !== 'undefined' ? new FirebaseCacheManager({ db: firestore }) : { getList: async () => null, defaultTTL: {} });
-        this.assetService = typeof AssetService !== 'undefined' ? new AssetService() : null;
+        try {
+            this.assetService = typeof AssetService !== 'undefined' ? new AssetService() : null;
+        } catch (e) {
+            console.warn('[Browse View] AssetService construction failed:', e.message);
+            this.assetService = null;
+        }
         this.entities = [];
         this.filteredEntities = [];
         this.displayedEntities = [];
@@ -153,12 +158,17 @@ class BrowseCategoryView {
 
             // Fetch using AssetService (handles standard + community assets)
             if (this.assetService) {
-                this.entities = await this.assetService.getAssets(this.category, {
-                    mythology: this.mythology,
-                    includeUserContent: this.showUserContent,
-                    orderBy: 'name',
-                    limit: 500
-                });
+                try {
+                    this.entities = await this.assetService.getAssets(this.category, {
+                        mythology: this.mythology,
+                        includeUserContent: this.showUserContent,
+                        orderBy: 'name',
+                        limit: 500
+                    });
+                } catch (assetError) {
+                    console.warn('[Browse View] AssetService failed, falling back to direct query:', assetError.message);
+                    this.entities = await this.loadEntitiesDirect();
+                }
             } else {
                 // Fallback: direct Firebase query
                 console.warn('[Browse View] AssetService not available, using direct Firebase query');
@@ -191,22 +201,39 @@ class BrowseCategoryView {
      * Fallback: load entities directly from Firebase when AssetService is unavailable
      */
     async loadEntitiesDirect() {
-        const db = this.db || firebase.firestore();
-        let query = db.collection(this.category);
-
-        if (this.mythology) {
-            query = query.where('mythology', '==', this.mythology);
+        const db = this.db || (typeof firebase !== 'undefined' ? firebase.firestore() : null);
+        if (!db) {
+            console.error('[Browse View] No Firestore instance available');
+            throw new Error('Firestore not available');
         }
 
-        query = query.orderBy('name').limit(500);
+        let baseQuery = db.collection(this.category);
 
-        const snapshot = await query.get();
-        return snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            isStandard: true,
-            source: 'standard'
-        }));
+        if (this.mythology) {
+            baseQuery = baseQuery.where('mythology', '==', this.mythology);
+        }
+
+        // Try ordered query first, fall back to unordered
+        try {
+            const snapshot = await baseQuery.orderBy('name').limit(500).get();
+            return snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                isStandard: true,
+                source: 'standard'
+            }));
+        } catch (orderError) {
+            console.warn('[Browse View] Ordered query failed:', orderError.code || orderError.message, '- trying unordered');
+            const snapshot = await baseQuery.limit(500).get();
+            const results = snapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data(),
+                isStandard: true,
+                source: 'standard'
+            }));
+            results.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+            return results;
+        }
     }
 
     /**
