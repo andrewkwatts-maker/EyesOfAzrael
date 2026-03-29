@@ -79,8 +79,14 @@ class BrowseCategoryView {
         container.classList.add('has-skeleton');
 
         try {
-            // Load entities from Firebase
-            await this.loadEntities();
+            // Load entities from Firebase (with timeout to prevent stuck skeletons)
+            const LOAD_TIMEOUT = 15000;
+            await Promise.race([
+                this.loadEntities(),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Loading timed out. Please check your connection and try again.')), LOAD_TIMEOUT)
+                )
+            ]);
 
             // Fade out loading before replacing content
             const loadingEl = container.querySelector('.loading-container');
@@ -4276,6 +4282,7 @@ class BrowseCategoryView {
      * Show error
      */
     showError(container, error) {
+        container.classList.remove('has-skeleton');
         container.innerHTML = `
             <div class="error-container" style="
                 text-align: center;
