@@ -72,14 +72,19 @@ run_patrol() {
     fi
 
     # Read manifest to get screenshot paths and page info
+    # Use path.resolve to handle Windows/Git Bash path differences
     SCREENSHOTS=$(node -e "
-        const m = require('${MANIFEST//\\/\\\\}');
+        const fs = require('fs'), path = require('path');
+        const f = path.resolve('screenshots', 'patrol', 'manifest.json');
+        const m = JSON.parse(fs.readFileSync(f, 'utf8'));
         const imgs = m.pages.map(p => p.screenshot).filter(Boolean);
         console.log(imgs.join('\n'));
     ")
 
     PAGE_INFO=$(node -e "
-        const m = require('${MANIFEST//\\/\\\\}');
+        const fs = require('fs'), path = require('path');
+        const f = path.resolve('screenshots', 'patrol', 'manifest.json');
+        const m = JSON.parse(fs.readFileSync(f, 'utf8'));
         const lines = m.pages.map(p => {
             let status = '';
             if (p.spinnerStuck) status = ' [SPINNER STUCK]';
@@ -122,12 +127,15 @@ Instructions:
 
     echo "[patrol] Sending to Claude for analysis..."
 
-    # Run claude in non-interactive print mode with dangerously-skip-permissions
-    # so it can freely read files, edit code, and run tests without prompts
-    claude -p \
+    # Write prompt to a temp file to avoid shell argument length limits
+    PROMPT_FILE="$SCREENSHOT_DIR/patrol-prompt.txt"
+    echo "$PROMPT" > "$PROMPT_FILE"
+
+    # Run claude in non-interactive print mode, piping prompt via stdin
+    cat "$PROMPT_FILE" | claude -p \
         --dangerously-skip-permissions \
         --allowedTools "Read Edit Write Bash Grep Glob Agent" \
-        "$PROMPT" 2>&1 | tee "$SCREENSHOT_DIR/claude-review.log"
+        2>&1 | tee "$SCREENSHOT_DIR/claude-review.log"
 
     # 5. Check if any files were modified
     CHANGED_FILES=$(git diff --name-only 2>/dev/null || true)

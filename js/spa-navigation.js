@@ -625,7 +625,9 @@ class SPANavigation {
                 if (!this._isNavigating) {
                     this.handleRoute();
                 } else {
-                    spaLog('Skipping hashchange - navigation already in progress');
+                    spaLog('Cancelling in-progress navigation for new hashchange');
+                    this._isNavigating = false;
+                    this.handleRoute();
                 }
             }, 10);
         };
@@ -646,9 +648,11 @@ class SPANavigation {
                 });
             }
 
-            if (!this._isNavigating) {
-                this.handleRoute(true); // true = isPopState
+            if (this._isNavigating) {
+                spaLog('Cancelling in-progress navigation for popstate');
+                this._isNavigating = false;
             }
+            this.handleRoute(true); // true = isPopState
         };
 
         this._boundHandlers.click = (e) => {
