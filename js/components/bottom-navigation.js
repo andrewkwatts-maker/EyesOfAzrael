@@ -192,7 +192,7 @@ class BottomNavigation {
 
         // Haptic feedback
         if (this.options.enableHaptics && navigator.vibrate) {
-            navigator.vibrate(10);
+            try { navigator.vibrate(10); } catch (e) { /* blocked by browser policy */ }
         }
 
         // Update active state immediately for responsiveness
