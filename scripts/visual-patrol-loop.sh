@@ -176,8 +176,9 @@ if [[ "${1:-}" == "--loop" ]]; then
     while true; do
         run_patrol || echo "[patrol] Patrol run failed, will retry next cycle."
         echo ""
-        echo "[patrol] Next patrol in 30 minutes..."
-        sleep 1800
+        INTERVAL="${2:-1800}"
+        echo "[patrol] Next patrol in $((INTERVAL / 60)) minutes..."
+        sleep "$INTERVAL"
     done
 else
     run_patrol
