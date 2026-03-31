@@ -946,16 +946,13 @@ class SPANavigation {
             const currentUser = firebase.auth().currentUser;
             spaLog('Firebase currentUser:', currentUser ? currentUser.email : 'null');
 
-            if (!currentUser) {
-                spaLog('No user found for protected route, showing loading state...');
-                this.showAuthWaitingState(mainContent);
-                this._isNavigating = false;
-                this._activeNavigationId = null;
-                NavigationMetrics.recordPhase(metric, 'authRequired');
-                return;
+            // Let renderDashboard() handle unauthenticated users —
+            // it shows a proper "Sign In Required" message instead of a stuck spinner
+            if (currentUser) {
+                spaLog('Auth checks passed for protected route');
+            } else {
+                spaLog('No user for protected route, letting view handle auth prompt');
             }
-
-            spaLog('Auth checks passed for protected route');
         } else {
             spaLog('Public route - proceeding without auth check');
         }
