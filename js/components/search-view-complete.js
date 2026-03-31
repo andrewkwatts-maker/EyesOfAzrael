@@ -130,8 +130,25 @@ class SearchViewComplete {
      * Load available mythologies from Firestore
      */
     async loadMythologies() {
+        const fallback = [
+            { id: 'greek', name: 'Greek' },
+            { id: 'norse', name: 'Norse' },
+            { id: 'egyptian', name: 'Egyptian' },
+            { id: 'hindu', name: 'Hindu' },
+            { id: 'buddhist', name: 'Buddhist' },
+            { id: 'christian', name: 'Christian' },
+            { id: 'babylonian', name: 'Babylonian' },
+            { id: 'sumerian', name: 'Sumerian' },
+            { id: 'celtic', name: 'Celtic' },
+            { id: 'japanese', name: 'Japanese' },
+            { id: 'chinese', name: 'Chinese' }
+        ];
         try {
-            const snapshot = await this.db.collection('mythologies').get();
+            const timeoutMs = 5000;
+            const snapshot = await Promise.race([
+                this.db.collection('mythologies').get(),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), timeoutMs))
+            ]);
             this.mythologies = [];
             snapshot.forEach(doc => {
                 this.mythologies.push({
@@ -142,19 +159,7 @@ class SearchViewComplete {
             this.mythologies.sort((a, b) => a.name.localeCompare(b.name));
         } catch (error) {
             console.warn('[SearchView] Could not load mythologies:', error);
-            this.mythologies = [
-                { id: 'greek', name: 'Greek' },
-                { id: 'norse', name: 'Norse' },
-                { id: 'egyptian', name: 'Egyptian' },
-                { id: 'hindu', name: 'Hindu' },
-                { id: 'buddhist', name: 'Buddhist' },
-                { id: 'christian', name: 'Christian' },
-                { id: 'babylonian', name: 'Babylonian' },
-                { id: 'sumerian', name: 'Sumerian' },
-                { id: 'celtic', name: 'Celtic' },
-                { id: 'japanese', name: 'Japanese' },
-                { id: 'chinese', name: 'Chinese' }
-            ];
+            this.mythologies = fallback;
         }
     }
 
