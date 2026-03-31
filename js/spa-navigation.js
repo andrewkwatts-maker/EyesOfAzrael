@@ -3,8 +3,8 @@
 /**
  * Single Page Application Navigation System
  * Handles dynamic routing and content loading from Firebase
- * Public routes (home, mythologies, browse, etc.) are accessible without auth
- * Protected routes (dashboard, compare) require authentication
+ * Public routes (home, mythologies, browse, compare, etc.) are accessible without auth
+ * Protected routes (dashboard) require authentication
  *
  * Features:
  * - Smooth page transitions with CSS animations
@@ -385,7 +385,7 @@ class SPANavigation {
                 this.authReady = true;
 
                 const currentPath = (window.location.hash || '#/').replace('#', '');
-                const protectedRoutes = ['dashboard', 'compare'];
+                const protectedRoutes = ['dashboard'];
                 const isProtectedRoute = protectedRoutes.some(route => currentPath.includes(route));
                 if (isProtectedRoute) {
                     spaLog('Re-handling protected route now that auth is ready');
@@ -401,7 +401,7 @@ class SPANavigation {
                 if (!this.authReady) {
                     this.authReady = true;
                     const currentPath = (window.location.hash || '#/').replace('#', '');
-                    const protectedRoutes = ['dashboard', 'compare'];
+                    const protectedRoutes = ['dashboard'];
                     const isProtectedRoute = protectedRoutes.some(route => currentPath.includes(route));
                     if (isProtectedRoute && event.detail && event.detail.authenticated) {
                         spaLog('Re-handling protected route after auth-ready event');
@@ -930,7 +930,7 @@ class SPANavigation {
         const mainContent = document.getElementById('main-content');
 
         // Protected routes check
-        const protectedRoutes = ['dashboard', 'compare'];
+        const protectedRoutes = ['dashboard'];
         const isProtectedRoute = protectedRoutes.some(route => path.includes(route));
 
         if (isProtectedRoute) {
