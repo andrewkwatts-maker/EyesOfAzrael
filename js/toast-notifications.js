@@ -133,7 +133,8 @@ class ToastNotifications {
     triggerHaptic(type = 'light') {
         if (!this.options.enableHapticFeedback) return;
 
-        // Vibration API support
+        // Vibration API support (try-catch guards against browsers blocking
+        // vibrate when no user gesture has occurred yet)
         if ('vibrate' in navigator) {
             const patterns = {
                 light: [10],
@@ -143,7 +144,11 @@ class ToastNotifications {
                 error: [50, 30, 50],
                 warning: [30, 20, 30]
             };
-            navigator.vibrate(patterns[type] || patterns.light);
+            try {
+                navigator.vibrate(patterns[type] || patterns.light);
+            } catch (_) {
+                // Blocked by browser — no user gesture yet
+            }
         }
 
         // iOS Taptic Engine via webkit (if available)
