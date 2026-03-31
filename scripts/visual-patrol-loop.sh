@@ -57,12 +57,18 @@ run_patrol() {
     echo " Visual Patrol - $(date '+%Y-%m-%d %H:%M:%S')"
     echo "================================================================"
 
-    # 1. Start server
-    start_server
+    # 1. Determine target URL
+    LIVE_URL="${PATROL_URL:-https://www.eyesofazrael.com}"
+    echo "[patrol] Target: $LIVE_URL"
 
-    # 2. Run screenshot collector
+    # 2. Start local server only if targeting localhost
+    if [[ "$LIVE_URL" == *"localhost"* ]]; then
+        start_server
+    fi
+
+    # 3. Run screenshot collector against target
     echo "[patrol] Taking screenshots..."
-    node scripts/visual-patrol.js --base-url "http://localhost:$PORT"
+    node scripts/visual-patrol.js --base-url "$LIVE_URL"
 
     # 3. Build the prompt for Claude with all screenshots
     MANIFEST="$SCREENSHOT_DIR/manifest.json"
@@ -126,10 +132,11 @@ Read every screenshot file above using the Read tool. For each page, check for:
   - Console errors: check the manifest console errors section — these often reveal the root cause
 
 STEP 2 — TRIAGE (important!)
+This patrol runs against the LIVE production website (eyesofazrael.com), so Firebase is fully connected.
 Ignore these expected states — they are NOT bugs:
   - 'Please sign in' or auth prompts (expected for unauthenticated patrol)
-  - Empty content due to no Firebase connection (patrol runs against local http-server)
   - Slight layout differences at exactly 1440x900 viewport
+Everything else IS a real bug if it looks wrong — empty grids, broken layouts, missing data, errors.
 
 Focus ONLY on genuine code bugs: crashes, wrong logic, broken CSS, missing event handlers,
 race conditions, null reference errors, or regressions from recent changes.

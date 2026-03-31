@@ -332,7 +332,7 @@ class MobileGestures {
 
         // Haptic feedback if available
         if (navigator.vibrate) {
-            navigator.vibrate(50);
+            try { navigator.vibrate(50); } catch (e) { /* blocked by browser policy */ }
         }
 
         // Find the closest context-menu-enabled element
