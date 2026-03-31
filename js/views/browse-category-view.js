@@ -1293,12 +1293,34 @@ class BrowseCategoryView {
         const categoryInfo = this.getCategoryInfo(this.category);
         const hasActiveFilters = this.searchTerm || this.selectedMythologies.size > 0 ||
                                 this.selectedDomains.size > 0 || this.selectedTypes.size > 0;
+        const isOffline = typeof navigator !== 'undefined' && !navigator.onLine;
 
         // Build filter summary for suggestion
         const activeFiltersList = [];
         if (this.searchTerm) activeFiltersList.push(`search term "${this.searchTerm}"`);
         if (this.selectedMythologies.size > 0) activeFiltersList.push(`${this.selectedMythologies.size} mythology filter${this.selectedMythologies.size > 1 ? 's' : ''}`);
         if (this.selectedDomains.size > 0) activeFiltersList.push(`${this.selectedDomains.size} domain filter${this.selectedDomains.size > 1 ? 's' : ''}`);
+
+        // Show offline-specific message when no data and no active filters
+        if (isOffline && !hasActiveFilters) {
+            return `
+                <div class="empty-state">
+                    <div class="empty-state__icon">📡</div>
+                    <h3 class="empty-state__title">You're Offline</h3>
+                    <p class="empty-state__message">
+                        Unable to load ${categoryInfo.name.toLowerCase()}. Please check your internet connection and try again.
+                    </p>
+                    <div class="empty-state__actions">
+                        <button class="btn-primary" onclick="location.reload()">
+                            Retry
+                        </button>
+                        <a href="#/" class="btn-secondary">
+                            Return to Home
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
 
         return `
             <div class="empty-state">
