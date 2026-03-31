@@ -65,14 +65,32 @@ class MythologyOverview {
 
     /**
      * Load mythology document from Firestore
+     * Handles both raw IDs (e.g., 'norse') and prefixed IDs (e.g., 'mythology-hub-norse')
      */
     async loadMythology(mythologyId) {
         if (!this.db) throw new Error('Firebase Firestore not initialized');
 
-        const doc = await this.db.collection('mythologies').doc(mythologyId).get();
-        if (!doc.exists) return null;
+        // Try the exact ID first
+        let doc = await this.db.collection('mythologies').doc(mythologyId).get();
+        if (doc.exists) return { id: doc.id, ...doc.data() };
 
-        return { id: doc.id, ...doc.data() };
+        // Try with mythology-hub- prefix (Firebase convention)
+        if (!mythologyId.startsWith('mythology-hub-')) {
+            doc = await this.db.collection('mythologies').doc(`mythology-hub-${mythologyId}`).get();
+            if (doc.exists) return { id: doc.id, ...doc.data() };
+        }
+
+        // Fallback: query by mythology field
+        const snapshot = await this.db.collection('mythologies')
+            .where('mythology', '==', mythologyId)
+            .limit(1)
+            .get();
+        if (!snapshot.empty) {
+            const matchedDoc = snapshot.docs[0];
+            return { id: matchedDoc.id, ...matchedDoc.data() };
+        }
+
+        return null;
     }
 
     /**
