@@ -81,7 +81,7 @@ describe('AuthGuard', () => {
     describe('isProtectedRoute logic', () => {
         function isProtectedRoute(hash) {
             const path = (hash || '#/').replace('#', '').replace(/\/$/, '');
-            const protectedRoutes = ['/dashboard', '/compare'];
+            const protectedRoutes = ['/dashboard'];
             return protectedRoutes.some(route => path.startsWith(route));
         }
 
@@ -89,8 +89,8 @@ describe('AuthGuard', () => {
             expect(isProtectedRoute('#/dashboard')).toBe(true);
         });
 
-        test('should identify compare as protected', () => {
-            expect(isProtectedRoute('#/compare')).toBe(true);
+        test('should not flag compare as protected', () => {
+            expect(isProtectedRoute('#/compare')).toBe(false);
         });
 
         test('should not flag home as protected', () => {
