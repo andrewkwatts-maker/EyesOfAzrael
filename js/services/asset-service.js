@@ -185,10 +185,21 @@ class AssetService {
             query = query.where('mythology', '==', mythology);
         }
 
+        // Helper to retry without mythology filter if exact match returns empty (handles inconsistent casing)
+        const retryWithoutFilter = async (baseQuery) => {
+            const snapshot = await baseQuery.get();
+            if (snapshot.empty && mythology) {
+                console.log(`[AssetService] Exact mythology match empty for ${type}, retrying without filter`);
+                const allQuery = this.db.collection(collectionName).limit(limit);
+                return allQuery.get();
+            }
+            return snapshot;
+        };
+
         // Try with orderBy first, fall back to unordered if index is missing
         try {
             const orderedQuery = query.orderBy(orderBy).limit(limit);
-            const snapshot = await orderedQuery.get();
+            const snapshot = await retryWithoutFilter(orderedQuery);
             const results = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
@@ -201,7 +212,7 @@ class AssetService {
             // Fallback: query without orderBy (works without composite index)
             try {
                 const fallbackQuery = query.limit(limit);
-                const snapshot = await fallbackQuery.get();
+                const snapshot = await retryWithoutFilter(fallbackQuery);
                 const results = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()

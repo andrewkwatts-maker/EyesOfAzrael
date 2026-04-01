@@ -595,10 +595,11 @@ class FirebaseCacheManager {
             const startTime = performance.now();
 
             let query = this.db.collection(collection);
+            const mythologyFilter = filters.mythology;
 
             // Apply filters
-            if (filters.mythology) {
-                query = query.where('mythology', '==', filters.mythology);
+            if (mythologyFilter) {
+                query = query.where('mythology', '==', mythologyFilter);
             }
 
             if (filters.type) {
@@ -620,7 +621,20 @@ class FirebaseCacheManager {
                 query = query.startAfter(options.startAfter);
             }
 
-            const snapshot = await query.get();
+            let snapshot = await query.get();
+
+            // If mythology filter returned empty, retry without it (handles inconsistent casing in data)
+            if (snapshot.empty && mythologyFilter && !filters.type && !options.startAfter) {
+                console.log(`[CacheManager] Exact mythology match empty for ${collection}, retrying without filter`);
+                let retryQuery = this.db.collection(collection);
+                if (options.orderBy) {
+                    const [field, direction = 'asc'] = options.orderBy.split(' ');
+                    retryQuery = retryQuery.orderBy(field, direction);
+                }
+                retryQuery = retryQuery.limit(limit);
+                snapshot = await retryQuery.get();
+            }
+
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
             // Cache the results

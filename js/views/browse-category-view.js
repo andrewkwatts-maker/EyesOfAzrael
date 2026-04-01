@@ -218,29 +218,38 @@ class BrowseCategoryView {
         };
         const collectionName = collectionMap[this.category] || this.category;
         let baseQuery = db.collection(collectionName);
+        const mythFilter = this.mythology;
 
-        if (this.mythology) {
-            baseQuery = baseQuery.where('mythology', '==', this.mythology);
+        if (mythFilter) {
+            baseQuery = baseQuery.where('mythology', '==', mythFilter);
         }
 
         // Try ordered query first, fall back to unordered
-        try {
-            const snapshot = await baseQuery.orderBy('name').limit(500).get();
-            return snapshot.docs.map(doc => ({
+        const fetchAndFilter = (snapshot) => {
+            let results = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
                 isStandard: true,
                 source: 'standard'
             }));
+            return results;
+        };
+
+        try {
+            let snapshot = await baseQuery.orderBy('name').limit(500).get();
+            // If mythology filter returned no results, retry without filter (handles inconsistent casing)
+            if (snapshot.empty && mythFilter) {
+                snapshot = await db.collection(collectionName).orderBy('name').limit(500).get();
+            }
+            return fetchAndFilter(snapshot);
         } catch (orderError) {
             console.warn('[Browse View] Ordered query failed:', orderError.code || orderError.message, '- trying unordered');
-            const snapshot = await baseQuery.limit(500).get();
-            const results = snapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                isStandard: true,
-                source: 'standard'
-            }));
+            let snapshot = await baseQuery.limit(500).get();
+            // If mythology filter returned no results, retry without filter
+            if (snapshot.empty && mythFilter) {
+                snapshot = await db.collection(collectionName).limit(500).get();
+            }
+            const results = fetchAndFilter(snapshot);
             results.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             return results;
         }
