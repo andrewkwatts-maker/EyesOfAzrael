@@ -140,9 +140,9 @@ class ContentFilter {
                 finalQuery = query.where('mythology', '==', this.mythology);
             }
 
-            // Get count
-            const snapshot = await finalQuery.count().get();
-            this.communityCount = snapshot.data().count;
+            // Get count (use .get() + snapshot.size since .count() requires Firebase v9.24+)
+            const snapshot = await finalQuery.get();
+            this.communityCount = snapshot.size;
 
             // Update cache
             this.countCache = this.communityCount;
@@ -163,24 +163,51 @@ class ContentFilter {
     render() {
         if (!this.container) return;
 
-        // Load template
+        // Try template first, fall back to inline HTML
         const template = document.getElementById('content-filter-toggle-template');
-        if (!template) {
-            console.error('[ContentFilter] Template not found: content-filter-toggle-template');
-            return;
+        if (template) {
+            const clone = template.content.cloneNode(true);
+            const toggle = clone.getElementById('show-community-content');
+            if (toggle) {
+                toggle.checked = this.showUserContent;
+            }
+            this.container.appendChild(clone);
+        } else {
+            // Inline fallback when template is not in the DOM
+            this.container.innerHTML = `
+                <div class="content-filter-bar" id="contentFilterBar">
+                    <div class="content-filter-main">
+                        <label class="toggle-switch" for="show-community-content">
+                            <input type="checkbox" id="show-community-content" class="toggle-input"
+                                   aria-label="Toggle community content visibility"
+                                   ${this.showUserContent ? 'checked' : ''} />
+                            <span class="slider round"></span>
+                        </label>
+                        <div class="toggle-info">
+                            <span class="toggle-label">Show Community Content</span>
+                            <span class="toggle-description">View user-submitted entities alongside official content</span>
+                        </div>
+                        <span class="content-count-badge" id="communityContentCount" style="display: none;">
+                            <span class="badge-icon">+</span>
+                            <span class="badge-count">0</span>
+                            <span class="badge-label">items</span>
+                        </span>
+                        <button class="info-btn" id="contentFilterInfoBtn"
+                                title="What is community content?"
+                                aria-label="Learn about community content">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="2"/>
+                                <path d="M10 14V10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="10" cy="7" r="0.5" fill="currentColor" stroke="currentColor" stroke-width="1"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="filter-loading" id="filterLoading" style="display: none;">
+                        <div class="loading-spinner"></div>
+                        <span class="loading-text">Updating content...</span>
+                    </div>
+                </div>`;
         }
-
-        // Clone template
-        const clone = template.content.cloneNode(true);
-
-        // Set initial toggle state
-        const toggle = clone.getElementById('show-community-content');
-        if (toggle) {
-            toggle.checked = this.showUserContent;
-        }
-
-        // Append to container
-        this.container.appendChild(clone);
 
         // Update count badge
         this.updateCountBadge();

@@ -1125,15 +1125,15 @@ class FirebaseCacheManager {
             }
         }
 
-        // Sort by timestamp and remove oldest 25%
+        // Sort by timestamp and remove oldest 50% (more aggressive to prevent repeated quota errors)
         entries.sort((a, b) => a.timestamp - b.timestamp);
-        const toRemove = Math.ceil(entries.length * 0.25);
+        const toRemove = Math.max(1, Math.ceil(entries.length * 0.5));
 
-        for (let i = 0; i < toRemove; i++) {
+        for (let i = 0; i < toRemove && i < entries.length; i++) {
             storage.removeItem(entries[i].key);
         }
 
-        console.log(`[CacheManager] Cleared ${toRemove} oldest entries from storage`);
+        console.log(`[CacheManager] Cleared ${Math.min(toRemove, entries.length)} oldest entries from storage`);
     }
 
     recordHit(startTime) {

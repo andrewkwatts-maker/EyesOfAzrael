@@ -536,7 +536,7 @@ class BrowseCategoryView {
                 .skeleton-title {
                     height: 2.5rem;
                     width: 300px;
-                    background: rgba(var(--color-primary-rgb), 0.2);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
                     border-radius: var(--radius-lg);
                     margin-bottom: 0.5rem;
                 }
@@ -553,7 +553,7 @@ class BrowseCategoryView {
                 .skeleton-stats {
                     height: 1.5rem;
                     width: 200px;
-                    background: rgba(var(--color-primary-rgb), 0.2);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
                     border-radius: var(--radius-md);
                 }
 
@@ -588,7 +588,7 @@ class BrowseCategoryView {
                 .skeleton-card-myth {
                     height: 0.85rem;
                     width: 100px;
-                    background: rgba(var(--color-primary-rgb), 0.2);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
                     border-radius: var(--radius-md);
                 }
 
@@ -2587,7 +2587,7 @@ class BrowseCategoryView {
                     gap: var(--spacing-sm, 0.5rem);
                     font-size: var(--font-size-base, 1rem);
                     font-weight: var(--font-semibold, 600);
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                     margin: 0 0 var(--spacing-md, 1rem) 0;
                 }
 
@@ -2609,7 +2609,7 @@ class BrowseCategoryView {
                     background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.5);
                     border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.2);
                     border-radius: var(--radius-full, 9999px);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     font-weight: var(--font-medium, 500);
                     cursor: pointer;
@@ -2631,19 +2631,19 @@ class BrowseCategoryView {
                 }
 
                 .filter-chip:hover {
-                    background: rgba(var(--color-primary-rgb), 0.15);
-                    border-color: rgba(var(--color-primary-rgb), 0.6);
-                    color: var(--color-text-primary);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.6);
+                    color: var(--color-text-primary, #f8f9fa);
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.2);
+                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
                 }
 
                 .filter-chip[aria-pressed="true"],
                 .filter-chip.active {
                     background: transparent;
-                    border-color: var(--color-primary);
+                    border-color: var(--color-primary, #8b7fff);
                     color: white;
-                    box-shadow: 0 6px 16px rgba(var(--color-primary-rgb), 0.4);
+                    box-shadow: 0 6px 16px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
                     font-weight: var(--font-semibold, 600);
                 }
 
@@ -2688,7 +2688,7 @@ class BrowseCategoryView {
                 .active-filters-label {
                     font-size: var(--font-size-sm, 0.875rem);
                     font-weight: var(--font-medium, 500);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                 }
 
                 .active-filter-chips {
@@ -2700,11 +2700,11 @@ class BrowseCategoryView {
 
                 .active-chip {
                     padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
                     border-radius: var(--radius-md, 0.5rem);
                     font-size: var(--font-size-xs, 0.75rem);
-                    color: var(--color-primary);
+                    color: var(--color-primary, #8b7fff);
                 }
 
                 .clear-filters-btn {
@@ -2712,7 +2712,7 @@ class BrowseCategoryView {
                     background: transparent;
                     border: 2px solid rgba(var(--color-text-secondary-rgb, 156, 163, 175), 0.3);
                     border-radius: var(--radius-md, 0.5rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     font-weight: var(--font-medium, 500);
                     cursor: pointer;
@@ -2769,7 +2769,7 @@ class BrowseCategoryView {
                     gap: var(--spacing-xs, 0.25rem);
                     font-size: var(--font-size-sm, 0.875rem);
                     font-weight: var(--font-medium, 500);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                 }
 
                 .filter-icon {
@@ -2783,7 +2783,7 @@ class BrowseCategoryView {
                     backdrop-filter: blur(10px);
                     border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
                     border-radius: var(--radius-lg, 0.75rem);
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                     font-size: var(--font-size-base, 1rem);
                     cursor: pointer;
                     transition: all var(--transition-base, 0.3s ease);
@@ -2792,18 +2792,18 @@ class BrowseCategoryView {
 
                 .filter-select:hover,
                 .filter-input:hover {
-                    border-color: rgba(var(--color-primary-rgb), 0.5);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
                 }
 
                 .filter-select:focus,
                 .filter-input:focus {
                     outline: none;
-                    border-color: var(--color-primary);
-                    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+                    border-color: var(--color-primary, #8b7fff);
+                    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
                 }
 
                 .filter-input::placeholder {
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     opacity: 0.6;
                 }
 
@@ -2811,12 +2811,12 @@ class BrowseCategoryView {
                     display: flex;
                     align-items: center;
                     padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                 }
 
                 .filter-results-info strong {
-                    color: var(--color-primary);
+                    color: var(--color-primary, #8b7fff);
                     font-weight: var(--font-semibold, 600);
                 }
 
@@ -2843,7 +2843,7 @@ class BrowseCategoryView {
                     background: transparent;
                     border: none;
                     border-radius: var(--radius-md, 0.5rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     font-weight: var(--font-medium, 500);
                     cursor: pointer;
@@ -2852,8 +2852,8 @@ class BrowseCategoryView {
                 }
 
                 .view-btn:hover {
-                    background: rgba(var(--color-primary-rgb), 0.1);
-                    color: var(--color-text-primary);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
+                    color: var(--color-text-primary, #f8f9fa);
                 }
 
                 .view-btn.active {
@@ -2880,7 +2880,7 @@ class BrowseCategoryView {
                     background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.6);
                     border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
                     border-radius: var(--radius-lg, 0.75rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     font-weight: var(--font-medium, 500);
                     cursor: pointer;
@@ -2902,9 +2902,9 @@ class BrowseCategoryView {
                 }
 
                 .density-btn:hover {
-                    border-color: rgba(var(--color-primary-rgb), 0.6);
-                    color: var(--color-text-primary);
-                    background: rgba(var(--color-primary-rgb), 0.1);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.6);
+                    color: var(--color-text-primary, #f8f9fa);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
                 }
 
                 .density-btn:hover::after {
@@ -2951,7 +2951,7 @@ class BrowseCategoryView {
                     background: transparent;
                     border: none;
                     border-radius: var(--radius-md, 0.5rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     text-align: left;
                     cursor: pointer;
@@ -2961,16 +2961,16 @@ class BrowseCategoryView {
                 }
 
                 .density-option:hover {
-                    background: rgba(var(--color-primary-rgb), 0.15);
-                    color: var(--color-text-primary);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+                    color: var(--color-text-primary, #f8f9fa);
                     padding-left: 1.5rem;
                 }
 
                 .density-option.active {
                     background: linear-gradient(135deg,
-                        rgba(var(--color-primary-rgb), 0.3),
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.3),
                         rgba(var(--color-secondary-rgb), 0.2));
-                    color: var(--color-primary);
+                    color: var(--color-primary, #8b7fff);
                     font-weight: var(--font-semibold, 600);
                     border-left: 3px solid var(--color-primary);
                     padding-left: calc(1rem - 3px);
@@ -3072,10 +3072,10 @@ class BrowseCategoryView {
 
                 .entity-card:hover {
                     transform: translateY(-5px) scale(1.02);
-                    border-color: rgba(var(--color-primary-rgb), 0.6);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.6);
                     box-shadow: 0 14px 36px rgba(0, 0, 0, 0.35),
-                                0 0 0 1px rgba(var(--color-primary-rgb), 0.15),
-                                0 0 24px rgba(var(--color-primary-rgb), 0.2);
+                                0 0 0 1px rgba(var(--color-primary-rgb, 139, 127, 255), 0.15),
+                                0 0 24px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
                 }
 
                 .entity-card:hover::before {
@@ -3126,15 +3126,15 @@ class BrowseCategoryView {
                     backdrop-filter: blur(8px);
                     border: 1.5px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
                     border-radius: var(--radius-md, 0.5rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     cursor: pointer;
                     transition: all 0.2s ease;
                 }
 
                 .quick-action-btn:hover {
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    border-color: rgba(var(--color-primary-rgb), 0.5);
-                    color: var(--color-primary);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
+                    color: var(--color-primary, #8b7fff);
                     transform: scale(1.1);
                 }
 
@@ -3149,7 +3149,7 @@ class BrowseCategoryView {
                 }
 
                 .quick-action-btn.active:hover {
-                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
                     transform: scale(1.1);
                 }
 
@@ -3215,7 +3215,7 @@ class BrowseCategoryView {
                 .entity-icon {
                     font-size: 2.25rem;
                     line-height: 1;
-                    filter: drop-shadow(0 2px 6px rgba(var(--color-primary-rgb), 0.35));
+                    filter: drop-shadow(0 2px 6px rgba(var(--color-primary-rgb, 139, 127, 255), 0.35));
                     flex-shrink: 0;
                     transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
                 }
@@ -3279,7 +3279,7 @@ class BrowseCategoryView {
                     align-items: center;
                     justify-content: center;
                     border-radius: var(--radius-md, 0.5rem);
-                    background: rgba(var(--color-primary-rgb), 0.1);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.1);
                 }
 
                 .entity-icon-img {
@@ -3310,7 +3310,7 @@ class BrowseCategoryView {
                     background: linear-gradient(
                         90deg,
                         transparent,
-                        rgba(var(--color-primary-rgb), 0.15),
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.15),
                         transparent
                     );
                     animation: shimmer 1.5s infinite;
@@ -3336,7 +3336,7 @@ class BrowseCategoryView {
                     text-overflow: ellipsis;
                     font-size: var(--font-size-lg, 1.125rem);
                     font-weight: var(--font-semibold, 600);
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                     margin: 0 0 var(--spacing-xs, 0.25rem) 0;
                     line-height: var(--leading-tight, 1.25);
                     word-break: break-word;
@@ -3357,10 +3357,10 @@ class BrowseCategoryView {
                     max-width: 100%;
                     font-size: var(--font-size-xs, 0.75rem);
                     padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
                     border-radius: var(--radius-full, 9999px);
-                    color: var(--color-primary);
+                    color: var(--color-primary, #8b7fff);
                     text-transform: uppercase;
                     font-weight: var(--font-semibold, 600);
                     letter-spacing: 0.05em;
@@ -3376,7 +3376,7 @@ class BrowseCategoryView {
                     -webkit-box-orient: vertical;
                     overflow: hidden;
                     text-overflow: ellipsis;
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     line-height: var(--leading-relaxed, 1.75);
                     margin: var(--spacing-md, 1rem) 0;
@@ -3400,7 +3400,7 @@ class BrowseCategoryView {
                 .entity-card-title {
                     font-size: var(--font-size-lg, 1.125rem);
                     font-weight: var(--font-semibold, 600);
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                     margin: 0 0 var(--spacing-xs, 0.25rem) 0;
                     line-height: var(--leading-tight, 1.25);
                 }
@@ -3417,17 +3417,17 @@ class BrowseCategoryView {
                     display: inline-block;
                     font-size: var(--font-size-xs, 0.75rem);
                     padding: var(--spacing-xs, 0.25rem) var(--spacing-sm, 0.5rem);
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.4);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
                     border-radius: var(--radius-full, 9999px);
-                    color: var(--color-primary);
+                    color: var(--color-primary, #8b7fff);
                     text-transform: uppercase;
                     font-weight: var(--font-semibold, 600);
                     letter-spacing: 0.05em;
                 }
 
                 .entity-description {
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     line-height: var(--leading-relaxed, 1.75);
                     margin: var(--spacing-md, 1rem) 0;
@@ -3467,7 +3467,7 @@ class BrowseCategoryView {
                     border: 1px solid rgba(var(--color-secondary-rgb), 0.4);
                     border-radius: var(--radius-md, 0.5rem);
                     font-size: var(--font-size-xs, 0.75rem);
-                    color: var(--color-secondary);
+                    color: var(--color-secondary, #ff7eb6);
                     font-weight: var(--font-medium, 500);
                     transition: all var(--transition-fast, 0.15s ease);
                     white-space: nowrap;
@@ -3482,9 +3482,9 @@ class BrowseCategoryView {
                 }
 
                 .tag-overflow {
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    border-color: rgba(var(--color-primary-rgb), 0.4);
-                    color: var(--color-primary);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
+                    color: var(--color-primary, #8b7fff);
                     font-weight: var(--font-semibold, 600);
                 }
 
@@ -3500,7 +3500,7 @@ class BrowseCategoryView {
                         transparent 100%
                     );
                     padding: var(--spacing-xl, 2rem) var(--spacing-lg, 1.5rem) var(--spacing-lg, 1.5rem);
-                    border-top: 1px solid rgba(var(--color-primary-rgb), 0.3);
+                    border-top: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
                     opacity: 0;
                     visibility: hidden;
                     transform: translateY(10px);
@@ -3510,7 +3510,7 @@ class BrowseCategoryView {
                 }
 
                 .preview-content {
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     line-height: var(--leading-relaxed, 1.75);
                 }
@@ -3524,7 +3524,7 @@ class BrowseCategoryView {
                 }
 
                 .preview-section strong {
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                     font-weight: var(--font-semibold, 600);
                 }
 
@@ -3571,7 +3571,7 @@ class BrowseCategoryView {
                     background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.8);
                     border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
                     border-radius: var(--radius-md, 0.5rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     font-weight: var(--font-medium, 500);
                     cursor: pointer;
@@ -3580,14 +3580,14 @@ class BrowseCategoryView {
                 }
 
                 .page-btn:hover:not(:disabled) {
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    border-color: rgba(var(--color-primary-rgb), 0.5);
-                    color: var(--color-text-primary);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.5);
+                    color: var(--color-text-primary, #f8f9fa);
                 }
 
                 .page-btn.active {
                     background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-                    border-color: var(--color-primary);
+                    border-color: var(--color-primary, #8b7fff);
                     color: white;
                     box-shadow: var(--shadow-md);
                 }
@@ -3599,7 +3599,7 @@ class BrowseCategoryView {
 
                 .page-ellipsis {
                     padding: var(--spacing-sm, 0.5rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                 }
 
                 /* ==========================================
@@ -3619,15 +3619,15 @@ class BrowseCategoryView {
                     display: flex;
                     align-items: center;
                     gap: var(--spacing-md, 1rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                 }
 
                 .spinner-ring {
                     width: 24px;
                     height: 24px;
-                    border: 3px solid rgba(var(--color-primary-rgb), 0.2);
-                    border-top-color: var(--color-primary);
+                    border: 3px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    border-top-color: var(--color-primary, #8b7fff);
                     border-radius: 50%;
                     animation: spin 0.8s linear infinite;
                 }
@@ -3642,9 +3642,9 @@ class BrowseCategoryView {
                     gap: var(--spacing-sm, 0.5rem);
                     padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
                     background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.8);
-                    border: 2px solid rgba(var(--color-primary-rgb), 0.4);
+                    border: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
                     border-radius: var(--radius-lg, 0.75rem);
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                     font-size: var(--font-size-base, 1rem);
                     font-weight: var(--font-semibold, 600);
                     cursor: pointer;
@@ -3653,10 +3653,10 @@ class BrowseCategoryView {
                 }
 
                 .load-more-btn:hover {
-                    background: rgba(var(--color-primary-rgb), 0.15);
-                    border-color: var(--color-primary);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
+                    border-color: var(--color-primary, #8b7fff);
                     transform: translateY(-2px);
-                    box-shadow: 0 4px 16px rgba(var(--color-primary-rgb), 0.3);
+                    box-shadow: 0 4px 16px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
                 }
 
                 .load-more-icon {
@@ -3693,14 +3693,14 @@ class BrowseCategoryView {
                     position: absolute;
                     right: 1rem;
                     font-size: 0.75rem;
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     pointer-events: none;
                     transition: transform 0.2s ease;
                 }
 
                 .filter-select--sort:focus + .sort-select-arrow {
                     transform: rotate(180deg);
-                    color: var(--color-primary);
+                    color: var(--color-primary, #8b7fff);
                 }
 
                 /* ==========================================
@@ -3729,14 +3729,14 @@ class BrowseCategoryView {
                 }
 
                 .empty-state__title {
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                     font-size: var(--font-size-2xl, 1.5rem);
                     margin: 0 0 var(--spacing-md, 1rem) 0;
                     font-family: var(--font-heading, Georgia, serif);
                 }
 
                 .empty-state__message {
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-base, 1rem);
                     margin: 0 0 var(--spacing-lg, 1.5rem) 0;
                     max-width: 500px;
@@ -3750,13 +3750,13 @@ class BrowseCategoryView {
                     max-width: 400px;
                     margin: 0 auto var(--spacing-xl, 2rem);
                     padding: var(--spacing-lg, 1.5rem);
-                    background: rgba(var(--color-primary-rgb), 0.08);
-                    border: 1px solid rgba(var(--color-primary-rgb), 0.2);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.08);
+                    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
                     border-radius: var(--radius-lg, 0.75rem);
                 }
 
                 .empty-state__suggestion-title {
-                    color: var(--color-primary);
+                    color: var(--color-primary, #8b7fff);
                     font-weight: var(--font-semibold, 600);
                     font-size: var(--font-size-sm, 0.875rem);
                     margin: 0 0 var(--spacing-sm, 0.5rem) 0;
@@ -3767,7 +3767,7 @@ class BrowseCategoryView {
                 .empty-state__suggestion-list {
                     margin: 0;
                     padding-left: var(--spacing-lg, 1.5rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-sm, 0.875rem);
                     line-height: 1.8;
                 }
@@ -3807,19 +3807,19 @@ class BrowseCategoryView {
 
                 .empty-state .btn-primary:hover {
                     transform: translateY(-2px);
-                    box-shadow: var(--shadow-lg), 0 0 20px rgba(var(--color-primary-rgb), 0.3);
+                    box-shadow: var(--shadow-lg), 0 0 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
                 }
 
                 .empty-state .btn-secondary {
                     background: transparent;
-                    border: 2px solid rgba(var(--color-border-rgb), 0.4);
-                    color: var(--color-text-secondary);
+                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.4);
+                    color: var(--color-text-secondary, #adb5bd);
                 }
 
                 .empty-state .btn-secondary:hover {
-                    border-color: var(--color-primary);
-                    color: var(--color-primary);
-                    background: rgba(var(--color-primary-rgb), 0.08);
+                    border-color: var(--color-primary, #8b7fff);
+                    color: var(--color-primary, #8b7fff);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.08);
                 }
 
                 .empty-state .btn-icon {
@@ -3835,13 +3835,13 @@ class BrowseCategoryView {
                 }
 
                 .empty-state h3 {
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                     font-size: var(--font-size-2xl, 1.5rem);
                     margin: 0 0 var(--spacing-md, 1rem) 0;
                 }
 
                 .empty-state p {
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     font-size: var(--font-size-base, 1rem);
                     margin: 0 0 var(--spacing-lg, 1.5rem) 0;
                     max-width: 500px;
@@ -4154,10 +4154,10 @@ class BrowseCategoryView {
                     background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.95);
                     backdrop-filter: blur(16px);
                     -webkit-backdrop-filter: blur(16px);
-                    border: 1.5px solid rgba(var(--color-primary-rgb), 0.4);
+                    border: 1.5px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
                     border-radius: var(--radius-xl, 1rem);
                     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4),
-                                0 0 20px rgba(var(--color-primary-rgb), 0.2);
+                                0 0 20px rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
                     animation: tray-slide-in 0.3s ease;
                     overflow: hidden;
                 }
@@ -4188,9 +4188,9 @@ class BrowseCategoryView {
                     justify-content: space-between;
                     padding: 0.75rem 1rem;
                     background: linear-gradient(135deg,
-                        rgba(var(--color-primary-rgb), 0.2),
+                        rgba(var(--color-primary-rgb, 139, 127, 255), 0.2),
                         rgba(var(--color-secondary-rgb), 0.15));
-                    border-bottom: 1px solid rgba(var(--color-border-rgb), 0.2);
+                    border-bottom: 1px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.2);
                 }
 
                 .compare-tray-title {
@@ -4199,11 +4199,11 @@ class BrowseCategoryView {
                     gap: 0.5rem;
                     font-weight: var(--font-semibold, 600);
                     font-size: var(--font-size-sm, 0.875rem);
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                 }
 
                 .compare-tray-title svg {
-                    color: var(--color-primary);
+                    color: var(--color-primary, #8b7fff);
                 }
 
                 .compare-tray-close {
@@ -4215,14 +4215,14 @@ class BrowseCategoryView {
                     background: transparent;
                     border: none;
                     border-radius: var(--radius-md, 0.5rem);
-                    color: var(--color-text-secondary);
+                    color: var(--color-text-secondary, #adb5bd);
                     cursor: pointer;
                     transition: all 0.2s ease;
                 }
 
                 .compare-tray-close:hover {
-                    background: rgba(var(--color-primary-rgb), 0.2);
-                    color: var(--color-primary);
+                    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+                    color: var(--color-primary, #8b7fff);
                 }
 
                 .compare-tray-close svg {
@@ -4242,13 +4242,13 @@ class BrowseCategoryView {
                     justify-content: space-between;
                     padding: 0.5rem 0.75rem;
                     background: rgba(var(--color-surface-rgb), 0.5);
-                    border: 1px solid rgba(var(--color-border-rgb), 0.2);
+                    border: 1px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.2);
                     border-radius: var(--radius-md, 0.5rem);
                 }
 
                 .tray-entity-name {
                     font-size: var(--font-size-sm, 0.875rem);
-                    color: var(--color-text-primary);
+                    color: var(--color-text-primary, #f8f9fa);
                     font-weight: var(--font-medium, 500);
                 }
 
@@ -4275,7 +4275,7 @@ class BrowseCategoryView {
                     display: flex;
                     gap: 0.5rem;
                     padding: 0.75rem 1rem;
-                    border-top: 1px solid rgba(var(--color-border-rgb), 0.2);
+                    border-top: 1px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.2);
                 }
 
                 .compare-tray-btn {
@@ -4300,14 +4300,14 @@ class BrowseCategoryView {
                 }
 
                 .compare-tray-btn.compare-now:hover {
-                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+                    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb, 139, 127, 255), 0.4);
                     transform: translateY(-1px);
                 }
 
                 .compare-tray-btn.compare-clear {
                     background: transparent;
-                    border: 1px solid rgba(var(--color-border-rgb), 0.3);
-                    color: var(--color-text-secondary);
+                    border: 1px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.3);
+                    color: var(--color-text-secondary, #adb5bd);
                 }
 
                 .compare-tray-btn.compare-clear:hover {
@@ -4354,10 +4354,10 @@ class BrowseCategoryView {
                 border: 2px solid rgba(var(--color-danger-rgb, 239, 68, 68), 0.3);
             ">
                 <div class="error-icon" style="font-size: 4rem; margin-bottom: 1.5rem;">⚠️</div>
-                <h2 style="color: var(--color-text-primary); margin-bottom: 1rem;">
+                <h2 style="color: var(--color-text-primary, #f8f9fa); margin-bottom: 1rem;">
                     Failed to Load ${this.category}
                 </h2>
-                <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">
+                <p style="color: var(--color-text-secondary, #adb5bd); margin-bottom: 2rem;">
                     ${error.message}
                 </p>
                 <button
