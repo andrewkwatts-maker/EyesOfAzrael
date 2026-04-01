@@ -639,9 +639,10 @@ class FirebaseCacheManager {
                 }
             }
 
-            // If mythology filter returned empty, retry without it (handles inconsistent casing in data)
+            // If mythology filter returned empty, retry with case-insensitive client-side filter
             if (snapshot.empty && mythologyFilter && !filters.type && !options.startAfter) {
-                console.log(`[CacheManager] Exact mythology match empty for ${collection}, retrying without filter`);
+                const mythLower = mythologyFilter.toLowerCase();
+                console.log(`[CacheManager] Exact mythology match empty for ${collection}, retrying with case-insensitive filter for "${mythologyFilter}"`);
                 try {
                     let retryQuery = this.db.collection(collection);
                     if (options.orderBy && !sortedClientSide) {
@@ -649,11 +650,21 @@ class FirebaseCacheManager {
                         retryQuery = retryQuery.orderBy(field, direction);
                     }
                     retryQuery = retryQuery.limit(limit);
-                    snapshot = await retryQuery.get();
+                    const allSnapshot = await retryQuery.get();
+                    const filteredDocs = allSnapshot.docs.filter(doc => {
+                        const m = (doc.data().mythology || '').toLowerCase();
+                        return m === mythLower;
+                    });
+                    snapshot = { docs: filteredDocs, empty: filteredDocs.length === 0 };
                 } catch (retryIndexError) {
                     if (retryIndexError.code === 'failed-precondition' || (retryIndexError.message && retryIndexError.message.includes('index'))) {
                         let retryFallback = this.db.collection(collection).limit(limit);
-                        snapshot = await retryFallback.get();
+                        const allSnapshot = await retryFallback.get();
+                        const filteredDocs = allSnapshot.docs.filter(doc => {
+                            const m = (doc.data().mythology || '').toLowerCase();
+                            return m === mythLower;
+                        });
+                        snapshot = { docs: filteredDocs, empty: filteredDocs.length === 0 };
                         sortedClientSide = true;
                     } else {
                         throw retryIndexError;

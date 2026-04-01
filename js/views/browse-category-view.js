@@ -235,20 +235,30 @@ class BrowseCategoryView {
             return results;
         };
 
+        // When mythology filter returns empty, fetch all and filter client-side
+        // (handles inconsistent casing between URL and Firebase data)
+        const retryWithCaseInsensitiveFilter = async (snapshot) => {
+            if (snapshot.empty && mythFilter) {
+                const mythLower = mythFilter.toLowerCase();
+                console.log(`[Browse View] Exact mythology match empty, retrying with case-insensitive filter for "${mythFilter}"`);
+                const allSnapshot = await db.collection(collectionName).limit(500).get();
+                const filtered = allSnapshot.docs.filter(doc => {
+                    const m = (doc.data().mythology || '').toLowerCase();
+                    return m === mythLower;
+                });
+                return { docs: filtered, empty: filtered.length === 0 };
+            }
+            return snapshot;
+        };
+
         try {
             let snapshot = await baseQuery.orderBy('name').limit(500).get();
-            // If mythology filter returned no results, retry without filter (handles inconsistent casing)
-            if (snapshot.empty && mythFilter) {
-                snapshot = await db.collection(collectionName).orderBy('name').limit(500).get();
-            }
+            snapshot = await retryWithCaseInsensitiveFilter(snapshot);
             return fetchAndFilter(snapshot);
         } catch (orderError) {
             console.warn('[Browse View] Ordered query failed:', orderError.code || orderError.message, '- trying unordered');
             let snapshot = await baseQuery.limit(500).get();
-            // If mythology filter returned no results, retry without filter
-            if (snapshot.empty && mythFilter) {
-                snapshot = await db.collection(collectionName).limit(500).get();
-            }
+            snapshot = await retryWithCaseInsensitiveFilter(snapshot);
             const results = fetchAndFilter(snapshot);
             results.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
             return results;
