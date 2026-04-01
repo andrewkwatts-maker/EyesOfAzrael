@@ -67,19 +67,21 @@ class ToastNotifications {
         document.body.appendChild(this.srAnnouncer);
 
         // Offline banner container
+        // Critical inline styles ensure banner is hidden even if CSS fails to load
         this.offlineBanner = document.createElement('div');
         this.offlineBanner.className = 'offline-banner';
         this.offlineBanner.setAttribute('role', 'alert');
         this.offlineBanner.setAttribute('aria-live', 'assertive');
+        this.offlineBanner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;transform:translateY(-100%);transition:transform 0.4s ease;overflow:hidden;';
         this.offlineBanner.innerHTML = `
-            <div class="offline-banner__content">
+            <div class="offline-banner__content" style="display:flex;align-items:center;justify-content:center;gap:0.75rem;padding:0.875rem 1.5rem;">
                 <div class="offline-banner__pulse"></div>
-                <svg class="offline-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <svg class="offline-banner__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px;flex-shrink:0;">
                     <path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0119 12.55M5 12.55a10.94 10.94 0 015.17-2.39M10.71 5.05A16 16 0 0122.58 9M1.42 9a15.91 15.91 0 014.7-2.88M8.53 16.11a6 6 0 016.95 0M12 20h.01"/>
                 </svg>
                 <span class="offline-banner__text">You are offline. Some features may be unavailable.</span>
-                <button class="offline-banner__retry" aria-label="Retry connection">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <button class="offline-banner__retry" aria-label="Retry connection" style="background:none;border:none;cursor:pointer;padding:0.25rem;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;">
                         <path d="M23 4v6h-6M1 20v-6h6M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/>
                     </svg>
                 </button>
@@ -108,6 +110,7 @@ class ToastNotifications {
         window.addEventListener('online', () => {
             this.isOnline = true;
             this.offlineBanner.classList.remove('offline-banner--visible');
+            this.offlineBanner.style.transform = 'translateY(-100%)';
             this.success('You are back online', {
                 title: 'Connection Restored',
                 icon: 'wifi'
@@ -146,6 +149,7 @@ class ToastNotifications {
                 // Fetch succeeded — we're actually online despite navigator.onLine
                 this.isOnline = true;
                 this.offlineBanner.classList.remove('offline-banner--visible');
+                this.offlineBanner.style.transform = 'translateY(-100%)';
             })
             .catch((err) => {
                 clearTimeout(timeoutId);
@@ -158,6 +162,7 @@ class ToastNotifications {
                 // Genuinely offline — show the banner
                 this.isOnline = false;
                 this.offlineBanner.classList.add('offline-banner--visible');
+                this.offlineBanner.style.transform = 'translateY(0)';
             });
     }
 
@@ -206,6 +211,7 @@ class ToastNotifications {
             });
             this.isOnline = true;
             this.offlineBanner.classList.remove('offline-banner--visible');
+            this.offlineBanner.style.transform = 'translateY(-100%)';
             this.success('Connection restored');
             this.triggerHaptic('success');
         } catch (e) {

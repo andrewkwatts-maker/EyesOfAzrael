@@ -185,13 +185,18 @@ class AssetService {
             query = query.where('mythology', '==', mythology);
         }
 
-        // Helper to retry without mythology filter if exact match returns empty (handles inconsistent casing)
-        const retryWithoutFilter = async (baseQuery) => {
+        // Helper to retry with case-insensitive client-side filter if exact match returns empty
+        const retryWithCaseInsensitiveFilter = async (baseQuery) => {
             const snapshot = await baseQuery.get();
             if (snapshot.empty && mythology) {
-                console.log(`[AssetService] Exact mythology match empty for ${type}, retrying without filter`);
-                const allQuery = this.db.collection(collectionName).limit(limit);
-                return allQuery.get();
+                const mythLower = mythology.toLowerCase();
+                console.log(`[AssetService] Exact mythology match empty for ${type}, retrying with case-insensitive filter for "${mythology}"`);
+                const allSnapshot = await this.db.collection(collectionName).limit(limit).get();
+                const filtered = allSnapshot.docs.filter(doc => {
+                    const m = (doc.data().mythology || '').toLowerCase();
+                    return m === mythLower;
+                });
+                return { docs: filtered, empty: filtered.length === 0 };
             }
             return snapshot;
         };
@@ -199,7 +204,7 @@ class AssetService {
         // Try with orderBy first, fall back to unordered if index is missing
         try {
             const orderedQuery = query.orderBy(orderBy).limit(limit);
-            const snapshot = await retryWithoutFilter(orderedQuery);
+            const snapshot = await retryWithCaseInsensitiveFilter(orderedQuery);
             const results = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
@@ -212,7 +217,7 @@ class AssetService {
             // Fallback: query without orderBy (works without composite index)
             try {
                 const fallbackQuery = query.limit(limit);
-                const snapshot = await retryWithoutFilter(fallbackQuery);
+                const snapshot = await retryWithCaseInsensitiveFilter(fallbackQuery);
                 const results = snapshot.docs.map(doc => ({
                     id: doc.id,
                     ...doc.data()
