@@ -101,6 +101,10 @@ class BrowseCategoryView {
             container.innerHTML = this.getBrowseHTML();
             container.classList.remove('has-skeleton');
 
+            // Force visibility to prevent content being hidden by skeleton/loading CSS
+            container.style.setProperty('opacity', '1', 'important');
+            container.style.setProperty('visibility', 'visible', 'important');
+
             // Initialize content filter
             await this.initContentFilter();
 
@@ -4339,6 +4343,8 @@ class BrowseCategoryView {
      */
     showError(container, error) {
         container.classList.remove('has-skeleton');
+        container.style.setProperty('opacity', '1', 'important');
+        container.style.setProperty('visibility', 'visible', 'important');
         container.innerHTML = `
             <div class="error-container" style="
                 text-align: center;
@@ -4373,6 +4379,15 @@ class BrowseCategoryView {
                 </button>
             </div>
         `;
+
+        // Attach retry handler directly since attachEventListeners() may not have been called
+        const retryBtn = container.querySelector('[data-action="retry"]');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.render(container, { category: this.category, mythology: this.mythology });
+            });
+        }
     }
 }
 
