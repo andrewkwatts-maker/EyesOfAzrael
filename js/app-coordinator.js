@@ -200,6 +200,10 @@
         initState.appReady.timestamp = Math.round(performance.now() - startTime);
         const hasError = event.detail?.error ? ` (with error: ${event.detail.error})` : '';
         logStateChange('initState', 'appReady', true, hasError);
+
+        // Clear auto-reload flag on successful initialization
+        try { sessionStorage.removeItem('eoa_auto_reload_attempted'); } catch (_) {}
+
         checkAndInitialize();
     });
 
@@ -225,6 +229,25 @@
                 checkAndInitialize();
             } else {
                 console.error('[App Coordinator] Navigation not available after timeout');
+
+                // Check if critical scripts failed to load (transient network issue)
+                const scriptErrors = window.__scriptErrors || [];
+                if (scriptErrors.length > 0) {
+                    console.error('[App Coordinator] Script load errors detected:', scriptErrors);
+
+                    // Auto-reload once for transient network failures
+                    // Use sessionStorage to prevent infinite reload loops
+                    const reloadKey = 'eoa_auto_reload_attempted';
+                    if (!sessionStorage.getItem(reloadKey)) {
+                        sessionStorage.setItem(reloadKey, Date.now().toString());
+                        console.log('[App Coordinator] Attempting auto-reload for transient script load failure...');
+                        location.reload();
+                        return;
+                    }
+                    // Clear the flag so future visits can try again
+                    sessionStorage.removeItem(reloadKey);
+                }
+
                 showFallbackContent('Application failed to initialize. Please refresh the page.');
             }
         }
