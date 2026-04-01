@@ -23,7 +23,7 @@
  * - Add truncateDescription() to prevent text overflow in card grids
  */
 
-const CACHE_VERSION = 'v4.0.1';
+const CACHE_VERSION = 'v4.0.2';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 
 // Separate caches for different content types
@@ -583,9 +583,9 @@ async function networkFirst(request, cacheType, ttl) {
 
     if (response.ok && response.status === 200) {
       const cache = await caches.open(cacheName);
-      // Add timestamp header for TTL checking
-      const responseWithTimestamp = await addTimestampHeader(response);
-      cache.put(request, responseWithTimestamp.clone()).catch(() => {});
+      // Clone before consuming body for timestamp header
+      const responseWithTimestamp = await addTimestampHeader(response.clone());
+      cache.put(request, responseWithTimestamp).catch(() => {});
       await enforceMaxCacheSize(cacheName, cacheType);
     }
 
@@ -636,8 +636,9 @@ async function cacheFirst(request, cacheType, ttl) {
 
     if (response.ok && response.status === 200) {
       const cache = await caches.open(cacheName);
-      const responseWithTimestamp = await addTimestampHeader(response);
-      cache.put(request, responseWithTimestamp.clone()).catch(() => {});
+      // Clone before consuming body for timestamp header
+      const responseWithTimestamp = await addTimestampHeader(response.clone());
+      cache.put(request, responseWithTimestamp).catch(() => {});
       await enforceMaxCacheSize(cacheName, cacheType);
     }
 
@@ -667,8 +668,9 @@ async function staleWhileRevalidate(request, cacheType, ttl) {
       if (response.ok && response.status === 200) {
         try {
           const cache = await caches.open(cacheName);
-          const responseWithTimestamp = await addTimestampHeader(response);
-          await cache.put(request, responseWithTimestamp.clone());
+          // Clone before consuming body for timestamp header
+          const responseWithTimestamp = await addTimestampHeader(response.clone());
+          await cache.put(request, responseWithTimestamp);
           await enforceMaxCacheSize(cacheName, cacheType);
 
           // Notify clients of cache update for critical resources
@@ -761,8 +763,9 @@ function fetchAndCache(request, cacheName) {
       if (response.ok && response.status === 200) {
         try {
           const cache = await caches.open(cacheName);
-          const responseWithTimestamp = await addTimestampHeader(response);
-          await cache.put(request, responseWithTimestamp.clone());
+          // Clone before consuming body for timestamp header
+          const responseWithTimestamp = await addTimestampHeader(response.clone());
+          await cache.put(request, responseWithTimestamp);
         } catch (error) {
           // Silently fail
         }
