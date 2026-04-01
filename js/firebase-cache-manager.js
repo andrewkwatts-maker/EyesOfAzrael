@@ -606,36 +606,67 @@ class FirebaseCacheManager {
                 query = query.where('type', '==', filters.type);
             }
 
-            // Apply ordering
-            if (options.orderBy) {
-                const [field, direction = 'asc'] = options.orderBy.split(' ');
-                query = query.orderBy(field, direction);
-            }
-
             // Apply limit (default 20)
             const limit = options.limit || 20;
-            query = query.limit(limit);
 
-            // Apply pagination
-            if (options.startAfter) {
-                query = query.startAfter(options.startAfter);
+            // Build the query with ordering, falling back to unordered if composite index is missing
+            let snapshot;
+            let sortedClientSide = false;
+            const orderByField = options.orderBy ? options.orderBy.split(' ')[0] : null;
+
+            try {
+                let orderedQuery = query;
+                if (options.orderBy) {
+                    const [field, direction = 'asc'] = options.orderBy.split(' ');
+                    orderedQuery = orderedQuery.orderBy(field, direction);
+                }
+                orderedQuery = orderedQuery.limit(limit);
+                if (options.startAfter) {
+                    orderedQuery = orderedQuery.startAfter(options.startAfter);
+                }
+                snapshot = await orderedQuery.get();
+            } catch (indexError) {
+                if (indexError.code === 'failed-precondition' || (indexError.message && indexError.message.includes('index'))) {
+                    console.warn(`[CacheManager] Composite index missing for ${collection}, retrying without orderBy`);
+                    let fallbackQuery = query.limit(limit);
+                    if (options.startAfter) {
+                        fallbackQuery = fallbackQuery.startAfter(options.startAfter);
+                    }
+                    snapshot = await fallbackQuery.get();
+                    sortedClientSide = true;
+                } else {
+                    throw indexError;
+                }
             }
-
-            let snapshot = await query.get();
 
             // If mythology filter returned empty, retry without it (handles inconsistent casing in data)
             if (snapshot.empty && mythologyFilter && !filters.type && !options.startAfter) {
                 console.log(`[CacheManager] Exact mythology match empty for ${collection}, retrying without filter`);
-                let retryQuery = this.db.collection(collection);
-                if (options.orderBy) {
-                    const [field, direction = 'asc'] = options.orderBy.split(' ');
-                    retryQuery = retryQuery.orderBy(field, direction);
+                try {
+                    let retryQuery = this.db.collection(collection);
+                    if (options.orderBy && !sortedClientSide) {
+                        const [field, direction = 'asc'] = options.orderBy.split(' ');
+                        retryQuery = retryQuery.orderBy(field, direction);
+                    }
+                    retryQuery = retryQuery.limit(limit);
+                    snapshot = await retryQuery.get();
+                } catch (retryIndexError) {
+                    if (retryIndexError.code === 'failed-precondition' || (retryIndexError.message && retryIndexError.message.includes('index'))) {
+                        let retryFallback = this.db.collection(collection).limit(limit);
+                        snapshot = await retryFallback.get();
+                        sortedClientSide = true;
+                    } else {
+                        throw retryIndexError;
+                    }
                 }
-                retryQuery = retryQuery.limit(limit);
-                snapshot = await retryQuery.get();
             }
 
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            // Sort client-side if we fell back to unordered query
+            if (sortedClientSide && orderByField) {
+                data.sort((a, b) => (a[orderByField] || '').localeCompare(b[orderByField] || ''));
+            }
 
             // Cache the results
             const cacheEntry = {

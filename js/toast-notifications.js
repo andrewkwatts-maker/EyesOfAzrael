@@ -121,7 +121,9 @@ class ToastNotifications {
             this.verifyOfflineStatus();
         });
 
-        // Initial check — verify with a real fetch, navigator.onLine is unreliable
+        // Initial check — only trust navigator.onLine if it says true.
+        // When it says false (common false-negative in headless/automation contexts),
+        // verify with a real fetch before showing the banner.
         if (!navigator.onLine) {
             this.verifyOfflineStatus();
         }
@@ -133,13 +135,24 @@ class ToastNotifications {
      * (common in headless browsers, some mobile contexts, etc.).
      */
     verifyOfflineStatus() {
-        fetch(window.location.origin + '/favicon.ico', { method: 'HEAD', cache: 'no-store' })
-            .then((response) => {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+        // Use the page origin itself — any response (even 4xx) proves connectivity.
+        // favicon.ico can 404 on Firebase Hosting, giving a false offline signal.
+        fetch(window.location.origin + '/', { method: 'HEAD', cache: 'no-store', signal: controller.signal })
+            .then(() => {
+                clearTimeout(timeoutId);
                 // Fetch succeeded — we're actually online despite navigator.onLine
                 this.isOnline = true;
                 this.offlineBanner.classList.remove('offline-banner--visible');
             })
-            .catch(() => {
+            .catch((err) => {
+                clearTimeout(timeoutId);
+                // AbortError means timeout — inconclusive, don't show banner
+                if (err.name === 'AbortError') {
+                    return;
+                }
                 // Genuinely offline — show the banner
                 this.isOnline = false;
                 this.offlineBanner.classList.add('offline-banner--visible');
@@ -184,16 +197,15 @@ class ToastNotifications {
         retryBtn.classList.add('offline-banner__retry--loading');
 
         try {
-            const response = await fetch('/favicon.ico', {
+            // Any response (even 4xx) proves connectivity — don't check response.ok
+            await fetch(window.location.origin + '/', {
                 method: 'HEAD',
                 cache: 'no-store'
             });
-            if (response.ok) {
-                this.isOnline = true;
-                this.offlineBanner.classList.remove('offline-banner--visible');
-                this.success('Connection restored');
-                this.triggerHaptic('success');
-            }
+            this.isOnline = true;
+            this.offlineBanner.classList.remove('offline-banner--visible');
+            this.success('Connection restored');
+            this.triggerHaptic('success');
         } catch (e) {
             this.warning('Still offline. Please check your connection.');
             this.triggerHaptic('error');
