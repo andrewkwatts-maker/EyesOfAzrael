@@ -1597,7 +1597,17 @@ class SPANavigation {
             'mayan': { name: 'Mayan', color: '#8BC34A' },
             'buddhist': { name: 'Buddhist', color: '#FFEB3B' },
             'christian': { name: 'Christian', color: '#2196F3' },
-            'yoruba': { name: 'Yoruba', color: '#9C27B0' }
+            'yoruba': { name: 'Yoruba', color: '#9C27B0' },
+            'aboriginal': { name: 'Aboriginal', color: '#D84315' },
+            'slavic': { name: 'Slavic', color: '#5D4037' },
+            'polynesian': { name: 'Polynesian', color: '#00897B' },
+            'korean': { name: 'Korean', color: '#1565C0' },
+            'finnish': { name: 'Finnish', color: '#558B2F' },
+            'incan': { name: 'Incan', color: '#F9A825' },
+            'mesopotamian': { name: 'Mesopotamian', color: '#6D4C41' },
+            'islamic': { name: 'Islamic', color: '#1B5E20' },
+            'african': { name: 'African', color: '#BF360C' },
+            'native american': { name: 'Native American', color: '#827717' }
         };
 
         const myth = mythologies[mythologyId] || { name: mythologyId, color: '#666' };
@@ -1605,13 +1615,24 @@ class SPANavigation {
         const counts = {};
         let totalCount = 0;
 
+        const mythLower = mythologyId.toLowerCase();
         for (const type of entityTypes) {
             try {
-                const snapshot = await this.db.collection(type)
+                // Try exact match first (most common case)
+                let snapshot = await this.db.collection(type)
                     .where('mythology', '==', mythologyId)
                     .get();
-                counts[type] = snapshot.size;
-                totalCount += snapshot.size;
+                // If no results, fetch all and filter client-side (handles inconsistent casing)
+                if (snapshot.empty) {
+                    snapshot = await this.db.collection(type).get();
+                    counts[type] = snapshot.docs.filter(doc => {
+                        const m = (doc.data().mythology || '').toLowerCase();
+                        return m === mythLower || m.startsWith(mythLower);
+                    }).length;
+                } else {
+                    counts[type] = snapshot.size;
+                }
+                totalCount += counts[type];
             } catch (error) {
                 spaError(`Error loading count for ${type}:`, error);
                 counts[type] = 0;
@@ -1677,11 +1698,24 @@ class SPANavigation {
         const categoryName = category.charAt(0).toUpperCase() + category.slice(1);
 
         let entities = [];
+        const mythLower = mythology.toLowerCase();
         try {
-            const snapshot = await this.db.collection(category)
+            // Try exact match first
+            let snapshot = await this.db.collection(category)
                 .where('mythology', '==', mythology)
                 .get();
-            entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            // If no results, fetch all and filter client-side (handles inconsistent casing)
+            if (snapshot.empty) {
+                snapshot = await this.db.collection(category).get();
+                entities = snapshot.docs
+                    .filter(doc => {
+                        const m = (doc.data().mythology || '').toLowerCase();
+                        return m === mythLower || m.startsWith(mythLower);
+                    })
+                    .map(doc => ({ id: doc.id, ...doc.data() }));
+            } else {
+                entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            }
         } catch (error) {
             spaError(`Error loading ${category} for ${mythology}:`, error);
         }

@@ -80,7 +80,7 @@ class MythologyOverview {
             if (doc.exists) return { id: doc.id, ...doc.data() };
         }
 
-        // Fallback: query by mythology field
+        // Fallback: query by mythology field (exact match)
         const snapshot = await this.db.collection('mythologies')
             .where('mythology', '==', mythologyId)
             .limit(1)
@@ -90,6 +90,16 @@ class MythologyOverview {
             return { id: matchedDoc.id, ...matchedDoc.data() };
         }
 
+        // Final fallback: case-insensitive search across all mythologies
+        const mythLower = mythologyId.toLowerCase();
+        const allSnapshot = await this.db.collection('mythologies').get();
+        for (const doc of allSnapshot.docs) {
+            const m = (doc.data().mythology || doc.data().name || '').toLowerCase();
+            if (m === mythLower || m.startsWith(mythLower)) {
+                return { id: doc.id, ...doc.data() };
+            }
+        }
+
         return null;
     }
 
@@ -97,19 +107,32 @@ class MythologyOverview {
      * Load all category sections with entity data in parallel
      */
     async loadCategorySections(mythologyId) {
+        const mythLower = mythologyId.toLowerCase();
         const results = await Promise.all(
             MythologyOverview.ENTITY_TYPES.map(async (type) => {
                 try {
-                    const snapshot = await this.db.collection(type.collection)
+                    // Try exact match first
+                    let snapshot = await this.db.collection(type.collection)
                         .where('mythology', '==', mythologyId)
                         .get();
 
-                    if (snapshot.empty) return null;
+                    // If no results, fetch all and filter client-side (handles inconsistent casing)
+                    let entities = [];
+                    if (snapshot.empty) {
+                        snapshot = await this.db.collection(type.collection).get();
+                        snapshot.forEach(doc => {
+                            const m = (doc.data().mythology || '').toLowerCase();
+                            if (m === mythLower || m.startsWith(mythLower)) {
+                                entities.push({ id: doc.id, ...doc.data() });
+                            }
+                        });
+                    } else {
+                        snapshot.forEach(doc => {
+                            entities.push({ id: doc.id, ...doc.data() });
+                        });
+                    }
 
-                    const entities = [];
-                    snapshot.forEach(doc => {
-                        entities.push({ id: doc.id, ...doc.data() });
-                    });
+                    if (entities.length === 0) return null;
 
                     // Sort alphabetically by name
                     entities.sort((a, b) => {
