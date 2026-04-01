@@ -60,14 +60,24 @@ class UserDashboardView {
 
         this.userId = user.uid;
 
-        // Initialize services
+        // Initialize services — failures are isolated so the dashboard still renders
         if (typeof window.ReputationService !== 'undefined') {
-            this.reputationService = new window.ReputationService();
-            await this.reputationService.init();
+            try {
+                this.reputationService = new window.ReputationService();
+                await this.reputationService.init();
+            } catch (e) {
+                console.warn('[UserDashboard] ReputationService failed to init, disabling:', e.message);
+                this.reputationService = null;
+            }
         }
 
         if (typeof window.FavoritesService !== 'undefined') {
-            this.favoritesService = window.EyesOfAzrael?.favorites || new window.FavoritesService();
+            try {
+                this.favoritesService = window.EyesOfAzrael?.favorites || new window.FavoritesService();
+            } catch (e) {
+                console.warn('[UserDashboard] FavoritesService failed to init, disabling:', e.message);
+                this.favoritesService = null;
+            }
         }
 
         // Load user data

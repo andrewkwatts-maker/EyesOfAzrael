@@ -85,6 +85,12 @@ class AboutPage {
         `;
 
         console.log('[AboutPage] About page rendered successfully');
+
+        if (typeof document !== 'undefined') {
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'about', timestamp: Date.now() }
+            }));
+        }
     }
 }
 

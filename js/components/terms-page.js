@@ -128,6 +128,12 @@ class TermsPage {
         `;
 
         console.log('[TermsPage] Terms of Service page rendered successfully');
+
+        if (typeof document !== 'undefined') {
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'terms', timestamp: Date.now() }
+            }));
+        }
     }
 }
 

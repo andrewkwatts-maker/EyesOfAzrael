@@ -164,12 +164,19 @@ class BrowseCategoryView {
             // Fetch using AssetService (handles standard + community assets)
             if (this.assetService) {
                 try {
-                    this.entities = await this.assetService.getAssets(this.category, {
+                    const assetResults = await this.assetService.getAssets(this.category, {
                         mythology: this.mythology,
                         includeUserContent: this.showUserContent,
                         orderBy: 'name',
                         limit: 500
                     });
+                    if (assetResults && assetResults.length > 0) {
+                        this.entities = assetResults;
+                    } else {
+                        // AssetService returned nothing — fall back to direct query
+                        console.warn('[Browse View] AssetService returned 0 entities, falling back to direct query');
+                        this.entities = await this.loadEntitiesDirect();
+                    }
                 } catch (assetError) {
                     console.warn('[Browse View] AssetService failed, falling back to direct query:', assetError.message);
                     this.entities = await this.loadEntitiesDirect();

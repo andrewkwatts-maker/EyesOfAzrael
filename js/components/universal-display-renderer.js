@@ -65,6 +65,42 @@ class UniversalDisplayRenderer {
      */
     static DEFAULT_MAX_LINES = 3;
 
+    /**
+     * Check whether UniversalDisplayRenderer is registered on window
+     * @returns {boolean}
+     */
+    static isAvailable() {
+        return typeof window !== 'undefined' && window.UniversalDisplayRenderer === UniversalDisplayRenderer;
+    }
+
+    /**
+     * Validate that a value is a non-null, non-array plain object (a single entity)
+     * @param {*} entity
+     * @returns {boolean}
+     */
+    static isValidEntity(entity) {
+        return entity !== null && typeof entity === 'object' && !Array.isArray(entity);
+    }
+
+    /**
+     * Safe render wrapper — catches all rendering errors and returns fallback HTML
+     * @param {Array} entities - Entities to render
+     * @param {string} displayMode - Display mode
+     * @returns {string} Rendered HTML or fallback error/empty HTML
+     */
+    renderSafe(entities, displayMode = 'grid') {
+        try {
+            const validated = this.validateEntities(entities);
+            if (validated.length === 0) {
+                return this.renderEmptyState(displayMode);
+            }
+            return this.render(validated, displayMode);
+        } catch (error) {
+            console.error('[UniversalDisplayRenderer] renderSafe caught error:', error);
+            return `<div class="entity-render-error"><p>Failed to render entities: ${error.message}</p></div>`;
+        }
+    }
+
     constructor(options = {}) {
         this.options = {
             defaultDisplayMode: 'grid',
@@ -546,15 +582,20 @@ class UniversalDisplayRenderer {
      * Render Grid Display (2-wide mobile, 4-wide desktop)
      */
     renderGrid(entities) {
-        const cards = entities.map(entity => this.renderGridCard(entity)).join('');
+        try {
+            const cards = entities.map(entity => this.renderGridCard(entity)).join('');
 
-        return `
-            <div class="entity-grid universal-grid"
-                 data-display-mode="grid"
-                 data-entity-count="${entities.length}">
-                ${cards}
-            </div>
-        `;
+            return `
+                <div class="entity-grid universal-grid"
+                     data-display-mode="grid"
+                     data-entity-count="${entities.length}">
+                    ${cards}
+                </div>
+            `;
+        } catch (error) {
+            console.error('[UniversalDisplayRenderer] renderGrid error:', error);
+            return `<div class="entity-render-error"><p>Failed to render entities: ${error.message}</p></div>`;
+        }
     }
 
     renderGridCard(entity) {
@@ -690,14 +731,19 @@ class UniversalDisplayRenderer {
      * Render List Display (vertical, expandable)
      */
     renderList(entities) {
-        const items = entities.map(entity => this.renderListItem(entity)).join('');
+        try {
+            const items = entities.map(entity => this.renderListItem(entity)).join('');
 
-        return `
-            <ul class="entity-list universal-list"
-                data-display-mode="list">
-                ${items}
-            </ul>
-        `;
+            return `
+                <ul class="entity-list universal-list"
+                    data-display-mode="list">
+                    ${items}
+                </ul>
+            `;
+        } catch (error) {
+            console.error('[UniversalDisplayRenderer] renderList error:', error);
+            return `<div class="entity-render-error"><p>Failed to render entities: ${error.message}</p></div>`;
+        }
     }
 
     renderListItem(entity) {

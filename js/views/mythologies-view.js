@@ -44,6 +44,11 @@ class MythologiesView {
             // Load mythologies
             await this.loadMythologies();
 
+            // Fall back to static data if loadMythologies returned nothing
+            if (!this.mythologies || this.mythologies.length === 0) {
+                this.mythologies = this.getFallbackMythologies();
+            }
+
             // Fade out loading before replacing content
             const loadingEl = container.querySelector('.loading-container');
             if (loadingEl) {
@@ -85,6 +90,11 @@ class MythologiesView {
             // Emit error event
             document.dispatchEvent(new CustomEvent('render-error', {
                 detail: { view: 'mythologies', error: error.message }
+            }));
+
+            // Still dispatch first-render-complete so loading spinner is hidden
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'mythologies', error: true, timestamp: Date.now() }
             }));
         }
     }
@@ -414,20 +424,26 @@ class MythologiesView {
      * Show error
      */
     showError(container, error) {
+        container.classList.remove('has-skeleton');
         container.innerHTML = `
             <div class="error-container">
                 <div class="error-icon">⚠️</div>
                 <h2>Failed to Load Mythologies</h2>
                 <p>${error.message}</p>
                 <button class="btn-primary" data-action="retry">Retry</button>
+                <button class="btn-secondary" data-action="use-fallback">Use Offline Data</button>
             </div>
         `;
 
-        // Delegated retry handler
+        // Delegated retry/fallback handler
         const signal = this._abortController ? this._abortController.signal : undefined;
         container.addEventListener('click', (e) => {
             if (e.target.closest('[data-action="retry"]')) {
                 this.render(container);
+            } else if (e.target.closest('[data-action="use-fallback"]')) {
+                this.mythologies = this.getFallbackMythologies();
+                container.innerHTML = this.getMythologiesHTML();
+                this.attachEventListeners();
             }
         }, { signal });
     }

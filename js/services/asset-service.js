@@ -70,11 +70,32 @@ class AssetService {
             return this.queryCache.get(cacheKey);
         }
 
+        // Known collections that should never return empty
+        const EXPECTED_COLLECTIONS = ['deities', 'creatures', 'heroes', 'items', 'places', 'texts', 'rituals', 'herbs', 'symbols', 'magic', 'archetypes', 'concepts'];
+
         console.log(`[AssetService] Fetching ${type} (includeUserContent: ${includeUserContent})`);
 
         try {
-            // Fetch standard assets
-            const standardAssets = await this.getStandardAssets(type, { mythology, orderBy, limit });
+            // Wrap in 10-second timeout
+            const fetchWithTimeout = async () => {
+                // Fetch standard assets
+                let standardAssets = await this.getStandardAssets(type, { mythology, orderBy, limit });
+
+                // Retry with forceRefresh for expected collections that return empty
+                if (standardAssets.length === 0 && EXPECTED_COLLECTIONS.includes(type)) {
+                    console.warn(`[AssetService] Empty results for expected collection "${type}", retrying with forceRefresh`);
+                    standardAssets = await this.getStandardAssets(type, { mythology, orderBy, limit, forceRefresh: true });
+                }
+
+                return standardAssets;
+            };
+
+            const standardAssets = await Promise.race([
+                fetchWithTimeout(),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error(`AssetService timeout: ${type} query exceeded 10 seconds`)), 10000)
+                )
+            ]);
 
             // If not including user content, return standard assets only
             if (!includeUserContent) {
@@ -84,7 +105,10 @@ class AssetService {
                     source: 'standard'
                 }));
 
-                this.setCacheValue(cacheKey, result);
+                // Only cache non-empty results
+                if (result.length > 0) {
+                    this.setCacheValue(cacheKey, result);
+                }
                 return result;
             }
 
@@ -134,8 +158,10 @@ class AssetService {
                 return 0;
             });
 
-            // Cache and return
-            this.setCacheValue(cacheKey, allAssets);
+            // Cache only non-empty results
+            if (allAssets.length > 0) {
+                this.setCacheValue(cacheKey, allAssets);
+            }
             return allAssets;
 
         } catch (error) {
@@ -145,22 +171,43 @@ class AssetService {
     }
 
     /**
-     * Get standard assets from standard_assets collection
+     * Get standard assets from Firestore collection
      */
     async getStandardAssets(type, options = {}) {
-        const { mythology = null, orderBy = 'name', limit = 500 } = options;
+        const { mythology = null, orderBy = 'name', limit = 500, forceRefresh = false } = options;
 
         if (!this.db) {
             console.error(`[AssetService] No Firestore instance available for ${type}`);
             throw new Error('Firestore not initialized');
         }
 
+        // Request deduplication — share in-flight requests for the same query
+        const dedupeKey = `${type}:${mythology || ''}:${orderBy}:${limit}`;
+        if (!forceRefresh && this._inFlightRequests && this._inFlightRequests.has(dedupeKey)) {
+            console.log(`[AssetService] Reusing in-flight request for ${dedupeKey}`);
+            return this._inFlightRequests.get(dedupeKey);
+        }
+        if (!this._inFlightRequests) this._inFlightRequests = new Map();
+
+        const queryPromise = this._executeStandardQuery(type, { mythology, orderBy, limit, forceRefresh });
+        this._inFlightRequests.set(dedupeKey, queryPromise);
+        try {
+            const result = await queryPromise;
+            return result;
+        } finally {
+            this._inFlightRequests.delete(dedupeKey);
+        }
+    }
+
+    async _executeStandardQuery(type, options) {
+        const { mythology = null, orderBy = 'name', limit = 500, forceRefresh = false } = options;
+
         // Map URL category to Firebase collection name
         const collectionName = this.getCollectionName(type);
-        console.log(`[AssetService] Querying "${collectionName}" (from "${type}"), orderBy="${orderBy}", limit=${limit}${mythology ? `, mythology="${mythology}"` : ''}`);
+        console.log(`[AssetService] Querying "${collectionName}" (from "${type}"), orderBy="${orderBy}", limit=${limit}${mythology ? `, mythology="${mythology}"` : ''}${forceRefresh ? ' [forceRefresh]' : ''}`);
 
         // Try cache manager first, fall through to direct query on failure
-        if (this.cache) {
+        if (this.cache && !forceRefresh) {
             try {
                 const query = mythology ? { mythology } : {};
                 const cached = await this.cache.getList(collectionName, query, {
@@ -168,11 +215,12 @@ class AssetService {
                     orderBy: `${orderBy} asc`,
                     limit
                 });
-                if (cached && cached.length > 0) {
+                // Validate cache: non-empty array where items have id fields
+                if (cached && cached.length > 0 && typeof cached[0] === 'object' && cached[0].id) {
                     console.log(`[AssetService] Cache hit: ${cached.length} ${type}`);
                     return cached;
                 }
-                console.log(`[AssetService] Cache empty for ${type}, trying direct query`);
+                console.log(`[AssetService] Cache empty or invalid for ${type}, trying direct query`);
             } catch (cacheError) {
                 console.warn(`[AssetService] Cache error for ${type}:`, cacheError.message, '- trying direct query');
             }
@@ -401,6 +449,16 @@ class AssetService {
         };
     }
 }
+
+// Static collection name lookup (works without instantiation)
+AssetService.COLLECTION_MAP = {
+    'archetypes': 'concepts',
+    'cosmologies': 'cosmology',
+};
+
+AssetService.getCollectionName = function(category) {
+    return AssetService.COLLECTION_MAP[category] || category;
+};
 
 // Global export for browser usage
 if (typeof window !== 'undefined') {

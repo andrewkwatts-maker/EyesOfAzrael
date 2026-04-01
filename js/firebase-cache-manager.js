@@ -679,6 +679,15 @@ class FirebaseCacheManager {
                 data.sort((a, b) => (a[orderByField] || '').localeCompare(b[orderByField] || ''));
             }
 
+            // Never cache empty arrays — an empty result may mean the Firebase
+            // query hasn't been indexed yet or the network was flaky.  Caching []
+            // would cause browse pages to show "No X Found" on every subsequent
+            // page load even when real data exists (Agent 3.1).
+            if (data.length === 0) {
+                console.warn(`[CacheManager] Skipping cache write for ${cacheKey}: result is empty (length 0)`);
+                return data;
+            }
+
             // Cache the results
             const cacheEntry = {
                 data: data,
