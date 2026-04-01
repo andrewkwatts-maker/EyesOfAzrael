@@ -2606,10 +2606,10 @@ class BrowseCategoryView {
                     align-items: center;
                     gap: var(--spacing-xs, 0.25rem);
                     padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
-                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.5);
-                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.2);
+                    background: rgba(var(--color-surface-rgb, 26, 31, 58), 0.75);
+                    border: 2px solid rgba(var(--color-border-rgb, 139, 127, 255), 0.25);
                     border-radius: var(--radius-full, 9999px);
-                    color: var(--color-text-secondary, #adb5bd);
+                    color: var(--color-text-primary, #f8f9fa);
                     font-size: var(--font-size-sm, 0.875rem);
                     font-weight: var(--font-medium, 500);
                     cursor: pointer;
@@ -3044,6 +3044,13 @@ class BrowseCategoryView {
                     position: relative;
                     overflow: hidden;
                     will-change: transform;
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                }
+
+                /* Override external cardFadeIn animation that can leave cards at opacity:0 */
+                .entity-grid > .entity-card {
+                    animation: none;
                 }
 
                 /* Compact density */

@@ -152,7 +152,10 @@ class ContentFilter {
             this.updateCountBadge();
 
         } catch (error) {
-            console.error('[ContentFilter] Error loading community count:', error);
+            // Permission errors are expected for unauthenticated users
+            if (error.code !== 'permission-denied') {
+                console.warn('[ContentFilter] Error loading community count:', error.message);
+            }
             this.communityCount = 0;
         }
     }
