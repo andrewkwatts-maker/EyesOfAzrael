@@ -2106,10 +2106,13 @@ class BrowseCategoryView {
         let filtered = [...this.entities];
 
         // Apply mythology filter (from quick chips or initial param)
+        // Use case-insensitive comparison to handle data from cache/Firebase that may differ in casing
         if (this.mythology && this.selectedMythologies.size === 0) {
-            filtered = filtered.filter(entity => entity.mythology === this.mythology);
+            const mythLower = this.mythology.toLowerCase();
+            filtered = filtered.filter(entity => (entity.mythology || '').toLowerCase() === mythLower);
         } else if (this.selectedMythologies.size > 0) {
-            filtered = filtered.filter(entity => this.selectedMythologies.has(entity.mythology));
+            const selectedLower = new Set([...this.selectedMythologies].map(m => m.toLowerCase()));
+            filtered = filtered.filter(entity => selectedLower.has((entity.mythology || '').toLowerCase()));
         }
 
         // Apply domain filter
