@@ -687,15 +687,15 @@ async function handleFetchError(request) {
   const isNavigationRequest = request.mode === 'navigate' || acceptHeader.includes('text/html');
 
   if (isNavigationRequest) {
-    // Try offline page
-    const offlinePage = await caches.match(OFFLINE_PAGE);
-    if (offlinePage) {
-      return offlinePage;
-    }
-    // Try index.html for SPA
+    // For SPA: prefer index.html (handles client-side routing) over offline.html
     const indexPage = await caches.match('/index.html');
     if (indexPage) {
       return indexPage;
+    }
+    // Last resort: dedicated offline page
+    const offlinePage = await caches.match(OFFLINE_PAGE);
+    if (offlinePage) {
+      return offlinePage;
     }
   }
 

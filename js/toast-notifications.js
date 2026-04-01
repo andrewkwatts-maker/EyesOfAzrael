@@ -149,8 +149,10 @@ class ToastNotifications {
             })
             .catch((err) => {
                 clearTimeout(timeoutId);
-                // AbortError means timeout — inconclusive, don't show banner
+                // AbortError means timeout — inconclusive, assume online to avoid
+                // false-positive offline state (common in headless/automated contexts)
                 if (err.name === 'AbortError') {
+                    this.isOnline = true;
                     return;
                 }
                 // Genuinely offline — show the banner
