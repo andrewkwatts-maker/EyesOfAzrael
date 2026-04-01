@@ -175,13 +175,21 @@ class MythologyOverview {
 
                 <!-- Category Sections -->
                 <div class="mythology-sections-container">
-                    ${sections.map(section => this.renderCategorySection(mythology, section)).join('')}
+                    ${sections.length > 0
+                        ? sections.map(section => this.renderCategorySection(mythology, section)).join('')
+                        : `<div style="text-align: center; padding: 3rem 1.5rem; opacity: 0.7;">
+                            <p style="font-size: 1.1rem; margin-bottom: 1rem;">No entities available for this mythology yet. Check back soon!</p>
+                            <a href="#/" class="btn-primary" style="display: inline-block; padding: 0.75rem 1.5rem; background: ${primaryColor}; color: white; text-decoration: none; border-radius: 8px;">Browse All Mythologies</a>
+                        </div>`
+                    }
                 </div>
 
+                ${sections.length > 0 ? `
                 <!-- Back to top -->
                 <div class="mythology-back-to-top">
                     <button type="button" class="back-to-top-link mythology-back-to-top-btn">Back to top</button>
                 </div>
+                ` : ''}
             </div>
         `;
     }
