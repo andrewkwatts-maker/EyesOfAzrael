@@ -238,7 +238,9 @@
                     // Auto-reload once for transient network failures
                     // Use sessionStorage to prevent infinite reload loops
                     const reloadKey = 'eoa_auto_reload_attempted';
-                    if (!sessionStorage.getItem(reloadKey)) {
+                    const lastAttempt = sessionStorage.getItem(reloadKey);
+                    const RELOAD_COOLDOWN = 30000; // 30 seconds before allowing another auto-reload
+                    if (!lastAttempt || (Date.now() - parseInt(lastAttempt, 10)) > RELOAD_COOLDOWN) {
                         sessionStorage.setItem(reloadKey, Date.now().toString());
                         console.log('[App Coordinator] Attempting auto-reload for transient script load failure...');
                         location.reload();
