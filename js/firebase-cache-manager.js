@@ -1069,11 +1069,16 @@ class FirebaseCacheManager {
             if (error.name === 'QuotaExceededError') {
                 console.warn('[CacheManager] SessionStorage quota exceeded, clearing old entries');
                 this.clearOldestEntries(sessionStorage);
-                // Retry
                 try {
                     sessionStorage.setItem(key, JSON.stringify(data));
                 } catch (retryError) {
-                    console.error('[CacheManager] SessionStorage write failed after cleanup');
+                    // Aggressive cleanup: clear ALL cache entries and retry once more
+                    this.clearStorageByPrefix(sessionStorage, 'cache_');
+                    try {
+                        sessionStorage.setItem(key, JSON.stringify(data));
+                    } catch (finalError) {
+                        console.warn('[CacheManager] SessionStorage write failed after full cleanup, data too large');
+                    }
                 }
             }
         }
@@ -1086,11 +1091,16 @@ class FirebaseCacheManager {
             if (error.name === 'QuotaExceededError') {
                 console.warn('[CacheManager] LocalStorage quota exceeded, clearing old entries');
                 this.clearOldestEntries(localStorage);
-                // Retry
                 try {
                     localStorage.setItem(key, JSON.stringify(data));
                 } catch (retryError) {
-                    console.error('[CacheManager] LocalStorage write failed after cleanup');
+                    // Aggressive cleanup: clear ALL cache entries and retry once more
+                    this.clearStorageByPrefix(localStorage, 'cache_');
+                    try {
+                        localStorage.setItem(key, JSON.stringify(data));
+                    } catch (finalError) {
+                        console.warn('[CacheManager] LocalStorage write failed after full cleanup, data too large');
+                    }
                 }
             }
         }
@@ -1125,9 +1135,9 @@ class FirebaseCacheManager {
             }
         }
 
-        // Sort by timestamp and remove oldest 50% (more aggressive to prevent repeated quota errors)
+        // Sort by timestamp and remove oldest 75% (aggressive to prevent repeated quota errors)
         entries.sort((a, b) => a.timestamp - b.timestamp);
-        const toRemove = Math.max(1, Math.ceil(entries.length * 0.5));
+        const toRemove = Math.max(1, Math.ceil(entries.length * 0.75));
 
         for (let i = 0; i < toRemove && i < entries.length; i++) {
             storage.removeItem(entries[i].key);

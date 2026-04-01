@@ -93,7 +93,7 @@ class AssetService {
             const standardAssets = await Promise.race([
                 fetchWithTimeout(),
                 new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error(`AssetService timeout: ${type} query exceeded 10 seconds`)), 10000)
+                    setTimeout(() => reject(new Error(`AssetService timeout: ${type} query exceeded 20 seconds`)), 20000)
                 )
             ]);
 
