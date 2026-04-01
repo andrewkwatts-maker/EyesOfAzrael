@@ -41,6 +41,7 @@ class ToastNotifications {
         this.isOnline = navigator.onLine;
         this.offlineBanner = null;
         this.pausedToasts = new Set();
+        this._userHasInteracted = false;
 
         this.init();
         this.setupNetworkListeners();
@@ -50,6 +51,12 @@ class ToastNotifications {
      * Initialize toast container and offline banner
      */
     init() {
+        // Track user interaction for vibrate API (Chrome requires user gesture)
+        const markInteracted = () => { this._userHasInteracted = true; };
+        document.addEventListener('click', markInteracted, { once: true, passive: true });
+        document.addEventListener('touchstart', markInteracted, { once: true, passive: true });
+        document.addEventListener('keydown', markInteracted, { once: true, passive: true });
+
         // Main toast container with accessibility attributes
         this.container = document.createElement('div');
         this.container.className = `toast-container toast-container--${this.options.position}`;
@@ -172,8 +179,11 @@ class ToastNotifications {
     triggerHaptic(type = 'light') {
         if (!this.options.enableHapticFeedback) return;
 
-        // Vibration API support (try-catch guards against browsers blocking
-        // vibrate when no user gesture has occurred yet)
+        // Vibration API requires a prior user gesture (click/tap/key).
+        // Calling without one triggers a Chrome console warning.
+        if (!this._userHasInteracted) return;
+
+        // Vibration API support
         if ('vibrate' in navigator) {
             const patterns = {
                 light: [10],
@@ -186,7 +196,7 @@ class ToastNotifications {
             try {
                 navigator.vibrate(patterns[type] || patterns.light);
             } catch (_) {
-                // Blocked by browser — no user gesture yet
+                // Blocked by browser policy
             }
         }
 

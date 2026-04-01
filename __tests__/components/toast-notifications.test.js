@@ -341,26 +341,36 @@ describe('ToastNotifications', () => {
     });
 
     describe('triggerHaptic()', () => {
-        test('should call navigator.vibrate when enabled', () => {
+        test('should call navigator.vibrate when enabled and user has interacted', () => {
             const toast = new ToastNotifications({ enableHapticFeedback: true });
+            toast._userHasInteracted = true;
             toast.triggerHaptic('success');
             expect(navigator.vibrate).toHaveBeenCalled();
         });
 
         test('should not vibrate when haptic disabled', () => {
             const toast = new ToastNotifications({ enableHapticFeedback: false });
+            toast._userHasInteracted = true;
+            toast.triggerHaptic('success');
+            expect(navigator.vibrate).not.toHaveBeenCalled();
+        });
+
+        test('should not vibrate before user interaction', () => {
+            const toast = new ToastNotifications({ enableHapticFeedback: true });
             toast.triggerHaptic('success');
             expect(navigator.vibrate).not.toHaveBeenCalled();
         });
 
         test('should use correct pattern for different types', () => {
             const toast = new ToastNotifications({ enableHapticFeedback: true });
+            toast._userHasInteracted = true;
             toast.triggerHaptic('error');
             expect(navigator.vibrate).toHaveBeenCalledWith([50, 30, 50]);
         });
 
         test('should use light pattern for unknown type', () => {
             const toast = new ToastNotifications({ enableHapticFeedback: true });
+            toast._userHasInteracted = true;
             toast.triggerHaptic('unknown');
             expect(navigator.vibrate).toHaveBeenCalledWith([10]);
         });
