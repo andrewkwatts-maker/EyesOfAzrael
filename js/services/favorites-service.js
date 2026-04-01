@@ -229,7 +229,7 @@ class FavoritesService {
 
             // Haptic feedback if available
             if (navigator.vibrate) {
-                navigator.vibrate([15, 30, 15]);
+                try { navigator.vibrate([15, 30, 15]); } catch (_) { /* blocked by browser policy */ }
             }
 
             setTimeout(() => button.classList.remove('heart-burst'), 600);
