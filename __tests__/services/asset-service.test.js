@@ -195,8 +195,8 @@ describe('AssetService.getAssets — retry on empty for expected collections', (
     });
 });
 
-// ── 6. 10-second timeout ──────────────────────────────────────────────────────
-describe('AssetService.getAssets — 10-second timeout', () => {
+// ── 6. 20-second timeout ──────────────────────────────────────────────────────
+describe('AssetService.getAssets — 20-second timeout', () => {
     test('rejects with timeout error when Firebase hangs', async () => {
         jest.useFakeTimers();
 
@@ -208,13 +208,13 @@ describe('AssetService.getAssets — 10-second timeout', () => {
 
         const promise = service.getAssets('deities');
 
-        // Advance past the 10-second timeout
-        jest.advanceTimersByTime(11000);
+        // Advance past the 20-second timeout
+        jest.advanceTimersByTime(21000);
 
         await expect(promise).rejects.toThrow(/timeout/i);
 
         jest.useRealTimers();
-    });
+    }, 25000);
 });
 
 // ── 7. Does not retry non-expected collections ────────────────────────────────

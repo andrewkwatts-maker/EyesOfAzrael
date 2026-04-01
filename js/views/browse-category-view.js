@@ -80,7 +80,7 @@ class BrowseCategoryView {
 
         try {
             // Load entities from Firebase (with timeout to prevent stuck skeletons)
-            const LOAD_TIMEOUT = 15000;
+            const LOAD_TIMEOUT = 25000;
             await Promise.race([
                 this.loadEntities(),
                 new Promise((_, reject) =>
@@ -837,7 +837,7 @@ class BrowseCategoryView {
 
                     <!-- Results Info -->
                     <div class="filter-results-info" id="resultsInfo">
-                        Showing <strong>0</strong> of <strong>${this.entities.length}</strong>
+                        <span>Showing</span>&nbsp;<strong>0</strong>&nbsp;<span>of</span>&nbsp;<strong>${this.entities.length}</strong>
                     </div>
                 </div>
 
@@ -2226,11 +2226,11 @@ class BrowseCategoryView {
         const displayed = Math.min(this.currentPage * this.itemsPerPage, filtered);
 
         if (filtered === total && displayed >= filtered) {
-            info.innerHTML = `Showing <strong>${total}</strong> ${this.category}`;
+            info.innerHTML = `<span>Showing</span>&nbsp;<strong>${total}</strong>&nbsp;<span>${this.category}</span>`;
         } else if (displayed < filtered) {
-            info.innerHTML = `Showing <strong>${displayed}</strong> of <strong>${filtered}</strong> ${this.category}`;
+            info.innerHTML = `<span>Showing</span>&nbsp;<strong>${displayed}</strong>&nbsp;<span>of</span>&nbsp;<strong>${filtered}</strong>&nbsp;<span>${this.category}</span>`;
         } else {
-            info.innerHTML = `Showing <strong>${filtered}</strong> of <strong>${total}</strong> ${this.category}`;
+            info.innerHTML = `<span>Showing</span>&nbsp;<strong>${filtered}</strong>&nbsp;<span>of</span>&nbsp;<strong>${total}</strong>&nbsp;<span>${this.category}</span>`;
         }
     }
 

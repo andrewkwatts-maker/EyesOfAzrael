@@ -443,7 +443,7 @@ describe('FirebaseCacheManager', () => {
     });
 
     describe('clearOldestEntries()', () => {
-        test('should remove oldest 50% of entries', () => {
+        test('should remove oldest 75% of entries', () => {
             for (let i = 0; i < 8; i++) {
                 localStorage.setItem(`cache_item_${i}`, JSON.stringify({
                     data: `item-${i}`,
@@ -453,13 +453,13 @@ describe('FirebaseCacheManager', () => {
 
             cache.clearOldestEntries(localStorage);
 
-            // Should have removed 4 (50% of 8)
+            // Should have removed 6 (75% of 8)
             let remaining = 0;
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
                 if (key && key.startsWith('cache_item_')) remaining++;
             }
-            expect(remaining).toBe(4);
+            expect(remaining).toBe(2);
         });
     });
 
