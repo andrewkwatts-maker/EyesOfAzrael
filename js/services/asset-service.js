@@ -334,8 +334,8 @@ class AssetService {
                 query = query.where('mythology', '==', mythology);
             }
 
-            const snapshot = await query.count().get();
-            return snapshot.data().count;
+            const snapshot = await query.get();
+            return snapshot.size;
 
         } catch (error) {
             console.error(`[AssetService] Error counting user ${type}:`, error);
