@@ -116,9 +116,9 @@ class ToastNotifications {
         });
 
         window.addEventListener('offline', () => {
-            this.isOnline = false;
-            this.offlineBanner.classList.add('offline-banner--visible');
-            this.triggerHaptic('warning');
+            // Don't show banner immediately — verify with a real fetch first
+            // navigator.onLine is unreliable in headless browsers and some environments
+            this.verifyOfflineStatus();
         });
 
         // Initial check — verify with a real fetch, navigator.onLine is unreliable
@@ -129,13 +129,15 @@ class ToastNotifications {
 
     /**
      * Verify offline status with a real network request.
-     * navigator.onLine can report false even when connectivity exists.
+     * navigator.onLine can report false even when connectivity exists
+     * (common in headless browsers, some mobile contexts, etc.).
      */
     verifyOfflineStatus() {
         fetch(window.location.origin + '/favicon.ico', { method: 'HEAD', cache: 'no-store' })
-            .then(() => {
+            .then((response) => {
                 // Fetch succeeded — we're actually online despite navigator.onLine
                 this.isOnline = true;
+                this.offlineBanner.classList.remove('offline-banner--visible');
             })
             .catch(() => {
                 // Genuinely offline — show the banner
