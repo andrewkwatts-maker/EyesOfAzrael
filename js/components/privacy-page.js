@@ -142,6 +142,12 @@ class PrivacyPage {
         `;
 
         console.log('[PrivacyPage] Privacy Policy page rendered successfully');
+
+        if (typeof document !== 'undefined') {
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'privacy', timestamp: Date.now() }
+            }));
+        }
     }
 }
 

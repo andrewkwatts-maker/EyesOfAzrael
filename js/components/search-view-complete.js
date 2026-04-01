@@ -100,6 +100,16 @@ class SearchViewComplete {
     async render(container) {
         console.log('[SearchView] Rendering search interface');
 
+        // Show loading state immediately
+        container.innerHTML = `
+            <div class="search-loading-container">
+                <div class="spinner-container">
+                    <div class="spinner-ring"></div>
+                </div>
+                <p class="loading-message">Loading search...</p>
+            </div>
+        `;
+
         try {
             // Load mythologies
             await this.loadMythologies();
@@ -123,6 +133,10 @@ class SearchViewComplete {
                     </div>
                 </div>
             `;
+        } finally {
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'search', timestamp: Date.now() }
+            }));
         }
     }
 

@@ -149,15 +149,41 @@ class CompareView {
     async render(container) {
         console.log('[CompareView] Rendering...');
 
-        // Parse URL params for pre-selected entities
-        await this.parseURLParams();
+        // Show loading state immediately
+        container.innerHTML = `
+            <div class="compare-loading-container">
+                <div class="spinner-container">
+                    <div class="spinner-ring"></div>
+                </div>
+                <p class="loading-message">Loading compare view...</p>
+            </div>
+        `;
 
-        container.innerHTML = this.getHTML();
-        await this.init();
+        try {
+            // Parse URL params for pre-selected entities
+            await this.parseURLParams();
 
-        // Load suggestions if entities selected
-        if (this.selectedEntities.length === 1) {
-            await this.loadSuggestions();
+            container.innerHTML = this.getHTML();
+            await this.init();
+
+            // Load suggestions if entities selected
+            if (this.selectedEntities.length === 1) {
+                await this.loadSuggestions();
+            }
+        } catch (error) {
+            console.error('[CompareView] Render failed:', error);
+            container.innerHTML = `
+                <div class="compare-error-container">
+                    <div class="error-icon">⚠️</div>
+                    <h2>Failed to load Compare view</h2>
+                    <p>${error.message}</p>
+                    <button class="btn-primary" data-action="retry">Retry</button>
+                </div>
+            `;
+        } finally {
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'compare', timestamp: Date.now() }
+            }));
         }
     }
 

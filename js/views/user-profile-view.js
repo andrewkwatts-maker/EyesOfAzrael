@@ -90,6 +90,9 @@ class UserProfileView {
         // Validate user ID upfront
         if (!userId || typeof userId !== 'string' || userId.trim().length === 0) {
             this.container.innerHTML = this._getErrorHTML('Invalid or missing user ID.');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'user-profile', timestamp: Date.now() }
+            }));
             return;
         }
 
@@ -129,6 +132,9 @@ class UserProfileView {
         } catch (error) {
             console.error('[UserProfileView] Error loading profile:', error);
             this.container.innerHTML = this._getErrorHTML(error.message);
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { view: 'user-profile', timestamp: Date.now() }
+            }));
         }
     }
 

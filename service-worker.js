@@ -23,7 +23,7 @@
  * - Add truncateDescription() to prevent text overflow in card grids
  */
 
-const CACHE_VERSION = 'v3.3.0';
+const CACHE_VERSION = 'v4.0.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 
 // Separate caches for different content types
@@ -53,17 +53,21 @@ const PRECACHE_ASSETS = [
   '/js/app-init-simple.js',
   '/js/spa-navigation.js',
   '/js/auth-guard-simple.js',
-  '/js/auth-manager.js',
   '/js/toast-notifications.js',
-  '/js/shader-theme-picker.js',
   '/js/shaders/shader-sources.js',
   '/js/shaders/shader-themes.js',
   '/js/sw-register.js',
   '/js/firebase-cache-manager.js',
+  '/js/components/corpus-search.js'
+];
+
+// Dependency-cascade critical scripts
+const PRECACHE_CRITICAL = [
+  '/js/auth-manager.js',
   '/js/firebase-crud-manager.js',
   '/js/components/universal-display-renderer.js',
-  '/js/components/corpus-search.js',
   '/js/components/corpus-search-enhanced.js',
+  '/js/shader-theme-picker.js',
   '/js/components/edit-entity-modal.js'
 ];
 
@@ -87,7 +91,100 @@ const PRECACHE_ENHANCED = [
   '/js/components/terms-page.js',
   '/js/components/search-view-complete.js',
   '/js/components/compare-view.js',
-  '/js/utils/loading-spinner.js'
+  '/js/utils/loading-spinner.js',
+  '/js/accessibility-manager.js',
+  '/js/lazy-loader.js',
+  '/js/debug-loading.js',
+  '/js/diagnostic-collector.js',
+  '/js/offline-event-logger.js',
+  '/js/seo-manager.js',
+  '/js/image-optimizer.js',
+  '/js/utils/modal-helpers.js',
+  '/js/sw-update-notifier.js',
+  '/js/app-coordinator.js',
+  '/js/header-nav.js',
+  '/js/page-asset-renderer.js',
+  '/js/data/mythology-whispers.js',
+  '/js/components/schema-section-renderer.js',
+  '/js/entity-renderer-firebase.js',
+  '/js/link-prefetcher.js',
+  '/js/components/breadcrumb-nav.js',
+  '/js/components/mythology-overview.js',
+  '/js/components/entity-quick-view-modal.js',
+  '/js/components/entity-card-quick-view.js',
+  '/js/components/image-lightbox.js',
+  '/js/components/extended-menu-controller.js',
+  '/js/components/navigation-enhancements.js',
+  '/js/components/virtual-scroller.js',
+  '/js/components/search-enhancements.js',
+  '/js/form-utils.js',
+  '/js/components/multi-step-form.js',
+  '/js/components/entity-form.js',
+  '/js/components/user-dashboard.js',
+  '/js/services/asset-service.js',
+  '/js/user-preferences.js',
+  '/js/services/user-preferences-service.js',
+  '/js/components/content-filter.js',
+  '/js/services/content-filter-service.js',
+  '/js/services/moderation-service.js',
+  '/js/services/favorites-service.js',
+  '/js/services/perspective-service.js',
+  '/js/services/relationship-service.js',
+  '/js/services/reputation-service.js',
+  '/js/components/contribute-menu.js',
+  '/js/components/relationship-suggestion-form.js',
+  '/js/components/badge-display.js',
+  '/js/components/contribution-indicator.js',
+  '/js/config/metadata-sections.js',
+  '/js/components/metadata-display-standard.js',
+  '/js/components/timeline-display.js',
+  '/js/components/relationship-graph.js',
+  '/js/components/geography-display.js',
+  '/js/components/source-citations.js',
+  '/js/components/entity-detail-page.js',
+  '/js/services/discussion-validator.js',
+  '/js/components/discussion-submit-form.js',
+  '/js/components/asset-discussion.js',
+  '/js/components/admin-moderation-panel.js',
+  '/js/components/debug-data-panel.js',
+  '/js/components/admin-inline-edit-panel.js',
+  '/js/components/admin-field-edit-icon.js',
+  '/js/services/posts-service.js',
+  '/js/components/entity-posts.js',
+  '/js/components/admin-populate-button.js',
+  '/js/components/share-toolbar.js',
+  '/js/services/private-notes-service.js',
+  '/js/components/private-notes-panel.js',
+  '/js/services/vote-service.js',
+  '/js/services/ownership-service.js',
+  '/js/services/ai-populate-service.js',
+  '/js/services/pdf-download-service.js',
+  '/js/services/content-submission-service.js',
+  '/js/gemini-svg-generator.js',
+  '/js/components/svg-editor-modal.js',
+  '/js/components/icon-generator.js',
+  '/js/components/icon-generator-preview.js',
+  '/js/components/icon-picker.js',
+  '/js/components/content-submission-wizard.js',
+  '/js/privacy-controls.js',
+  '/js/core/assertions.js',
+  '/js/core/service-container.js',
+  '/js/core/startup-checklist.js',
+  '/js/components/diagnostic-panel.js',
+  '/js/router/navigation-metrics.js',
+  '/js/router/scroll-manager.js',
+  '/js/router/route-matcher.js',
+  '/js/router/transition-manager.js',
+  '/js/router/render-utilities.js',
+  '/js/router/route-preloader.js',
+  '/js/router/accessibility-manager.js',
+  '/js/router/history-manager.js',
+  '/js/corpus-query-templates.js',
+  '/js/components/asset-corpus-search.js',
+  '/js/components/corpus-search-integration.js',
+  '/js/mobile-gestures.js',
+  '/js/components/bottom-navigation.js',
+  '/js/components/lazy-image.js'
 ];
 
 // Cache strategies
@@ -111,12 +208,20 @@ const CACHE_TTL = {
 
 // Maximum cache sizes per cache type
 const MAX_CACHE_SIZE = {
-  static: 75,
+  static: 150,
   dynamic: 50,
   images: 50,
   fonts: 20,
   pages: 20
 };
+
+// Critical JS files that must always be fresh — use NETWORK_FIRST for these
+const CRITICAL_JS = [
+  '/firebase-config.js',
+  '/js/app-init-simple.js',
+  '/js/spa-navigation.js',
+  '/js/auth-guard-simple.js'
+];
 
 // Route patterns and their strategies with cache types
 const ROUTE_STRATEGIES = [
@@ -187,6 +292,21 @@ self.addEventListener('install', (event) => {
         );
         const successful = results.filter(r => r.status === 'fulfilled').length;
         console.log(`[Service Worker] Precached ${successful}/${PRECACHE_ASSETS.length} critical assets`);
+      }),
+
+      // Cache dependency-cascade critical scripts
+      caches.open(CACHE_NAMES.static).then(async (cache) => {
+        console.log('[Service Worker] Precaching critical dependency scripts');
+        const results = await Promise.allSettled(
+          PRECACHE_CRITICAL.map(url =>
+            cache.add(url).catch(err => {
+              console.warn(`[Service Worker] Failed to cache ${url}:`, err.message);
+              return null;
+            })
+          )
+        );
+        const successful = results.filter(r => r.status === 'fulfilled').length;
+        console.log(`[Service Worker] Precached ${successful}/${PRECACHE_CRITICAL.length} critical dependency scripts`);
       }),
 
       // Cache enhanced offline experience assets
@@ -379,6 +499,16 @@ async function handleNavigationRequest(request) {
  */
 function getRouteConfig(request) {
   const url = request.url;
+
+  // Critical JS files always use NETWORK_FIRST to guarantee freshness
+  const urlPath = new URL(url).pathname;
+  if (CRITICAL_JS.some(path => urlPath === path || urlPath.endsWith(path))) {
+    return {
+      strategy: CACHE_STRATEGIES.NETWORK_FIRST,
+      cache: 'static',
+      ttl: CACHE_TTL.static
+    };
+  }
 
   for (const route of ROUTE_STRATEGIES) {
     if (route.pattern.test(url)) {

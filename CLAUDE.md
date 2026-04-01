@@ -177,3 +177,49 @@ The following CSS files were consolidated during refactoring:
 - `user-dashboard-polished.css` merged into `user-dashboard.css`
 - `user-profile-polished.css` merged into `user-profile.css`
 - `card-truncation.css` merged into `entity-card-polish.css`
+
+### Service Worker Precache Management
+
+Every `<script src="...">` in `index.html` **must** also appear in one of the three precache arrays in `service-worker.js`:
+
+- `PRECACHE_ASSETS` — critical, must-cache (Firebase config, init, navigation, auth)
+- `PRECACHE_CRITICAL` — dependency-cascade scripts (auth-manager, crud-manager, renderers)
+- `PRECACHE_ENHANCED` — best-effort (views, components, services)
+
+**When adding new scripts to `index.html`, also add them to `PRECACHE_ENHANCED` (or a more critical array) in `service-worker.js`.** Run `npm run validate:project` to check for drift.
+
+Critical JS files (`firebase-config.js`, `app-init-simple.js`, `spa-navigation.js`, `auth-guard-simple.js`) are listed in the `CRITICAL_JS` array and always use **NETWORK_FIRST** strategy so the browser never serves a stale init chain from cache.
+
+### Initialization Chain Architecture
+
+The app boots in this order:
+
+1. `firebase-config.js` — initializes Firebase SDK (must be first)
+2. `js/auth-guard-simple.js` — sets up auth state listener
+3. `js/app-init-simple.js` — 15-step init chain; waits for all `window.*` globals
+4. `js/spa-navigation.js` — SPA router; calls `handleRoute()` on hash change
+5. View scripts (e.g. `LandingPageView`) — render on demand
+
+Each step depends on the previous ones completing. If any script fails to load, the chain breaks silently unless `window.__scriptErrors` captures the failure. The `CRITICAL_JS` array in `service-worker.js` ensures these four files are always fresh via network-first fetching.
+
+### Adding New Scripts Checklist
+
+When adding a new JS file to the project:
+
+1. Add `<script src="...">` in `index.html` in the correct load-order position
+2. Add the same path to `PRECACHE_ENHANCED` (or `PRECACHE_CRITICAL`) in `service-worker.js`
+3. Use the `window.X = { ... }` module pattern — no ES module `export` syntax
+4. Add an `onerror` handler on the `<script>` tag if it's load-order critical
+5. Run `npm test` to ensure the precache completeness test still passes
+
+### Troubleshooting Common Rendering Issues
+
+**"No X Found" on browse pages** — AssetService or CacheManager is returning an empty array from cache. Clear localStorage keys starting with `eoa_` and reload. Check `firebase-cache-manager.js` `getList()` for empty-array false positives.
+
+**Header missing / zero height** — `HeaderNavController.init()` did not fire. Check that `header-nav.js` loaded (look in DevTools Network tab). The `.site-header` element must exist in DOM before init runs.
+
+**Spinner never resolves** — The safety timeout in `app-init-simple.js` is 2 seconds. If it fires before views are ready, `window.__emergencyRender` can be called from console. Check `window.__scriptErrors` for failed script loads.
+
+**Service worker serving stale JS** — The `CRITICAL_JS` array forces network-first for init scripts. For other scripts, bump `CACHE_VERSION` in `service-worker.js` to invalidate the cache on next visit.
+
+**Startup Diagnostics shows missing dependencies** — The named global (e.g. `window.AuthManager`) was not set because its script failed to load or ran after `app-init-simple.js` checked for it. Verify load order in `index.html` and that the script is in SW precache.
