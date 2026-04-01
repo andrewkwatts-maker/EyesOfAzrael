@@ -2000,11 +2000,20 @@ class SPANavigation {
                     <div class="error-page" style="text-align: center; padding: 4rem 2rem;">
                         <h1 style="margin-bottom: 1rem;">Sign In Required</h1>
                         <p style="margin-bottom: 2rem; opacity: 0.8;">You need to be signed in to view your dashboard.</p>
-                        <button onclick="document.getElementById('login-btn')?.click()" class="btn btn-primary" style="cursor: pointer;">
+                        <button data-action="trigger-sign-in" class="btn btn-primary" style="cursor: pointer;">
                             Sign In
                         </button>
                     </div>
                 `;
+                const signInTrigger = mainContent.querySelector('[data-action="trigger-sign-in"]');
+                if (signInTrigger) {
+                    signInTrigger.addEventListener('click', () => {
+                        const headerBtn = document.getElementById('signInBtn');
+                        if (headerBtn) {
+                            headerBtn.click();
+                        }
+                    });
+                }
                 document.dispatchEvent(new CustomEvent('first-render-complete', {
                     detail: { route: 'dashboard', authRequired: true, timestamp: Date.now() }
                 }));
