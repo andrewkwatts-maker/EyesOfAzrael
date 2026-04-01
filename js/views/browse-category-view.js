@@ -548,12 +548,17 @@ class BrowseCategoryView {
 
                 .skeleton-card {
                     pointer-events: none;
+                    background: rgba(var(--color-primary-rgb, 99, 102, 241), 0.08) !important;
+                    backdrop-filter: none !important;
+                    -webkit-backdrop-filter: none !important;
+                    border-color: rgba(var(--color-primary-rgb, 99, 102, 241), 0.12) !important;
+                    box-shadow: none !important;
                 }
 
                 .skeleton-icon {
                     width: 2.5rem;
                     height: 2.5rem;
-                    background: rgba(var(--color-primary-rgb), 0.2);
+                    background: rgba(var(--color-primary-rgb, 99, 102, 241), 0.15);
                     border-radius: var(--radius-md);
                 }
 

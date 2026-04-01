@@ -1545,11 +1545,17 @@ class SPANavigation {
 
             if (typeof MythologyOverview !== 'undefined') {
                 spaLog('MythologyOverview class available, using it...');
-                const mythologyView = new MythologyOverview({ db: this.db, router: this });
-                const html = await mythologyView.render({ mythology: mythologyId });
-                mainContent.innerHTML = html;
-                mythologyView.attachEventListeners();
-                spaLog('Mythology page rendered via MythologyOverview');
+                try {
+                    const mythologyView = new MythologyOverview({ db: this.db, router: this });
+                    const html = await mythologyView.render({ mythology: mythologyId });
+                    mainContent.innerHTML = html;
+                    mythologyView.attachEventListeners();
+                    spaLog('Mythology page rendered via MythologyOverview');
+                } catch (overviewError) {
+                    spaError('MythologyOverview render failed, falling back:', overviewError);
+                    mainContent.innerHTML = await this.renderBasicMythologyPage(mythologyId);
+                    spaLog('Mythology page rendered (basic fallback after MythologyOverview error)');
+                }
             } else {
                 spaLog('MythologyOverview not available, trying PageAssetRenderer...');
                 if (typeof PageAssetRenderer !== 'undefined') {
@@ -1611,12 +1617,12 @@ class SPANavigation {
         };
 
         const myth = mythologies[mythologyId] || { name: mythologyId, color: '#666' };
-        const entityTypes = ['deities', 'heroes', 'creatures', 'texts', 'rituals', 'herbs', 'cosmology', 'magic'];
+        const entityTypes = ['deities', 'heroes', 'creatures', 'items', 'places', 'texts', 'rituals', 'herbs', 'symbols', 'cosmology', 'magic'];
         const counts = {};
         let totalCount = 0;
 
         const mythLower = mythologyId.toLowerCase();
-        for (const type of entityTypes) {
+        await Promise.all(entityTypes.map(async (type) => {
             try {
                 // Try exact match first (most common case)
                 let snapshot = await this.db.collection(type)
@@ -1637,7 +1643,7 @@ class SPANavigation {
                 spaError(`Error loading count for ${type}:`, error);
                 counts[type] = 0;
             }
-        }
+        }));
 
         return `
             <div class="mythology-page" style="--myth-color: ${myth.color};">
