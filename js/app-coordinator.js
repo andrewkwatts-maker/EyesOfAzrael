@@ -390,6 +390,21 @@
     }
 
     /**
+     * Escape HTML special characters for safe display
+     * @param {string} text - Text to escape
+     * @returns {string} - Escaped text
+     */
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    }
+
+    /**
      * Show fallback content when initialization fails completely
      * This prevents the user from seeing a blank page
      * @param {string} message - Error message to display
@@ -397,12 +412,13 @@
     function showFallbackContent(message) {
         const mainContent = document.getElementById('main-content');
         if (mainContent) {
+            const safeMessage = escapeHtml(message);
             mainContent.innerHTML = `
                 <div class="error-container" style="text-align: center; padding: 3rem; max-width: 600px; margin: 2rem auto;">
                     <div style="font-size: 4rem; margin-bottom: 1rem;">&#9888;</div>
                     <h1 style="color: #ef4444; margin-bottom: 1rem;">Initialization Error</h1>
-                    <p style="color: #9ca3af; margin-bottom: 2rem;">${message}</p>
-                    <button onclick="location.reload()" class="btn-primary" style="
+                    <p style="color: #9ca3af; margin-bottom: 2rem;">${safeMessage}</p>
+                    <button data-action="reload-page" class="btn-primary" style="
                         padding: 0.75rem 1.5rem;
                         background: #3b82f6;
                         color: white;
@@ -413,6 +429,12 @@
                     ">Reload Page</button>
                 </div>
             `;
+
+            // Attach reload handler (CSP-safe, no inline onclick)
+            const reloadBtn = mainContent.querySelector('[data-action="reload-page"]');
+            if (reloadBtn) {
+                reloadBtn.addEventListener('click', () => location.reload());
+            }
         }
 
         // Also hide any loading spinners
@@ -420,6 +442,11 @@
         loadingContainers.forEach(container => {
             container.style.display = 'none';
         });
+
+        // Dispatch first-render-complete so other loading indicators are hidden
+        document.dispatchEvent(new CustomEvent('first-render-complete', {
+            detail: { route: 'error-fallback', timestamp: Date.now() }
+        }));
     }
 
     // Expose debugging functions
