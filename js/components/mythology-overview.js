@@ -381,7 +381,7 @@ class MythologyOverview {
 
         return `
             <a href="${href}" class="entity-mini-card" data-entity-id="${entityId}">
-                ${icon ? `<span class="mini-card-icon">${this.escapeHtml(icon)}</span>` : ''}
+                ${icon ? `<span class="mini-card-icon">${this.renderIcon(icon)}</span>` : ''}
                 <span class="mini-card-body">
                     <span class="mini-card-name">${name}</span>
                     ${subText ? `<span class="mini-card-sub">${subText}</span>` : ''}
@@ -460,6 +460,17 @@ class MythologyOverview {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
+    }
+
+    isSvg(str) {
+        if (!str || typeof str !== 'string') return false;
+        return str.trim().toLowerCase().startsWith('<svg');
+    }
+
+    renderIcon(icon) {
+        if (!icon) return '';
+        if (this.isSvg(icon)) return icon;
+        return this.escapeHtml(icon);
     }
 }
 
