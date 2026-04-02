@@ -66,9 +66,11 @@ class SVGEditorModal {
             console.warn('GeminiSVGGenerator not loaded. AI generation will be disabled.');
         }
 
-        // Also initialize AI Icon Generator for entity-based generation
-        if (window.AIIconGenerator) {
-            this.iconGenerator = new window.AIIconGenerator();
+        // Use IconGenerator for entity-based sacred geometry generation
+        if (window.IconGenerator) {
+            this.iconGenerator = new window.IconGenerator();
+        } else if (window.IconGeneratorPreview) {
+            this.iconGenerator = new window.IconGeneratorPreview();
         }
     }
 
@@ -660,8 +662,8 @@ class SVGEditorModal {
      * Generate SVG from entity data using AI Icon Generator
      */
     async generateFromEntity() {
-        if (!this.iconGenerator) {
-            this.showMessage('error', 'AI Icon Generator not available. Please ensure ai-icon-generator.js is loaded.');
+        if (!this.iconGenerator && !this.generator) {
+            this.showMessage('error', 'Icon generator not available. Please refresh the page.');
             return;
         }
 
@@ -675,14 +677,24 @@ class SVGEditorModal {
         this.showMessage('info', 'Generating icon from entity data...');
 
         try {
-            const result = this.iconGenerator.generateWithOptions(this.entityData, {
-                style: 'symbolic',
-                size: 64,
-                colorScheme: 'auto'
-            });
+            let svgResult;
 
-            if (result.success) {
-                this.currentSvg = result.svgCode;
+            if (this.generator && this.entityData.name) {
+                // Use Gemini AI generator for prompt-based generation
+                const prompt = `Sacred mythological icon for ${this.entityData.name}, ${this.entityData.type || 'entity'} from ${this.entityData.mythology || 'world'} mythology`;
+                svgResult = await this.generator.generate(prompt);
+            } else if (this.iconGenerator && typeof this.iconGenerator.generateForMythology === 'function') {
+                // Use IconGenerator for sacred geometry generation
+                svgResult = this.iconGenerator.generateForMythology(
+                    this.entityData.mythology || 'greek',
+                    { style: 'filled', size: 64 }
+                );
+            } else if (this.iconGenerator) {
+                svgResult = this.iconGenerator.generateRandom({ size: 64, style: 'gradient' });
+            }
+
+            if (svgResult) {
+                this.currentSvg = typeof svgResult === 'string' ? svgResult : (svgResult.svg || svgResult.svgCode || svgResult);
 
                 // Update code editor
                 const codeInput = this.overlay.querySelector('#svg-code-input');
@@ -693,10 +705,10 @@ class SVGEditorModal {
                 this.updatePreview();
                 this.showMessage('success', `Icon generated for ${this.entityData.name}! You can edit the code in the Code Editor tab if needed.`);
             } else {
-                this.showMessage('error', `Generation failed: ${result.error}`);
+                this.showMessage('error', 'Generation returned no result. Try again or use the code editor.');
             }
         } catch (error) {
-            this.showMessage('error', `Unexpected error: ${error.message}`);
+            this.showMessage('error', `Generation error: ${error.message}`);
         } finally {
             this.setGenerating(false);
         }
