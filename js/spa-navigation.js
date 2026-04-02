@@ -1549,6 +1549,8 @@ class SPANavigation {
                     const mythologyView = new MythologyOverview({ db: this.db, router: this });
                     const html = await mythologyView.render({ mythology: mythologyId });
                     mainContent.innerHTML = html;
+                    mainContent.classList.remove('has-skeleton', 'content-loading', 'fade-out', 'transitioning');
+                    mainContent.classList.add('content-loaded');
                     mythologyView.attachEventListeners();
                     spaLog('Mythology page rendered via MythologyOverview');
                 } catch (overviewError) {
@@ -1580,6 +1582,12 @@ class SPANavigation {
             }));
             throw error;
         } finally {
+            // Ensure skeleton classes are always cleaned up
+            const mc = document.getElementById('main-content');
+            if (mc) {
+                mc.classList.remove('has-skeleton', 'content-loading', 'fade-out', 'transitioning');
+                mc.classList.add('content-loaded');
+            }
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: { route: 'mythology', mythologyId: mythologyId, timestamp: Date.now() }
             }));
