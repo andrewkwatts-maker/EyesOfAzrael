@@ -107,10 +107,11 @@
           background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.98);
           backdrop-filter: blur(20px);
           border-top: 2px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
-          padding: 1.5rem;
+          padding: 1.5rem 2rem;
           z-index: 10000;
           box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
           animation: slideUp 0.3s ease-out;
+          box-sizing: border-box;
         }
 
         @keyframes slideUp {
@@ -152,6 +153,7 @@
           display: flex;
           gap: 0.75rem;
           flex-shrink: 0;
+          overflow: visible;
         }
 
         @media (max-width: 768px) {
