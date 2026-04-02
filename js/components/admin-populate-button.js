@@ -28,8 +28,7 @@ class AdminPopulateButton {
     }
 
     _isAdmin() {
-        const user = firebase.auth?.()?.currentUser;
-        return user?.email === 'andrewkwatts@gmail.com';
+        return document.body.classList.contains('is-admin');
     }
 
     _getMissingFields() {
@@ -102,8 +101,16 @@ class AdminPopulateButton {
             }
 
             if (Object.keys(generated).length === 0) {
-                status.innerHTML = '<span class="populate-error">No content generated. Check console for errors.</span>';
+                const failedList = missing.map(f => `<li>${f}</li>`).join('');
+                status.innerHTML = `<span class="populate-error">No content generated. Failed fields:<ul>${failedList}</ul></span>`;
                 return;
+            }
+
+            // Report any per-field failures
+            const failedFields = missing.filter(f => !(f in generated));
+            if (failedFields.length > 0) {
+                const failedList = failedFields.map(f => `<li>${f}</li>`).join('');
+                status.insertAdjacentHTML('beforeend', `<div class="populate-field-errors">Some fields failed to generate:<ul>${failedList}</ul></div>`);
             }
 
             // Show preview
@@ -166,7 +173,8 @@ class AdminPopulateButton {
             });
 
             if (!response.ok) {
-                console.error(`[AdminPopulate] API error for ${field}:`, response.status);
+                const errBody = await response.text().catch(() => '');
+                console.error(`[AdminPopulate] API error for field "${field}" (HTTP ${response.status}):`, errBody);
                 return null;
             }
 

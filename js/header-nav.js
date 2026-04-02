@@ -80,6 +80,7 @@ class HeaderNavController {
         this.setupGlobalListeners();
         this.setupScrollListener();
         this.setupHeaderSearch();
+        this.setupNewsletterForm();
 
         // Inject mobile nav panel if not present
         this.ensureMobileNav();
@@ -934,6 +935,146 @@ class HeaderNavController {
 
         // Check if current hash starts with href (for nested routes)
         return currentHash.startsWith(href) && href.length > 2;
+    }
+
+    /**
+     * Set up newsletter form submission handler
+     */
+    setupNewsletterForm() {
+        const form = document.querySelector('.footer-newsletter-form');
+        if (!form) return;
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const input = form.querySelector('.footer-newsletter-input');
+            const btn = form.querySelector('.footer-newsletter-btn');
+            if (!input) return;
+
+            const email = input.value.trim();
+
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                this._showNewsletterToast('Please enter a valid email address.', 'error');
+                input.focus();
+                return;
+            }
+
+            // Prevent duplicate submissions (check localStorage)
+            const subscribedEmails = this._getSubscribedEmails();
+            if (subscribedEmails.includes(email.toLowerCase())) {
+                this._showNewsletterToast('You\'re already subscribed!', 'info');
+                return;
+            }
+
+            // Disable button during submission
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<span>Subscribing...</span>';
+            }
+
+            try {
+                await this._submitNewsletterEmail(email);
+
+                // Store email locally to prevent duplicate submissions
+                subscribedEmails.push(email.toLowerCase());
+                try {
+                    localStorage.setItem('eoa_newsletter_subscribed', JSON.stringify(subscribedEmails));
+                } catch (_) { /* localStorage unavailable */ }
+
+                // Success feedback
+                input.value = '';
+                this._showNewsletterToast('Subscribed successfully! Welcome to the community.', 'success');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Subscribe</span>';
+                }
+            } catch (err) {
+                console.warn('[HeaderNav] Newsletter subscription error:', err);
+                this._showNewsletterToast('Subscription failed. Please try again.', 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>Subscribe</span>';
+                }
+            }
+        });
+    }
+
+    /**
+     * Submit newsletter email to Firestore or localStorage fallback
+     * @param {string} email
+     */
+    async _submitNewsletterEmail(email) {
+        // Try Firestore first
+        if (typeof firebase !== 'undefined' && firebase.firestore) {
+            const db = firebase.firestore();
+            await db.collection('newsletter_subscribers').add({
+                email: email.toLowerCase(),
+                subscribedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                source: 'footer_form'
+            });
+            return;
+        }
+
+        // Fallback: store in localStorage
+        const subscribedEmails = this._getSubscribedEmails();
+        if (!subscribedEmails.includes(email.toLowerCase())) {
+            subscribedEmails.push(email.toLowerCase());
+            localStorage.setItem('eoa_newsletter_subscribed', JSON.stringify(subscribedEmails));
+        }
+    }
+
+    /**
+     * Get list of previously subscribed emails from localStorage
+     * @returns {string[]}
+     */
+    _getSubscribedEmails() {
+        try {
+            const stored = localStorage.getItem('eoa_newsletter_subscribed');
+            return stored ? JSON.parse(stored) : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    /**
+     * Show a toast notification for newsletter feedback
+     * @param {string} message
+     * @param {string} type - 'success' | 'error' | 'info'
+     */
+    _showNewsletterToast(message, type = 'info') {
+        if (window.toast) {
+            const method = type === 'success' ? 'success' : type === 'error' ? 'error' : 'info';
+            if (typeof window.toast[method] === 'function') {
+                window.toast[method](message);
+                return;
+            }
+        }
+        {
+            // Inline fallback if toast system unavailable
+            const existingToast = document.querySelector('.newsletter-inline-toast');
+            if (existingToast) existingToast.remove();
+
+            const toast = document.createElement('div');
+            toast.className = `newsletter-inline-toast newsletter-toast-${type}`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'polite');
+            toast.style.cssText = `
+                position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+                padding: 0.75rem 1.25rem; border-radius: 8px; font-size: 0.9rem;
+                background: ${type === 'success' ? '#2d8a4e' : type === 'error' ? '#c0392b' : '#1a5276'};
+                color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                opacity: 0; transition: opacity 0.3s;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            requestAnimationFrame(() => { toast.style.opacity = '1'; });
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
     }
 
     /**

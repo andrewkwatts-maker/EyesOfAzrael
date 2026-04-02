@@ -208,9 +208,12 @@ class ContentSubmissionWizard {
      * Initialize the wizard
      */
     init() {
-        // Initialize AI Icon Generator
-        if (window.AIIconGenerator) {
-            this.iconGenerator = new window.AIIconGenerator();
+        // Initialize icon generator — prefer IconGenerator (geometric, always available),
+        // fall back to GeminiSVGGenerator wrapper for AI-backed generation.
+        if (window.IconGenerator) {
+            this.iconGenerator = window.IconGenerator;
+        } else if (window.GeminiSVGGenerator) {
+            this.iconGenerator = new window.GeminiSVGGenerator();
         }
 
         // Initialize SVG Editor Modal
@@ -1233,11 +1236,12 @@ class ContentSubmissionWizard {
     }
 
     /**
-     * Generate icon using AI
+     * Generate icon using IconGenerator (geometric) or GeminiSVGGenerator (AI).
+     * Works without AI — IconGenerator is always the preferred path.
      */
     generateIcon(regenerate = false) {
         if (!this.iconGenerator) {
-            this.showNotification('AI Icon Generator not available', 'error');
+            this.showNotification('Icon generator not available', 'error');
             return;
         }
 
@@ -1256,27 +1260,38 @@ class ContentSubmissionWizard {
         const style = document.getElementById('csw-icon-style')?.value || 'symbolic';
         const theme = document.getElementById('csw-icon-theme')?.value || 'night';
 
-        // Generate icon
-        const result = this.iconGenerator.generateWithStyle(entityData, style, theme);
+        const applyResult = (result) => {
+            if (result && result.success) {
+                this.formData.svgIcon = result.svgCode;
 
-        if (result.success) {
-            this.formData.svgIcon = result.svgCode;
+                // Update preview
+                const preview = document.getElementById('csw-icon-preview');
+                if (preview) {
+                    preview.innerHTML = result.svgCode;
+                }
 
-            // Update preview
-            const preview = document.getElementById('csw-icon-preview');
-            if (preview) {
-                preview.innerHTML = result.svgCode;
+                // Enable action buttons
+                const regenerateBtn = document.getElementById('csw-regenerate-icon-btn');
+                const editBtn = document.getElementById('csw-edit-svg-btn');
+                if (regenerateBtn) regenerateBtn.disabled = false;
+                if (editBtn) editBtn.disabled = false;
+
+                const note = result.isGeometricFallback ? ' (geometric fallback)' : '';
+                this.showNotification('Icon generated successfully!' + note, 'success');
+            } else {
+                this.showNotification('Failed to generate icon: ' + (result && result.error || 'Unknown error'), 'error');
             }
+        };
 
-            // Enable action buttons
-            const regenerateBtn = document.getElementById('csw-regenerate-icon-btn');
-            const editBtn = document.getElementById('csw-edit-svg-btn');
-            if (regenerateBtn) regenerateBtn.disabled = false;
-            if (editBtn) editBtn.disabled = false;
-
-            this.showNotification('Icon generated successfully!', 'success');
+        // IconGenerator is synchronous; GeminiSVGGenerator is async
+        if (typeof this.iconGenerator.generateWithStyle === 'function') {
+            const result = this.iconGenerator.generateWithStyle(entityData, style, theme);
+            applyResult(result);
+        } else if (typeof this.iconGenerator.generateSVG === 'function') {
+            const prompt = `${entityData.type} icon for ${entityData.name} from ${entityData.mythology} mythology`;
+            this.iconGenerator.generateSVG(prompt, { style, mythology: entityData.mythology }).then(applyResult);
         } else {
-            this.showNotification('Failed to generate icon: ' + result.error, 'error');
+            this.showNotification('Icon generator has no compatible generate method', 'error');
         }
     }
 

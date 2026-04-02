@@ -293,25 +293,61 @@ Example output format:
             const response = await this.callGeminiAPI(prompt, token);
 
             if (!response.success) {
-                return response;
+                const schema = this.schemaDefinitions[entityType] || this.schemaDefinitions.deity;
+                const fieldsToFill = schema.fields.filter(field => {
+                    const value = existingData[field];
+                    if (value === undefined || value === null || value === '') return true;
+                    if (Array.isArray(value) && value.length === 0) return true;
+                    if (typeof value === 'object' && Object.keys(value).length === 0) return true;
+                    return false;
+                });
+                return {
+                    ...response,
+                    fieldErrors: fieldsToFill.reduce((acc, f) => {
+                        acc[f] = response.error || 'API call failed';
+                        return acc;
+                    }, {})
+                };
             }
 
             // Parse and validate response
             const populatedData = this.parseResponse(response.content, entityType);
+            const schema = this.schemaDefinitions[entityType] || this.schemaDefinitions.deity;
+
+            // Identify fields that were requested but not returned
+            const prompt2 = this.buildPrompt(entityType, existingData); // re-derive fields list
+            const requestedFields = schema.fields.filter(field => {
+                const value = existingData[field];
+                if (value === undefined || value === null || value === '') return true;
+                if (Array.isArray(value) && value.length === 0) return true;
+                if (typeof value === 'object' && Object.keys(value).length === 0) return true;
+                return false;
+            });
+
+            const missingFromResponse = requestedFields.filter(f => !(f in populatedData));
+            const fieldErrors = missingFromResponse.reduce((acc, f) => {
+                acc[f] = 'Field not returned by AI — may need retry';
+                return acc;
+            }, {});
 
             console.log('[AIPopulateService] Populated fields:', Object.keys(populatedData));
+            if (missingFromResponse.length > 0) {
+                console.warn('[AIPopulateService] Fields missing from AI response:', missingFromResponse);
+            }
 
             return {
                 success: true,
                 data: populatedData,
-                fieldsPopulated: Object.keys(populatedData)
+                fieldsPopulated: Object.keys(populatedData),
+                fieldErrors: Object.keys(fieldErrors).length > 0 ? fieldErrors : undefined
             };
 
         } catch (error) {
             console.error('[AIPopulateService] Error:', error);
             return {
                 success: false,
-                error: error.message || 'Failed to populate fields'
+                error: error.message || 'Failed to populate fields',
+                fieldErrors: { _general: error.message || 'Failed to populate fields' }
             };
         }
     }

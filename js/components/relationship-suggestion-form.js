@@ -680,7 +680,24 @@ class RelationshipSuggestionForm {
                 setTimeout(() => this.close(), 1500);
 
             } else {
-                throw new Error('RelationshipService not available');
+                // RelationshipService not available — store suggestion locally and inform user
+                console.warn('[RelationshipSuggestionForm] RelationshipService not available — saving locally');
+                try {
+                    const pending = JSON.parse(localStorage.getItem('eoa_pending_relationships') || '[]');
+                    pending.push({
+                        sourceId: this.sourceEntity.id || this.sourceEntity,
+                        sourceCollection: this.sourceCollection,
+                        targetId: this.targetEntity.id,
+                        targetCollection: this.targetEntity.collection,
+                        ...formData,
+                        submittedAt: Date.now()
+                    });
+                    localStorage.setItem('eoa_pending_relationships', JSON.stringify(pending));
+                    this._showSuccess('Suggestion saved locally — will be submitted when service is available.');
+                    setTimeout(() => this.close(), 1500);
+                } catch (_localErr) {
+                    throw new Error('Relationship suggestion service is currently unavailable. Please try again later.');
+                }
             }
 
         } catch (error) {

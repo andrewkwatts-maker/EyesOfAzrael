@@ -139,6 +139,60 @@ async function run() {
         pass(`Mythologies: ${result === 'cards' ? 'cards found' : 'loading state visible'}`);
     });
 
+    // ---- 5. Search with query param ------------------------------------------
+    console.log('\n[5] Search page with query param');
+    await check('Navigate to #/search?q=zeus', async () => {
+        await page.goto(`${TARGET_URL}#/search?q=zeus`, {
+            waitUntil: 'domcontentloaded',
+            timeout: TIMEOUT
+        });
+        pass('Navigated to #/search?q=zeus');
+    });
+
+    await check('Search page renders (not 404)', async () => {
+        const result = await Promise.race([
+            page.waitForSelector('.search-view, [class*="search"], #search-input, input[type="search"]', {
+                timeout: TIMEOUT
+            }).then(() => 'search'),
+            page.waitForSelector('.error-404, .not-found, h1', {
+                timeout: TIMEOUT
+            }).then(async () => {
+                const h1 = await page.textContent('h1').catch(() => '');
+                if (h1.includes('404') || h1.toLowerCase().includes('not found')) {
+                    throw new Error('Got 404 page instead of search page');
+                }
+                return 'content';
+            })
+        ]).catch(err => { throw err; });
+        pass(`Search page with ?q=zeus rendered: ${result}`);
+    });
+
+    // ---- 6. Guidelines page --------------------------------------------------
+    console.log('\n[6] Guidelines page');
+    await check('Navigate to #/guidelines', async () => {
+        await page.goto(`${TARGET_URL}#/guidelines`, {
+            waitUntil: 'domcontentloaded',
+            timeout: TIMEOUT
+        });
+        pass('Navigated to #/guidelines');
+    });
+
+    await check('Guidelines page renders (not 404)', async () => {
+        const result = await Promise.race([
+            page.waitForSelector('.guidelines-page, .static-page', {
+                timeout: TIMEOUT
+            }).then(() => 'guidelines'),
+            page.waitForSelector('h1', { timeout: TIMEOUT }).then(async () => {
+                const h1 = await page.textContent('h1').catch(() => '');
+                if (h1.includes('404') || h1.toLowerCase().includes('not found')) {
+                    throw new Error('Got 404 page instead of guidelines page');
+                }
+                return 'content';
+            })
+        ]).catch(err => { throw err; });
+        pass(`Guidelines page rendered: ${result}`);
+    });
+
     await browser.close();
 
     // ---- Summary -------------------------------------------------------------

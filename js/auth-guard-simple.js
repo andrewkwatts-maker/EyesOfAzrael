@@ -339,6 +339,11 @@
     }
 
     /**
+     * Admin email list — single source of truth within auth guard
+     */
+    const ADMIN_EMAILS = ['andrewkwatts@gmail.com'];
+
+    /**
      * Handle authenticated user
      */
     function handleAuthenticated(user) {
@@ -354,6 +359,18 @@
         setTimeout(() => {
             document.body.classList.remove('auth-transitioning');
         }, 300);
+
+        // Set admin status on body and dispatch event
+        const isAdmin = ADMIN_EMAILS.includes(user.email);
+        if (isAdmin) {
+            document.body.classList.add('is-admin');
+            console.log('[Auth Guard] Admin user detected — is-admin class set');
+        } else {
+            document.body.classList.remove('is-admin');
+        }
+        document.dispatchEvent(new CustomEvent('adminStatusChanged', {
+            detail: { isAdmin, user }
+        }));
 
         // Hide auth overlay if visible
         hideLoginOverlay();
@@ -374,7 +391,7 @@
 
         // Dispatch auth-ready event
         document.dispatchEvent(new CustomEvent('auth-ready', {
-            detail: { user, authenticated: true }
+            detail: { user, authenticated: true, isAdmin }
         }));
     }
 
@@ -389,11 +406,16 @@
 
         // Update body class with smooth transition
         document.body.classList.add('not-authenticated');
-        document.body.classList.remove('authenticated');
+        document.body.classList.remove('authenticated', 'is-admin');
         document.body.classList.add('auth-transitioning');
         setTimeout(() => {
             document.body.classList.remove('auth-transitioning');
         }, 300);
+
+        // Clear admin status
+        document.dispatchEvent(new CustomEvent('adminStatusChanged', {
+            detail: { isAdmin: false, user: null }
+        }));
 
         // Clear user display
         updateUserDisplay(null);
