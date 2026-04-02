@@ -863,27 +863,7 @@ class BrowseCategoryView {
                         </button>
                     </div>
 
-                    <!-- Density Toggle -->
-                    <div class="density-toggle">
-                        <button class="density-btn" id="densityBtn" title="View density">
-                            <span class="density-icon">⚙</span>
-                            <span class="density-label">${this.capitalize(this.viewDensity)}</span>
-                        </button>
-                        <div class="density-menu" id="densityMenu">
-                            <button class="density-option ${this.viewDensity === 'compact' ? 'active' : ''}" data-density="compact">
-                                <span class="option-icon">▪</span>
-                                <span class="option-label">Compact</span>
-                            </button>
-                            <button class="density-option ${this.viewDensity === 'comfortable' ? 'active' : ''}" data-density="comfortable">
-                                <span class="option-icon">▪▪</span>
-                                <span class="option-label">Comfortable</span>
-                            </button>
-                            <button class="density-option ${this.viewDensity === 'detailed' ? 'active' : ''}" data-density="detailed">
-                                <span class="option-icon">▪▪▪</span>
-                                <span class="option-label">Detailed</span>
-                            </button>
-                        </div>
-                    </div>
+                    <!-- Density is always comfortable -->
                 </div>
             </div>
         `;

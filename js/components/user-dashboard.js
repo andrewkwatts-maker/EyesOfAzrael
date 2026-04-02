@@ -1225,7 +1225,7 @@ class UserDashboard {
      */
     handleCreateSubmission() {
         if (window.EyesOfAzrael?.navigation) {
-            window.EyesOfAzrael.navigation.navigate('#/contribute');
+            window.EyesOfAzrael.navigation.navigate('#/dashboard');
         }
     }
 

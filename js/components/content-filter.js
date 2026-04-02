@@ -177,18 +177,12 @@ class ContentFilter {
             this.container.appendChild(clone);
         } else {
             // Inline fallback when template is not in the DOM
+            // Community content toggle removed — always show standard content
             this.container.innerHTML = `
-                <div class="content-filter-bar" id="contentFilterBar">
+                <div class="content-filter-bar" id="contentFilterBar" style="display: none;">
                     <div class="content-filter-main">
-                        <label class="toggle-switch" for="show-community-content">
-                            <input type="checkbox" id="show-community-content" class="toggle-input"
-                                   aria-label="Toggle community content visibility"
-                                   ${this.showUserContent ? 'checked' : ''} />
-                            <span class="slider round"></span>
-                        </label>
                         <div class="toggle-info">
-                            <span class="toggle-label">Show Community Content</span>
-                            <span class="toggle-description">View user-submitted entities alongside official content</span>
+                            <span class="toggle-label">Content Filter</span>
                         </div>
                         <span class="content-count-badge" id="communityContentCount" style="display: none;">
                             <span class="badge-icon">+</span>

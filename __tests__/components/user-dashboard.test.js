@@ -257,7 +257,7 @@ describe('UserDashboard Component', () => {
 
         test('should handle create submission', () => {
             dashboard.handleCreateSubmission();
-            expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/contribute');
+            expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/dashboard');
         });
 
         test('should handle action dispatch', async () => {
