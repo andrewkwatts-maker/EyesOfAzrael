@@ -94,7 +94,8 @@ class MythologyOverview {
         const mythLower = mythologyId.toLowerCase();
         const allSnapshot = await this.db.collection('mythologies').get();
         for (const doc of allSnapshot.docs) {
-            const m = (doc.data().mythology || doc.data().name || '').toLowerCase();
+            const rawMyth = doc.data().mythology;
+            const m = (typeof rawMyth === 'string' ? rawMyth : Array.isArray(rawMyth) ? rawMyth[0] || '' : doc.data().name || '').toLowerCase();
             if (m === mythLower || m.startsWith(mythLower)) {
                 return { id: doc.id, ...doc.data() };
             }
@@ -121,7 +122,8 @@ class MythologyOverview {
                     if (snapshot.empty) {
                         snapshot = await this.db.collection(type.collection).get();
                         snapshot.forEach(doc => {
-                            const m = (doc.data().mythology || '').toLowerCase();
+                            const rawMyth = doc.data().mythology;
+                            const m = (typeof rawMyth === 'string' ? rawMyth : Array.isArray(rawMyth) ? rawMyth[0] || '' : '').toLowerCase();
                             if (m === mythLower || m.startsWith(mythLower)) {
                                 entities.push({ id: doc.id, ...doc.data() });
                             }
