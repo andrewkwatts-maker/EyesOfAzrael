@@ -2018,6 +2018,38 @@ Discover & Explore
     }
 
     /**
+     * Replace <img> SVG icons with inline SVGs for proper currentColor inheritance.
+     * SVGs using fill="currentColor" don't work in <img> tags because <img> can't
+     * inherit CSS color. Inlining them allows the .entity-icon-svg class to apply
+     * color: var(--card-color) which currentColor then resolves to.
+     */
+    async inlineSVGIcons() {
+        const imgs = document.querySelectorAll('.landing-category-grid img[data-icon-fallback]');
+        for (const img of imgs) {
+            try {
+                const resp = await fetch(img.src);
+                if (!resp.ok) continue;
+                const svgText = await resp.text();
+                if (!svgText.trim().startsWith('<svg')) continue;
+
+                const wrapper = document.createElement('span');
+                wrapper.className = 'entity-icon-svg';
+                wrapper.setAttribute('aria-hidden', 'true');
+                wrapper.innerHTML = svgText;
+
+                // Also hide the emoji fallback sibling since the inline SVG is working
+                const fallback = img.nextElementSibling;
+                img.replaceWith(wrapper);
+                if (fallback && fallback.classList.contains('landing-category-icon-fallback')) {
+                    fallback.style.display = 'none';
+                }
+            } catch (e) {
+                // Leave the <img> in place; the error handler will show emoji fallback
+            }
+        }
+    }
+
+    /**
      * Attach event listeners with proper cleanup registration
      */
     attachEventListeners() {
@@ -2076,6 +2108,9 @@ Discover & Explore
         if (window.SPANavigation && typeof window.SPANavigation.registerViewCleanup === 'function') {
             window.SPANavigation.registerViewCleanup(() => this.cleanup());
         }
+
+        // Inline SVG icons for proper color inheritance
+        this.inlineSVGIcons();
 
         // Load featured entities, recent additions, and stats in parallel
         // Using Promise.allSettled so individual failures don't crash the others
