@@ -1547,7 +1547,10 @@ class SPANavigation {
                 spaLog('MythologyOverview class available, using it...');
                 try {
                     const mythologyView = new MythologyOverview({ db: this.db, router: this });
-                    const html = await mythologyView.render({ mythology: mythologyId });
+                    const html = await Promise.race([
+                        mythologyView.render({ mythology: mythologyId }),
+                        new Promise((_, reject) => setTimeout(() => reject(new Error('Mythology render timeout after 15s')), 15000))
+                    ]);
                     mainContent.innerHTML = html;
                     mainContent.classList.remove('has-skeleton', 'content-loading', 'fade-out', 'transitioning');
                     mainContent.classList.add('content-loaded');

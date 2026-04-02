@@ -90,15 +90,27 @@ class MythologyOverview {
             return { id: matchedDoc.id, ...matchedDoc.data() };
         }
 
-        // Final fallback: case-insensitive search across all mythologies
-        const mythLower = mythologyId.toLowerCase();
-        const allSnapshot = await this.db.collection('mythologies').get();
-        for (const doc of allSnapshot.docs) {
-            const rawMyth = doc.data().mythology;
-            const m = (typeof rawMyth === 'string' ? rawMyth : Array.isArray(rawMyth) ? rawMyth[0] || '' : doc.data().name || '').toLowerCase();
-            if (m === mythLower || m.startsWith(mythLower)) {
-                return { id: doc.id, ...doc.data() };
+        // Try capitalized variant (e.g. "Polynesian" if URL is "polynesian")
+        const mythCapitalized = mythologyId.charAt(0).toUpperCase() + mythologyId.slice(1).toLowerCase();
+        if (mythCapitalized !== mythologyId) {
+            const capSnapshot = await this.db.collection('mythologies')
+                .where('mythology', '==', mythCapitalized)
+                .limit(1)
+                .get();
+            if (!capSnapshot.empty) {
+                const matchedDoc = capSnapshot.docs[0];
+                return { id: matchedDoc.id, ...matchedDoc.data() };
             }
+        }
+
+        // Try name field match
+        const nameSnapshot = await this.db.collection('mythologies')
+            .where('name', '==', mythCapitalized)
+            .limit(1)
+            .get();
+        if (!nameSnapshot.empty) {
+            const matchedDoc = nameSnapshot.docs[0];
+            return { id: matchedDoc.id, ...matchedDoc.data() };
         }
 
         return null;
@@ -109,45 +121,20 @@ class MythologyOverview {
      */
     async loadCategorySections(mythologyId) {
         const mythLower = mythologyId.toLowerCase();
+        const mythCapitalized = mythLower.charAt(0).toUpperCase() + mythLower.slice(1);
+
         const results = await Promise.all(
             MythologyOverview.ENTITY_TYPES.map(async (type) => {
                 try {
-                    // Try exact match first
-                    let snapshot = await this.db.collection(type.collection)
-                        .where('mythology', '==', mythologyId)
-                        .get();
-
-                    // If no results, fetch all and filter client-side (handles inconsistent casing)
-                    let entities = [];
-                    if (snapshot.empty) {
-                        snapshot = await this.db.collection(type.collection).get();
-                        snapshot.forEach(doc => {
-                            const rawMyth = doc.data().mythology;
-                            const m = (typeof rawMyth === 'string' ? rawMyth : Array.isArray(rawMyth) ? rawMyth[0] || '' : '').toLowerCase();
-                            if (m === mythLower || m.startsWith(mythLower)) {
-                                entities.push({ id: doc.id, ...doc.data() });
-                            }
-                        });
-                    } else {
-                        snapshot.forEach(doc => {
-                            entities.push({ id: doc.id, ...doc.data() });
-                        });
-                    }
-
-                    if (entities.length === 0) return null;
-
-                    // Sort alphabetically by name
-                    entities.sort((a, b) => {
-                        const nameA = (a.name || a.title || '').toLowerCase();
-                        const nameB = (b.name || b.title || '').toLowerCase();
-                        return nameA.localeCompare(nameB);
-                    });
-
-                    return {
-                        ...type,
-                        count: entities.length,
-                        entities
-                    };
+                    // Race each category query against a timeout to prevent stuck loading
+                    const queryWithTimeout = Promise.race([
+                        this._loadSingleCategory(type, mythologyId, mythLower, mythCapitalized),
+                        new Promise(resolve => setTimeout(() => {
+                            console.warn(`[MythologyOverview] Timeout loading ${type.collection} for ${mythologyId}`);
+                            resolve(null);
+                        }, 10000))
+                    ]);
+                    return await queryWithTimeout;
                 } catch (error) {
                     console.error(`[MythologyOverview] Error loading ${type.collection}:`, error);
                     return null;
@@ -159,6 +146,47 @@ class MythologyOverview {
         return results
             .filter(s => s && s.count > 0)
             .sort((a, b) => b.count - a.count);
+    }
+
+    /**
+     * Load a single category's entities for a mythology.
+     * Tries exact match, then capitalized variant — avoids full-collection scan.
+     */
+    async _loadSingleCategory(type, mythologyId, mythLower, mythCapitalized) {
+        let entities = [];
+
+        // Try exact match first (e.g. "polynesian")
+        let snapshot = await this.db.collection(type.collection)
+            .where('mythology', '==', mythologyId)
+            .get();
+
+        if (snapshot.empty && mythologyId !== mythCapitalized) {
+            // Try capitalized variant (e.g. "Polynesian")
+            snapshot = await this.db.collection(type.collection)
+                .where('mythology', '==', mythCapitalized)
+                .get();
+        }
+
+        if (!snapshot.empty) {
+            snapshot.forEach(doc => {
+                entities.push({ id: doc.id, ...doc.data() });
+            });
+        }
+
+        if (entities.length === 0) return null;
+
+        // Sort alphabetically by name
+        entities.sort((a, b) => {
+            const nameA = (a.name || a.title || '').toLowerCase();
+            const nameB = (b.name || b.title || '').toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        return {
+            ...type,
+            count: entities.length,
+            entities
+        };
     }
 
     /**
