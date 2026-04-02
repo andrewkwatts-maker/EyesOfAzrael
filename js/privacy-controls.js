@@ -72,6 +72,7 @@
 
       // Add to page
       document.body.appendChild(banner);
+      document.body.classList.add('has-consent-banner');
 
       // Event listeners
       document.getElementById('consent-accept').addEventListener('click', () => {
@@ -117,6 +118,21 @@
         @keyframes slideUp {
           from { transform: translateY(100%); }
           to { transform: translateY(0); }
+        }
+
+        @keyframes slideDown {
+          from { transform: translateY(0); }
+          to { transform: translateY(100%); }
+        }
+
+        body.has-consent-banner {
+          padding-bottom: 80px;
+        }
+
+        @media (max-width: 768px) {
+          body.has-consent-banner {
+            padding-bottom: 140px;
+          }
         }
 
         .consent-content {
@@ -180,6 +196,7 @@
         banner.style.animation = 'slideDown 0.3s ease-in';
         setTimeout(() => banner.remove(), 300);
       }
+      document.body.classList.remove('has-consent-banner');
       localStorage.setItem('consent_banner_seen', 'true');
     }
 

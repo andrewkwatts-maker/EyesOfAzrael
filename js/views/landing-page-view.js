@@ -529,7 +529,7 @@ Our Growing Collection
                             <div class="stat-description">Mythical beasts</div>
                         </div>
                         <div class="landing-stat-card" style="--stat-index: 3;">
-                            <div class="stat-icon">&#9876;</div>
+                            <div class="stat-icon">&#9876;&#65039;</div>
                             <div class="stat-number" id="stat-items">200+</div>
                             <div class="stat-label">Artifacts</div>
                             <div class="stat-description">Sacred objects</div>
