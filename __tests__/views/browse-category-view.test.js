@@ -280,9 +280,9 @@ describe('BrowseCategoryView', () => {
             expect(activeBtn.dataset.view).toBe('grid');
         });
 
-        test('density toggle exists', () => {
+        test('density toggle removed (always comfortable)', () => {
             const densityBtn = container.querySelector('#densityBtn');
-            expect(densityBtn).not.toBeNull();
+            expect(densityBtn).toBeNull();
         });
 
         test('quick filter chips are rendered', () => {

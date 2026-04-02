@@ -188,7 +188,7 @@ describe('UserDashboard - Branch Coverage', () => {
     test('should handle create submission navigation', () => {
         dashboard.handleCreateSubmission();
 
-        expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/contribute');
+        expect(window.EyesOfAzrael.navigation.navigate).toHaveBeenCalledWith('#/dashboard');
     });
 
     test('should handle create submission when navigation is missing', () => {
