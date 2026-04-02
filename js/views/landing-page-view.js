@@ -1807,6 +1807,30 @@ Discover & Explore
                     }
                 }
 
+                /* Light Theme Icon Fix — icons use brightness(0)+invert(1) which
+                 * makes them white (correct on dark backgrounds, invisible on light).
+                 * For light themes, keep icons dark with a colored drop-shadow instead. */
+                :root[data-theme="day"] .landing-category-icon,
+                :root[data-theme="light"] .landing-category-icon,
+                :root[data-theme="air"] .landing-category-icon,
+                :root[data-theme="order"] .landing-category-icon {
+                    filter:
+                        brightness(0)
+                        drop-shadow(0 2px 8px rgba(0, 0, 0, 0.15))
+                        drop-shadow(0 0 12px var(--card-color));
+                }
+
+                :root[data-theme="day"] .landing-category-card:hover .landing-category-icon,
+                :root[data-theme="light"] .landing-category-card:hover .landing-category-icon,
+                :root[data-theme="air"] .landing-category-card:hover .landing-category-icon,
+                :root[data-theme="order"] .landing-category-card:hover .landing-category-icon {
+                    filter:
+                        brightness(0)
+                        drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))
+                        drop-shadow(0 0 24px var(--card-color))
+                        brightness(0.2);
+                }
+
                 /* Print Styles */
                 @media print {
                     .landing-page-view {
