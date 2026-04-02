@@ -119,6 +119,7 @@ class FirebaseEntityRenderer {
             // Use prefetched data if available, otherwise fetch from Firestore
             let entity = prefetchedData;
             if (!entity) {
+                this._currentMythology = mythology || null;
                 entity = await this.fetchEntity(sanitizedType, sanitizedId);
             } else {
                 console.log('[EntityRenderer] Using prefetched data - instant render!');
@@ -231,6 +232,31 @@ class FirebaseEntityRenderer {
         const doc = await this.db.collection(collectionName).doc(id).get();
 
         if (!doc.exists) {
+            // Entity not found by exact doc ID — try variations and other collections
+            const allCollections = ['deities', 'heroes', 'creatures', 'items', 'places', 'texts', 'rituals', 'herbs', 'symbols', 'concepts', 'cosmology'];
+
+            // Try ID variations: greek_perseus, greek_hero_perseus, etc.
+            const mythology = this._currentMythology || 'greek';
+            const idVariations = [
+                id,
+                `${mythology}_${id}`,
+                `${mythology}_${type.replace(/s$/, '')}_${id}`,
+            ];
+
+            for (const collection of allCollections) {
+                for (const variantId of idVariations) {
+                    if (collection === collectionName && variantId === id) continue; // already tried
+                    try {
+                        const fallbackDoc = await this.db.collection(collection).doc(variantId).get();
+                        if (fallbackDoc.exists) {
+                            console.log(`[EntityRenderer] Found "${variantId}" in "${collection}" (searched from "${collectionName}/${id}")`);
+                            const entity = { id: fallbackDoc.id, ...fallbackDoc.data() };
+                            this._cache.set(`${type}:${id}`, { data: entity, timestamp: Date.now() });
+                            return entity;
+                        }
+                    } catch (e) { /* skip */ }
+                }
+            }
             return null;
         }
 
