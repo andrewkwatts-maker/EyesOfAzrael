@@ -96,9 +96,27 @@ class SearchViewComplete {
 
     /**
      * Main render method - initializes the search interface
+     * @param {HTMLElement} container - Container element to render into
+     * @param {URLSearchParams} [searchParams] - Optional query params (q, mode)
      */
-    async render(container) {
+    async render(container, searchParams) {
         console.log('[SearchView] Rendering search interface');
+
+        // Parse query params: support both passed searchParams and window.location.hash fallback
+        if (!searchParams) {
+            const hash = window.location.hash || '';
+            const qIndex = hash.indexOf('?');
+            const queryStr = qIndex !== -1 ? hash.slice(qIndex + 1) : '';
+            searchParams = new URLSearchParams(queryStr);
+        }
+
+        const initialQuery = searchParams.get('q') || '';
+        const initialMode = searchParams.get('mode') || '';
+
+        // Pre-populate state from query params
+        if (initialQuery) {
+            this.state.query = initialQuery;
+        }
 
         // Show loading state immediately
         container.innerHTML = `
@@ -114,11 +132,21 @@ class SearchViewComplete {
             // Load mythologies
             await this.loadMythologies();
 
-            // Render HTML
+            // Render HTML (state.query is already set, so input will be pre-populated)
             container.innerHTML = this.getHTML();
 
             // Initialize components
             await this.init();
+
+            // Activate corpus mode if requested
+            if (initialMode === 'corpus') {
+                this._activateCorpusMode();
+            }
+
+            // Auto-trigger search if query param present
+            if (initialQuery) {
+                await this.performSearch(initialQuery);
+            }
 
             console.log('[SearchView] Search interface rendered successfully');
         } catch (error) {
@@ -792,6 +820,32 @@ class SearchViewComplete {
                 this.performSearch(query);
             });
         }
+    }
+
+    /**
+     * Activate corpus mode (mode=corpus query param).
+     * The SearchViewComplete already uses the corpus search engine; this method
+     * focuses the search input and adds a visual indicator so users know they
+     * are in corpus mode.
+     */
+    _activateCorpusMode() {
+        const searchInput = document.getElementById('search-input');
+        const searchHero = document.querySelector('.search-hero');
+
+        // Update subtitle to indicate corpus mode
+        if (searchHero) {
+            const subtitle = searchHero.querySelector('.search-subtitle');
+            if (subtitle) {
+                subtitle.textContent = 'Corpus Search — explore sacred texts, historical sources, and cross-cultural parallels';
+            }
+        }
+
+        // Focus input for immediate typing
+        if (searchInput) {
+            setTimeout(() => searchInput.focus(), 50);
+        }
+
+        console.log('[SearchView] Corpus mode activated');
     }
 
     /**

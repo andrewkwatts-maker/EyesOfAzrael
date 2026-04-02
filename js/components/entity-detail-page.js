@@ -73,14 +73,21 @@
          */
         render(entity, options = {}) {
             if (!entity) {
-                return this.renderError('No entity data provided');
+                const html = this.renderError('No entity data provided');
+                // Dispatch first-render-complete on error path so loading spinners always hide
+                if (typeof document !== 'undefined') {
+                    document.dispatchEvent(new CustomEvent('first-render-complete', {
+                        detail: { route: 'entity-detail-page', error: 'No entity data provided', timestamp: Date.now() }
+                    }));
+                }
+                return html;
             }
 
             const mergedOptions = { ...this.options, ...options };
             const entityType = entity.type || entity.entityType || 'deity';
             const colors = this.getEntityColors(entity, entityType);
 
-            return `
+            const html = `
                 <article class="entity-detail-page"
                          data-entity-type="${this.escapeHtml(entityType)}"
                          data-entity-id="${this.escapeHtml(entity.id || '')}"
@@ -93,6 +100,15 @@
 
                 </article>
             `;
+
+            // Dispatch first-render-complete so loading spinners always hide after render
+            if (typeof document !== 'undefined') {
+                document.dispatchEvent(new CustomEvent('first-render-complete', {
+                    detail: { route: 'entity-detail-page', entityId: entity.id || '', entityType, timestamp: Date.now() }
+                }));
+            }
+
+            return html;
         }
 
         /**
@@ -244,6 +260,20 @@
                             </h2>
                         </div>
                         ${this.citationsRenderer.render(entity)}
+                    </div>
+                `);
+            } else if (options.showSources) {
+                // No sources yet — offer Add Source button
+                sections.push(`
+                    <div class="edp-section edp-sources edp-sources--empty">
+                        <div class="edp-section-header">
+                            <h2 class="edp-section-title">
+                                <span class="edp-section-icon">\u{1F4DA}</span>
+                                Sources & References
+                            </h2>
+                            ${this.renderAddSourceButton(entity, 'sources')}
+                        </div>
+                        <p class="edp-sources-empty-msg">No sources have been linked yet.</p>
                     </div>
                 `);
             }
@@ -597,6 +627,28 @@
                     }
                 });
             });
+        }
+
+        /**
+         * Render an "Add Source" button that opens corpus search for an entity section
+         * @param {Object} entity - The entity data
+         * @param {string} sectionTopic - The section topic to pre-populate the query
+         * @returns {string} HTML button string
+         */
+        renderAddSourceButton(entity, sectionTopic) {
+            const entityName = encodeURIComponent(entity.name || entity.title || entity.id || '');
+            const topic = encodeURIComponent(sectionTopic || '');
+            const query = topic ? `${entityName}+${topic}` : entityName;
+            const href = `#/search?mode=corpus&q=${query}`;
+
+            return `
+                <a href="${this.escapeHtml(href)}"
+                   class="edp-add-source-btn"
+                   title="Find sources for this section in the corpus"
+                   aria-label="Add source for ${this.escapeHtml(sectionTopic || 'this section')}">
+                    + Add Source
+                </a>
+            `;
         }
 
         /**
