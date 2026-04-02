@@ -1151,9 +1151,10 @@ console.log('[App Init] Script loaded - starting execution');
             }
         }));
 
-        // Show diagnostic panel if there were issues or in debug mode
-        const showDiagnostics = initState.warnings.length > 0 ||
-                                initState.missingDependencies.length > 0 ||
+        // Show diagnostic panel only for critical errors or explicit debug mode
+        const hasCriticalErrors = initState.missingDependencies.some(d => d.critical);
+        const showDiagnostics = hasCriticalErrors ||
+                                (window.DEBUG_MODE === true) ||
                                 new URLSearchParams(window.location.search).has('debug');
 
         if (showDiagnostics) {
