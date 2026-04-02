@@ -369,8 +369,20 @@
                     <!-- Breadcrumb Navigation -->
                     ${this.renderBreadcrumb(mythology, entityType, entity.name || entity.title)}
 
+                    <!-- Share Toolbar -->
+                    <div class="entity-share-toolbar-container"></div>
+
                     <!-- Main Asset Detail Panel -->
                     ${this.assetDetailPanel.render(entity, entityType, mythology)}
+
+                    <!-- Corpus Search -->
+                    <div class="entity-corpus-search-container"></div>
+
+                    <!-- Private Notes (auth users only) -->
+                    <div class="entity-private-notes-container"></div>
+
+                    <!-- Discussion -->
+                    <div class="asset-discussion-container"></div>
 
                     <!-- Print Footer -->
                     ${this.enablePrintStyles ? this.renderPrintFooter(entity) : ''}
@@ -456,6 +468,18 @@
                             </section>
                         ` : ''}
                     </div>
+
+                    <!-- Share Toolbar -->
+                    <div class="entity-share-toolbar-container"></div>
+
+                    <!-- Corpus Search -->
+                    <div class="entity-corpus-search-container"></div>
+
+                    <!-- Private Notes (auth users only) -->
+                    <div class="entity-private-notes-container"></div>
+
+                    <!-- Discussion -->
+                    <div class="asset-discussion-container"></div>
                 </article>
             `;
         }
@@ -499,6 +523,10 @@
          * Render breadcrumb navigation
          */
         renderBreadcrumb(mythology, entityType, entityName) {
+            const safeEntityType = entityType || 'entities';
+            const safeMythology = mythology && mythology !== 'undefined' ? mythology : null;
+            const safeEntityName = entityName || 'Unknown';
+
             return `
                 <nav class="edv-breadcrumb" aria-label="Breadcrumb navigation">
                     <ol class="edv-breadcrumb__list">
@@ -506,13 +534,13 @@
                             <a href="#/" class="edv-breadcrumb__link">Home</a>
                         </li>
                         <li class="edv-breadcrumb__item">
-                            <a href="#/browse/${entityType}" class="edv-breadcrumb__link">${this.getEntityTypeLabel(entityType)}</a>
+                            <a href="#/browse/${this.escapeAttr(safeEntityType)}" class="edv-breadcrumb__link">${this.getEntityTypeLabel(safeEntityType)}</a>
                         </li>
-                        ${mythology ? `<li class="edv-breadcrumb__item">
-                            <a href="#/mythology/${mythology}" class="edv-breadcrumb__link">${this.capitalize(mythology)}</a>
+                        ${safeMythology ? `<li class="edv-breadcrumb__item">
+                            <a href="#/mythology/${this.escapeAttr(safeMythology)}" class="edv-breadcrumb__link">${this.capitalize(safeMythology)}</a>
                         </li>` : ''}
                         <li class="edv-breadcrumb__item edv-breadcrumb__item--current" aria-current="page">
-                            <span>${this.escapeHtml(entityName)}</span>
+                            <span>${this.escapeHtml(safeEntityName)}</span>
                         </li>
                     </ol>
                 </nav>
@@ -1090,15 +1118,184 @@
          */
         initializeCommunityComponents(entity) {
             const discussionContainer = document.querySelector('.asset-discussion-container');
-            if (discussionContainer && window.AssetDiscussion) {
-                const discussion = new window.AssetDiscussion({
-                    container: discussionContainer,
+            if (discussionContainer) {
+                if (window.AssetDiscussion) {
+                    try {
+                        const discussion = new window.AssetDiscussion({
+                            container: discussionContainer,
+                            assetId: entity.id,
+                            assetType: entity.entityType,
+                            assetName: entity.name || entity.title,
+                            mythology: entity.mythology
+                        });
+                        discussion.render();
+                    } catch (err) {
+                        console.warn('[EntityDetailView] AssetDiscussion failed to initialize:', err);
+                        this.renderDiscussionUnavailable(discussionContainer, entity);
+                    }
+                } else {
+                    this.renderDiscussionUnavailable(discussionContainer, entity);
+                }
+            }
+
+            // Initialize corpus search
+            this.initializeCorpusSearch(entity);
+
+            // Initialize private notes (auth users only)
+            this.initializePrivateNotes(entity);
+
+            // Initialize share toolbar
+            this.initializeShareToolbar(entity);
+
+            // Initialize contribute menu FAB
+            this.initializeContributeMenu(entity);
+        }
+
+        /**
+         * Render "Discussions unavailable" fallback with retry button
+         */
+        renderDiscussionUnavailable(container, entity) {
+            container.innerHTML = `
+                <div class="edv-discussion-unavailable">
+                    <p class="edv-discussion-unavailable__msg">Discussions unavailable</p>
+                    <button class="edv-btn edv-btn--secondary edv-btn--sm"
+                            data-action="retry-discussion"
+                            data-entity-id="${this.escapeAttr(entity.id)}"
+                            aria-label="Retry loading discussions">
+                        Retry
+                    </button>
+                </div>
+            `;
+
+            // Attach retry handler
+            const retryBtn = container.querySelector('[data-action="retry-discussion"]');
+            if (retryBtn) {
+                retryBtn.addEventListener('click', () => {
+                    container.innerHTML = '<p class="edv-discussion-loading">Loading discussions...</p>';
+                    setTimeout(() => this.initializeCommunityComponents(entity), 500);
+                });
+            }
+        }
+
+        /**
+         * Initialize corpus search component on entity pages
+         */
+        initializeCorpusSearch(entity) {
+            const corpusContainer = document.querySelector('.entity-corpus-search-container');
+            if (!corpusContainer || typeof window.AssetCorpusSearch === 'undefined') return;
+
+            try {
+                const corpusSearch = new window.AssetCorpusSearch({
+                    container: corpusContainer,
+                    entity: entity,
                     assetId: entity.id,
                     assetType: entity.entityType,
                     assetName: entity.name || entity.title,
                     mythology: entity.mythology
                 });
-                discussion.render();
+                if (typeof corpusSearch.init === 'function') {
+                    corpusSearch.init(entity);
+                } else if (typeof corpusSearch.render === 'function') {
+                    corpusSearch.render();
+                }
+            } catch (err) {
+                console.warn('[EntityDetailView] AssetCorpusSearch failed to initialize:', err);
+            }
+        }
+
+        /**
+         * Initialize private notes panel (authenticated users only)
+         */
+        initializePrivateNotes(entity) {
+            const notesContainer = document.querySelector('.entity-private-notes-container');
+            if (!notesContainer || typeof window.PrivateNotesPanel === 'undefined') return;
+
+            // Only show for authenticated users
+            const isAuthenticated = !!(
+                window.EyesOfAzrael?.currentUser ||
+                (window.firebase && window.firebase.auth && window.firebase.auth().currentUser) ||
+                localStorage.getItem('eoa_auth_cached') === 'true'
+            );
+
+            if (!isAuthenticated) {
+                notesContainer.style.display = 'none';
+                return;
+            }
+
+            try {
+                const notesPanel = new window.PrivateNotesPanel({
+                    container: notesContainer,
+                    entityId: entity.id,
+                    entityType: entity.entityType,
+                    entityName: entity.name || entity.title
+                });
+                if (typeof notesPanel.init === 'function') {
+                    notesPanel.init();
+                } else if (typeof notesPanel.render === 'function') {
+                    notesPanel.render();
+                }
+            } catch (err) {
+                console.warn('[EntityDetailView] PrivateNotesPanel failed to initialize:', err);
+            }
+        }
+
+        /**
+         * Initialize share toolbar component
+         */
+        initializeShareToolbar(entity) {
+            const shareContainer = document.querySelector('.entity-share-toolbar-container');
+            if (!shareContainer || typeof window.ShareToolbar === 'undefined') return;
+
+            try {
+                const shareToolbar = new window.ShareToolbar({
+                    container: shareContainer,
+                    name: entity.name || entity.title,
+                    url: window.location.href,
+                    description: entity.shortDescription || entity.description || ''
+                });
+                if (typeof shareToolbar.init === 'function') {
+                    shareToolbar.init();
+                } else if (typeof shareToolbar.render === 'function') {
+                    shareToolbar.render();
+                }
+            } catch (err) {
+                console.warn('[EntityDetailView] ShareToolbar failed to initialize:', err);
+            }
+        }
+
+        /**
+         * Initialize contribute menu FAB on entity pages
+         */
+        initializeContributeMenu(entity) {
+            if (typeof window.ContributeMenu === 'undefined') return;
+
+            try {
+                const contributeMenu = new window.ContributeMenu({
+                    entityId: entity.id,
+                    entityType: entity.entityType,
+                    entityName: entity.name || entity.title,
+                    mythology: entity.mythology,
+                    callbacks: {
+                        'add-note': () => {
+                            const notesContainer = document.querySelector('.entity-private-notes-container');
+                            if (notesContainer) {
+                                notesContainer.scrollIntoView({ behavior: 'smooth' });
+                                notesContainer.focus?.();
+                            }
+                        },
+                        'suggest-relationship': () => {
+                            const entityName = encodeURIComponent(entity.name || entity.title || entity.id);
+                            window.location.hash = `#/search?mode=corpus&q=${entityName}+relationships`;
+                        }
+                    }
+                });
+                if (typeof contributeMenu.init === 'function') {
+                    contributeMenu.init();
+                } else if (typeof contributeMenu.render === 'function') {
+                    contributeMenu.render();
+                }
+            } catch (err) {
+                console.warn('[EntityDetailView] ContributeMenu failed to initialize:', err);
             }
         }
 

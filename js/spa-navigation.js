@@ -321,7 +321,7 @@ class SPANavigation {
             entity_alt: /^#?\/entity\/([^\/]+)\/([^\/]+)\/([^\/]+)\/?$/,
             entity_simple: /^#?\/entity\/([^\/]+)\/([^\/]+)\/?$/,  // 2-param: #/entity/collection/id
             category: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/?$/,
-            search: /^#?\/search\/?$/,
+            search: /^#?\/search\/?(\?.*)?$/,
             corpus_explorer: /^#?\/corpus-explorer\/?$/,
             compare: /^#?\/compare\/?$/,
             dashboard: /^#?\/dashboard\/?$/,
@@ -1047,7 +1047,9 @@ class SPANavigation {
                 }
             } else if (this.routes.search.test(path)) {
                 spaLog('Matched SEARCH route');
-                await this.renderSearch();
+                const queryStr = path.includes('?') ? path.split('?')[1] : '';
+                const searchParams = new URLSearchParams(queryStr);
+                await this.renderSearch(searchParams);
             } else if (this.routes.corpus_explorer.test(path)) {
                 spaLog('Matched CORPUS EXPLORER route - redirecting to standalone page');
                 this._isNavigating = false;
@@ -1069,8 +1071,8 @@ class SPANavigation {
                 spaLog('Matched TERMS route');
                 await this.renderTerms();
             } else if (this.routes.guidelines.test(path)) {
-                spaLog('Matched GUIDELINES route - rendering about page');
-                await this.renderAbout();
+                spaLog('Matched GUIDELINES route');
+                await this.renderGuidelines();
             } else if (this.routes.user_profile.test(path)) {
                 const match = path.match(this.routes.user_profile);
                 spaLog('Matched USER PROFILE route:', match[1]);
@@ -1876,8 +1878,8 @@ class SPANavigation {
         return div.innerHTML;
     }
 
-    async renderSearch() {
-        spaLog('renderSearch() called');
+    async renderSearch(searchParams) {
+        spaLog('renderSearch() called', searchParams ? Object.fromEntries(searchParams) : {});
 
         try {
             const mainContent = document.getElementById('main-content');
@@ -1887,7 +1889,7 @@ class SPANavigation {
                 const searchView = new SearchViewComplete(this.db);
                 window.searchViewInstance = searchView;
                 spaLog('Rendering SearchViewComplete...');
-                await searchView.render(mainContent);
+                await searchView.render(mainContent, searchParams);
                 spaLog('Search page rendered via SearchViewComplete');
                 document.dispatchEvent(new CustomEvent('first-render-complete', {
                     detail: { route: 'search', renderer: 'SearchViewComplete', timestamp: Date.now() }
@@ -2133,6 +2135,60 @@ class SPANavigation {
             }));
         } catch (error) {
             spaError('Terms page render failed:', error);
+            throw error;
+        }
+    }
+
+    async renderGuidelines() {
+        spaLog('renderGuidelines() called');
+
+        try {
+            const mainContent = document.getElementById('main-content');
+
+            mainContent.innerHTML = `
+                <div class="static-page guidelines-page" style="max-width: 800px; margin: 0 auto; padding: 2rem 1rem;">
+                    <h1 style="color: var(--color-primary, #8b7fff); margin-bottom: 1rem;">Community Guidelines</h1>
+                    <p style="opacity: 0.8; margin-bottom: 2rem;">Eyes of Azrael is a collaborative mythology encyclopedia. These guidelines help us maintain accuracy, respect, and scholarly integrity.</p>
+
+                    <section style="margin-bottom: 2rem;">
+                        <h2 style="margin-bottom: 0.75rem;">Accuracy &amp; Sources</h2>
+                        <ul style="line-height: 1.8; opacity: 0.9; padding-left: 1.5rem;">
+                            <li>All contributions should be grounded in documented mythological sources.</li>
+                            <li>Cite primary or reputable secondary sources when suggesting changes.</li>
+                            <li>Distinguish between attested myths and modern interpretations.</li>
+                        </ul>
+                    </section>
+
+                    <section style="margin-bottom: 2rem;">
+                        <h2 style="margin-bottom: 0.75rem;">Respect &amp; Sensitivity</h2>
+                        <ul style="line-height: 1.8; opacity: 0.9; padding-left: 1.5rem;">
+                            <li>Treat all mythological traditions with equal scholarly respect.</li>
+                            <li>Avoid sensationalising or trivialising living religious traditions.</li>
+                            <li>Indigenous and contemporary traditions deserve particular care.</li>
+                        </ul>
+                    </section>
+
+                    <section style="margin-bottom: 2rem;">
+                        <h2 style="margin-bottom: 0.75rem;">Constructive Contributions</h2>
+                        <ul style="line-height: 1.8; opacity: 0.9; padding-left: 1.5rem;">
+                            <li>Use the corpus search to find supporting texts before suggesting edits.</li>
+                            <li>Propose relationship links with a clear rationale.</li>
+                            <li>Discussion threads should advance scholarly understanding.</li>
+                        </ul>
+                    </section>
+
+                    <div style="margin-top: 2rem; padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                        <p style="margin: 0; opacity: 0.7;">Questions? Contact us at <a href="mailto:support@eyesofazrael.com" style="color: var(--color-primary, #8b7fff);">support@eyesofazrael.com</a></p>
+                    </div>
+                </div>
+            `;
+
+            spaLog('Guidelines page rendered');
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { route: 'guidelines', timestamp: Date.now() }
+            }));
+        } catch (error) {
+            spaError('Guidelines page render failed:', error);
             throw error;
         }
     }
