@@ -47,7 +47,7 @@
         earth: 'earth',
         storm: 'storm',
         // Cosmic themes
-        celestial: 'night',
+        celestial: 'cosmic',
         abyssal: 'dark',
         chaos: 'chaos',
         aurora: 'aurora',
