@@ -345,7 +345,7 @@ describe('AdminFieldEditIcons', () => {
             expect(icon.dataset.entityId).toBe('zeus');
         });
 
-        test('skips injection if not admin', () => {
+        test('icons injected regardless of admin status (CSS controls visibility)', () => {
             const container = document.createElement('div');
             container.innerHTML = '<section><h2>Appearance</h2></section>';
 
@@ -357,10 +357,9 @@ describe('AdminFieldEditIcons', () => {
             icons.isAdmin = false;
             icons.inject(container, entity);
 
+            // Icons are always injected — CSS body:not(.is-admin) hides them
             const editIcons = container.querySelectorAll('.admin-field-edit-icon');
-            editIcons.forEach(i => {
-                expect(i.style.display).toBe('none');
-            });
+            expect(editIcons.length).toBeGreaterThan(0);
         });
 
         test('does not duplicate icons on re-injection', () => {

@@ -138,16 +138,9 @@ class DebugDataPanel {
 
         if (this.isActive) btn.classList.add('active');
 
-        // Insert into header actions, before the hamburger menu button
-        const headerActions = document.querySelector('.header-actions');
-        if (headerActions) {
-            const extendedMenuBtn = document.getElementById('extendedMenuBtn');
-            if (extendedMenuBtn) {
-                headerActions.insertBefore(btn, extendedMenuBtn);
-            } else {
-                headerActions.appendChild(btn);
-            }
-        }
+        // Position fixed in bottom-right corner, outside header flow
+        btn.style.cssText = 'position: fixed; bottom: 16px; right: 16px; z-index: 9990; border-radius: 8px; padding: 6px 12px; background: rgba(30, 30, 60, 0.9); border: 1px solid rgba(255,255,255,0.15); color: #e0e0e0; cursor: pointer; font-size: 12px; display: flex; align-items: center; gap: 4px; backdrop-filter: blur(8px);';
+        document.body.appendChild(btn);
     }
 
     /**

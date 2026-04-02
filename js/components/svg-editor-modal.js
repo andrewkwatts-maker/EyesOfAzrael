@@ -94,6 +94,11 @@ class SVGEditorModal {
         this.updatePreview();
         this.isOpen = true;
 
+        // Switch to requested tab mode ('ai' or 'code')
+        if (options.mode && typeof this.switchTab === 'function') {
+            setTimeout(() => this.switchTab(options.mode), 50);
+        }
+
         // Focus on first input
         setTimeout(() => {
             const firstInput = this.overlay.querySelector('.svg-code-textarea, .svg-prompt-input');

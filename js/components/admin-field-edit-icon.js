@@ -25,6 +25,7 @@ class AdminFieldEditIcons {
         if (window.moderationService) {
             window.moderationService.getAdminStatus().then(isAdmin => {
                 this.isAdmin = isAdmin;
+                document.body.classList.toggle('is-admin', isAdmin);
                 if (isAdmin) this._showAllIcons();
             }).catch(() => {});
         }
@@ -34,6 +35,7 @@ class AdminFieldEditIcons {
 
     _handleAdminChange(e) {
         this.isAdmin = e.detail?.isAdmin || false;
+        document.body.classList.toggle('is-admin', this.isAdmin);
         if (this.isAdmin) {
             this._showAllIcons();
         } else {
@@ -82,10 +84,7 @@ class AdminFieldEditIcons {
                 icon.dataset.entityName = entity.name || entity.title || entity.id;
                 icon.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>`;
 
-                // Only show if admin
-                if (!this.isAdmin) {
-                    icon.style.display = 'none';
-                }
+                // Visibility controlled by body.is-admin class via CSS
 
                 target.appendChild(icon);
             });
