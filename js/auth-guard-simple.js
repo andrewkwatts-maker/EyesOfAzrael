@@ -32,7 +32,6 @@
     let currentUser = null;
     let authInitialized = false;
     let sessionCheckInterval = null;
-    let userMenuOpen = false;
 
     // LocalStorage keys for remembering user
     const LAST_USER_KEY = 'eoa_last_user_email_hash';
@@ -153,9 +152,6 @@
         setupLogoutButton();
         setupUserMenuDropdown();
         setupProtectedRouteIndicators();
-
-        // Close dropdown when clicking outside
-        document.addEventListener('click', handleDocumentClick);
 
         // Keyboard navigation support
         document.addEventListener('keydown', handleKeyboardNavigation);
@@ -401,9 +397,6 @@
 
         // Clear user display
         updateUserDisplay(null);
-
-        // Close user menu if open
-        closeUserMenu();
 
         // Dispatch auth-ready event
         document.dispatchEvent(new CustomEvent('auth-ready', {
@@ -792,81 +785,37 @@
     }
 
     /**
-     * Toggle user menu dropdown
-     */
-    function toggleUserMenu() {
-        userMenuOpen = !userMenuOpen;
-        const dropdown = document.getElementById('user-dropdown');
-        const trigger = document.getElementById('user-menu-trigger');
-
-        if (dropdown && trigger) {
-            if (userMenuOpen) {
-                dropdown.classList.add('show');
-                trigger.setAttribute('aria-expanded', 'true');
-                // Focus first menu item
-                const firstItem = dropdown.querySelector('[role="menuitem"]');
-                if (firstItem) firstItem.focus();
-            } else {
-                dropdown.classList.remove('show');
-                trigger.setAttribute('aria-expanded', 'false');
-            }
-        }
-    }
-
-    /**
-     * Close user menu dropdown
-     */
-    function closeUserMenu() {
-        userMenuOpen = false;
-        const dropdown = document.getElementById('user-dropdown');
-        const trigger = document.getElementById('user-menu-trigger');
-
-        if (dropdown) {
-            dropdown.classList.remove('show');
-        }
-        if (trigger) {
-            trigger.setAttribute('aria-expanded', 'false');
-        }
-    }
-
-    /**
-     * Handle document click to close dropdown
-     */
-    function handleDocumentClick(e) {
-        const userInfo = document.getElementById('userInfo');
-        if (userInfo && !userInfo.contains(e.target)) {
-            closeUserMenu();
-        }
-    }
-
-    /**
      * Handle keyboard navigation
      */
     function handleKeyboardNavigation(e) {
-        if (!userMenuOpen) return;
-
         const dropdown = document.getElementById('user-dropdown');
-        if (!dropdown) return;
+        if (!dropdown || !dropdown.classList.contains('show')) return;
 
         const items = dropdown.querySelectorAll('[role="menuitem"]');
         const currentIndex = Array.from(items).findIndex(item => item === document.activeElement);
 
         switch (e.key) {
-            case 'Escape':
-                closeUserMenu();
+            case 'Escape': {
+                dropdown.classList.remove('show');
                 const trigger = document.getElementById('user-menu-trigger');
-                if (trigger) trigger.focus();
+                if (trigger) {
+                    trigger.setAttribute('aria-expanded', 'false');
+                    trigger.focus();
+                }
                 break;
-            case 'ArrowDown':
+            }
+            case 'ArrowDown': {
                 e.preventDefault();
                 const nextIndex = currentIndex < items.length - 1 ? currentIndex + 1 : 0;
                 items[nextIndex].focus();
                 break;
-            case 'ArrowUp':
+            }
+            case 'ArrowUp': {
                 e.preventDefault();
                 const prevIndex = currentIndex > 0 ? currentIndex - 1 : items.length - 1;
                 items[prevIndex].focus();
                 break;
+            }
             case 'Home':
                 e.preventDefault();
                 items[0].focus();

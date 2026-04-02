@@ -36,10 +36,8 @@ class AdminModerationPanel {
         // Listen for admin status changes
         window.addEventListener('adminStatusChanged', (e) => {
             if (e.detail.isAdmin) {
-                this.showAdminMenuOption();
                 this.showExtendedMenuAdminSection();
             } else {
-                this.hideAdminMenuOption();
                 this.hideExtendedMenuAdminSection();
                 this.hide();
             }
@@ -48,7 +46,6 @@ class AdminModerationPanel {
         // Check initial admin status
         const isAdmin = await this.moderationService.getAdminStatus();
         if (isAdmin) {
-            this.showAdminMenuOption();
             this.showExtendedMenuAdminSection();
         }
 
@@ -117,59 +114,6 @@ class AdminModerationPanel {
                 this.activeTab = 'history';
                 this.show();
             });
-        }
-    }
-
-    /**
-     * Show the admin menu option in the header
-     */
-    showAdminMenuOption() {
-        // Check if admin menu option already exists
-        if (document.getElementById('adminModerationBtn')) return;
-
-        // Find the user info container in header
-        const userInfo = document.getElementById('userInfo');
-        if (!userInfo) {
-            // Try adding to header actions instead
-            const headerActions = document.querySelector('.header-actions');
-            if (headerActions) {
-                this.injectAdminButton(headerActions);
-            }
-            return;
-        }
-
-        this.injectAdminButton(userInfo);
-    }
-
-    /**
-     * Inject the admin moderation button
-     * @param {HTMLElement} container
-     */
-    injectAdminButton(container) {
-        const adminBtn = document.createElement('button');
-        adminBtn.id = 'adminModerationBtn';
-        adminBtn.className = 'admin-moderation-btn';
-        adminBtn.setAttribute('aria-label', 'Admin Moderation Panel');
-        adminBtn.setAttribute('title', 'Admin Moderation');
-        adminBtn.innerHTML = '<span class="admin-icon">&#9881;</span><span class="admin-label">Admin</span>';
-        adminBtn.addEventListener('click', () => this.toggle());
-
-        // Insert before sign out button if present
-        const signOutBtn = container.querySelector('#signOutBtn');
-        if (signOutBtn) {
-            container.insertBefore(adminBtn, signOutBtn);
-        } else {
-            container.appendChild(adminBtn);
-        }
-    }
-
-    /**
-     * Hide the admin menu option
-     */
-    hideAdminMenuOption() {
-        const adminBtn = document.getElementById('adminModerationBtn');
-        if (adminBtn) {
-            adminBtn.remove();
         }
     }
 

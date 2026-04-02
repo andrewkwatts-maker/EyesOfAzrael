@@ -451,7 +451,8 @@ class BrowseCategoryView {
         const domains = new Set();
 
         entities.forEach(entity => {
-            const entityDomains = entity.domains || entity.attributes || entity.roles || [];
+            const rawDomains = entity.domains || entity.attributes || entity.roles || [];
+            const entityDomains = Array.isArray(rawDomains) ? rawDomains : [];
             entityDomains.forEach(domain => domains.add(domain));
         });
 
@@ -2153,7 +2154,8 @@ class BrowseCategoryView {
         // Apply domain filter
         if (this.selectedDomains.size > 0) {
             filtered = filtered.filter(entity => {
-                const domains = entity.domains || entity.attributes || entity.roles || [];
+                const rawDomains = entity.domains || entity.attributes || entity.roles || [];
+                const domains = Array.isArray(rawDomains) ? rawDomains : [];
                 return domains.some(domain => this.selectedDomains.has(domain));
             });
         }
@@ -2172,10 +2174,10 @@ class BrowseCategoryView {
                     entity.name,
                     entity.description || '',
                     entity.summary || '',
-                    ...(entity.domains || []),
-                    ...(entity.attributes || []),
-                    ...(entity.roles || []),
-                    ...(entity.altNames || [])
+                    ...(Array.isArray(entity.domains) ? entity.domains : []),
+                    ...(Array.isArray(entity.attributes) ? entity.attributes : []),
+                    ...(Array.isArray(entity.roles) ? entity.roles : []),
+                    ...(Array.isArray(entity.altNames) ? entity.altNames : [])
                 ].join(' ').toLowerCase();
 
                 return searchableText.includes(this.searchTerm);
