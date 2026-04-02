@@ -79,6 +79,7 @@ class HeaderNavController {
         this.setupThemePickerListeners();
         this.setupGlobalListeners();
         this.setupScrollListener();
+        this.setupHeaderSearch();
 
         // Inject mobile nav panel if not present
         this.ensureMobileNav();
@@ -526,6 +527,78 @@ class HeaderNavController {
                 });
             }
         }
+    }
+
+    /**
+     * Set up header search toggle
+     */
+    setupHeaderSearch() {
+        const searchBtn = document.getElementById('headerSearchBtn');
+        const searchDropdown = document.getElementById('headerSearchDropdown');
+        const searchInput = document.getElementById('headerSearchInput');
+        if (!searchBtn || !searchDropdown) return;
+
+        let searchOpen = false;
+        const toggleSearch = () => {
+            searchOpen = !searchOpen;
+            searchDropdown.style.display = searchOpen ? 'block' : 'none';
+            if (searchOpen && searchInput) {
+                setTimeout(() => searchInput.focus(), 50);
+            }
+        };
+
+        searchBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleSearch();
+        });
+
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (searchOpen && !searchDropdown.contains(e.target) && e.target !== searchBtn) {
+                searchOpen = false;
+                searchDropdown.style.display = 'none';
+            }
+        });
+
+        // Ctrl+K shortcut
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                toggleSearch();
+            }
+            if (e.key === 'Escape' && searchOpen) {
+                searchOpen = false;
+                searchDropdown.style.display = 'none';
+            }
+        });
+
+        // Submit search on Enter
+        if (searchInput) {
+            searchInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && searchInput.value.trim()) {
+                    const query = encodeURIComponent(searchInput.value.trim());
+                    window.location.hash = `#/search?q=${query}`;
+                    searchOpen = false;
+                    searchDropdown.style.display = 'none';
+                    searchInput.value = '';
+                }
+            });
+        }
+
+        // Search option links pass the query
+        searchDropdown.querySelectorAll('.header-search-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                if (searchInput && searchInput.value.trim()) {
+                    e.preventDefault();
+                    const query = encodeURIComponent(searchInput.value.trim());
+                    const type = option.dataset.searchType;
+                    const mode = type === 'corpus' ? '&mode=corpus' : '';
+                    window.location.hash = `#/search?q=${query}${mode}`;
+                }
+                searchOpen = false;
+                searchDropdown.style.display = 'none';
+            });
+        });
     }
 
     /**
