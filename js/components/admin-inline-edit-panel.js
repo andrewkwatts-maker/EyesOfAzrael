@@ -645,6 +645,7 @@ class AdminInlineEditPanel {
                 window.SVGEditorModal.open({
                     initialSvg: textarea.value,
                     entityData: this.currentField?.entity,
+                    mode: 'ai',
                     onSave: (data) => {
                         textarea.value = data.svgCode || data;
                         preview.innerHTML = data.svgCode || data;
@@ -654,12 +655,13 @@ class AdminInlineEditPanel {
             }
         });
 
-        // Edit SVG button - open full editor
+        // Edit SVG button - open full editor in code mode
         document.getElementById('adminEditIconEdit').addEventListener('click', () => {
             if (window.SVGEditorModal) {
                 window.SVGEditorModal.open({
                     initialSvg: textarea.value,
                     entityData: this.currentField?.entity,
+                    mode: 'code',
                     onSave: (data) => {
                         textarea.value = data.svgCode || data;
                         preview.innerHTML = data.svgCode || data;
