@@ -778,133 +778,17 @@
     }
 
     /**
-     * Set up user menu dropdown
+     * Set up authenticated header items (no dropdown — inline buttons)
      */
     function setupUserMenuDropdown() {
-        const userInfo = document.getElementById('userInfo');
-        if (!userInfo) return;
-
-        // Check if dropdown already exists
-        if (userInfo.querySelector('.user-dropdown-menu')) return;
-
-        // Create dropdown menu
-        const dropdown = document.createElement('div');
-        dropdown.className = 'user-dropdown-menu';
-        dropdown.id = 'user-dropdown';
-        dropdown.setAttribute('role', 'menu');
-        dropdown.setAttribute('aria-label', 'User menu');
-        dropdown.innerHTML = `
-            <div class="user-dropdown-header" role="menuitem">
-                <img id="dropdown-avatar" class="dropdown-avatar" src="" alt="">
-                <div class="dropdown-user-details">
-                    <span class="dropdown-user-name" id="dropdown-user-name"></span>
-                    <span class="dropdown-user-email" id="dropdown-user-email"></span>
-                </div>
-            </div>
-            <div class="user-dropdown-divider" role="separator"></div>
-            <a href="#/dashboard" class="user-dropdown-item" role="menuitem" tabindex="0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="3" y="3" width="7" height="7"/>
-                    <rect x="14" y="3" width="7" height="7"/>
-                    <rect x="14" y="14" width="7" height="7"/>
-                    <rect x="3" y="14" width="7" height="7"/>
-                </svg>
-                My Dashboard
-            </a>
-            <a href="#/favorites" class="user-dropdown-item" role="menuitem" tabindex="0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-                </svg>
-                My Favorites
-            </a>
-            <a href="#/settings" class="user-dropdown-item" role="menuitem" tabindex="0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                </svg>
-                Settings
-            </a>
-            <div class="user-dropdown-divider" role="separator"></div>
-            <button class="user-dropdown-item user-dropdown-signout" id="dropdown-signout" role="menuitem" tabindex="0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16,17 21,12 16,7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                </svg>
-                Sign Out
-            </button>
-        `;
-
-        userInfo.appendChild(dropdown);
-
-        // Make avatar and name clickable to toggle dropdown
-        const userAvatar = userInfo.querySelector('#userAvatar');
-        const userName = userInfo.querySelector('#userName');
-
-        // Create wrapper for click target
-        const clickTarget = document.createElement('button');
-        clickTarget.className = 'user-menu-trigger';
-        clickTarget.setAttribute('aria-haspopup', 'true');
-        clickTarget.setAttribute('aria-expanded', 'false');
-        clickTarget.setAttribute('aria-label', 'Open user menu');
-        clickTarget.id = 'user-menu-trigger';
-
-        // Move avatar and name into click target
-        if (userAvatar) {
-            const avatarClone = userAvatar.cloneNode(true);
-            clickTarget.appendChild(avatarClone);
-            userAvatar.style.display = 'none';
-        }
-        if (userName) {
-            const nameClone = userName.cloneNode(true);
-            nameClone.id = 'user-menu-name';
-            clickTarget.appendChild(nameClone);
-            userName.style.display = 'none';
-        }
-
-        // Add dropdown indicator
-        const dropdownIndicator = document.createElement('span');
-        dropdownIndicator.className = 'dropdown-indicator';
-        dropdownIndicator.innerHTML = `
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <polyline points="6,9 12,15 18,9"/>
-            </svg>
-        `;
-        clickTarget.appendChild(dropdownIndicator);
-
-        // Insert before dropdown
-        userInfo.insertBefore(clickTarget, dropdown);
-
-        // Remove old sign out button (we have one in dropdown)
-        const oldSignOutBtn = userInfo.querySelector('#signOutBtn:not(.user-dropdown-signout)');
-        if (oldSignOutBtn) {
-            oldSignOutBtn.style.display = 'none';
-        }
-
-        // Toggle dropdown on click
-        clickTarget.addEventListener('click', (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleUserMenu();
-        });
-
-        // Sign out from dropdown
-        const dropdownSignout = dropdown.querySelector('#dropdown-signout');
-        if (dropdownSignout) {
-            dropdownSignout.addEventListener('click', (e) => {
+        const signOutBtn = document.getElementById('signOutBtn');
+        if (signOutBtn && !signOutBtn._authHandlerAttached) {
+            signOutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                closeUserMenu();
                 handleLogout();
             });
+            signOutBtn._authHandlerAttached = true;
         }
-
-        // Close dropdown when clicking menu items (except signout which we handle above)
-        dropdown.querySelectorAll('.user-dropdown-item:not(#dropdown-signout)').forEach(item => {
-            item.addEventListener('click', () => {
-                closeUserMenu();
-            });
-        });
     }
 
     /**
@@ -1527,24 +1411,13 @@
      */
     function updateUserDisplay(user) {
         const userInfo = document.getElementById('userInfo');
-        const userName = document.getElementById('userName');
         const userAvatar = document.getElementById('userAvatar');
         const signInBtn = document.getElementById('signInBtn');
 
-        // Also update dropdown elements
-        const dropdownAvatar = document.getElementById('dropdown-avatar');
-        const dropdownName = document.getElementById('dropdown-user-name');
-        const dropdownEmail = document.getElementById('dropdown-user-email');
-        const menuName = document.getElementById('user-menu-name');
-        const menuAvatar = document.querySelector('.user-menu-trigger img');
-
         if (user) {
-            // User is logged in
+            // User is logged in — show auth header items, hide sign-in
             if (userInfo) {
                 userInfo.classList.remove('hidden');
-            }
-            if (userName) {
-                userName.textContent = user.displayName || user.email || 'User';
             }
             if (userAvatar) {
                 userAvatar.src = user.photoURL || DEFAULT_AVATAR;
@@ -1557,29 +1430,8 @@
             if (signInBtn) {
                 signInBtn.style.display = 'none';
             }
-
-            // Update dropdown
-            if (dropdownAvatar) {
-                dropdownAvatar.src = user.photoURL || DEFAULT_AVATAR;
-                dropdownAvatar.alt = user.displayName || 'User profile';
-            }
-            if (dropdownName) {
-                dropdownName.textContent = user.displayName || 'User';
-            }
-            if (dropdownEmail) {
-                dropdownEmail.textContent = user.email || '';
-            }
-
-            // Update menu trigger
-            if (menuName) {
-                menuName.textContent = user.displayName || user.email || 'User';
-            }
-            if (menuAvatar) {
-                menuAvatar.src = user.photoURL || DEFAULT_AVATAR;
-                menuAvatar.alt = user.displayName || 'User profile';
-            }
         } else {
-            // User is logged out
+            // User is logged out — hide auth items, show sign-in
             if (userInfo) {
                 userInfo.classList.add('hidden');
             }
@@ -1599,8 +1451,6 @@
     function isProtectedRoute(path) {
         const protectedRoutes = [
             '/dashboard',
-            '/favorites',
-            '/settings',
             '/my-theories',
             '/profile'
         ];
