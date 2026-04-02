@@ -212,6 +212,63 @@ When adding a new JS file to the project:
 4. Add an `onerror` handler on the `<script>` tag if it's load-order critical
 5. Run `npm test` to ensure the precache completeness test still passes
 
+### Search Routing
+
+The search route accepts optional query parameters:
+
+- `#/search` — plain search page
+- `#/search?q=zeus` — pre-populated query, auto-triggers search on load
+- `#/search?mode=corpus` — activates corpus search mode
+- `#/search?q=zeus&mode=corpus` — corpus search with pre-populated query
+
+Route regex: `/^#?\/search\/?(\?.*)?$/` — captures the optional `?...` query string.
+
+`SearchViewComplete.render(container, searchParams)` receives a `URLSearchParams` object and uses `q` and `mode` params to pre-fill the search input and activate the correct tab.
+
+### Entity Detail Page Features
+
+Entity detail pages (`js/views/entity-detail-view.js` + `js/components/entity-detail-page.js`) include the following optional panels, each initialized after the entity loads:
+
+- **Corpus Search** — `AssetCorpusSearch` component shows related source texts; auto-initialized via `corpus-search-integration.js` listening for the `entity:loaded` event
+- **Private Notes** — `PrivateNotesPanel` renders a notes sidebar for authenticated users only; notes stored per-user in Firestore (`private_notes` collection)
+- **Discussion** — `AssetDiscussion` renders threaded comments with voting; dispatches `first-render-complete` on completion (both success and error paths)
+- **Share Toolbar** — `ShareToolbar` component renders copy-link and social share buttons
+- **Contribute Menu** — FAB rendered by `contribute-menu.js`; offers: add note, suggest relationship, submit variant
+
+### AI / Gemini Configuration
+
+SVG icon generation uses the Gemini API via `js/gemini-svg-generator.js`.
+
+To enable AI generation without being signed in as an admin:
+
+```js
+// Set before the app initializes (e.g. in browser console or a config script)
+window.EOA_GEMINI_KEY = 'YOUR_GEMINI_API_KEY';
+```
+
+If `window.EOA_GEMINI_KEY` is not set and no Firebase Auth token is available, the generator falls back to `IconGenerator.generateForMythology()` (geometric SVG) and shows a toast: "AI generation unavailable, using geometric fallback".
+
+### Admin System
+
+Admin status is determined by Firebase custom claims and propagated as follows:
+
+1. `js/auth-guard-simple.js` checks the ID token for `admin: true` claim
+2. Sets `document.body.classList.add('is-admin')` when confirmed
+3. Dispatches `document.dispatchEvent(new CustomEvent('adminStatusChanged', { detail: { isAdmin: true } }))`
+
+Admin-gated UI should check `document.body.classList.contains('is-admin')` or listen for the `adminStatusChanged` event — **not** a hardcoded email address.
+
+### Newsletter Subscription
+
+Newsletter sign-up forms submit to Firestore collection `newsletter_subscribers`:
+
+```js
+// Document structure
+{ email: 'user@example.com', subscribedAt: Timestamp, source: 'footer' }
+```
+
+The handler in `js/header-nav.js` validates email format, writes to Firestore, and shows a success toast. Duplicate emails are handled gracefully (upsert by email as document ID).
+
 ### Troubleshooting Common Rendering Issues
 
 **"No X Found" on browse pages** — AssetService or CacheManager is returning an empty array from cache. Clear localStorage keys starting with `eoa_` and reload. Check `firebase-cache-manager.js` `getList()` for empty-array false positives.

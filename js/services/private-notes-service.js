@@ -273,7 +273,8 @@ class PrivateNotesService {
     }
 }
 
-// Auto-initialize
+// Expose class for testability and auto-initialize singleton
+window.PrivateNotesService = PrivateNotesService;
 (function() {
     if (window.privateNotesService) return;
     window.privateNotesService = new PrivateNotesService();

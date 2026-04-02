@@ -420,9 +420,9 @@ class PrivateNotesPanel {
 
         } catch (error) {
             console.error('[PrivateNotes] Save error:', error);
-            alert('Error saving note: ' + error.message);
+            this._showPanelError('Error saving note: ' + (error.message || 'Unknown error'));
         } finally {
-            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Save Note'; }
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = this.editingNoteId ? 'Update Note' : 'Save Note'; }
         }
     }
 
@@ -440,7 +440,7 @@ class PrivateNotesPanel {
             await this.loadNotes();
         } catch (error) {
             console.error('[PrivateNotes] Delete error:', error);
-            alert('Error deleting note: ' + error.message);
+            this._showPanelError('Error deleting note: ' + (error.message || 'Unknown error'));
         }
     }
 
@@ -459,6 +459,33 @@ class PrivateNotesPanel {
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
             .replace(/\n/g, '<br>');
+    }
+
+    /**
+     * Show an in-panel error message (non-blocking alternative to alert())
+     * @param {string} message
+     */
+    _showPanelError(message) {
+        // Reuse or create an error banner inside the panel body
+        const body = document.getElementById('privateNotesBody');
+        if (!body) return;
+
+        let errorEl = body.querySelector('.private-notes-panel-error');
+        if (!errorEl) {
+            errorEl = document.createElement('div');
+            errorEl.className = 'private-notes-panel-error';
+            errorEl.style.cssText = 'color:#ff6b6b;background:rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.3);border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:0.5rem;font-size:0.85rem;';
+            body.insertBefore(errorEl, body.firstChild);
+        }
+
+        errorEl.textContent = message;
+        errorEl.style.display = 'block';
+
+        // Auto-dismiss after 5 seconds
+        clearTimeout(this._errorTimeout);
+        this._errorTimeout = setTimeout(() => {
+            if (errorEl) errorEl.style.display = 'none';
+        }, 5000);
     }
 
     _escapeHtml(str) {

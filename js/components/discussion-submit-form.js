@@ -101,10 +101,17 @@ class DiscussionSubmitForm {
                 this.auth = firebase.auth();
             }
 
-            // Initialize corpus service
+            // Initialize corpus service (optional — degrade gracefully if missing)
             if (window.CorpusQueryService) {
-                this.corpusService = window.corpusQueryService || new window.CorpusQueryService(this.db);
-                await this.corpusService.init({});
+                try {
+                    this.corpusService = window.corpusQueryService || new window.CorpusQueryService(this.db);
+                    await this.corpusService.init({});
+                } catch (corpusErr) {
+                    console.warn('[DiscussionSubmitForm] CorpusQueryService init failed — corpus validation disabled:', corpusErr);
+                    this.corpusService = null;
+                }
+            } else {
+                console.warn('[DiscussionSubmitForm] CorpusQueryService not available — corpus validation disabled');
             }
 
             // Initialize validator
@@ -457,7 +464,9 @@ class DiscussionSubmitForm {
         const query = this.corpusQueryInput?.value?.trim() || '';
 
         const contentValid = content.length >= this.options.minContentLength;
-        const queryValid = !this.options.requireCorpusQuery || query.length >= this.options.minQueryLength;
+        // If corpus service is unavailable, don't require a corpus query even when requireCorpusQuery is true
+        const corpusRequired = this.options.requireCorpusQuery && !!this.corpusService;
+        const queryValid = !corpusRequired || query.length >= this.options.minQueryLength;
 
         this.validateBtn.disabled = !contentValid || !queryValid || this.isValidating;
     }
@@ -598,7 +607,9 @@ class DiscussionSubmitForm {
             return;
         }
 
-        if (this.options.requireCorpusQuery && (!query || query.length < this.options.minQueryLength)) {
+        // Only enforce corpus query requirement when the service is actually available
+        const corpusRequired = this.options.requireCorpusQuery && !!this.corpusService;
+        if (corpusRequired && (!query || query.length < this.options.minQueryLength)) {
             this._showError('Please enter a corpus search query.');
             return;
         }
@@ -636,8 +647,18 @@ class DiscussionSubmitForm {
                     this._showError(validationResult.message || 'Validation failed. Please revise your contribution.');
                 }
             } else {
-                // No validator available - allow submission with corpus results
-                if (this.corpusResults && this.corpusResults.combined?.length > 0) {
+                // No validator available
+                if (!this.corpusService) {
+                    // Corpus service is entirely unavailable — allow submission without citation
+                    this.isValidated = true;
+                    this.submitBtn.disabled = false;
+                    this._updateValidationStatus({
+                        isValid: true,
+                        message: 'Corpus validation unavailable — ready to submit.'
+                    });
+                    this._updatePreview();
+                } else if (this.corpusResults && this.corpusResults.combined?.length > 0) {
+                    // Corpus results found — allow submission
                     this.isValidated = true;
                     this.submitBtn.disabled = false;
                     this._updateValidationStatus({

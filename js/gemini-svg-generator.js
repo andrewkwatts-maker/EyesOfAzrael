@@ -98,6 +98,9 @@ Generate clean, semantic SVG code with these requirements:
      * Check if user is authenticated
      */
     isAuthenticated() {
+        // Direct API key takes precedence — no Firebase auth needed
+        if (window.EOA_GEMINI_KEY) return true;
+
         // Try to reinitialize auth if not set
         if (!this.auth && typeof firebase !== 'undefined' && firebase.auth) {
             this.auth = firebase.auth();
@@ -106,7 +109,7 @@ Generate clean, semantic SVG code with these requirements:
     }
 
     /**
-     * Check if configured (user is signed in)
+     * Check if configured (API key present or user is signed in)
      */
     isConfigured() {
         return this.isAuthenticated();
@@ -337,9 +340,13 @@ Generate clean, semantic SVG code with these requirements:
      */
     async generateSVG(prompt, options = {}) {
         if (!this.isAuthenticated()) {
+            // Try geometric fallback before returning error
+            const fallback = this._tryGeometricFallback(prompt, options);
+            if (fallback) return fallback;
+
             return {
                 success: false,
-                error: 'Not authenticated. Please sign in with your Google account to use AI image generation.',
+                error: 'API key required. Set window.EOA_GEMINI_KEY or sign in with Google to use AI image generation.',
                 needsAuth: true,
                 authPromptHTML: this.getAuthPromptHTML(),
                 configInstructions: this.getConfigInstructions()
@@ -432,11 +439,53 @@ Generate clean, semantic SVG code with these requirements:
             }
         }
 
+        // Try geometric fallback before giving up
+        const fallback = this._tryGeometricFallback(prompt, options);
+        if (fallback) return fallback;
+
         return {
             success: false,
             error: 'Maximum retries exceeded. The AI service may be temporarily unavailable.',
             errorHTML: this.getErrorHTML('Maximum retries exceeded. The AI service may be temporarily unavailable. Please try again later.')
         };
+    }
+
+    /**
+     * Try geometric fallback via IconGenerator when Gemini is unavailable
+     * @param {string} prompt - Original prompt
+     * @param {Object} options - Generation options
+     * @returns {Object|null} Fallback result or null if unavailable
+     */
+    _tryGeometricFallback(prompt, options) {
+        if (typeof window === 'undefined' || !window.IconGenerator) return null;
+
+        try {
+            // Extract mythology hint from prompt for better geometric output
+            const mythology = options.mythology || 'greek';
+            const svgCode = window.IconGenerator.generateForMythology(mythology);
+
+            if (svgCode) {
+                console.log('[GeminiSVG] Using geometric fallback via IconGenerator');
+                if (typeof window.ToastNotifications !== 'undefined') {
+                    window.ToastNotifications.show(
+                        'AI generation unavailable — using geometric fallback',
+                        'warning'
+                    );
+                }
+                return {
+                    success: true,
+                    svgCode: svgCode,
+                    prompt: prompt,
+                    options: options,
+                    isGeometricFallback: true,
+                    fallbackNote: 'Geometric fallback (not AI-generated)'
+                };
+            }
+        } catch (e) {
+            console.warn('[GeminiSVG] Geometric fallback failed:', e.message);
+        }
+
+        return null;
     }
 
     /**
@@ -475,19 +524,29 @@ Generate clean, semantic SVG code with these requirements:
     }
 
     /**
-     * Call Gemini API using OAuth token
+     * Call Gemini API using API key or OAuth token
      */
     async callGeminiAPI(prompt) {
         try {
-            // Get current user's OAuth token
-            const token = await this.getCurrentUserToken();
-            if (!token) {
-                return {
-                    success: false,
-                    error: 'Failed to get authentication token. Please try signing in again.',
-                    retryable: false,
-                    needsAuth: true
-                };
+            let authHeader;
+            let requestUrl = this.apiEndpoint;
+
+            if (window.EOA_GEMINI_KEY) {
+                // Use direct API key — append as query param (Gemini REST API style)
+                requestUrl = `${this.apiEndpoint}?key=${encodeURIComponent(window.EOA_GEMINI_KEY)}`;
+                authHeader = null;
+            } else {
+                // Fall back to Firebase OAuth token
+                const token = await this.getCurrentUserToken();
+                if (!token) {
+                    return {
+                        success: false,
+                        error: 'API key required. Set window.EOA_GEMINI_KEY or sign in with Google.',
+                        retryable: false,
+                        needsAuth: true
+                    };
+                }
+                authHeader = `Bearer ${token}`;
             }
 
             const requestBody = {
@@ -504,13 +563,13 @@ Generate clean, semantic SVG code with these requirements:
                 }
             };
 
-            // Call Gemini API with OAuth token in Authorization header
-            const response = await fetch(this.apiEndpoint, {
+            // Call Gemini API — with API key in URL or OAuth token in header
+            const fetchHeaders = { 'Content-Type': 'application/json' };
+            if (authHeader) fetchHeaders['Authorization'] = authHeader;
+
+            const response = await fetch(requestUrl, {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
+                headers: fetchHeaders,
                 body: JSON.stringify(requestBody)
             });
 
@@ -521,7 +580,7 @@ Generate clean, semantic SVG code with these requirements:
                 if (response.status === 401 || response.status === 403) {
                     // Try to refresh token and retry once
                     const refreshedToken = await this.getCurrentUserToken();
-                    if (refreshedToken && refreshedToken !== token) {
+                    if (refreshedToken) {
                         // Token was refreshed, retry the request
                         return this.callGeminiAPI(prompt);
                     }

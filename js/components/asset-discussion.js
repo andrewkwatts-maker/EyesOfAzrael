@@ -103,8 +103,11 @@ class AssetDiscussion {
                 this.db = firebase.firestore();
                 this.auth = firebase.auth();
 
+                // VoteService is optional — degrade gracefully if missing
                 if (window.VoteService) {
                     this.voteService = new window.VoteService(this.db, this.auth);
+                } else {
+                    console.warn('[AssetDiscussion] VoteService not available — voting disabled');
                 }
             }
 
@@ -122,11 +125,51 @@ class AssetDiscussion {
             // Check for highlighted comment in URL hash
             this._checkUrlHash();
 
+            // Dispatch first-render-complete so loading spinners hide
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { source: 'asset-discussion', assetId: this.options.assetId }
+            }));
+
             console.log(`[AssetDiscussion] Initialized for ${this.options.assetType}/${this.options.assetId}`);
 
         } catch (error) {
             console.error('[AssetDiscussion] Initialization error:', error);
-            this._showError('Failed to load discussion. Please refresh the page.');
+            // Error boundary: show user-friendly message with retry button
+            this._showErrorBoundary(error);
+            // Still dispatch first-render-complete so spinners hide
+            document.dispatchEvent(new CustomEvent('first-render-complete', {
+                detail: { source: 'asset-discussion', error: true }
+            }));
+        }
+    }
+
+    /**
+     * Show full error boundary when the component fails to initialize
+     * @param {Error} error - The caught error
+     */
+    _showErrorBoundary(error) {
+        if (!this.container) return;
+
+        this.container.innerHTML = `
+            <div class="discussion-error-boundary" role="alert" style="padding: 2rem; text-align: center; border: 1px solid rgba(255,80,80,0.3); border-radius: 8px; background: rgba(255,0,0,0.05);">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:40px;height:40px;margin-bottom:0.75rem;opacity:0.6;">
+                    <circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>
+                </svg>
+                <p style="font-weight:600;margin-bottom:0.5rem;">Discussion failed to load</p>
+                <p style="opacity:0.7;margin-bottom:1rem;font-size:0.9rem;">There was a problem loading the discussion for this page.</p>
+                <button class="discussion-retry-btn" style="padding:0.5rem 1.25rem;border:1px solid currentColor;background:transparent;color:inherit;border-radius:6px;cursor:pointer;">
+                    Try Again
+                </button>
+            </div>
+        `;
+
+        // Retry button re-initialises the component
+        const retryBtn = this.container.querySelector('.discussion-retry-btn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+                this.container.innerHTML = '';
+                this.init();
+            });
         }
     }
 
