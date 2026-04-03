@@ -105,17 +105,29 @@ class UserDashboardView {
             reputationData = await this.reputationService.getReputation(this.userId);
         }
 
-        // Get badges
-        const badgesSnapshot = await db.collection('badge_awards')
-            .where('userId', '==', this.userId)
-            .orderBy('awardedAt', 'desc')
-            .limit(50)
-            .get();
-
-        const badges = [];
-        badgesSnapshot.forEach(doc => {
-            badges.push({ id: doc.id, ...doc.data() });
-        });
+        // Get badges (with fallback if index missing)
+        let badges = [];
+        try {
+            const badgesSnapshot = await db.collection('badge_awards')
+                .where('userId', '==', this.userId)
+                .orderBy('awardedAt', 'desc')
+                .limit(50)
+                .get();
+            badgesSnapshot.forEach(doc => {
+                badges.push({ id: doc.id, ...doc.data() });
+            });
+        } catch (badgeErr) {
+            console.warn('[Dashboard] Badge query failed (index may be missing):', badgeErr.message);
+            try {
+                const fallback = await db.collection('badge_awards')
+                    .where('userId', '==', this.userId)
+                    .limit(50)
+                    .get();
+                fallback.forEach(doc => {
+                    badges.push({ id: doc.id, ...doc.data() });
+                });
+            } catch (_) { /* badges unavailable */ }
+        }
 
         // Get contribution counts
         const counts = await this._getContributionCounts();
@@ -526,6 +538,16 @@ class UserDashboardView {
                         </svg>
                         Settings
                     </button>
+                    ${document.body.classList.contains('is-admin') ? `
+                    <button class="dashboard-tab ${this.activeTab === 'admin' ? 'active' : ''}"
+                            data-tab="admin" role="tab" aria-selected="${this.activeTab === 'admin'}" aria-controls="dashboard-tabpanel" id="dashboard-tab-admin"
+                            style="color: #fbbf24;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        Admin
+                    </button>
+                    ` : ''}
                 </nav>
 
                 <!-- Tab Content -->
@@ -551,6 +573,8 @@ class UserDashboardView {
                 return this._getAchievementsContent();
             case 'settings':
                 return this._getSettingsContent();
+            case 'admin':
+                return this._getAdminContent();
             default:
                 return this._getOverviewContent();
         }
@@ -857,6 +881,36 @@ class UserDashboardView {
     /**
      * Get settings tab content
      */
+    _getAdminContent() {
+        return `
+            <div class="dashboard-admin">
+                <h2 style="margin-bottom: 1rem; color: #fbbf24;">Admin Panel</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+                    <div class="stat-card" style="padding: 1.5rem;">
+                        <h3>Content Management</h3>
+                        <p style="opacity: 0.7; margin: 0.5rem 0;">Manage entities, approve submissions, moderate content.</p>
+                        <a href="#/browse/deities" class="header-auth-link" style="margin-top: 0.5rem;">Browse Entities →</a>
+                    </div>
+                    <div class="stat-card" style="padding: 1.5rem;">
+                        <h3>Moderation Queue</h3>
+                        <p style="opacity: 0.7; margin: 0.5rem 0;">Review pending submissions and user reports.</p>
+                        <div id="admin-moderation-mount"></div>
+                    </div>
+                    <div class="stat-card" style="padding: 1.5rem;">
+                        <h3>Firebase Sync</h3>
+                        <p style="opacity: 0.7; margin: 0.5rem 0;">Push local data to Firestore.</p>
+                        <code style="font-size: 0.75rem; opacity: 0.5;">npm run push:dry-run</code>
+                    </div>
+                    <div class="stat-card" style="padding: 1.5rem;">
+                        <h3>AI Tools</h3>
+                        <p style="opacity: 0.7; margin: 0.5rem 0;">Auto-populate fields, generate icons, validate content.</p>
+                        <p style="font-size: 0.75rem; opacity: 0.5;">Available on entity detail pages via edit icons.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     _getSettingsContent() {
         const u = this.userData;
 
@@ -1332,6 +1386,19 @@ class UserDashboardView {
                 this._loadFavorites();
             } else if (tabId === 'achievements') {
                 this._initBadgeDisplay();
+            } else if (tabId === 'admin') {
+                // Initialize moderation panel if available
+                if (window.AdminModerationPanel) {
+                    const mount = document.getElementById('admin-moderation-mount');
+                    if (mount) {
+                        try {
+                            const panel = new window.AdminModerationPanel();
+                            panel.render(mount);
+                        } catch (e) {
+                            mount.innerHTML = '<p style="opacity: 0.5;">Moderation panel unavailable.</p>';
+                        }
+                    }
+                }
             }
         }
 
