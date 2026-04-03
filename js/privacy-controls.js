@@ -126,12 +126,12 @@
         }
 
         body.has-consent-banner {
-          padding-bottom: 80px;
+          padding-bottom: 100px;
         }
 
         @media (max-width: 768px) {
           body.has-consent-banner {
-            padding-bottom: 140px;
+            padding-bottom: 160px;
           }
         }
 
@@ -141,7 +141,8 @@
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 2rem;
+          gap: 1rem 2rem;
+          flex-wrap: wrap;
         }
 
         .consent-text h3 {
@@ -169,7 +170,7 @@
           display: flex;
           gap: 0.75rem;
           flex-shrink: 0;
-          overflow: visible;
+          flex-wrap: wrap;
         }
 
         @media (max-width: 768px) {
