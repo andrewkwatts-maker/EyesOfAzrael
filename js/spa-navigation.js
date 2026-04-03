@@ -1560,8 +1560,16 @@ class SPANavigation {
                     spaLog('Mythology page rendered via MythologyOverview');
                 } catch (overviewError) {
                     spaError('MythologyOverview render failed, falling back:', overviewError);
-                    mainContent.innerHTML = await this.renderBasicMythologyPage(mythologyId);
-                    spaLog('Mythology page rendered (basic fallback after MythologyOverview error)');
+                    try {
+                        mainContent.innerHTML = await this.renderBasicMythologyPage(mythologyId);
+                        spaLog('Mythology page rendered (basic fallback after MythologyOverview error)');
+                    } catch (fallbackError) {
+                        spaError('Basic mythology fallback also failed:', fallbackError);
+                        mainContent.innerHTML = this.getErrorHTML(
+                            'Unable to Load Mythology',
+                            'Could not connect to the server. Please check your internet connection and try again.'
+                        );
+                    }
                 }
             } else {
                 spaLog('MythologyOverview not available, trying PageAssetRenderer...');
