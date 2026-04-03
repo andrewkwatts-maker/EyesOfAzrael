@@ -402,7 +402,7 @@ class FirebaseEntityRenderer {
             ${entity.keyMyths?.length ? ssr.renderKeyMyths(entity.keyMyths, 'Key Myths & Legends') : ''}
 
             <!-- Mythology & Stories (Legacy format) -->
-            ${entity.mythsAndLegends?.length && !entity.keyMyths?.length ? `
+            ${Array.isArray(entity.mythsAndLegends) && entity.mythsAndLegends.length && !entity.keyMyths?.length ? `
             <section style="margin-top: 2rem;">
                 <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <a data-mythos="${this.mythology}" data-smart href="#mythology">Mythology</a> &amp; Stories
@@ -410,7 +410,7 @@ class FirebaseEntityRenderer {
                 <p>${this.escapeHtml(entity.name || 'This entity')}'s mythology spans numerous tales and legends. These stories reveal the nature of divine power, wisdom, and the relationship between the divine and humanity.</p>
                 <h3 style="color: var(--mythos-secondary, var(--color-text-primary)); margin-top: 1.5rem;">Key Myths:</h3>
                 <ul style="margin: 1rem 0 0 2rem; line-height: 1.8;">
-                    ${entity.mythsAndLegends.map(myth => `
+                    ${(Array.isArray(entity.mythsAndLegends) ? entity.mythsAndLegends : [entity.mythsAndLegends]).map(myth => `
                         <li>
                             <strong>${this.escapeHtml(myth.title || myth.name)}:</strong> ${this.escapeHtml(myth.description || myth.summary)}
                             ${myth.source ? `<div class="citation" style="margin-top: 0.5rem;"><em>Source: ${this.escapeHtml(myth.source)}</em></div>` : ''}
@@ -441,7 +441,7 @@ class FirebaseEntityRenderer {
                 </h2>
                 <h3 style="color: var(--mythos-secondary, var(--color-text-primary));">Sacred Sites</h3>
                 ${entity.worship ? `<p>${this.escapeHtml(entity.worship)}</p>` : ''}
-                ${entity.cultCenters?.length ? `
+                ${Array.isArray(entity.cultCenters) && entity.cultCenters.length ? `
                     <ul style="margin: 0.5rem 0 0 2rem;">
                         ${entity.cultCenters.map(site => `<li>${this.escapeHtml(site)}</li>`).join('')}
                     </ul>
@@ -1113,7 +1113,7 @@ class FirebaseEntityRenderer {
             </section>
 
             <!-- Quests & Adventures -->
-            ${entity.quests?.length || entity.adventures?.length ? `
+            ${(Array.isArray(entity.quests) && entity.quests.length) || (Array.isArray(entity.adventures) && entity.adventures.length) ? `
             <section style="margin-top: 2rem;">
                 <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <span style="margin-right: 0.5rem;">🗺️</span>
@@ -1121,7 +1121,7 @@ class FirebaseEntityRenderer {
                 </h2>
                 <div class="glass-card" style="padding: 1rem;">
                     <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
-                        ${(entity.quests || entity.adventures || []).map(quest => `
+                        ${(Array.isArray(entity.quests) ? entity.quests : Array.isArray(entity.adventures) ? entity.adventures : []).map(quest => `
                             <li style="margin-bottom: 0.5rem;">
                                 <strong style="color: var(--mythos-primary, var(--color-primary));">${this.escapeHtml(quest.title || quest.name || quest)}</strong>
                                 ${quest.description ? `<br><span style="opacity: 0.9;">${this.escapeHtml(quest.description)}</span>` : ''}
@@ -1133,14 +1133,14 @@ class FirebaseEntityRenderer {
             ` : ''}
 
             <!-- Weapons & Equipment -->
-            ${entity.weapons?.length || entity.equipment?.length ? `
+            ${(Array.isArray(entity.weapons) && entity.weapons.length) || (Array.isArray(entity.equipment) && entity.equipment.length) ? `
             <section style="margin-top: 2rem;">
                 <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <span style="margin-right: 0.5rem;">⚔️</span>
                     Weapons &amp; Equipment
                 </h2>
                 <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-                    ${(entity.weapons || entity.equipment || []).map(item => `
+                    ${(Array.isArray(entity.weapons) ? entity.weapons : Array.isArray(entity.equipment) ? entity.equipment : []).map(item => `
                         <span class="tag" style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.15); color: var(--mythos-primary, var(--color-primary)); padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.3);">
                             ${this.escapeHtml(typeof item === 'string' ? item : item.name)}
                         </span>
@@ -1349,7 +1349,7 @@ class FirebaseEntityRenderer {
             ${ssr.renderItemDetails(entity)}
 
             <!-- Wielders/Owners -->
-            ${entity.wielders?.length || entity.owners?.length ? `
+            ${(Array.isArray(entity.wielders) && entity.wielders.length) || (Array.isArray(entity.owners) && entity.owners.length) ? `
             <section style="margin-top: 2rem;">
                 <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <span style="margin-right: 0.5rem;">👥</span>
@@ -1357,7 +1357,7 @@ class FirebaseEntityRenderer {
                 </h2>
                 <div class="glass-card" style="padding: 1rem;">
                     <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
-                        ${(entity.wielders || entity.owners || []).map(wielder => `
+                        ${(Array.isArray(entity.wielders) ? entity.wielders : Array.isArray(entity.owners) ? entity.owners : []).map(wielder => `
                             <li>${this.escapeHtml(typeof wielder === 'string' ? wielder : wielder.name)}</li>
                         `).join('')}
                     </ul>
@@ -1548,14 +1548,14 @@ class FirebaseEntityRenderer {
             ${entity.cross_cultural_parallels?.length ? ssr.renderCrossCulturalParallels(entity.cross_cultural_parallels) : ''}
 
             <!-- Related Events -->
-            ${entity.relatedEvents?.length ? `
+            ${Array.isArray(entity.relatedEvents) && entity.relatedEvents.length ? `
             <section style="margin-top: 2rem;">
                 <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <span style="margin-right: 0.5rem;">📜</span>
                     Notable Events
                 </h2>
                 <div style="display: flex; flex-direction: column; gap: 1rem;">
-                    ${entity.relatedEvents.map(event => `
+                    ${(Array.isArray(entity.relatedEvents) ? entity.relatedEvents : [entity.relatedEvents]).map(event => `
                         <div class="glass-card" style="padding: 1.25rem;">
                             <h3 style="color: var(--mythos-primary, var(--color-primary)); margin: 0 0 0.5rem 0;">
                                 ${this.escapeHtml(event.title || event.name || 'Event')}
@@ -1812,13 +1812,13 @@ class FirebaseEntityRenderer {
                 </h2>
                 <div class="attribute-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
                     ${this.renderCreatureAttributes(entity)}
-                    ${entity.abilities?.length ? `
+                    ${Array.isArray(entity.abilities) && entity.abilities.length ? `
                         <div class="subsection-card" style="padding: 1rem;">
                             <div class="attribute-label" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                                 <span>✨</span><span>Abilities</span>
                             </div>
                             <div class="attribute-value" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-                                ${entity.abilities.map(a => `
+                                ${(Array.isArray(entity.abilities) ? entity.abilities : [entity.abilities]).map(a => `
                                     <span style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.1); padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.85rem;">
                                         ${this.escapeHtml(a)}
                                     </span>
@@ -1826,15 +1826,15 @@ class FirebaseEntityRenderer {
                             </div>
                         </div>
                     ` : ''}
-                    ${entity.habitat?.length ? `
+                    ${entity.habitat ? `
                         <div class="subsection-card" style="padding: 1rem;">
                             <div class="attribute-label" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
                                 <span>🌍</span><span>Habitat</span>
                             </div>
                             <div class="attribute-value" style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
-                                ${entity.habitat.map(h => `
+                                ${(Array.isArray(entity.habitat) ? entity.habitat : [entity.habitat]).map(h => `
                                     <span style="background: rgba(var(--mythos-primary-rgb, var(--color-primary-rgb, 139, 127, 255)), 0.1); padding: 0.25rem 0.5rem; border-radius: 8px; font-size: 0.85rem;">
-                                        ${this.escapeHtml(h)}
+                                        ${this.escapeHtml(String(h))}
                                     </span>
                                 `).join('')}
                             </div>
@@ -1845,7 +1845,7 @@ class FirebaseEntityRenderer {
             ` : ''}
 
             <!-- Weaknesses -->
-            ${entity.weaknesses?.length ? `
+            ${Array.isArray(entity.weaknesses) && entity.weaknesses.length ? `
             <section style="margin-top: 2rem;">
                 <h2 style="color: var(--mythos-primary, var(--color-primary));">
                     <span style="margin-right: 0.5rem;">🛡️</span>
@@ -1853,7 +1853,7 @@ class FirebaseEntityRenderer {
                 </h2>
                 <div class="glass-card" style="padding: 1.5rem;">
                     <ul style="margin: 0; padding-left: 1.5rem; line-height: 1.8;">
-                        ${entity.weaknesses.map(w => `
+                        ${(Array.isArray(entity.weaknesses) ? entity.weaknesses : [entity.weaknesses]).map(w => `
                             <li style="margin-bottom: 0.5rem;">
                                 ${typeof w === 'string' ? this.escapeHtml(w) : `
                                     <strong style="color: var(--mythos-primary, var(--color-primary));">${this.escapeHtml(w.name || w.title || '')}</strong>
