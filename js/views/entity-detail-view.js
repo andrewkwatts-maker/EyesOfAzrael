@@ -190,21 +190,37 @@
             }
 
             const collection = this.getCollectionName(entityType);
-            const doc = await this.db.collection(collection).doc(entityId).get();
 
-            if (!doc.exists) return null;
+            // Add timeout to prevent infinite hang on offline/network issues
+            const timeoutPromise = new Promise((_, reject) => {
+                setTimeout(() => reject(new Error('Request timeout - please check your connection and try again')), 10000);
+            });
 
-            const entity = {
-                id: doc.id,
-                ...doc.data(),
-                mythology: mythology,
-                entityType: entityType
-            };
+            const fetchPromise = this.db.collection(collection).doc(entityId).get();
 
-            // Cache the entity
-            this.entityCache.set(cacheKey, { data: entity, timestamp: Date.now() });
+            try {
+                const doc = await Promise.race([fetchPromise, timeoutPromise]);
 
-            return entity;
+                if (!doc.exists) return null;
+
+                const entity = {
+                    id: doc.id,
+                    ...doc.data(),
+                    mythology: mythology,
+                    entityType: entityType
+                };
+
+                // Cache the entity
+                this.entityCache.set(cacheKey, { data: entity, timestamp: Date.now() });
+
+                return entity;
+            } catch (error) {
+                // Handle offline/timeout errors gracefully
+                if (error.code === 'unavailable' || error.message.includes('offline')) {
+                    throw new Error('Unable to connect to server. Please check your internet connection and try again.');
+                }
+                throw error;
+            }
         }
 
         /**
@@ -323,7 +339,7 @@
                             <div class="edv-spinner__ring"></div>
                             <div class="edv-spinner__ring"></div>
                         </div>
-                        <p class="edv-loading-text">Loading entity details...</p>
+                        <p class="edv-loading-text">Loading ${this.getEntityTypeLabel(entityType).toLowerCase()}...</p>
                     </div>
                 </article>
             `;

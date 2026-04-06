@@ -252,7 +252,13 @@ class BrowseCategoryView {
             if (snapshot.empty && mythFilter) {
                 const mythLower = mythFilter.toLowerCase();
                 console.log(`[Browse View] Exact mythology match empty, retrying with case-insensitive filter for "${mythFilter}"`);
-                const allSnapshot = await db.collection(collectionName).limit(500).get();
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Request timeout')), 10000);
+                });
+                const allSnapshot = await Promise.race([
+                    db.collection(collectionName).limit(500).get(),
+                    timeoutPromise
+                ]);
                 const filtered = allSnapshot.docs.filter(doc => {
                     const m = (doc.data().mythology || '').toLowerCase();
                     return m === mythLower;
@@ -262,17 +268,42 @@ class BrowseCategoryView {
             return snapshot;
         };
 
+        // Wrap all Firestore calls in timeout protection
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Request timeout - please check your connection')), 10000);
+        });
+
         try {
-            let snapshot = await baseQuery.orderBy('name').limit(500).get();
+            let snapshot = await Promise.race([
+                baseQuery.orderBy('name').limit(500).get(),
+                timeoutPromise
+            ]);
             snapshot = await retryWithCaseInsensitiveFilter(snapshot);
             return fetchAndFilter(snapshot);
         } catch (orderError) {
+            // Handle offline/timeout errors
+            if (orderError.code === 'unavailable' || orderError.message.includes('offline') || orderError.message.includes('timeout')) {
+                throw new Error('Unable to connect to server. Please check your internet connection and try again.');
+            }
             console.warn('[Browse View] Ordered query failed:', orderError.code || orderError.message, '- trying unordered');
-            let snapshot = await baseQuery.limit(500).get();
-            snapshot = await retryWithCaseInsensitiveFilter(snapshot);
-            const results = fetchAndFilter(snapshot);
-            results.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-            return results;
+            try {
+                const timeoutPromise2 = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Request timeout')), 10000);
+                });
+                let snapshot = await Promise.race([
+                    baseQuery.limit(500).get(),
+                    timeoutPromise2
+                ]);
+                snapshot = await retryWithCaseInsensitiveFilter(snapshot);
+                const results = fetchAndFilter(snapshot);
+                results.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+                return results;
+            } catch (unorderedError) {
+                if (unorderedError.code === 'unavailable' || unorderedError.message.includes('offline') || unorderedError.message.includes('timeout')) {
+                    throw new Error('Unable to connect to server. Please check your internet connection and try again.');
+                }
+                throw unorderedError;
+            }
         }
     }
 
