@@ -70,50 +70,67 @@ class MythologyOverview {
     async loadMythology(mythologyId) {
         if (!this.db) throw new Error('Firebase Firestore not initialized');
 
-        // Try the exact ID first
-        let doc = await this.db.collection('mythologies').doc(mythologyId).get();
-        if (doc.exists) return { id: doc.id, ...doc.data() };
+        // Wrap entire load sequence in a timeout to prevent infinite hang
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('Request timeout - please check your connection')), 10000);
+        });
 
-        // Try with mythology-hub- prefix (Firebase convention)
-        if (!mythologyId.startsWith('mythology-hub-')) {
-            doc = await this.db.collection('mythologies').doc(`mythology-hub-${mythologyId}`).get();
+        const loadPromise = (async () => {
+            // Try the exact ID first
+            let doc = await this.db.collection('mythologies').doc(mythologyId).get();
             if (doc.exists) return { id: doc.id, ...doc.data() };
-        }
 
-        // Fallback: query by mythology field (exact match)
-        const snapshot = await this.db.collection('mythologies')
-            .where('mythology', '==', mythologyId)
-            .limit(1)
-            .get();
-        if (!snapshot.empty) {
-            const matchedDoc = snapshot.docs[0];
-            return { id: matchedDoc.id, ...matchedDoc.data() };
-        }
+            // Try with mythology-hub- prefix (Firebase convention)
+            if (!mythologyId.startsWith('mythology-hub-')) {
+                doc = await this.db.collection('mythologies').doc(`mythology-hub-${mythologyId}`).get();
+                if (doc.exists) return { id: doc.id, ...doc.data() };
+            }
 
-        // Try capitalized variant (e.g. "Polynesian" if URL is "polynesian")
-        const mythCapitalized = mythologyId.charAt(0).toUpperCase() + mythologyId.slice(1).toLowerCase();
-        if (mythCapitalized !== mythologyId) {
-            const capSnapshot = await this.db.collection('mythologies')
-                .where('mythology', '==', mythCapitalized)
+            // Fallback: query by mythology field (exact match)
+            const snapshot = await this.db.collection('mythologies')
+                .where('mythology', '==', mythologyId)
                 .limit(1)
                 .get();
-            if (!capSnapshot.empty) {
-                const matchedDoc = capSnapshot.docs[0];
+            if (!snapshot.empty) {
+                const matchedDoc = snapshot.docs[0];
                 return { id: matchedDoc.id, ...matchedDoc.data() };
             }
-        }
 
-        // Try name field match
-        const nameSnapshot = await this.db.collection('mythologies')
-            .where('name', '==', mythCapitalized)
-            .limit(1)
-            .get();
-        if (!nameSnapshot.empty) {
-            const matchedDoc = nameSnapshot.docs[0];
-            return { id: matchedDoc.id, ...matchedDoc.data() };
-        }
+            // Try capitalized variant (e.g. "Polynesian" if URL is "polynesian")
+            const mythCapitalized = mythologyId.charAt(0).toUpperCase() + mythologyId.slice(1).toLowerCase();
+            if (mythCapitalized !== mythologyId) {
+                const capSnapshot = await this.db.collection('mythologies')
+                    .where('mythology', '==', mythCapitalized)
+                    .limit(1)
+                    .get();
+                if (!capSnapshot.empty) {
+                    const matchedDoc = capSnapshot.docs[0];
+                    return { id: matchedDoc.id, ...matchedDoc.data() };
+                }
+            }
 
-        return null;
+            // Try name field match
+            const nameSnapshot = await this.db.collection('mythologies')
+                .where('name', '==', mythCapitalized)
+                .limit(1)
+                .get();
+            if (!nameSnapshot.empty) {
+                const matchedDoc = nameSnapshot.docs[0];
+                return { id: matchedDoc.id, ...matchedDoc.data() };
+            }
+
+            return null;
+        })();
+
+        try {
+            return await Promise.race([loadPromise, timeoutPromise]);
+        } catch (error) {
+            // Handle offline/timeout errors gracefully
+            if (error.code === 'unavailable' || error.message.includes('offline')) {
+                throw new Error('Unable to connect to server. Please check your internet connection and try again.');
+            }
+            throw error;
+        }
     }
 
     /**

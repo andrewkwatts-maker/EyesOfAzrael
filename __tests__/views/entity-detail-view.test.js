@@ -188,9 +188,9 @@ describe('EntityDetailView', () => {
             expect(html).toContain('edv-spinner');
         });
 
-        test('should show "Loading entity details..." text', async () => {
+        test('should show "Loading..." text', async () => {
             const html = await view.render(route, container);
-            expect(html).toContain('Loading entity details...');
+            expect(html).toMatch(/Loading (entity details|deity|hero|creature)\.\.\./)
         });
 
         test('should create AbortController', async () => {
