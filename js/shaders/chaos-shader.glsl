@@ -4,94 +4,99 @@ uniform float u_time;
 uniform float u_intensity;
 
 // ============================================================================
-// CHAOS — Ray-Marched Black Hole
+// CHAOS — Ray-Marched Black Hole  (physically-grounded rewrite)
 // ============================================================================
 //
 // ╔══════════════════════════════════════════════════════════════════════════╗
 // ║  TWEAK ME — all visual controls in one place                           ║
 // ╠══════════════════════════════════════════════════════════════════════════╣
 // ║  BLACK HOLE                                                             ║
-// ║    RS          Schwarzschild radius. Bigger = larger event horizon.     ║
-// ║                Range: 0.05 (small) … 0.25 (huge). Default 0.115        ║
-// ║    BEND_FORCE  Gravitational lensing strength. Higher = more wrap.      ║
-// ║                Range: 1.0 (subtle) … 8.0 (extreme fish-eye). Def 4.2   ║
-// ║    STEPS       Ray-march iterations. More = sharper disk at GPU cost.   ║
-// ║                Range: 60 (fast) … 160 (cinematic). Default 100         ║
+// ║    RS          Schwarzschild radius (scene units). Default 0.115       ║
+// ║    BEND_FORCE  Gravitational lensing strength. Def 4.2                 ║
+// ║    STEPS       Ray-march iterations. Default 100                       ║
 // ╠══════════════════════════════════════════════════════════════════════════╣
 // ║  ACCRETION DISK                                                         ║
-// ║    DISK_INNER  Inner edge multiplier of RS. 2.0 ≈ ISCO. Range 1.5…3.0  ║
-// ║    DISK_OUTER  Outer spiral edge radius. Range 2.0 (tight) … 5.0       ║
-// ║    DISK_HEIGHT Vertical half-thickness for sampling. Range 0.3…1.5      ║
-// ║    DISK_BRIGHT Global disk emission scale. Range 1.0 (dim) … 8.0       ║
-// ║    ISCO_RING   ISCO ring spike strength. 0.0 = off, 12.0 = blinding.   ║
-// ║    TURBULENCE  FBM turbulence mix. 0.0 = smooth, 1.0 = stormy.         ║
-// ║    SPIRAL      Spiral arm depth. 0.0 = no arms, 1.0 = strong arms.     ║
+// ║    DISK_INNER  Inner ISCO edge. RS*3.0 = Schwarzschild ISCO.            ║
+// ║                RS*1.5 = Kerr maximally-spinning ISCO. Range RS*1.2…4.0 ║
+// ║    DISK_OUTER  Outer edge radius. Range 2.0…5.0                        ║
+// ║    DISK_HEIGHT Vertical half-thickness for sampling. Range 0.2…1.5     ║
+// ║    DISK_BRIGHT Global disk emission scale. Range 1.0…8.0               ║
+// ║    ISCO_RING   ISCO ring spike strength. 0.0=off, 12.0=blinding.       ║
+// ║    TURBULENCE  FBM turbulence mix. 0.0=smooth, 1.0=stormy.             ║
+// ║    SPIRAL      Spiral arm depth. 0.0=none, 1.0=strong.                 ║
 // ╠══════════════════════════════════════════════════════════════════════════╣
 // ║  DOPPLER / PHYSICS                                                      ║
-// ║    DOPPLER_STR Relativistic Doppler exponent. Range 1.0…6.0. Def 3.2   ║
-// ║                Higher = brighter prograde side, darker retrograde.      ║
-// ║    OMEGA_SCALE Keplerian speed scale. Higher = faster rotation. Def 0.38║
-// ║    ANIM_SPEED  Overall animation multiplier. 0.0 = frozen. Def 1.0     ║
+// ║    DOPPLER_STR Relativistic Doppler exponent. Def 3.2 (Schwarzschild)  ║
+// ║                Higher = stronger prograde/retrograde asymmetry          ║
+// ║    OMEGA_SCALE Keplerian speed scale. Def 0.38                         ║
+// ║    ANIM_SPEED  Overall animation multiplier. Def 1.0                   ║
 // ╠══════════════════════════════════════════════════════════════════════════╣
 // ║  PHOTON RING                                                            ║
-// ║    RING_BRIGHT Photon ring brightness. 0.0 = off, 12.0 = vivid. Def 5.5║
-// ║    RING_COLOR  Photon ring colour (blue-white). Tune x/y/z freely.     ║
+// ║    RING_BRIGHT Photon ring brightness. 0.0=off, 12.0=vivid. Def 5.5   ║
+// ║    RING_COLOR  Photon ring colour (blue-white).                        ║
 // ╠══════════════════════════════════════════════════════════════════════════╣
 // ║  CAMERA                                                                 ║
-// ║    CAM_Y       Camera height above disk. 0.0 = edge-on, 2.0 = top-down ║
-// ║    CAM_Z       Camera distance from black hole. Range 2.0…6.0. Def 3.5  ║
-// ║    CAM_TILT    Forward vector Y component (negative = look down).       ║
-// ║                -0.05 = nearly level, -0.35 = steep. Default -0.185     ║
-// ║    FOV         Focal length multiplier. 0.8 = wide, 1.6 = telephoto.   ║
+// ║    CAM_Y         Mean height above disk plane. 0.0=edge-on, 2.0=top   ║
+// ║    CAM_Z         Distance from BH. Range 2.0…6.0. Default 3.5         ║
+// ║    CAM_TILT      Look-down angle (negative). Default -0.185            ║
+// ║    FOV           Focal length. 0.8=wide, 1.6=telephoto. Default 1.20  ║
+// ║    CAM_ORBIT_SPEED  Radians/sec horizontal orbit. 0.0=static           ║
+// ║                  Full orbit = 2π/CAM_ORBIT_SPEED seconds               ║
+// ║    CAM_INCL_AMP  Elevation wobble amplitude (scene units). 0.0=none   ║
+// ║                  Camera bobs ±CAM_INCL_AMP above/below mean height    ║
+// ║    CAM_INCL_FREQ Elevation wobble rate (rad/s). Different from orbit   ║
+// ║                  rate → non-repeating Lissajous path (spaceship feel)  ║
 // ╠══════════════════════════════════════════════════════════════════════════╣
 // ║  STARS / NEBULA                                                         ║
-// ║    STAR_BRIGHT Star field brightness. Range 0.5 … 3.0. Default 1.3     ║
-// ║    NEBULA_MIX  Nebula colour intensity. 0.0 = black sky. Default 0.55   ║
-// ║    PURPLE_AMT  Purple accent nebula. 0.0 = off, 1.0 = vivid. Def 0.40  ║
+// ║    STAR_BRIGHT  Star field brightness. Default 1.3                     ║
+// ║    NEBULA_MIX   Nebula colour intensity. Default 0.55                  ║
+// ║    PURPLE_AMT   Purple accent nebula. Default 0.40                     ║
 // ╠══════════════════════════════════════════════════════════════════════════╣
 // ║  TONE MAPPING                                                           ║
-// ║    TONEMAP_K   Reinhard denominator. Higher = darker HDR rolloff.       ║
-// ║                Range: 0.2 (punchy) … 1.0 (muted). Default 0.55         ║
-// ║    GAMMA       Display gamma. 1.0 = linear, 0.82 = warm. Default 0.82  ║
+// ║    TONEMAP_K    Reinhard denominator. Default 0.55                     ║
+// ║    GAMMA        Display gamma. Default 0.82                            ║
 // ╚══════════════════════════════════════════════════════════════════════════╝
 
 // ── Black hole ────────────────────────────────────────────────────────────────
-const float RS          = 0.115;
-const float BEND_FORCE  = 4.2;
-const int   STEPS       = 100;
+const float RS          = 0.110;
+const float BEND_FORCE  = 4.4;
+const int   STEPS       = 110;
 
 // ── Accretion disk ────────────────────────────────────────────────────────────
-const float DISK_INNER  = RS * 2.0;
-const float DISK_OUTER  = 3.2;
-const float DISK_HEIGHT = 0.75;
-const float DISK_BRIGHT = 4.0;
-const float ISCO_RING   = 5.5;
-const float TURBULENCE  = 1.0;
-const float SPIRAL      = 0.35;
+const float DISK_INNER  = RS * 3.0;   // Schwarzschild ISCO = 3 * RS
+const float DISK_OUTER  = 3.4;
+const float DISK_HEIGHT = 0.90;
+const float DISK_BRIGHT = 6.0;
+const float ISCO_RING   = 9.0;
+const float TURBULENCE  = 1.00;
+const float SPIRAL      = 0.65;
 
 // ── Doppler / physics ─────────────────────────────────────────────────────────
-const float DOPPLER_STR = 3.2;
-const float OMEGA_SCALE = 0.38;
+const float DOPPLER_STR = 4.0;
+const float OMEGA_SCALE = 0.42;
 const float ANIM_SPEED  = 1.0;
 
 // ── Photon ring ───────────────────────────────────────────────────────────────
-const float RING_BRIGHT = 5.5;
-const vec3  RING_COLOR  = vec3(0.50, 0.82, 1.65);
+const float RING_BRIGHT = 6.5;
+const vec3  RING_COLOR  = vec3(0.52, 0.84, 1.72);
 
 // ── Camera ────────────────────────────────────────────────────────────────────
-const float CAM_Y       = 0.65;
-const float CAM_Z       = 3.5;
-const float CAM_TILT    = -0.185;
-const float FOV         = 1.20;
+const float CAM_Y            = 0.60;
+const float CAM_Z            = 3.3;
+const float CAM_TILT         = -0.182;
+const float FOV              = 1.22;
+const float CAM_ORBIT_SPEED  = 0.035;   // 0.0 = static | 0.035 ≈ full orbit in 180 s
+const float CAM_INCL_AMP     = 0.65;    // elevation wobble ± above CAM_Y
+const float CAM_INCL_FREQ    = 0.023;   // irrational vs orbit freq → Lissajous path
 
 // ── Stars / nebula ────────────────────────────────────────────────────────────
-const float STAR_BRIGHT = 1.3;
-const float NEBULA_MIX  = 0.55;
-const float PURPLE_AMT  = 0.40;
+const float STAR_BRIGHT = 0.8;
+const float NEBULA_MIX  = 0.35;
+const float PURPLE_AMT  = 0.25;
 
 // ── Tone mapping ──────────────────────────────────────────────────────────────
-const float TONEMAP_K   = 0.55;
-const float GAMMA       = 0.82;
+const float TONEMAP_K   = 0.40;
+const float GAMMA       = 0.79;
 
 // ── Noise ─────────────────────────────────────────────────────────────────────
 
@@ -187,19 +192,31 @@ vec3 diskEmit(vec3 pos, vec3 rayDir) {
     float doppler = dot(tangent, -rayDir);
     float boost   = pow(max(0.0, 1.0 + 3.0 * doppler), DOPPLER_STR);
 
-    // HDR disk colours
-    vec3 c_isco  = vec3(2.2, 2.0, 1.6);
-    vec3 c_hot   = vec3(2.0, 1.1, 0.22);
-    vec3 c_mid   = vec3(1.4, 0.50, 0.04);
-    vec3 c_outer = vec3(0.65, 0.05, 0.01);
-    float t1 = smoothstep(DISK_INNER, 0.40, r);
-    float t2 = smoothstep(0.40, 0.85, r);
-    float t3 = smoothstep(0.85, 2.2,  r);
+    // Physically-grounded disk colour temperature:
+    // ISCO/innermost → white-yellow (hottest, ~10^7 K mapped to visible)
+    // Inner disk     → orange-yellow (~10^6 K)
+    // Mid disk       → orange-red   (~10^5 K)
+    // Outer disk     → deep red     (~10^4 K)
+    vec3 c_isco  = vec3(2.5, 2.2, 1.8);   // near-white hot
+    vec3 c_hot   = vec3(2.2, 1.2, 0.25);  // orange
+    vec3 c_mid   = vec3(1.5, 0.45, 0.04); // dark orange
+    vec3 c_outer = vec3(0.60, 0.04, 0.01);// deep red
+
+    // Colour breakpoints scale with RS for correct physical proportions
+    float r_isco  = RS * 3.0;
+    float r_hot   = r_isco * 2.5;   // 7.5 * RS
+    float r_mid   = r_isco * 5.0;   // 15.0 * RS
+    float t1 = smoothstep(r_isco, r_hot, r);
+    float t2 = smoothstep(r_hot,  r_mid, r);
+    float t3 = smoothstep(r_mid,  DISK_OUTER, r);
     vec3 temp = mix(c_isco, c_hot,   t1);
          temp = mix(temp,   c_mid,   t2);
          temp = mix(temp,   c_outer, t3);
 
-    float isco = exp(-pow((r - 0.22) / 0.024, 2.0)) * ISCO_RING;
+    // ISCO ring: physically placed at r = 3*RS (Schwarzschild)
+    float isco_r = RS * 3.0;
+    float isco_w = max(RS * 0.20, 0.012);
+    float isco = exp(-pow((r - isco_r) / isco_w, 2.0)) * ISCO_RING;
 
     float em  = density * (0.40 + 0.60 * n1 * TURBULENCE) * boost;
           em += density * n2 * 0.40 * TURBULENCE;
@@ -217,8 +234,17 @@ void main() {
     float ar = u_resolution.x / u_resolution.y;
     vec2  sc = (uv * 2.0 - 1.0) * vec2(ar, 1.0);
 
-    vec3 camPos = vec3(0.0, CAM_Y, CAM_Z);
-    vec3 fwd    = normalize(vec3(0.0, CAM_TILT, -1.0));
+    // Inclined-orbit camera: horizontal orbit + independent elevation wobble.
+    // With CAM_ORBIT_SPEED=0 and CAM_INCL_AMP=0 this reduces to the original
+    // static camera at (0, CAM_Y, CAM_Z) looking toward origin with CAM_TILT.
+    float orbitAngle = u_time * ANIM_SPEED * CAM_ORBIT_SPEED;
+    float elevAngle  = u_time * ANIM_SPEED * CAM_INCL_FREQ;
+    float dynY       = CAM_Y + CAM_INCL_AMP * sin(elevAngle);
+    vec3  camPos     = vec3(sin(orbitAngle) * CAM_Z, dynY, cos(orbitAngle) * CAM_Z);
+
+    // "Inward" direction in the horizontal plane + static tilt toward disk plane
+    vec3 inward = normalize(vec3(-sin(orbitAngle), 0.0, -cos(orbitAngle)));
+    vec3 fwd    = normalize(inward + vec3(0.0, CAM_TILT, 0.0));
     vec3 rgt    = normalize(cross(fwd, vec3(0.0, 1.0, 0.0)));
     vec3 camUp  = cross(rgt, fwd);
 
