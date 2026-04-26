@@ -323,6 +323,7 @@ class SPANavigation {
             category: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/?$/,
             search: /^#?\/search\/?(\?.*)?$/,
             corpus_explorer: /^#?\/corpus-explorer\/?$/,
+            settings: /^#?\/settings(?:\/[^\/]*)?\/?$/,
             compare: /^#?\/compare\/?$/,
             dashboard: /^#?\/dashboard\/?$/,
             about: /^#?\/about\/?$/,
@@ -345,6 +346,7 @@ class SPANavigation {
             category: 'Category',
             search: 'Search',
             corpus_explorer: 'Corpus Explorer',
+            settings: 'Settings',
             compare: 'Compare Entities',
             dashboard: 'Dashboard',
             about: 'About',
@@ -1054,6 +1056,10 @@ class SPANavigation {
                 spaLog('Matched CORPUS EXPLORER route - redirecting to standalone page');
                 this._isNavigating = false;
                 window.location.href = 'corpus-explorer.html';
+                return;
+            } else if (this.routes.settings.test(path)) {
+                spaLog('Matched SETTINGS route - redirecting to dashboard');
+                window.location.hash = '#/dashboard';
                 return;
             } else if (this.routes.compare.test(path)) {
                 spaLog('Matched COMPARE route');
