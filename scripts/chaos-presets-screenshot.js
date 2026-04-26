@@ -1,8 +1,6 @@
 /**
- * Screenshots 5 chaos shader presets by:
- *   1. Starting the local dev server (port 3000)
- *   2. For each preset, intercepting shader-sources.js and patching the control constants
- *   3. Navigating to the chaos-theme home page and screenshotting
+ * Screenshots 5 chaos shader presets.
+ * Starts dev server, patches shader-sources.js for each preset, screenshots, restores.
  *
  * node scripts/chaos-presets-screenshot.js
  */
@@ -11,144 +9,151 @@ const { spawn }    = require('child_process');
 const path         = require('path');
 const fs           = require('fs');
 
-// ── Presets ────────────────────────────────────────────────────────────────
+// ── Physically-grounded presets ───────────────────────────────────────────────
+// All presets use DISK_INNER = RS * 3.0 (Schwarzschild ISCO) except Kerr
+// which uses RS * 1.5 (Kerr near-maximal ISCO is much closer to the horizon).
 
 const PRESETS = [
     {
-        id: 'A', name: 'Interstellar Classic',
-        desc: 'Refined tilted view — warm tones, moderate lensing, visible ISCO ring',
+        id: 'A', name: 'Sagittarius_A_Star',
+        desc: 'Our galaxy\'s black hole — quiescent state, warm orange glow. '
+            + 'Slow orbit + moderate inclination wobble reveals the shadow from '
+            + 'multiple angles like a probe in a wide stable orbit.',
         params: {
-            RS: 0.115, BEND_FORCE: 4.2, STEPS: 120,
-            DISK_INNER: 'RS * 2.0', DISK_OUTER: 3.2, DISK_HEIGHT: 0.75,
-            DISK_BRIGHT: 4.5, ISCO_RING: 6.0, TURBULENCE: 0.85, SPIRAL: 0.30,
-            DOPPLER_STR: 3.2, OMEGA_SCALE: 0.38, ANIM_SPEED: 1.0,
-            RING_BRIGHT: 5.5, RING_COLOR: 'vec3(0.50, 0.82, 1.65)',
-            CAM_Y: 0.55, CAM_Z: 3.2, CAM_TILT: -0.165, FOV: 1.20,
-            STAR_BRIGHT: 1.2, NEBULA_MIX: 0.50, PURPLE_AMT: 0.35,
-            TONEMAP_K: 0.52, GAMMA: 0.82,
+            RS: 0.115, BEND_FORCE: 4.2, STEPS: 110,
+            DISK_INNER: 'RS * 3.0', DISK_OUTER: 3.6, DISK_HEIGHT: 0.70,
+            DISK_BRIGHT: 3.8, ISCO_RING: 5.0, TURBULENCE: 0.75, SPIRAL: 0.25,
+            DOPPLER_STR: 3.5, OMEGA_SCALE: 0.38, ANIM_SPEED: 1.0,
+            RING_BRIGHT: 5.5, RING_COLOR: 'vec3(0.55, 0.85, 1.70)',
+            CAM_Y: 0.55, CAM_Z: 3.6, CAM_TILT: -0.155, FOV: 1.20,
+            CAM_ORBIT_SPEED: 0.025, CAM_INCL_AMP: 0.45, CAM_INCL_FREQ: 0.017,
+            STAR_BRIGHT: 1.4, NEBULA_MIX: 0.55, PURPLE_AMT: 0.40,
+            TONEMAP_K: 0.58, GAMMA: 0.82,
         },
     },
     {
-        id: 'B', name: 'Edge-On Drama',
-        desc: 'Nearly edge-on — extreme Einstein ring, cinematic dark framing',
+        id: 'B', name: 'M87_Star_EHT_Portrait',
+        desc: 'Inspired by the EHT image — low-inclination view, bright crescent '
+            + 'from relativistic Doppler boost. Gentle inclination wobble sweeps '
+            + 'the viewing angle through the famous shadow geometry.',
         params: {
-            RS: 0.120, BEND_FORCE: 5.8, STEPS: 120,
-            DISK_INNER: 'RS * 2.0', DISK_OUTER: 3.6, DISK_HEIGHT: 0.55,
-            DISK_BRIGHT: 5.0, ISCO_RING: 7.5, TURBULENCE: 0.70, SPIRAL: 0.20,
+            RS: 0.130, BEND_FORCE: 4.8, STEPS: 110,
+            DISK_INNER: 'RS * 3.0', DISK_OUTER: 3.2, DISK_HEIGHT: 0.55,
+            DISK_BRIGHT: 4.5, ISCO_RING: 6.5, TURBULENCE: 0.60, SPIRAL: 0.15,
+            DOPPLER_STR: 4.5, OMEGA_SCALE: 0.40, ANIM_SPEED: 1.0,
+            RING_BRIGHT: 7.5, RING_COLOR: 'vec3(0.60, 0.88, 1.80)',
+            CAM_Y: 0.25, CAM_Z: 4.2, CAM_TILT: -0.060, FOV: 1.10,
+            CAM_ORBIT_SPEED: 0.018, CAM_INCL_AMP: 0.55, CAM_INCL_FREQ: 0.011,
+            STAR_BRIGHT: 1.2, NEBULA_MIX: 0.30, PURPLE_AMT: 0.15,
+            TONEMAP_K: 0.50, GAMMA: 0.80,
+        },
+    },
+    {
+        id: 'C', name: 'Kerr_Maximal_Spin',
+        desc: 'Near-maximally spinning Kerr BH — ISCO collapses to RS*1.5, '
+            + 'extreme Doppler asymmetry. Tilted inclined orbit exaggerates '
+            + 'the frame-dragging asymmetry as the camera passes over the poles.',
+        params: {
+            RS: 0.120, BEND_FORCE: 5.2, STEPS: 120,
+            DISK_INNER: 'RS * 1.5', DISK_OUTER: 3.0, DISK_HEIGHT: 0.65,
+            DISK_BRIGHT: 5.5, ISCO_RING: 8.5, TURBULENCE: 0.90, SPIRAL: 0.40,
+            DOPPLER_STR: 5.5, OMEGA_SCALE: 0.48, ANIM_SPEED: 1.0,
+            RING_BRIGHT: 8.0, RING_COLOR: 'vec3(0.65, 0.90, 2.00)',
+            CAM_Y: 0.50, CAM_Z: 3.4, CAM_TILT: -0.148, FOV: 1.15,
+            CAM_ORBIT_SPEED: 0.030, CAM_INCL_AMP: 0.70, CAM_INCL_FREQ: 0.019,
+            STAR_BRIGHT: 1.0, NEBULA_MIX: 0.30, PURPLE_AMT: 0.20,
+            TONEMAP_K: 0.44, GAMMA: 0.80,
+        },
+    },
+    {
+        id: 'D', name: 'ADAF_Thick_Disk',
+        desc: 'Advection-dominated accretion flow — radiatively inefficient, '
+            + 'puffy hot gas corona. Slow inclined wobble lets you watch the '
+            + 'diffuse disk change shape from face-on to edge-on.',
+        params: {
+            RS: 0.105, BEND_FORCE: 3.8, STEPS: 100,
+            DISK_INNER: 'RS * 3.0', DISK_OUTER: 4.5, DISK_HEIGHT: 1.40,
+            DISK_BRIGHT: 2.8, ISCO_RING: 2.5, TURBULENCE: 1.00, SPIRAL: 0.55,
+            DOPPLER_STR: 2.5, OMEGA_SCALE: 0.32, ANIM_SPEED: 1.0,
+            RING_BRIGHT: 3.5, RING_COLOR: 'vec3(0.45, 0.75, 1.55)',
+            CAM_Y: 0.90, CAM_Z: 4.5, CAM_TILT: -0.200, FOV: 1.05,
+            CAM_ORBIT_SPEED: 0.020, CAM_INCL_AMP: 0.60, CAM_INCL_FREQ: 0.013,
+            STAR_BRIGHT: 2.0, NEBULA_MIX: 0.80, PURPLE_AMT: 0.65,
+            TONEMAP_K: 0.70, GAMMA: 0.86,
+        },
+    },
+    {
+        id: 'E', name: 'Tidal_Disruption_Event',
+        desc: 'Star eaten by BH — dense clumpy debris stream, hot chaotic flares. '
+            + 'Faster inclined orbit gives the spaceship-in-chaos feel as the '
+            + 'camera dives through the debris plane.',
+        params: {
+            RS: 0.110, BEND_FORCE: 4.4, STEPS: 110,
+            DISK_INNER: 'RS * 3.0', DISK_OUTER: 3.4, DISK_HEIGHT: 0.90,
+            DISK_BRIGHT: 6.0, ISCO_RING: 9.0, TURBULENCE: 1.00, SPIRAL: 0.65,
             DOPPLER_STR: 4.0, OMEGA_SCALE: 0.42, ANIM_SPEED: 1.0,
-            RING_BRIGHT: 9.0, RING_COLOR: 'vec3(0.60, 0.90, 2.00)',
-            CAM_Y: 0.18, CAM_Z: 4.0, CAM_TILT: -0.045, FOV: 1.10,
-            STAR_BRIGHT: 1.5, NEBULA_MIX: 0.40, PURPLE_AMT: 0.25,
-            TONEMAP_K: 0.48, GAMMA: 0.78,
-        },
-    },
-    {
-        id: 'C', name: 'Wide Field Cosmic',
-        desc: 'High camera — full disk ellipse visible, rich nebula and star field',
-        params: {
-            RS: 0.105, BEND_FORCE: 3.8, STEPS: 120,
-            DISK_INNER: 'RS * 2.0', DISK_OUTER: 4.2, DISK_HEIGHT: 1.1,
-            DISK_BRIGHT: 3.8, ISCO_RING: 4.5, TURBULENCE: 1.0, SPIRAL: 0.45,
-            DOPPLER_STR: 2.8, OMEGA_SCALE: 0.34, ANIM_SPEED: 1.0,
-            RING_BRIGHT: 4.0, RING_COLOR: 'vec3(0.45, 0.78, 1.50)',
-            CAM_Y: 1.30, CAM_Z: 4.8, CAM_TILT: -0.270, FOV: 1.05,
-            STAR_BRIGHT: 1.8, NEBULA_MIX: 0.70, PURPLE_AMT: 0.55,
-            TONEMAP_K: 0.58, GAMMA: 0.84,
-        },
-    },
-    {
-        id: 'D', name: 'Plasma Storm',
-        desc: 'Violent turbulence — blazing ISCO, strong spiral arms, Doppler contrast',
-        params: {
-            RS: 0.130, BEND_FORCE: 4.5, STEPS: 120,
-            DISK_INNER: 'RS * 2.0', DISK_OUTER: 3.0, DISK_HEIGHT: 0.80,
-            DISK_BRIGHT: 6.5, ISCO_RING: 10.0, TURBULENCE: 1.0, SPIRAL: 0.60,
-            DOPPLER_STR: 4.5, OMEGA_SCALE: 0.44, ANIM_SPEED: 1.0,
-            RING_BRIGHT: 7.0, RING_COLOR: 'vec3(0.55, 0.88, 1.80)',
-            CAM_Y: 0.60, CAM_Z: 3.0, CAM_TILT: -0.190, FOV: 1.25,
-            STAR_BRIGHT: 0.9, NEBULA_MIX: 0.35, PURPLE_AMT: 0.20,
-            TONEMAP_K: 0.42, GAMMA: 0.80,
-        },
-    },
-    {
-        id: 'E', name: 'Clean Minimal',
-        desc: 'Low turbulence — smooth concentric bands, serene deep-space feel',
-        params: {
-            RS: 0.100, BEND_FORCE: 3.5, STEPS: 120,
-            DISK_INNER: 'RS * 2.0', DISK_OUTER: 3.8, DISK_HEIGHT: 0.60,
-            DISK_BRIGHT: 3.2, ISCO_RING: 4.0, TURBULENCE: 0.30, SPIRAL: 0.10,
-            DOPPLER_STR: 2.4, OMEGA_SCALE: 0.32, ANIM_SPEED: 1.0,
-            RING_BRIGHT: 4.5, RING_COLOR: 'vec3(0.40, 0.75, 1.55)',
-            CAM_Y: 0.70, CAM_Z: 3.8, CAM_TILT: -0.200, FOV: 1.15,
-            STAR_BRIGHT: 1.6, NEBULA_MIX: 0.65, PURPLE_AMT: 0.50,
-            TONEMAP_K: 0.65, GAMMA: 0.86,
+            RING_BRIGHT: 6.5, RING_COLOR: 'vec3(0.52, 0.84, 1.72)',
+            CAM_Y: 0.60, CAM_Z: 3.3, CAM_TILT: -0.182, FOV: 1.22,
+            CAM_ORBIT_SPEED: 0.035, CAM_INCL_AMP: 0.65, CAM_INCL_FREQ: 0.023,
+            STAR_BRIGHT: 0.8, NEBULA_MIX: 0.35, PURPLE_AMT: 0.25,
+            TONEMAP_K: 0.40, GAMMA: 0.79,
         },
     },
 ];
 
-// ── Patch the shader-sources.js content with new control constants ──────────
+// ── Patch shader-sources.js with preset constants ─────────────────────────────
 
-function patchShaderSource(originalContent, params) {
-    // Find the chaos shader entry and replace the control block constants
-    // The constants are at the top of the GLSL, escaped as \r\n in JS string
-    const p = params;
-
-    const replacements = [
-        [/const float RS\s*=\s*[0-9.]+;/, `const float RS          = ${p.RS.toFixed(4)};`],
-        [/const float BEND_FORCE\s*=\s*[0-9.]+;/, `const float BEND_FORCE  = ${p.BEND_FORCE.toFixed(2)};`],
-        [/const int\s+STEPS\s*=\s*[0-9]+;/, `const int   STEPS       = ${Math.round(p.STEPS)};`],
-        [/const float DISK_INNER\s*=\s*[^;]+;/, `const float DISK_INNER  = ${p.DISK_INNER};`],
-        [/const float DISK_OUTER\s*=\s*[0-9.]+;/, `const float DISK_OUTER  = ${p.DISK_OUTER.toFixed(2)};`],
-        [/const float DISK_HEIGHT\s*=\s*[0-9.]+;/, `const float DISK_HEIGHT = ${p.DISK_HEIGHT.toFixed(2)};`],
-        [/const float DISK_BRIGHT\s*=\s*[0-9.]+;/, `const float DISK_BRIGHT = ${p.DISK_BRIGHT.toFixed(2)};`],
-        [/const float ISCO_RING\s*=\s*[0-9.]+;/, `const float ISCO_RING   = ${p.ISCO_RING.toFixed(2)};`],
-        [/const float TURBULENCE\s*=\s*[0-9.]+;/, `const float TURBULENCE  = ${p.TURBULENCE.toFixed(2)};`],
-        [/const float SPIRAL\s*=\s*[0-9.]+;/, `const float SPIRAL      = ${p.SPIRAL.toFixed(2)};`],
-        [/const float DOPPLER_STR\s*=\s*[0-9.]+;/, `const float DOPPLER_STR = ${p.DOPPLER_STR.toFixed(2)};`],
-        [/const float OMEGA_SCALE\s*=\s*[0-9.]+;/, `const float OMEGA_SCALE = ${p.OMEGA_SCALE.toFixed(3)};`],
-        [/const float ANIM_SPEED\s*=\s*[0-9.]+;/, `const float ANIM_SPEED  = ${p.ANIM_SPEED.toFixed(2)};`],
-        [/const float RING_BRIGHT\s*=\s*[0-9.]+;/, `const float RING_BRIGHT = ${p.RING_BRIGHT.toFixed(2)};`],
+function patchShaderSource(src, p) {
+    const pairs = [
+        [/const float RS\s*=\s*[0-9.]+;/,           `const float RS          = ${p.RS.toFixed(4)};`],
+        [/const float BEND_FORCE\s*=\s*[0-9.]+;/,   `const float BEND_FORCE  = ${p.BEND_FORCE.toFixed(2)};`],
+        [/const int\s+STEPS\s*=\s*[0-9]+;/,         `const int   STEPS       = ${Math.round(p.STEPS)};`],
+        [/const float DISK_INNER\s*=\s*[^;]+;/,     `const float DISK_INNER  = ${p.DISK_INNER};`],
+        [/const float DISK_OUTER\s*=\s*[0-9.]+;/,   `const float DISK_OUTER  = ${p.DISK_OUTER.toFixed(2)};`],
+        [/const float DISK_HEIGHT\s*=\s*[0-9.]+;/,  `const float DISK_HEIGHT = ${p.DISK_HEIGHT.toFixed(2)};`],
+        [/const float DISK_BRIGHT\s*=\s*[0-9.]+;/,  `const float DISK_BRIGHT = ${p.DISK_BRIGHT.toFixed(2)};`],
+        [/const float ISCO_RING\s*=\s*[0-9.]+;/,    `const float ISCO_RING   = ${p.ISCO_RING.toFixed(2)};`],
+        [/const float TURBULENCE\s*=\s*[0-9.]+;/,   `const float TURBULENCE  = ${p.TURBULENCE.toFixed(2)};`],
+        [/const float SPIRAL\s*=\s*[0-9.]+;/,       `const float SPIRAL      = ${p.SPIRAL.toFixed(2)};`],
+        [/const float DOPPLER_STR\s*=\s*[0-9.]+;/,  `const float DOPPLER_STR = ${p.DOPPLER_STR.toFixed(2)};`],
+        [/const float OMEGA_SCALE\s*=\s*[0-9.]+;/,  `const float OMEGA_SCALE = ${p.OMEGA_SCALE.toFixed(3)};`],
+        [/const float ANIM_SPEED\s*=\s*[0-9.]+;/,   `const float ANIM_SPEED  = ${p.ANIM_SPEED.toFixed(2)};`],
+        [/const float RING_BRIGHT\s*=\s*[0-9.]+;/,  `const float RING_BRIGHT = ${p.RING_BRIGHT.toFixed(2)};`],
         [/const vec3\s+RING_COLOR\s*=\s*vec3\([^)]+\);/, `const vec3  RING_COLOR  = ${p.RING_COLOR};`],
-        [/const float CAM_Y\s*=\s*[0-9.]+;/, `const float CAM_Y       = ${p.CAM_Y.toFixed(3)};`],
-        [/const float CAM_Z\s*=\s*[0-9.]+;/, `const float CAM_Z       = ${p.CAM_Z.toFixed(2)};`],
-        [/const float CAM_TILT\s*=\s*-?[0-9.]+;/, `const float CAM_TILT    = ${p.CAM_TILT.toFixed(4)};`],
-        [/const float FOV\s*=\s*[0-9.]+;/, `const float FOV         = ${p.FOV.toFixed(3)};`],
-        [/const float STAR_BRIGHT\s*=\s*[0-9.]+;/, `const float STAR_BRIGHT = ${p.STAR_BRIGHT.toFixed(2)};`],
-        [/const float NEBULA_MIX\s*=\s*[0-9.]+;/, `const float NEBULA_MIX  = ${p.NEBULA_MIX.toFixed(2)};`],
-        [/const float PURPLE_AMT\s*=\s*[0-9.]+;/, `const float PURPLE_AMT  = ${p.PURPLE_AMT.toFixed(2)};`],
-        [/const float TONEMAP_K\s*=\s*[0-9.]+;/, `const float TONEMAP_K   = ${p.TONEMAP_K.toFixed(3)};`],
-        [/const float GAMMA\s*=\s*[0-9.]+;/, `const float GAMMA       = ${p.GAMMA.toFixed(3)};`],
+        [/const float CAM_Y\s*=\s*[0-9.]+;/,        `const float CAM_Y            = ${p.CAM_Y.toFixed(3)};`],
+        [/const float CAM_Z\s*=\s*[0-9.]+;/,        `const float CAM_Z            = ${p.CAM_Z.toFixed(2)};`],
+        [/const float CAM_TILT\s*=\s*-?[0-9.]+;/,   `const float CAM_TILT         = ${p.CAM_TILT.toFixed(4)};`],
+        [/const float FOV\s*=\s*[0-9.]+;/,          `const float FOV              = ${p.FOV.toFixed(3)};`],
+        [/const float CAM_ORBIT_SPEED\s*=\s*[0-9.]+;/, `const float CAM_ORBIT_SPEED  = ${p.CAM_ORBIT_SPEED.toFixed(4)};`],
+        [/const float CAM_INCL_AMP\s*=\s*[0-9.]+;/,   `const float CAM_INCL_AMP     = ${p.CAM_INCL_AMP.toFixed(3)};`],
+        [/const float CAM_INCL_FREQ\s*=\s*[0-9.]+;/,  `const float CAM_INCL_FREQ    = ${p.CAM_INCL_FREQ.toFixed(4)};`],
+        [/const float STAR_BRIGHT\s*=\s*[0-9.]+;/,  `const float STAR_BRIGHT = ${p.STAR_BRIGHT.toFixed(2)};`],
+        [/const float NEBULA_MIX\s*=\s*[0-9.]+;/,   `const float NEBULA_MIX  = ${p.NEBULA_MIX.toFixed(2)};`],
+        [/const float PURPLE_AMT\s*=\s*[0-9.]+;/,   `const float PURPLE_AMT  = ${p.PURPLE_AMT.toFixed(2)};`],
+        [/const float TONEMAP_K\s*=\s*[0-9.]+;/,    `const float TONEMAP_K   = ${p.TONEMAP_K.toFixed(3)};`],
+        [/const float GAMMA\s*=\s*[0-9.]+;/,        `const float GAMMA       = ${p.GAMMA.toFixed(3)};`],
     ];
-
-    let patched = originalContent;
-    for (const [re, replacement] of replacements) {
-        patched = patched.replace(re, replacement);
-    }
-    return patched;
+    let out = src;
+    for (const [re, rep] of pairs) out = out.replace(re, rep);
+    return out;
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// ── Helpers ────────────────────────────────────────────────────────────────────
 
-function waitForServer(port, retries = 20) {
+function waitForServer(port, retries = 25) {
     const http = require('http');
     return new Promise((resolve, reject) => {
-        let attempts = 0;
-        const tryConnect = () => {
-            const req = http.get(`http://localhost:${port}/`, res => {
-                res.resume();
-                resolve();
-            });
-            req.on('error', () => {
-                if (++attempts >= retries) return reject(new Error('Server never started'));
-                setTimeout(tryConnect, 500);
-            });
+        let n = 0;
+        const try_ = () => {
+            const req = http.get(`http://localhost:${port}/`, res => { res.resume(); resolve(); });
+            req.on('error', () => { if (++n >= retries) return reject(new Error('Server timeout')); setTimeout(try_, 500); });
             req.end();
         };
-        tryConnect();
+        try_();
     });
 }
 
-// ── Main ───────────────────────────────────────────────────────────────────
+// ── Main ───────────────────────────────────────────────────────────────────────
 
 async function run() {
     const shaderSourcePath = path.join(__dirname, '..', 'js', 'shaders', 'shader-sources.js');
@@ -157,59 +162,58 @@ async function run() {
     const outDir = path.join(__dirname, '..', 'screenshots', 'presets');
     fs.mkdirSync(outDir, { recursive: true });
 
-    // Start dev server
-    console.log('[server] Starting dev server on port 3001...');
+    const PORT = 3003;
+    console.log(`[server] Starting dev server on port ${PORT}...`);
     const devServer = spawn('node', ['dev-server.js'], {
         cwd: path.join(__dirname, '..'),
-        env: { ...process.env, PORT: '3001' },
+        env: { ...process.env, PORT: String(PORT) },
         stdio: ['ignore', 'pipe', 'pipe'],
     });
     devServer.stdout.on('data', d => process.stdout.write('[dev] ' + d));
-    devServer.stderr.on('data', d => process.stderr.write('[dev-err] ' + d));
+    devServer.stderr.on('data', d => process.stderr.write('[dev] ' + d));
 
-    await waitForServer(3001);
-    console.log('[server] Dev server ready.\n');
+    await waitForServer(PORT);
+    console.log('[server] Ready.\n');
 
-    const browser = await chromium.launch({ headless: true, args: ['--no-sandbox'] });
+    const browser = await chromium.launch({
+        headless: true,
+        args: [
+            '--no-sandbox',
+            '--disable-web-security',
+            '--disable-remote-fonts',
+        ],
+    });
 
     for (const preset of PRESETS) {
         console.log(`[preset ${preset.id}] ${preset.name}`);
 
-        // Write patched shader-sources.js to disk so dev server serves it
         const patched = patchShaderSource(originalShaderSource, preset.params);
         fs.writeFileSync(shaderSourcePath, patched, 'utf8');
 
         const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+        page.on('console', m => { if (m.type() === 'error') console.log(`  [js-err] ${m.text().slice(0, 120)}`); });
 
-        page.on('console', msg => {
-            if (msg.type() === 'error') console.log(`  [js-err] ${msg.text().substring(0, 120)}`);
-        });
-
-        // Pre-set chaos theme
         await page.addInitScript(() => {
             localStorage.setItem('eoaplot-selected-theme', 'chaos');
             localStorage.setItem('eoaplot-shader-enabled', 'true');
         });
 
-        await page.goto('http://localhost:3001', {
-            waitUntil: 'domcontentloaded', timeout: 20000,
-        }).catch(() => {});
+        await page.goto(`http://localhost:${PORT}`, { waitUntil: 'domcontentloaded', timeout: 20000 }).catch(() => {});
+        await page.waitForTimeout(10000);
 
-        // Wait for content + shader to render
-        await page.waitForTimeout(9000);
-
-        const imgPath = path.join(outDir, `preset_${preset.id}_${preset.name.replace(/\s+/g, '_')}.png`);
-        await page.screenshot({ path: imgPath, animations: 'disabled', timeout: 20000 });
+        const imgPath = path.join(outDir, `preset_${preset.id}_${preset.name}.png`);
+        await page.screenshot({ path: imgPath, animations: 'disabled', timeout: 30000 });
         await page.close();
-        console.log(`  Saved: ${imgPath}\n`);
+
+        const kb = (fs.statSync(imgPath).size / 1024).toFixed(0);
+        console.log(`  Saved ${kb} KB → ${imgPath}\n`);
     }
 
     await browser.close();
     devServer.kill();
 
-    // Restore original shader
     fs.writeFileSync(shaderSourcePath, originalShaderSource, 'utf8');
-    console.log('Shader source restored. All done.');
+    console.log('Shader source restored. Done.');
 }
 
 run().catch(e => { console.error(e); process.exit(1); });
