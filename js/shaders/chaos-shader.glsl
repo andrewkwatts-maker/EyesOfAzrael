@@ -64,39 +64,39 @@ const int   STEPS       = 120;
 
 // ── Accretion disk ────────────────────────────────────────────────────────────
 const float DISK_INNER  = RS * 3.0;   // Schwarzschild ISCO = 3 * RS
-const float DISK_OUTER  = 6.5;
+const float DISK_OUTER  = 8.0;
 const float DISK_HEIGHT = 0.30;
-const float DISK_BRIGHT = 5.0;
-const float ISCO_RING   = 7.5;
-const float TURBULENCE  = 0.60;
-const float SPIRAL      = 0.35;
+const float DISK_BRIGHT = 5.5;
+const float ISCO_RING   = 7.0;
+const float TURBULENCE  = 0.58;
+const float SPIRAL      = 0.32;
 
 // ── Doppler / physics ─────────────────────────────────────────────────────────
-const float DOPPLER_STR = 4.8;
-const float OMEGA_SCALE = 0.42;
+const float DOPPLER_STR = 2.5;        // (1+3d)^2.5 — warm→cool gradient, no blowout
+const float OMEGA_SCALE = 0.40;
 const float ANIM_SPEED  = 1.0;
 
 // ── Photon ring ───────────────────────────────────────────────────────────────
-const float RING_BRIGHT = 8.0;
-const vec3  RING_COLOR  = vec3(0.60, 0.90, 1.90);
+const float RING_BRIGHT = 7.0;
+const vec3  RING_COLOR  = vec3(0.57, 0.87, 1.82);
 
 // ── Camera ────────────────────────────────────────────────────────────────────
-const float CAM_Y            = 0.35;
-const float CAM_Z            = 5.5;
-const float CAM_TILT         = -0.065;
-const float FOV              = 1.12;
-const float CAM_ORBIT_SPEED  = 0.022;   // full orbit ≈ 286 s
-const float CAM_INCL_AMP     = 0.70;    // elevation wobble — takes it edge-on to 45°
-const float CAM_INCL_FREQ    = 0.015;   // irrational vs orbit freq → Lissajous path
+const float CAM_Y            = 0.30;
+const float CAM_Z            = 7.5;
+const float CAM_TILT         = -0.043;
+const float FOV              = 1.08;
+const float CAM_ORBIT_SPEED  = 0.018;   // full orbit ≈ 349 s
+const float CAM_INCL_AMP     = 0.68;    // elevation wobble — edge-on through ~38°
+const float CAM_INCL_FREQ    = 0.013;   // irrational vs orbit → Lissajous path
 
 // ── Stars / nebula ────────────────────────────────────────────────────────────
-const float STAR_BRIGHT = 1.3;
-const float NEBULA_MIX  = 0.40;
-const float PURPLE_AMT  = 0.20;
+const float STAR_BRIGHT = 1.6;
+const float NEBULA_MIX  = 0.65;
+const float PURPLE_AMT  = 0.40;
 
 // ── Tone mapping ──────────────────────────────────────────────────────────────
-const float TONEMAP_K   = 0.48;
-const float GAMMA       = 0.80;
+const float TONEMAP_K   = 0.55;
+const float GAMMA       = 0.82;
 
 // ── Noise ─────────────────────────────────────────────────────────────────────
 
