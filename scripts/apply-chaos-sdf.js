@@ -66,45 +66,49 @@ uniform float u_intensity;
 
 // ── Black hole ────────────────────────────────────────────────────────────────
 const float RS          = 0.22;
-const float BEND_FORCE  = 4.0;
+const float BEND_FORCE  = 4.5;
 const int   STEPS       = 200;
 
 // ── Accretion disk (SDF + volumetric)  ───────────────────────────────────────
 const float DISK_INNER  = RS * 3.0;
-const float DISK_OUTER  = 3.5;
-const float DISK_HEIGHT = 0.10;    // half-thickness for volumetric sampling
-const float DISK_BRIGHT = 9.0;
-const float DISK_VOL_SC = 0.55;    // volumetric sampling scale (complements SDF)
-const float ISCO_RING   = 12.0;
-const float TURBULENCE  = 0.80;
-const float SPIRAL      = 0.18;
-const float DISK_ABSORB = 0.40;
+const float DISK_OUTER  = 6.5;     // wide Saturn-style disk
+const float DISK_HEIGHT = 0.14;    // half-thickness for volumetric sampling
+const float DISK_BRIGHT = 7.0;
+const float DISK_VOL_SC = 0.65;    // volumetric sampling scale
+const float ISCO_RING   = 10.0;
+const float TURBULENCE  = 0.62;
+const float SPIRAL      = 0.25;
+const float DISK_ABSORB = 0.28;
+
+// ── Saturn ring bands & dust lanes ────────────────────────────────────────────
+const float RING_FREQ   = 4.0;    // number of bright/dark band cycles
+const float DUST_LANES  = 0.50;   // dark lane contrast between rings
 
 // ── Physics ───────────────────────────────────────────────────────────────────
-const float DOPPLER_STR  = 2.2;
+const float DOPPLER_STR  = 3.5;
 const float OMEGA_SCALE  = 0.42;
 const float ANIM_SPEED   = 1.0;
 
-// ── Photon ring ───────────────────────────────────────────────────────────────
-const float RING_BRIGHT  = 2.5;
+// ── Photon ring (analytical supplement) ───────────────────────────────────────
+const float RING_BRIGHT  = 3.0;
 const vec3  RING_COLOR   = vec3(0.92, 0.97, 1.0);
 
-// ── Camera ────────────────────────────────────────────────────────────────────
-const float CAM_Y            = 1.0;
-const float CAM_Z            = 4.5;
-const float FOV              = 0.82;
-const float CAM_ORBIT_SPEED  = 0.018;
-const float CAM_INCL_AMP     = 0.30;
-const float CAM_INCL_FREQ    = 0.010;
+// ── Camera — nearly edge-on Saturn geometry ────────────────────────────────────
+const float CAM_Y            = 0.35;   // ~3.6° elevation above disk
+const float CAM_Z            = 5.5;
+const float FOV              = 0.95;
+const float CAM_ORBIT_SPEED  = 0.022;
+const float CAM_INCL_AMP     = 0.35;
+const float CAM_INCL_FREQ    = 0.012;
 
 // ── Sky ───────────────────────────────────────────────────────────────────────
-const float STAR_BRIGHT  = 9.0;
-const float NEBULA_MIX   = 1.20;
-const float PURPLE_AMT   = 0.55;
+const float STAR_BRIGHT  = 5.0;    // sparser — disk dominates the frame
+const float NEBULA_MIX   = 0.80;
+const float PURPLE_AMT   = 0.25;
 
 // ── Output ────────────────────────────────────────────────────────────────────
-const float TONEMAP_K    = 0.41;
-const float GAMMA        = 0.79;
+const float TONEMAP_K    = 0.44;
+const float GAMMA        = 0.80;
 
 // ── Noise ─────────────────────────────────────────────────────────────────────
 
@@ -160,49 +164,77 @@ vec3 starBackground(vec3 dir) {
 // Called only at y=0 plane crossings — O(1) per ray instead of O(STEPS).
 
 vec3 diskEmit(vec3 cp, vec3 rayDir, float t) {
-    float r = length(cp.xz);
+    float r     = length(cp.xz);
+    float rNorm = clamp((r - DISK_INNER) / (DISK_OUTER - DISK_INNER), 0.0, 1.0);
 
-    // Keplerian rotation
-    float omega = OMEGA_SCALE * sqrt(1.5*RS / max(r*r*r, 0.001));
+    // ── Soft alpha envelope — smooth inner & outer edges ──────────────────────
+    float innerFade = smoothstep(0.0, 0.07, rNorm);
+    float outerFade = 1.0 - smoothstep(0.62, 1.0, rNorm); // wide soft outer fade
+    float edgeFade  = innerFade * outerFade;
+
+    // ── Keplerian rotation ────────────────────────────────────────────────────
+    float omega = OMEGA_SCALE * sqrt(1.5 * RS / max(r*r*r, 0.001));
     float phi   = atan(cp.z, cp.x);
     float ap    = phi - t * omega;
 
-    vec2  dc = vec2(ap*2.2, log(max(r,0.01))*5.5);
-    float n1 = fbm5(dc + t*0.031);
-    float n2 = fbm3(dc*1.6 + vec2(1.73,0.0) - t*0.044);
-    float n3 = fbm3(dc*0.72 + vec2(0.0, t*0.019));
+    // ── Saturn-like radial ring bands ─────────────────────────────────────────
+    // Multiple harmonic frequencies create concentric bright/dark rings.
+    float rB  = 0.60 * (0.5 + 0.5 * cos(rNorm * 6.28318 * RING_FREQ));
+    rB += 0.28 * (0.5 + 0.5 * cos(rNorm * 6.28318 * RING_FREQ * 2.85));
+    rB += 0.12 * (0.5 + 0.5 * cos(rNorm * 6.28318 * RING_FREQ * 6.60));
 
-    // Spiral arm density modulation
-    float spiral = 0.5 + SPIRAL*cos(ap*2.0 + r*1.8 - t*0.07);
-    float density = (1.0-SPIRAL*0.5) + SPIRAL*0.5*spiral;
+    // ── Gas/nebula noise — multi-scale for cloud + filament structure ─────────
+    vec2  dc     = vec2(ap * 2.0, log(max(r, 0.01)) * 5.0);
+    float n1     = fbm5(dc + t * 0.028);
+    float n2     = fbm3(dc * 1.5  + vec2(1.73, 0.0) - t * 0.040);
+    float n3     = fbm3(dc * 0.65 + vec2(0.0, t * 0.016));
+    float nCloud = fbm3(dc * 0.28 + t * 0.006);           // large gas cloud
+    float nWisp  = fbm3(dc * 0.75 + vec2(2.1, 0.0) + t * 0.014); // wispy filaments
+    float gasTexture = mix(n1, max(nCloud * 1.3, nWisp * 0.8), 0.45);
 
-    float knots = pow(max(0.0, n2-0.42), 1.3) * 9.0;
+    // ── Dust lanes: dark logarithmic spirals separating the rings ─────────────
+    float dustPhase = ap * 2.0 + log(max(r, 0.01)) * 2.0 - t * 0.022;
+    float dustLane  = max(0.0, cos(dustPhase)) * DUST_LANES * edgeFade;
 
-    // Relativistic Doppler (prograde side boosted)
+    // ── Density: ring bands modulated by spiral structure & dust ─────────────
+    float spiralMod = 0.5 + SPIRAL * cos(ap * 2.0 + r * 1.4 - t * 0.055);
+    float density = rB * ((1.0 - SPIRAL * 0.5) + SPIRAL * 0.5 * spiralMod);
+    density = max(0.0, density - dustLane * 0.70) * edgeFade;
+
+    float knots = pow(max(0.0, n2 - 0.40), 1.4) * 8.0 * edgeFade;
+
+    // ── Relativistic Doppler ──────────────────────────────────────────────────
     vec3  tang    = normalize(vec3(-cp.z, 0.0, cp.x));
     float doppler = dot(tang, -rayDir);
-    float boost   = pow(max(0.0, 1.0+3.2*doppler), DOPPLER_STR);
+    float boost   = pow(max(0.0, 1.0 + 3.2 * doppler), DOPPLER_STR);
 
-    // HDR temperature gradient — disk-relative transitions
-    vec3 ci = vec3(4.0,3.5,3.0), ch = vec3(3.0,1.8,0.30);
-    vec3 cm = vec3(2.0,0.70,0.05), co = vec3(0.60,0.06,0.01);
-    float mid1 = DISK_INNER * 1.6;
-    float mid2 = DISK_INNER * 2.8;
-    float t1 = smoothstep(DISK_INNER, mid1,      r);   // white-hot → yellow
-    float t2 = smoothstep(mid1,       mid2,      r);   // yellow → orange
-    float t3 = smoothstep(mid2,       DISK_OUTER,r);   // orange → dark red
-    vec3 temp = mix(mix(mix(ci,ch,t1),cm,t2),co,t3);
+    // ── Temperature gradient: white-hot ISCO → warm orange → rust → black ────
+    vec3 ci = vec3(5.0, 4.6, 4.0);    // white-hot inner (ISCO region)
+    vec3 ch = vec3(4.0, 2.6, 0.55);   // warm cream / gold
+    vec3 cm = vec3(2.2, 0.90, 0.10);  // deep orange mid-disk
+    vec3 co = vec3(0.55, 0.06, 0.01); // rust-brown outer
+    vec3 ce = vec3(0.05, 0.00, 0.00); // near-black edge (alpha out)
+    float mid1 = DISK_INNER * 1.40;
+    float mid2 = DISK_INNER * 2.60;
+    float t1   = smoothstep(DISK_INNER, mid1, r);
+    float t2   = smoothstep(mid1, mid2, r);
+    float t3   = smoothstep(mid2, DISK_OUTER * 0.72, r);
+    float t4   = smoothstep(DISK_OUTER * 0.58, DISK_OUTER, r); // alpha fade to black
+    vec3 temp  = mix(mix(mix(ci, ch, t1), cm, t2), co, t3);
+    temp       = mix(temp, ce, t4);           // fade to black at outer edge
+    temp      *= (1.0 - dustLane * 0.80);    // dust lanes darken/cool the gas
 
-    // ISCO ring spike
-    float iscoR = DISK_INNER + 0.04;
-    float isco  = exp(-pow((r-iscoR)/0.032,2.0)) * ISCO_RING;
+    // ── ISCO ring spike ───────────────────────────────────────────────────────
+    float iscoR = DISK_INNER + 0.032;
+    float isco  = exp(-pow((r - iscoR) / 0.026, 2.0)) * ISCO_RING;
 
-    float em  = density * (0.35 + 0.65*n1*TURBULENCE) * boost;
-          em += density * n2*0.35*TURBULENCE;
-          em += isco * 0.70;
+    // ── Emission assembly ─────────────────────────────────────────────────────
+    float em  = density * (0.30 + 0.70 * gasTexture * TURBULENCE) * boost;
+          em += density * n2 * 0.28 * TURBULENCE;
+          em += isco * 0.68;
 
     vec3 result = temp * em;
-    result += ci * knots * density * n3 * 0.50 * TURBULENCE;
+    result += ci * knots * density * n3 * 0.42 * TURBULENCE;
     return result;
 }
 
