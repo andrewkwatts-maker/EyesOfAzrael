@@ -92,7 +92,7 @@ class ShaderThemeManager {
 
         this.fpsCounter = {
             frames: 0,
-            lastTime: Date.now(),
+            lastTime: performance.now(),
             fps: 60
         };
 
@@ -204,7 +204,23 @@ class ShaderThemeManager {
     /**
      * Load a shader from file
      */
+    isLowPowerDevice() {
+        // Low-power detection: small viewport OR coarse pointer (touch) OR mobile UA OR <=4 hw threads
+        const ua = navigator.userAgent || '';
+        if (/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) return true;
+        if (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) return true;
+        if (window.innerWidth < 768) return true;
+        if (typeof navigator.hardwareConcurrency === 'number' && navigator.hardwareConcurrency <= 4) return true;
+        return false;
+    }
+
     async loadShaderSource(filename) {
+        // Substitute mobile variants for heavy shaders on low-power devices
+        if (filename === 'chaos-shader.glsl' && this.isLowPowerDevice()
+            && window.SHADER_SOURCES && window.SHADER_SOURCES['chaos-mobile-shader.glsl']) {
+            filename = 'chaos-mobile-shader.glsl';
+            console.log('[ShaderThemes] Low-power device: using chaos-mobile-shader.glsl');
+        }
         if (this.shaderCache.has(filename)) {
             return this.shaderCache.get(filename);
         }
@@ -410,9 +426,11 @@ class ShaderThemeManager {
             return;
         }
 
-        // Calculate time
-        const currentTime = Date.now();
-        const elapsedTime = (currentTime - this.startTime) / 1000.0;
+        // Calculate time — performance.now() gives sub-ms precision and isn't
+        // throttled by background-tab Date.now() coalescing, so animations stay smooth.
+        const currentTime = performance.now();
+        if (this._perfStart === undefined) { this._perfStart = currentTime; }
+        const elapsedTime = (currentTime - this._perfStart) / 1000.0;
 
         // Update FPS counter
         this.fpsCounter.frames++;

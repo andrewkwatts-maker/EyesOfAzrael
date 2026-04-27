@@ -72,9 +72,9 @@ const int   STEPS       = 200;
 // ── Accretion disk (SDF + volumetric)  ───────────────────────────────────────
 const float DISK_INNER  = RS * 3.0;
 const float DISK_OUTER  = 6.5;     // wide Saturn-style disk
-const float DISK_HEIGHT = 0.14;    // half-thickness for volumetric sampling
+const float DISK_HEIGHT = 0.22;    // slightly thicker disk for more volume
 const float DISK_BRIGHT = 7.0;
-const float DISK_VOL_SC = 0.65;    // volumetric sampling scale
+const float DISK_VOL_SC = 0.55;    // volumetric sampling scale (reduced for thicker disk)
 const float ISCO_RING   = 10.0;
 const float TURBULENCE  = 0.62;
 const float SPIRAL      = 0.25;
@@ -84,22 +84,33 @@ const float DISK_ABSORB = 0.28;
 const float RING_FREQ   = 4.0;    // number of bright/dark band cycles
 const float DUST_LANES  = 0.50;   // dark lane contrast between rings
 
+// ── Asteroid/dust chunks embedded in disk (folded-space SDF + noise) ──────────
+const float CHUNK_DENS  = 0.85;   // density of dark chunk silhouettes inside disk
+const float CHUNK_SIZE  = 0.075;  // base chunk radius in fold-cell units
+const float CHUNK_DRIFT = 0.05;   // slow tangential drift speed
+const float CHUNK_RIM   = 5.0;    // rim-light brightness around each chunk
+
 // ── Physics ───────────────────────────────────────────────────────────────────
 const float DOPPLER_STR  = 3.5;
 const float OMEGA_SCALE  = 0.42;
 const float ANIM_SPEED   = 1.0;
 
 // ── Photon ring (analytical supplement) ───────────────────────────────────────
-const float RING_BRIGHT  = 3.0;
-const vec3  RING_COLOR   = vec3(0.92, 0.97, 1.0);
+const float RING_BRIGHT     = 3.0;
+const vec3  RING_COLOR      = vec3(0.92, 0.97, 1.0);
+const float RING_DOPP_AMP   = 0.55;   // Doppler asymmetry across the ring
+const float RING_PERTURB    = 0.014;  // noise scale that breaks the perfect circle
 
-// ── Camera — nearly edge-on Saturn geometry ────────────────────────────────────
+// ── Camera — nearly edge-on Saturn geometry, tilted off-kilter ────────────────
 const float CAM_Y            = 0.35;   // ~3.6° elevation above disk
 const float CAM_Z            = 5.5;
 const float FOV              = 0.95;
 const float CAM_ORBIT_SPEED  = 0.022;
 const float CAM_INCL_AMP     = 0.35;
 const float CAM_INCL_FREQ    = 0.012;
+const float CAM_AXIS_TILT    = 0.22;   // ~13° tilt of orbital plane (off-kilter)
+const float CAM_ROLL_AMP     = 0.11;   // camera roll wobble (radians)
+const float CAM_ROLL_FREQ    = 0.014;
 
 // ── Sky ───────────────────────────────────────────────────────────────────────
 const float STAR_BRIGHT  = 5.0;    // sparser — disk dominates the frame
@@ -189,8 +200,14 @@ vec3 diskEmit(vec3 cp, vec3 rayDir, float t) {
     float n2     = fbm3(dc * 1.5  + vec2(1.73, 0.0) - t * 0.040);
     float n3     = fbm3(dc * 0.65 + vec2(0.0, t * 0.016));
     float nCloud = fbm3(dc * 0.28 + t * 0.006);           // large gas cloud
-    float nWisp  = fbm3(dc * 0.75 + vec2(2.1, 0.0) + t * 0.014); // wispy filaments
-    float gasTexture = mix(n1, max(nCloud * 1.3, nWisp * 0.8), 0.45);
+    // Wispy filaments — strongly stretched along azimuthal (orbital) direction.
+    // Low azimuthal frequency × high radial frequency → tangential streaks.
+    vec2  wispC1 = vec2(ap * 0.30, log(max(r, 0.01)) *  8.5) + t * 0.022;
+    vec2  wispC2 = vec2(ap * 0.45, log(max(r, 0.01)) * 11.0) - t * 0.018;
+    float wispBase = fbm5(wispC1);
+    float wispFine = fbm3(wispC2);
+    float nWisp = pow(max(0.0, wispBase - 0.30), 1.6) * (0.55 + 0.85 * wispFine);
+    float gasTexture = mix(n1, max(nCloud * 1.3, nWisp * 1.4), 0.45);
 
     // ── Dust lanes: dark logarithmic spirals separating the rings ─────────────
     float dustPhase = ap * 2.0 + log(max(r, 0.01)) * 2.0 - t * 0.022;
@@ -235,8 +252,68 @@ vec3 diskEmit(vec3 cp, vec3 rayDir, float t) {
 
     vec3 result = temp * em;
     result += ci * knots * density * n3 * 0.42 * TURBULENCE;
+    // Bright streaky filaments — hot tendrils riding on top of base emission
+    result += vec3(2.4, 1.7, 0.55) * nWisp * density * 0.85 * boost * edgeFade;
+
+    // ── Folded-space chunk silhouettes embedded in disk ────────────────────────
+    // Domain-replicated SDF spheres: each (azimuthal, radial) cell carries one
+    // chunk whose centre, size and rotation are noise-driven for variation.
+    // Chunks darken the disk emission behind them and gain a hot rim from disk light.
+    vec3 cellCoord = vec3(ap * 1.4, log(max(r, 0.01)) * 4.0, t * CHUNK_DRIFT);
+    vec2 cellId    = floor(cellCoord.xy);
+    vec2 cellLocal = fract(cellCoord.xy) - 0.5;
+    float chunkMask = 0.0;
+    // Sample 3×3 neighbour cells for chunks that might span cell boundaries
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            vec2 nid = cellId + vec2(float(dx), float(dy));
+            float h1 = hash12(nid * 7.13);
+            float h2 = hash12(nid * 11.37 + 3.7);
+            float h3 = hash12(nid * 17.91 - 1.3);
+            // Random sub-cell position + radius + drift offset
+            vec2 off  = vec2(h1 - 0.5, h2 - 0.5) * 0.7 + vec2(float(dx), float(dy));
+            vec2 drift = vec2(sin(t * CHUNK_DRIFT * (h1 + 0.3)), cos(t * CHUNK_DRIFT * (h2 + 0.4))) * 0.08;
+            float radius = CHUNK_SIZE * (0.4 + 1.6 * h3);
+            // Chunks only exist in some cells — sparse population
+            float exists = step(0.45, h1 * h2);
+            float d = length(cellLocal - off - drift) - radius;
+            chunkMask = max(chunkMask, exists * (1.0 - smoothstep(0.0, radius * 0.4, d)));
+        }
+    }
+    chunkMask *= edgeFade;
+    // Apply: darken disk where chunk silhouette sits, add hot rim from surrounding gas
+    result *= 1.0 - chunkMask * CHUNK_DENS;
+    float rim = chunkMask * (1.0 - chunkMask) * 4.0;
+    result += vec3(2.6, 1.6, 0.55) * rim * CHUNK_RIM * boost * edgeFade;
     return result;
 }
+
+// ── Radiance cascade — sample disk emission along geodesic-approximated rays ─
+// Approximates the disk-light field at any point in space.  Used both for
+// asteroid illumination and for volumetric god-ray scattering in nearby fog.
+// Cheap analytical model: the disk midplane glows brightest at r=DISK_INNER..OUTER,
+// and the geodesic bend near the BH means light wraps further than straight-line.
+vec3 radianceAt(vec3 pt, float t) {
+    vec3 acc = vec3(0.0);
+    // 6 cardinal samples around the midplane circle (azimuthal cascade)
+    for (int k = 0; k < 6; k++) {
+        float a = float(k) * 1.04719755 + t * 0.012; // 60° steps + slow rotation
+        float sR = (DISK_INNER + DISK_OUTER) * 0.5;
+        vec3  src = vec3(cos(a) * sR, 0.0, sin(a) * sR);
+        // Approximate disk-emission colour at sample (without doppler — cheap)
+        vec3 srcCol = diskEmit(src, normalize(pt - src), t) * DISK_BRIGHT;
+        // Distance-falloff with a soft floor (geodesic-bent light reaches further)
+        float d = length(src - pt);
+        float falloff = 1.0 / (0.6 + d * d * 0.7);
+        acc += srcCol * falloff;
+    }
+    // Vertical bias — points above/below the disk receive less direct light
+    float vAtten = exp(-abs(pt.y) * 1.5);
+    return acc * vAtten * 0.10;
+}
+
+// (Foreground asteroid silhouettes removed — chunks are now embedded in the
+//  disk via folded-space SDF inside diskEmit.)
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
@@ -247,14 +324,28 @@ void main() {
 
     float t = u_time * ANIM_SPEED;
 
-    // Orbiting camera with inclination wobble
+    // Orbiting camera — tilted orbital plane + roll wobble (off-kilter framing)
     float camAngle   = t * CAM_ORBIT_SPEED;
     float inclWobble = CAM_INCL_AMP * sin(t * CAM_INCL_FREQ);
-    float camY = CAM_Y + inclWobble * 0.22;
+    float camY       = CAM_Y + inclWobble * 0.22;
 
-    vec3 camPos = vec3(sin(camAngle)*CAM_Z, camY, cos(camAngle)*CAM_Z);
-    vec3 fwd    = normalize(-camPos);                          // always look at origin
-    vec3 rgt    = normalize(cross(fwd, vec3(0.0,1.0,0.0)));
+    // Base orbit on horizontal plane
+    vec3 baseOrbit = vec3(sin(camAngle)*CAM_Z, camY, cos(camAngle)*CAM_Z);
+
+    // Tilt the orbital plane around the X axis — disk now sits askew in frame
+    float ct = cos(CAM_AXIS_TILT), st = sin(CAM_AXIS_TILT);
+    vec3 camPos = vec3(
+        baseOrbit.x,
+        baseOrbit.y * ct - baseOrbit.z * st,
+        baseOrbit.y * st + baseOrbit.z * ct
+    );
+
+    vec3 fwd = normalize(-camPos);                                // look at origin
+
+    // Roll oscillation — camera not held perfectly upright
+    float roll  = CAM_ROLL_AMP * sin(t * CAM_ROLL_FREQ);
+    vec3  worldUp = vec3(sin(roll), cos(roll), 0.0);
+    vec3 rgt    = normalize(cross(fwd, worldUp));
     vec3 camUp  = cross(rgt, fwd);
 
     vec3 pos        = camPos;
@@ -314,22 +405,179 @@ void main() {
             trans *= exp(-DISK_ABSORB * 0.25 * dStep * vFall);
         }
 
+        // ── God rays / volumetric scattering ──────────────────────────────────
+        // Outside the disk volume, sample radiance cascade every ~8 steps for
+        // cheap god-ray glow.  Light shafts catch in the dust around the BH.
+        if (mod(float(i), 8.0) < 0.5 && r < 9.0 && r > RS * 1.5) {
+            vec3  scatter = radianceAt(pos, t);
+            float fogDens = 0.020 * exp(-abs(pos.y) * 0.7) * smoothstep(9.0, 2.0, r);
+            color += trans * scatter * fogDens * step * 8.0;
+        }
+
         prevY = nextPos.y;
         pos   = nextPos;
         if (trans < 0.008) break;
     }
 
-    // Analytical photon ring at correct Schwarzschild impact parameter b_c = 2.598*RS
+    // ── Photon ring (analytical) — Doppler-modulated, perturbed, with sub-ring ──
+    // Critical impact parameter b_c = 3√3/2 · RS ≈ 2.598·RS
     float ip = length(cross(camPos, initialDir));
-    float ring = smoothstep(RS*2.40, RS*2.58, ip)
-               * (1.0 - smoothstep(RS*2.58, RS*2.76, ip));
-    color += RING_COLOR * ring * RING_BRIGHT;
+    // Perturb the radius slightly with directional noise so it isn't a perfect circle.
+    float ipNoise = (fbm3(initialDir.xy * 11.0 + t * 0.04) - 0.5) * 2.0;
+    float ipMod   = ip + RING_PERTURB * ipNoise * RS;
+    // Doppler asymmetry: bright on the side of the disk rotating toward us.
+    vec3  ringPlaneN = normalize(cross(camPos, vec3(0.0, 1.0, 0.0)));
+    float ringDopp   = dot(initialDir, ringPlaneN);              // -1..+1 across ring
+    float ringBoost  = pow(max(0.30, 1.0 + RING_DOPP_AMP * ringDopp), 2.4);
+    // n=1 main ring + n=2 sub-ring closer to critical b_c
+    float r1 = smoothstep(RS*2.40, RS*2.58, ipMod)
+             * (1.0 - smoothstep(RS*2.58, RS*2.76, ipMod));
+    float r2 = smoothstep(RS*2.575, RS*2.595, ipMod)
+             * (1.0 - smoothstep(RS*2.595, RS*2.615, ipMod));
+    // Slight hue shift across ring — Doppler blue/red shift cue
+    vec3 ringColShift = mix(vec3(1.05, 0.92, 0.72),
+                            vec3(0.78, 0.92, 1.10),
+                            ringDopp * 0.5 + 0.5);
+    color += ringColShift * RING_COLOR * (r1 + r2 * 1.6) * RING_BRIGHT * ringBoost;
 
     // Sky for all non-occluded rays (escaped + step-limited grazing paths)
     color += trans * starBackground(dir);
 
     // Tone map + vignette + gamma
     color  = color / (1.0 + color*TONEMAP_K);
+    color *= max(0.0, 1.0 - length(sc)*0.07);
+    gl_FragColor = vec4(pow(max(vec3(0.0), color*u_intensity), vec3(GAMMA)), 1.0);
+}`;
+
+// ─── CHAOS MOBILE — stripped-down for low-power devices ───────────────────────
+// Cuts: STEPS 200→70, no asteroids, no radiance cascades / god rays,
+// no n=2 sub-ring, no volumetric sampling, no off-kilter camera, no wisp
+// emission, single-noise gas, smaller exit radius. Targets ~60fps on phones.
+const CHAOS_MOBILE = `precision highp float;
+uniform vec2  u_resolution;
+uniform float u_time;
+uniform float u_intensity;
+
+const float RS          = 0.22;
+const float BEND_FORCE  = 4.5;
+const int   STEPS       = 90;          // mobile budget (vs 200 desktop)
+
+const float DISK_INNER  = RS * 3.0;
+const float DISK_OUTER  = 6.5;
+const float DISK_HEIGHT = 0.18;
+const float DISK_BRIGHT = 7.0;
+const float ISCO_RING   = 10.0;
+const float TURBULENCE  = 0.55;
+const float DISK_ABSORB = 0.30;
+
+const float DOPPLER_STR = 3.5;
+const float OMEGA_SCALE = 0.42;
+const float ANIM_SPEED  = 1.0;
+const float RING_BRIGHT = 3.0;
+
+const float CAM_Y           = 0.55;    // slight elevation — better visibility of lensed arc
+const float CAM_Z           = 5.5;
+const float FOV             = 0.95;
+const float CAM_ORBIT_SPEED = 0.022;
+
+const float STAR_BRIGHT = 4.0;
+const float TONEMAP_K   = 0.44;
+const float GAMMA       = 0.80;
+
+float hash12(vec2 p){vec3 p3=fract(vec3(p.xyx)*0.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}
+float vn(vec2 p){vec2 i=floor(p),f=p-i;f=f*f*(3.0-2.0*f);return mix(mix(hash12(i),hash12(i+vec2(1,0)),f.x),mix(hash12(i+vec2(0,1)),hash12(i+vec2(1,1)),f.x),f.y);}
+float fbm3(vec2 p){return 0.5*vn(p)+0.25*vn(p*2.03)+0.125*vn(p*4.07);}
+
+vec3 starBg(vec3 dir){
+    float az=atan(dir.z,dir.x), el=asin(clamp(dir.y,-0.999,0.999));
+    vec2 sph=vec2(az,el);
+    float pt=0.0;
+    {vec2 c=floor(sph*200.0),v=fract(sph*200.0)-0.5;float h=hash12(c+0.71);
+     float cx=fract(h*7.1)-0.5,cy=fract(h*13.7)-0.5;
+     float d2=(v.x-cx)*(v.x-cx)+(v.y-cy)*(v.y-cy);
+     pt+=step(0.95,h)*exp(-d2*2200.0)*(h-0.95)/0.05*8.0*STAR_BRIGHT;}
+    return vec3(0.002,0.008,0.025)+vec3(0.85,0.92,1.0)*pt;
+}
+
+vec3 diskEmit(vec3 cp, vec3 rd, float t){
+    float r = length(cp.xz);
+    float rN = clamp((r-DISK_INNER)/(DISK_OUTER-DISK_INNER),0.0,1.0);
+    float ef = smoothstep(0.0,0.07,rN) * (1.0 - smoothstep(0.62,1.0,rN));
+    float omega = OMEGA_SCALE * sqrt(1.5*RS/max(r*r*r,0.001));
+    float phi = atan(cp.z,cp.x);
+    float ap  = phi - t * omega;
+    float rB  = 0.5 + 0.5 * cos(rN * 6.283 * 4.0);
+    rB += 0.25 * (0.5 + 0.5 * cos(rN * 6.283 * 11.0));
+    float gas = fbm3(vec2(ap*2.0, log(max(r,0.01))*5.0) + t*0.03);
+    float density = rB * ef;
+    vec3  tang = normalize(vec3(-cp.z,0.0,cp.x));
+    float dop  = dot(tang,-rd);
+    float boost= pow(max(0.0,1.0+3.2*dop), DOPPLER_STR);
+    vec3 ci=vec3(5.0,4.6,4.0), cm=vec3(2.2,0.9,0.1), co=vec3(0.55,0.06,0.01), ce=vec3(0.05,0.0,0.0);
+    float t1 = smoothstep(DISK_INNER, DISK_INNER*2.6, r);
+    float t2 = smoothstep(DISK_INNER*2.0, DISK_OUTER*0.72, r);
+    float t3 = smoothstep(DISK_OUTER*0.58, DISK_OUTER, r);
+    vec3 temp = mix(mix(ci, cm, t1), co, t2);
+    temp = mix(temp, ce, t3);
+    float iscoR = DISK_INNER + 0.032;
+    float isco  = exp(-pow((r-iscoR)/0.026, 2.0)) * ISCO_RING;
+    float em = density * (0.30 + 0.70*gas*TURBULENCE) * boost + isco * 0.7;
+    return temp * em;
+}
+
+void main(){
+    vec2 uv = gl_FragCoord.xy / u_resolution;
+    float ar = u_resolution.x / u_resolution.y;
+    // Aspect-aware: in portrait, expand vertical so BH stays centred and disk fits.
+    vec2 sc = ar > 1.0 ? (uv*2.0-1.0) * vec2(ar, 1.0)
+                       : (uv*2.0-1.0) * vec2(1.0, 1.0/ar);
+    float t = u_time * ANIM_SPEED;
+    float a = t * CAM_ORBIT_SPEED;
+    vec3 camPos = vec3(sin(a)*CAM_Z, CAM_Y, cos(a)*CAM_Z);
+    vec3 fwd = normalize(-camPos);
+    vec3 rgt = normalize(cross(fwd, vec3(0,1,0)));
+    vec3 up  = cross(rgt, fwd);
+    vec3 pos = camPos;
+    vec3 dir = normalize(fwd*FOV + rgt*sc.x + up*sc.y);
+    vec3 color = vec3(0.0);
+    float trans = 1.0;
+    float prevY = pos.y;
+    for(int i=0; i<STEPS; i++){
+        float r  = length(pos);
+        float dR = length(pos.xz);
+        if(r < RS*1.05) break;
+        if(r > 9.0) break;
+        float step = min(0.06 * r / (1.0 + 7.0*RS/r), 0.25);
+        vec3 toC = -pos / r;
+        float accel = (RS*BEND_FORCE) / (r*r + RS*0.4);
+        dir = normalize(dir + toC * accel * step * 2.0);
+        vec3 nextPos = pos + dir * step;
+        if(prevY * nextPos.y < 0.0){
+            float al = prevY / (prevY - nextPos.y);
+            vec3 cp = pos + dir * step * al;
+            float cr = length(cp.xz);
+            if(cr >= DISK_INNER && cr <= DISK_OUTER){
+                vec3 em = diskEmit(cp, dir, t);
+                color += trans * em * DISK_BRIGHT;
+                trans *= exp(-DISK_ABSORB);
+            }
+        }
+        // Cheap volumetric: grazing-angle rays inside disk volume — adds Einstein-ring visibility
+        if(abs(pos.y) < DISK_HEIGHT && dR >= DISK_INNER && dR <= DISK_OUTER){
+            float vF = exp(-abs(pos.y)/(DISK_HEIGHT*0.6));
+            float dS = step / (DISK_HEIGHT*2.0);
+            color += trans * diskEmit(pos, dir, t) * dS * 0.45 * vF;
+            trans *= exp(-DISK_ABSORB * 0.20 * dS * vF);
+        }
+        prevY = nextPos.y;
+        pos = nextPos;
+        if(trans < 0.01) break;
+    }
+    float ip = length(cross(camPos, normalize(fwd*FOV + rgt*sc.x + up*sc.y)));
+    float ring = smoothstep(RS*2.40, RS*2.58, ip) * (1.0 - smoothstep(RS*2.58, RS*2.76, ip));
+    color += vec3(0.92, 0.97, 1.0) * ring * RING_BRIGHT;
+    color += trans * starBg(dir);
+    color = color / (1.0 + color*TONEMAP_K);
     color *= max(0.0, 1.0 - length(sc)*0.07);
     gl_FragColor = vec4(pow(max(vec3(0.0), color*u_intensity), vec3(GAMMA)), 1.0);
 }`;
@@ -594,18 +842,26 @@ function writeShader(src, name, glsl) {
     const escaped = glsl.replace(/\r\n/g,'\n').replace(/\n/g,'\\r\\n').replace(/"/g,'\\"');
     const re  = new RegExp('window\\.SHADER_SOURCES\\["' + name + '"\\] = "[\\s\\S]*?";');
     const rep = `window.SHADER_SOURCES["${name}"] = "${escaped}";`;
-    if (!re.test(src)) { console.error('Entry not found:', name); process.exit(1); }
-    return src.replace(re, rep);
+    if (re.test(src)) {
+        return src.replace(re, rep);
+    }
+    // Entry not found — append it just before the export/footer.
+    console.log('Entry not found, appending:', name);
+    return src.replace(/(\n\/\/ === END SHADER SOURCES ===|$)/, `\n${rep}\n$1`);
 }
 
-src = writeShader(src, 'chaos-shader.glsl',  CHAOS);
-src = writeShader(src, 'cosmic-shader.glsl', COSMIC);
+src = writeShader(src, 'chaos-shader.glsl',         CHAOS);
+src = writeShader(src, 'chaos-mobile-shader.glsl',  CHAOS_MOBILE);
+src = writeShader(src, 'cosmic-shader.glsl',        COSMIC);
 fs.writeFileSync(file, src);
 
 const v = fs.readFileSync(file, 'utf8');
-console.log('chaos  — SDF crossing:', v.includes('disk-plane crossing'));
-console.log('chaos  — STEPS 200:  ', v.includes('STEPS       = 200'));
-console.log('cosmic — spiral arm: ', v.includes('spiralArm'));
-console.log('cosmic — SDF galaxy: ', v.includes('SDF galaxy disk'));
+console.log('chaos  — SDF crossing: ', v.includes('disk-plane crossing'));
+console.log('chaos  — STEPS 200:    ', v.includes('STEPS       = 200'));
+console.log('chaos  — radiance:     ', v.includes('radianceAt'));
+console.log('chaos  — chunks SDF:   ', v.includes('Folded-space chunk silhouettes'));
+console.log('mobile — present:      ', v.includes('chaos-mobile-shader.glsl'));
+console.log('cosmic — spiral arm:   ', v.includes('spiralArm'));
+console.log('cosmic — SDF galaxy:   ', v.includes('SDF galaxy disk'));
 console.log('File size:', v.length, 'bytes');
 console.log('Done.');
