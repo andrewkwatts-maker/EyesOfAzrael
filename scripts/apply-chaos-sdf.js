@@ -72,11 +72,11 @@ const int   STEPS       = 200;
 // ── Accretion disk (SDF + volumetric)  ───────────────────────────────────────
 const float DISK_INNER  = RS * 3.0;
 const float DISK_OUTER  = 6.5;     // wide Saturn-style disk
-const float DISK_HEIGHT = 0.22;    // slightly thicker disk for more volume
+const float DISK_HEIGHT = 0.24;    // slightly thicker disk for more volume
 const float DISK_BRIGHT = 7.0;
-const float DISK_VOL_SC = 0.55;    // volumetric sampling scale (reduced for thicker disk)
+const float DISK_VOL_SC = 0.78;    // volumetric scale — lifts lensed below-arc
 const float ISCO_RING   = 10.0;
-const float TURBULENCE  = 0.62;
+const float TURBULENCE  = 0.78;    // boosted for richer wispy texture
 const float SPIRAL      = 0.25;
 const float DISK_ABSORB = 0.28;
 
@@ -225,12 +225,13 @@ vec3 diskEmit(vec3 cp, vec3 rayDir, float t) {
     float doppler = dot(tang, -rayDir);
     float boost   = pow(max(0.0, 1.0 + 3.2 * doppler), DOPPLER_STR);
 
-    // ── Temperature gradient: white-hot ISCO → warm orange → rust → black ────
-    vec3 ci = vec3(5.0, 4.6, 4.0);    // white-hot inner (ISCO region)
-    vec3 ch = vec3(4.0, 2.6, 0.55);   // warm cream / gold
-    vec3 cm = vec3(2.2, 0.90, 0.10);  // deep orange mid-disk
-    vec3 co = vec3(0.55, 0.06, 0.01); // rust-brown outer
-    vec3 ce = vec3(0.05, 0.00, 0.00); // near-black edge (alpha out)
+    // ── Temperature gradient — Interstellar-style sepia/copper palette ────────
+    // High contrast: hot white-ivory inner, dim copper/brown body so wisps pop.
+    vec3 ci = vec3(5.5, 4.6, 3.4);    // very hot ivory-white inner
+    vec3 ch = vec3(3.0, 2.0, 0.85);   // golden cream (dimmer)
+    vec3 cm = vec3(1.6, 0.85, 0.28);  // copper mid-disk (dimmer)
+    vec3 co = vec3(0.72, 0.30, 0.08); // rust/sepia outer
+    vec3 ce = vec3(0.20, 0.08, 0.02); // deep brown edge (alpha out)
     float mid1 = DISK_INNER * 1.40;
     float mid2 = DISK_INNER * 2.60;
     float t1   = smoothstep(DISK_INNER, mid1, r);
@@ -252,8 +253,13 @@ vec3 diskEmit(vec3 cp, vec3 rayDir, float t) {
 
     vec3 result = temp * em;
     result += ci * knots * density * n3 * 0.42 * TURBULENCE;
-    // Bright streaky filaments — hot tendrils riding on top of base emission
-    result += vec3(2.4, 1.7, 0.55) * nWisp * density * 0.85 * boost * edgeFade;
+    // Bright streaky filaments — hot copper-white tendrils riding on top
+    result += vec3(2.6, 1.75, 0.65) * nWisp * density * 1.45 * boost * edgeFade;
+    // Cooler brown dust layer — adds the sepia "dirty gas" character
+    result += vec3(1.5, 0.95, 0.42) * pow(wispBase, 1.1) * density * 0.55 * edgeFade;
+    // Dark dust modulator — punches in shadowy striations between bright wisps
+    float dustMod = pow(max(0.0, 0.5 - wispBase), 1.4) * 1.2;
+    result *= 1.0 - dustMod * 0.32 * edgeFade;
 
     // ── Folded-space chunk silhouettes embedded in disk ────────────────────────
     // Domain-replicated SDF spheres: each (azimuthal, radial) cell carries one
@@ -460,14 +466,14 @@ uniform float u_intensity;
 
 const float RS          = 0.22;
 const float BEND_FORCE  = 4.5;
-const int   STEPS       = 90;          // mobile budget (vs 200 desktop)
+const int   STEPS       = 100;         // mobile budget (vs 200 desktop)
 
 const float DISK_INNER  = RS * 3.0;
-const float DISK_OUTER  = 6.5;
-const float DISK_HEIGHT = 0.18;
+const float DISK_OUTER  = 7.0;         // wider Saturn-ring
+const float DISK_HEIGHT = 0.22;
 const float DISK_BRIGHT = 7.0;
 const float ISCO_RING   = 10.0;
-const float TURBULENCE  = 0.55;
+const float TURBULENCE  = 0.70;
 const float DISK_ABSORB = 0.30;
 
 const float DOPPLER_STR = 3.5;
@@ -475,10 +481,13 @@ const float OMEGA_SCALE = 0.42;
 const float ANIM_SPEED  = 1.0;
 const float RING_BRIGHT = 3.0;
 
-const float CAM_Y           = 0.55;    // slight elevation — better visibility of lensed arc
-const float CAM_Z           = 5.5;
-const float FOV             = 0.95;
+// Variant 02 (far_high_tilt): tilted Saturn-ring with clear lensing
+const float CAM_Y           = 1.40;    // higher viewpoint — full ring visible
+const float CAM_Z           = 9.5;     // pulled back for portrait composition
+const float FOV             = 0.75;    // tighter focal length
 const float CAM_ORBIT_SPEED = 0.022;
+const float CAM_TILT        = 0.32;    // off-kilter inclined orbital plane
+const float CAM_ROLL        = 0.18;    // slight roll on forward axis
 
 const float STAR_BRIGHT = 4.0;
 const float TONEMAP_K   = 0.44;
@@ -509,11 +518,15 @@ vec3 diskEmit(vec3 cp, vec3 rd, float t){
     float rB  = 0.5 + 0.5 * cos(rN * 6.283 * 4.0);
     rB += 0.25 * (0.5 + 0.5 * cos(rN * 6.283 * 11.0));
     float gas = fbm3(vec2(ap*2.0, log(max(r,0.01))*5.0) + t*0.03);
+    // Stretched-streak wisps for textural variety
+    float wisp = fbm3(vec2(ap*0.35, log(max(r,0.01))*9.0) - t*0.020);
+    float wispH = pow(max(0.0, wisp - 0.32), 1.4);
     float density = rB * ef;
     vec3  tang = normalize(vec3(-cp.z,0.0,cp.x));
     float dop  = dot(tang,-rd);
     float boost= pow(max(0.0,1.0+3.2*dop), DOPPLER_STR);
-    vec3 ci=vec3(5.0,4.6,4.0), cm=vec3(2.2,0.9,0.1), co=vec3(0.55,0.06,0.01), ce=vec3(0.05,0.0,0.0);
+    // Sepia/copper temperature gradient — matches Interstellar reference
+    vec3 ci=vec3(4.6,4.1,3.4), cm=vec3(2.4,1.40,0.50), co=vec3(0.95,0.42,0.12), ce=vec3(0.18,0.08,0.02);
     float t1 = smoothstep(DISK_INNER, DISK_INNER*2.6, r);
     float t2 = smoothstep(DISK_INNER*2.0, DISK_OUTER*0.72, r);
     float t3 = smoothstep(DISK_OUTER*0.58, DISK_OUTER, r);
@@ -522,7 +535,11 @@ vec3 diskEmit(vec3 cp, vec3 rd, float t){
     float iscoR = DISK_INNER + 0.032;
     float isco  = exp(-pow((r-iscoR)/0.026, 2.0)) * ISCO_RING;
     float em = density * (0.30 + 0.70*gas*TURBULENCE) * boost + isco * 0.7;
-    return temp * em;
+    vec3 result = temp * em;
+    // Hot copper wisps + cool dust tone for textural variation
+    result += vec3(2.2, 1.45, 0.55) * wispH * density * 1.10 * boost * ef;
+    result += vec3(1.4, 0.85, 0.35) * pow(wisp, 1.2) * density * 0.40 * ef;
+    return result;
 }
 
 void main(){
@@ -531,11 +548,18 @@ void main(){
     // Aspect-aware: in portrait, expand vertical so BH stays centred and disk fits.
     vec2 sc = ar > 1.0 ? (uv*2.0-1.0) * vec2(ar, 1.0)
                        : (uv*2.0-1.0) * vec2(1.0, 1.0/ar);
+    sc += vec2(-0.15, 0.0);    // slight off-centre framing
     float t = u_time * ANIM_SPEED;
     float a = t * CAM_ORBIT_SPEED;
-    vec3 camPos = vec3(sin(a)*CAM_Z, CAM_Y, cos(a)*CAM_Z);
+    // Inclined (non-planar) orbit — tilts the orbital plane around X axis
+    vec3 base = vec3(sin(a)*CAM_Z, CAM_Y, cos(a)*CAM_Z);
+    float ct = cos(CAM_TILT), st = sin(CAM_TILT);
+    vec3 camPos = vec3(base.x, base.y*ct - base.z*st, base.y*st + base.z*ct);
     vec3 fwd = normalize(-camPos);
-    vec3 rgt = normalize(cross(fwd, vec3(0,1,0)));
+    // Roll camera around its forward axis
+    float cR = cos(CAM_ROLL), sR = sin(CAM_ROLL);
+    vec3 worldUp = vec3(sR, cR, 0.0);
+    vec3 rgt = normalize(cross(fwd, worldUp));
     vec3 up  = cross(rgt, fwd);
     vec3 pos = camPos;
     vec3 dir = normalize(fwd*FOV + rgt*sc.x + up*sc.y);
@@ -546,8 +570,8 @@ void main(){
         float r  = length(pos);
         float dR = length(pos.xz);
         if(r < RS*1.05) break;
-        if(r > 9.0) break;
-        float step = min(0.06 * r / (1.0 + 7.0*RS/r), 0.25);
+        if(r > 13.0) break;       // exit > camera distance + disk extent
+        float step = min(0.05 * r / (1.0 + 8.0*RS/r), 0.25);
         vec3 toC = -pos / r;
         float accel = (RS*BEND_FORCE) / (r*r + RS*0.4);
         dir = normalize(dir + toC * accel * step * 2.0);
