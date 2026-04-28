@@ -70,15 +70,17 @@ const float BEND_FORCE  = 4.5;
 const int   STEPS       = 200;
 
 // ── Accretion disk (SDF + volumetric)  ───────────────────────────────────────
+// Geometry shared with mobile so both renders look comparable.
 const float DISK_INNER  = RS * 3.0;
-const float DISK_OUTER  = 6.5;     // wide Saturn-style disk
+const float DISK_OUTER  = 7.0;     // wide Saturn-style disk
 const float DISK_HEIGHT = 0.24;    // slightly thicker disk for more volume
 const float DISK_BRIGHT = 7.0;
 const float DISK_VOL_SC = 0.78;    // volumetric scale — lifts lensed below-arc
 const float ISCO_RING   = 10.0;
-const float TURBULENCE  = 0.78;    // boosted for richer wispy texture
+const float TURBULENCE  = 0.72;    // richer wispy texture
 const float SPIRAL      = 0.25;
 const float DISK_ABSORB = 0.28;
+const float ANG_CELLS   = 14.0;    // angular fold cells (must match mobile)
 
 // ── Saturn ring bands & dust lanes ────────────────────────────────────────────
 const float RING_FREQ   = 4.0;    // number of bright/dark band cycles
@@ -101,15 +103,15 @@ const vec3  RING_COLOR      = vec3(0.92, 0.97, 1.0);
 const float RING_DOPP_AMP   = 0.55;   // Doppler asymmetry across the ring
 const float RING_PERTURB    = 0.014;  // noise scale that breaks the perfect circle
 
-// ── Camera — nearly edge-on Saturn geometry, tilted off-kilter ────────────────
-const float CAM_Y            = 0.35;   // ~3.6° elevation above disk
-const float CAM_Z            = 5.5;
-const float FOV              = 0.95;
+// ── Camera — SHARED with mobile so both renders have comparable framing ──────
+const float CAM_Y            = 1.10;   // elevated viewpoint — disk + lensed arc visible
+const float CAM_Z            = 7.5;    // pulled back for cinematic Saturn-ring look
+const float FOV              = 0.88;
 const float CAM_ORBIT_SPEED  = 0.022;
-const float CAM_INCL_AMP     = 0.35;
+const float CAM_INCL_AMP     = 0.30;
 const float CAM_INCL_FREQ    = 0.012;
-const float CAM_AXIS_TILT    = 0.22;   // ~13° tilt of orbital plane (off-kilter)
-const float CAM_ROLL_AMP     = 0.11;   // camera roll wobble (radians)
+const float CAM_AXIS_TILT    = 0.20;   // ~11° tilt of orbital plane (off-kilter)
+const float CAM_ROLL_AMP     = 0.10;   // camera roll wobble (radians)
 const float CAM_ROLL_FREQ    = 0.014;
 
 // ── Sky ───────────────────────────────────────────────────────────────────────
@@ -129,6 +131,14 @@ float noise3D(vec3 p){vec3 i=floor(p),f=fract(p);f=f*f*(3.0-2.0*f);return mix(mi
 float vn(vec2 p){vec2 i=floor(p),f=p-i;f=f*f*(3.0-2.0*f);return mix(mix(hash12(i),hash12(i+vec2(1,0)),f.x),mix(hash12(i+vec2(0,1)),hash12(i+vec2(1,1)),f.x),f.y);}
 float fbm3(vec2 p){return 0.500*vn(p)+0.250*vn(p*2.03)+0.125*vn(p*4.07);}
 float fbm5(vec2 p){return fbm3(p)+0.0625*vn(p*8.11)+0.03125*vn(p*16.23);}
+
+// ── Seamless angular coordinate ───────────────────────────────────────────────
+// Maps an angle to (cos,sin)*scale.  Sampling noise at this 2D coord wraps
+// continuously around the disk — no atan() ±π seam, no spaghetti drift.
+vec2 angC(float ang, float scale){ return vec2(cos(ang), sin(ang)) * scale; }
+// Bounded time oscillation — replaces linear t*k drift in noise offsets so
+// the texture doesn't slowly fold into spaghetti over long sessions.
+vec2 tWobble(float t, float freq, float amp){ return vec2(sin(t*freq), cos(t*freq*1.13)) * amp; }
 
 // ── Sky ───────────────────────────────────────────────────────────────────────
 
@@ -194,23 +204,28 @@ vec3 diskEmit(vec3 cp, vec3 rayDir, float t) {
     rB += 0.28 * (0.5 + 0.5 * cos(rNorm * 6.28318 * RING_FREQ * 2.85));
     rB += 0.12 * (0.5 + 0.5 * cos(rNorm * 6.28318 * RING_FREQ * 6.60));
 
-    // ── Gas/nebula noise — multi-scale for cloud + filament structure ─────────
-    vec2  dc     = vec2(ap * 2.0, log(max(r, 0.01)) * 5.0);
-    float n1     = fbm5(dc + t * 0.028);
-    float n2     = fbm3(dc * 1.5  + vec2(1.73, 0.0) - t * 0.040);
-    float n3     = fbm3(dc * 0.65 + vec2(0.0, t * 0.016));
-    float nCloud = fbm3(dc * 0.28 + t * 0.006);           // large gas cloud
-    // Wispy filaments — strongly stretched along azimuthal (orbital) direction.
-    // Low azimuthal frequency × high radial frequency → tangential streaks.
-    vec2  wispC1 = vec2(ap * 0.30, log(max(r, 0.01)) *  8.5) + t * 0.022;
-    vec2  wispC2 = vec2(ap * 0.45, log(max(r, 0.01)) * 11.0) - t * 0.018;
-    float wispBase = fbm5(wispC1);
-    float wispFine = fbm3(wispC2);
+    // ── Gas/nebula noise — SEAMLESS angular sampling (no atan ±π wrap) ────────
+    // angC(ap, k) = (cos*k, sin*k) — wraps continuously around the disk.
+    // tWobble bounded oscillation — replaces linear t drift that caused spaghetti.
+    float lr = log(max(r, 0.01));
+    vec2  ac1   = angC(ap, 1.6) + vec2(0.0, lr * 5.0) + tWobble(t, 0.05, 0.7);
+    vec2  ac2   = angC(ap, 2.4) + vec2(1.73, lr * 7.5) + tWobble(t, 0.07, 0.6);
+    vec2  ac3   = angC(ap, 1.0) + vec2(0.0, lr * 3.2) + tWobble(t, 0.03, 0.5);
+    vec2  acC   = angC(ap, 0.45) + vec2(0.0, lr * 1.5) + tWobble(t, 0.02, 0.3); // big cloud
+    float n1     = fbm5(ac1);
+    float n2     = fbm3(ac2);
+    float n3     = fbm3(ac3);
+    float nCloud = fbm3(acC);
+    // Wispy filaments — high RADIAL frequency, low ANGULAR (tangential streaks).
+    vec2  wisp1C = angC(ap, 0.55) + vec2(0.0, lr * 9.0) + tWobble(t, 0.04, 0.6);
+    vec2  wisp2C = angC(ap, 0.80) + vec2(2.1, lr * 11.5) + tWobble(t, 0.05, 0.5);
+    float wispBase = fbm5(wisp1C);
+    float wispFine = fbm3(wisp2C);
     float nWisp = pow(max(0.0, wispBase - 0.30), 1.6) * (0.55 + 0.85 * wispFine);
     float gasTexture = mix(n1, max(nCloud * 1.3, nWisp * 1.4), 0.45);
 
-    // ── Dust lanes: dark logarithmic spirals separating the rings ─────────────
-    float dustPhase = ap * 2.0 + log(max(r, 0.01)) * 2.0 - t * 0.022;
+    // ── Dust lanes: dark logarithmic spirals — periodic in cos(ap), no seam ───
+    float dustPhase = ap * 2.0 + lr * 2.0 - t * 0.02;
     float dustLane  = max(0.0, cos(dustPhase)) * DUST_LANES * edgeFade;
 
     // ── Density: ring bands modulated by spiral structure & dust ─────────────
@@ -262,25 +277,31 @@ vec3 diskEmit(vec3 cp, vec3 rayDir, float t) {
     result *= 1.0 - dustMod * 0.32 * edgeFade;
 
     // ── Folded-space chunk silhouettes embedded in disk ────────────────────────
-    // Domain-replicated SDF spheres: each (azimuthal, radial) cell carries one
-    // chunk whose centre, size and rotation are noise-driven for variation.
-    // Chunks darken the disk emission behind them and gain a hot rim from disk light.
-    vec3 cellCoord = vec3(ap * 1.4, log(max(r, 0.01)) * 4.0, t * CHUNK_DRIFT);
-    vec2 cellId    = floor(cellCoord.xy);
-    vec2 cellLocal = fract(cellCoord.xy) - 0.5;
+    // Domain-replicated SDF spheres in a wrap-aware azimuthal grid.
+    // Angular cells: ANG_CELLS divisions of [0, 2π); cell index wraps modulo
+    // ANG_CELLS so neighbours across the seam (cell -1 ≡ cell ANG_CELLS-1)
+    // hash to the same chunk — no wrap-line artifact.
+    float angU = ap * (ANG_CELLS / 6.28318);            // angular cell coord
+    float radU = lr * 4.0;                              // radial cell coord
+    float angI = floor(angU);
+    float radI = floor(radU);
+    vec2 cellLocal = vec2(fract(angU), fract(radU)) - 0.5;
     float chunkMask = 0.0;
-    // Sample 3×3 neighbour cells for chunks that might span cell boundaries
     for (int dy = -1; dy <= 1; dy++) {
         for (int dx = -1; dx <= 1; dx++) {
-            vec2 nid = cellId + vec2(float(dx), float(dy));
+            // Wrap angular index modulo ANG_CELLS for hash consistency across seam
+            float nAng = mod(angI + float(dx) + ANG_CELLS, ANG_CELLS);
+            float nRad = radI + float(dy);
+            vec2  nid  = vec2(nAng, nRad);
             float h1 = hash12(nid * 7.13);
             float h2 = hash12(nid * 11.37 + 3.7);
             float h3 = hash12(nid * 17.91 - 1.3);
-            // Random sub-cell position + radius + drift offset
-            vec2 off  = vec2(h1 - 0.5, h2 - 0.5) * 0.7 + vec2(float(dx), float(dy));
-            vec2 drift = vec2(sin(t * CHUNK_DRIFT * (h1 + 0.3)), cos(t * CHUNK_DRIFT * (h2 + 0.4))) * 0.08;
+            // Sub-cell position offset (relative to neighbour)
+            vec2 off = vec2(h1 - 0.5, h2 - 0.5) * 0.7 + vec2(float(dx), float(dy));
+            // Bounded chunk drift — oscillates instead of accumulating linearly
+            vec2 drift = vec2(sin(t * CHUNK_DRIFT * (h1 + 0.3)),
+                              cos(t * CHUNK_DRIFT * (h2 + 0.4))) * 0.08;
             float radius = CHUNK_SIZE * (0.4 + 1.6 * h3);
-            // Chunks only exist in some cells — sparse population
             float exists = step(0.45, h1 * h2);
             float d = length(cellLocal - off - drift) - radius;
             chunkMask = max(chunkMask, exists * (1.0 - smoothstep(0.0, radius * 0.4, d)));
@@ -481,13 +502,13 @@ const float OMEGA_SCALE = 0.42;
 const float ANIM_SPEED  = 1.0;
 const float RING_BRIGHT = 3.0;
 
-// Variant 02 (far_high_tilt): tilted Saturn-ring with clear lensing
-const float CAM_Y           = 1.40;    // higher viewpoint — full ring visible
-const float CAM_Z           = 9.5;     // pulled back for portrait composition
-const float FOV             = 0.75;    // tighter focal length
+// SHARED camera params — match desktop so the two renders look comparable.
+const float CAM_Y           = 1.10;
+const float CAM_Z           = 7.5;
+const float FOV             = 0.88;
 const float CAM_ORBIT_SPEED = 0.022;
-const float CAM_TILT        = 0.32;    // off-kilter inclined orbital plane
-const float CAM_ROLL        = 0.18;    // slight roll on forward axis
+const float CAM_TILT        = 0.20;
+const float CAM_ROLL        = 0.10;
 
 const float STAR_BRIGHT = 4.0;
 const float TONEMAP_K   = 0.44;
@@ -496,6 +517,11 @@ const float GAMMA       = 0.80;
 float hash12(vec2 p){vec3 p3=fract(vec3(p.xyx)*0.1031);p3+=dot(p3,p3.yzx+33.33);return fract((p3.x+p3.y)*p3.z);}
 float vn(vec2 p){vec2 i=floor(p),f=p-i;f=f*f*(3.0-2.0*f);return mix(mix(hash12(i),hash12(i+vec2(1,0)),f.x),mix(hash12(i+vec2(0,1)),hash12(i+vec2(1,1)),f.x),f.y);}
 float fbm3(vec2 p){return 0.5*vn(p)+0.25*vn(p*2.03)+0.125*vn(p*4.07);}
+
+// Seamless angular sampler — wraps continuously, no atan ±π seam
+vec2 angC(float a, float k){ return vec2(cos(a), sin(a))*k; }
+// Bounded time wobble — replaces linear t-drift in noise offsets
+vec2 tWob(float t, float f, float a){ return vec2(sin(t*f), cos(t*f*1.13))*a; }
 
 vec3 starBg(vec3 dir){
     float az=atan(dir.z,dir.x), el=asin(clamp(dir.y,-0.999,0.999));
@@ -517,16 +543,17 @@ vec3 diskEmit(vec3 cp, vec3 rd, float t){
     float ap  = phi - t * omega;
     float rB  = 0.5 + 0.5 * cos(rN * 6.283 * 4.0);
     rB += 0.25 * (0.5 + 0.5 * cos(rN * 6.283 * 11.0));
-    float gas = fbm3(vec2(ap*2.0, log(max(r,0.01))*5.0) + t*0.03);
-    // Stretched-streak wisps for textural variety
-    float wisp = fbm3(vec2(ap*0.35, log(max(r,0.01))*9.0) - t*0.020);
+    float lr = log(max(r, 0.01));
+    // SEAMLESS noise sampling — no atan ±π wrap, no spaghetti drift
+    float gas  = fbm3(angC(ap, 1.6) + vec2(0.0, lr*5.0) + tWob(t, 0.05, 0.7));
+    float wisp = fbm3(angC(ap, 0.55) + vec2(0.0, lr*9.0) + tWob(t, 0.04, 0.6));
     float wispH = pow(max(0.0, wisp - 0.32), 1.4);
     float density = rB * ef;
     vec3  tang = normalize(vec3(-cp.z,0.0,cp.x));
     float dop  = dot(tang,-rd);
     float boost= pow(max(0.0,1.0+3.2*dop), DOPPLER_STR);
-    // Sepia/copper temperature gradient — matches Interstellar reference
-    vec3 ci=vec3(4.6,4.1,3.4), cm=vec3(2.4,1.40,0.50), co=vec3(0.95,0.42,0.12), ce=vec3(0.18,0.08,0.02);
+    // Sepia/copper temperature gradient — same palette as desktop for consistency
+    vec3 ci=vec3(5.5,4.6,3.4), cm=vec3(1.6,0.85,0.28), co=vec3(0.72,0.30,0.08), ce=vec3(0.20,0.08,0.02);
     float t1 = smoothstep(DISK_INNER, DISK_INNER*2.6, r);
     float t2 = smoothstep(DISK_INNER*2.0, DISK_OUTER*0.72, r);
     float t3 = smoothstep(DISK_OUTER*0.58, DISK_OUTER, r);
@@ -536,9 +563,12 @@ vec3 diskEmit(vec3 cp, vec3 rd, float t){
     float isco  = exp(-pow((r-iscoR)/0.026, 2.0)) * ISCO_RING;
     float em = density * (0.30 + 0.70*gas*TURBULENCE) * boost + isco * 0.7;
     vec3 result = temp * em;
-    // Hot copper wisps + cool dust tone for textural variation
-    result += vec3(2.2, 1.45, 0.55) * wispH * density * 1.10 * boost * ef;
-    result += vec3(1.4, 0.85, 0.35) * pow(wisp, 1.2) * density * 0.40 * ef;
+    // Hot copper-white wisps + cool brown dust — matches desktop tone
+    result += vec3(2.6, 1.75, 0.65) * wispH * density * 1.45 * boost * ef;
+    result += vec3(1.5, 0.95, 0.42) * pow(wisp, 1.1) * density * 0.55 * ef;
+    // Dark dust modulator — shadowy striations for richer texture
+    float dustMod = pow(max(0.0, 0.5 - wisp), 1.4) * 1.2;
+    result *= 1.0 - dustMod * 0.32 * ef;
     return result;
 }
 
@@ -548,7 +578,7 @@ void main(){
     // Aspect-aware: in portrait, expand vertical so BH stays centred and disk fits.
     vec2 sc = ar > 1.0 ? (uv*2.0-1.0) * vec2(ar, 1.0)
                        : (uv*2.0-1.0) * vec2(1.0, 1.0/ar);
-    sc += vec2(-0.15, 0.0);    // slight off-centre framing
+    // (no off-centre offset — shared framing with desktop)
     float t = u_time * ANIM_SPEED;
     float a = t * CAM_ORBIT_SPEED;
     // Inclined (non-planar) orbit — tilts the orbital plane around X axis
