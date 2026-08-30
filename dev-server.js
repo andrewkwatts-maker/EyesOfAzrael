@@ -13,6 +13,16 @@ const path = require('path');
 const PORT = process.env.PORT || 3000;
 const ROOT = __dirname;
 
+// --static-delta flag: serve features.js with ENTITY_SOURCE='static+delta' without
+// touching the source file (safe — nothing gets committed accidentally).
+const STATIC_DELTA = process.argv.includes('--static-delta');
+const FEATURES_URL = '/js/config/features.js';
+const FEATURES_OVERRIDE = `// dev-server override — ENTITY_SOURCE='static+delta' (not committed)
+const FEATURES = { ENTITY_SOURCE: 'static+delta' };
+if (typeof window !== 'undefined') window.FEATURES = FEATURES;
+if (typeof module !== 'undefined' && module.exports) module.exports = FEATURES;
+`;
+
 const MIME_TYPES = {
     '.html': 'text/html; charset=utf-8',
     '.css': 'text/css; charset=utf-8',
@@ -39,6 +49,14 @@ const MIME_TYPES = {
 
 const server = http.createServer((req, res) => {
     const url = new URL(req.url, `http://localhost:${PORT}`);
+
+    // Intercept features.js when --static-delta is active
+    if (STATIC_DELTA && url.pathname === FEATURES_URL) {
+        res.writeHead(200, { 'Content-Type': 'text/javascript; charset=utf-8', 'Cache-Control': 'no-cache' });
+        res.end(FEATURES_OVERRIDE);
+        return;
+    }
+
     let filePath = path.join(ROOT, decodeURIComponent(url.pathname));
 
     // Security: prevent directory traversal
@@ -112,6 +130,11 @@ server.listen(PORT, () => {
     console.log('');
     console.log(`   Local:   http://localhost:${PORT}`);
     console.log(`   Root:    ${ROOT}`);
+    if (STATIC_DELTA) {
+        console.log('');
+        console.log('   ⚡ ENTITY_SOURCE = static+delta');
+        console.log('      features.js overridden in-flight (source unchanged)');
+    }
     console.log('');
     console.log('   Press Ctrl+C to stop');
     console.log('');

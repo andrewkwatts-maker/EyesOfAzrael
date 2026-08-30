@@ -86,33 +86,46 @@ class SitemapGenerator {
         ];
     }
 
+    // ── shared helper ─────────────────────────────────────────────────────────
+
+    /**
+     * Load entities for sitemap — prefers static base (zero Firestore reads),
+     * falls back to a direct Firestore fetch.
+     */
+    async _loadEntities(collection) {
+        const loader = typeof window !== 'undefined' ? window.entityBaseLoader : null;
+        if (loader) {
+            try {
+                const baseMap = await loader.load(collection, null);
+                if (baseMap && baseMap.size > 0) return Array.from(baseMap.values());
+            } catch (_) {}
+        }
+        const snapshot = await this.db.collection(collection).get();
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    }
+
+    _lastmod(data) {
+        try { return data.updatedAt?.toDate().toISOString().split('T')[0]; } catch (_) {}
+        return new Date().toISOString().split('T')[0];
+    }
+
+    // ── page-list methods ──────────────────────────────────────────────────────
+
     /**
      * Get mythology pages from Firestore
      */
     async getMythologyPages() {
         try {
             const snapshot = await this.db.collection('mythologies').get();
-            const urls = [];
-
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const mythologyId = doc.id;
-
-                // Skip special categories
-                const excludedCategories = ['comparative', 'herbalism', 'themes', 'freemasons', 'tarot'];
-                if (excludedCategories.includes(mythologyId)) {
-                    return;
-                }
-
-                urls.push({
-                    loc: `${this.baseUrl}/mythos/${mythologyId}/index.html`,
-                    lastmod: data.updatedAt?.toDate().toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
+            const excluded = new Set(['comparative', 'herbalism', 'themes', 'freemasons', 'tarot']);
+            return snapshot.docs
+                .filter(doc => !excluded.has(doc.id))
+                .map(doc => ({
+                    loc: `${this.baseUrl}/mythos/${doc.id}/index.html`,
+                    lastmod: this._lastmod(doc.data()),
                     changefreq: 'weekly',
                     priority: 0.8
-                });
-            });
-
-            return urls;
+                }));
         } catch (error) {
             console.error('Error fetching mythology pages:', error);
             return [];
@@ -120,27 +133,17 @@ class SitemapGenerator {
     }
 
     /**
-     * Get deity pages from Firestore
+     * Get deity pages — uses static base when available
      */
     async getDeityPages() {
         try {
-            const snapshot = await this.db.collection('deities').get();
-            const urls = [];
-
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const mythology = data.mythology?.toLowerCase() || 'unknown';
-                const deityId = doc.id;
-
-                urls.push({
-                    loc: `${this.baseUrl}/mythos/${mythology}/deities/${deityId}.html`,
-                    lastmod: data.updatedAt?.toDate().toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-                    changefreq: 'monthly',
-                    priority: 0.7
-                });
-            });
-
-            return urls;
+            const entities = await this._loadEntities('deities');
+            return entities.map(data => ({
+                loc: `${this.baseUrl}/mythos/${(data.mythology || 'unknown').toLowerCase()}/deities/${data.id}.html`,
+                lastmod: this._lastmod(data),
+                changefreq: 'monthly',
+                priority: 0.7
+            }));
         } catch (error) {
             console.error('Error fetching deity pages:', error);
             return [];
@@ -148,27 +151,17 @@ class SitemapGenerator {
     }
 
     /**
-     * Get archetype pages from Firestore
+     * Get archetype pages — uses static base when available
      */
     async getArchetypePages() {
         try {
-            const snapshot = await this.db.collection('archetypes').get();
-            const urls = [];
-
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const category = data.category?.toLowerCase() || 'general';
-                const archetypeId = doc.id;
-
-                urls.push({
-                    loc: `${this.baseUrl}/archetypes/${category}/${archetypeId}/index.html`,
-                    lastmod: data.updatedAt?.toDate().toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-                    changefreq: 'monthly',
-                    priority: 0.6
-                });
-            });
-
-            return urls;
+            const entities = await this._loadEntities('archetypes');
+            return entities.map(data => ({
+                loc: `${this.baseUrl}/archetypes/${(data.category || 'general').toLowerCase()}/${data.id}/index.html`,
+                lastmod: this._lastmod(data),
+                changefreq: 'monthly',
+                priority: 0.6
+            }));
         } catch (error) {
             console.error('Error fetching archetype pages:', error);
             return [];
@@ -176,26 +169,17 @@ class SitemapGenerator {
     }
 
     /**
-     * Get herb pages from Firestore
+     * Get herb pages — uses static base when available
      */
     async getHerbPages() {
         try {
-            const snapshot = await this.db.collection('herbs').get();
-            const urls = [];
-
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const herbId = doc.id;
-
-                urls.push({
-                    loc: `${this.baseUrl}/herbalism/${herbId}.html`,
-                    lastmod: data.updatedAt?.toDate().toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-                    changefreq: 'monthly',
-                    priority: 0.6
-                });
-            });
-
-            return urls;
+            const entities = await this._loadEntities('herbs');
+            return entities.map(data => ({
+                loc: `${this.baseUrl}/herbalism/${data.id}.html`,
+                lastmod: this._lastmod(data),
+                changefreq: 'monthly',
+                priority: 0.6
+            }));
         } catch (error) {
             console.error('Error fetching herb pages:', error);
             return [];
@@ -208,21 +192,12 @@ class SitemapGenerator {
     async getMagicSystemPages() {
         try {
             const snapshot = await this.db.collection('magic-systems').get();
-            const urls = [];
-
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const systemId = doc.id;
-
-                urls.push({
-                    loc: `${this.baseUrl}/magic/${systemId}.html`,
-                    lastmod: data.updatedAt?.toDate().toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-                    changefreq: 'monthly',
-                    priority: 0.6
-                });
-            });
-
-            return urls;
+            return snapshot.docs.map(doc => ({
+                loc: `${this.baseUrl}/magic/${doc.id}.html`,
+                lastmod: this._lastmod(doc.data()),
+                changefreq: 'monthly',
+                priority: 0.6
+            }));
         } catch (error) {
             console.error('Error fetching magic system pages:', error);
             return [];
@@ -235,21 +210,12 @@ class SitemapGenerator {
     async getSpiritualItemPages() {
         try {
             const snapshot = await this.db.collection('spiritual-items').get();
-            const urls = [];
-
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const itemId = doc.id;
-
-                urls.push({
-                    loc: `${this.baseUrl}/spiritual-items/${itemId}.html`,
-                    lastmod: data.updatedAt?.toDate().toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-                    changefreq: 'monthly',
-                    priority: 0.5
-                });
-            });
-
-            return urls;
+            return snapshot.docs.map(doc => ({
+                loc: `${this.baseUrl}/spiritual-items/${doc.id}.html`,
+                lastmod: this._lastmod(doc.data()),
+                changefreq: 'monthly',
+                priority: 0.5
+            }));
         } catch (error) {
             console.error('Error fetching spiritual item pages:', error);
             return [];
@@ -262,21 +228,12 @@ class SitemapGenerator {
     async getSpiritualPlacePages() {
         try {
             const snapshot = await this.db.collection('spiritual-places').get();
-            const urls = [];
-
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const placeId = doc.id;
-
-                urls.push({
-                    loc: `${this.baseUrl}/spiritual-places/${placeId}.html`,
-                    lastmod: data.updatedAt?.toDate().toISOString().split('T')[0] || new Date().toISOString().split('T')[0],
-                    changefreq: 'monthly',
-                    priority: 0.5
-                });
-            });
-
-            return urls;
+            return snapshot.docs.map(doc => ({
+                loc: `${this.baseUrl}/spiritual-places/${doc.id}.html`,
+                lastmod: this._lastmod(doc.data()),
+                changefreq: 'monthly',
+                priority: 0.5
+            }));
         } catch (error) {
             console.error('Error fetching spiritual place pages:', error);
             return [];

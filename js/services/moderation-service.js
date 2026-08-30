@@ -191,27 +191,20 @@ class ModerationService {
                 .orderBy('bannedAt', 'desc')
                 .get();
 
-            const bannedUsers = [];
-            for (const doc of snapshot.docs) {
+            const bannedUsers = await Promise.all(snapshot.docs.map(async (doc) => {
                 const banData = doc.data();
-                // Try to get user display info
                 let userInfo = null;
                 try {
                     const userDoc = await this.db.collection('users').doc(doc.id).get();
-                    if (userDoc.exists) {
-                        userInfo = userDoc.data();
-                    }
-                } catch (e) {
-                    // User doc may not exist
-                }
-
-                bannedUsers.push({
+                    if (userDoc.exists) userInfo = userDoc.data();
+                } catch (e) { /* user doc may not exist */ }
+                return {
                     id: doc.id,
                     ...banData,
                     userDisplayName: userInfo?.displayName || 'Unknown User',
                     userEmail: userInfo?.email || 'Unknown Email'
-                });
-            }
+                };
+            }));
 
             return bannedUsers;
         } catch (error) {

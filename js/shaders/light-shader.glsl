@@ -41,19 +41,12 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// FBM for soft patterns
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm3(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0);
+}
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
 }
 
 // Bokeh-style particles with hexagonal shape
@@ -127,7 +120,7 @@ float lightRays(vec2 uv_centered, float time) {
     rays *= smoothstep(1.8, 0.3, dist);
 
     // Add noise for organic feel
-    rays *= 0.8 + 0.2 * fbm(vec2(angle * 3.0, time * 0.1), 3);
+    rays *= 0.8 + 0.2 * fbm3(vec2(angle * 3.0, time * 0.1));
 
     return rays;
 }
@@ -158,7 +151,7 @@ float lensFlare(vec2 uv_centered, float time) {
 
 // Atmospheric glow
 float atmosphericGlow(vec2 uv, float time) {
-    float glow = fbm(uv * 3.0 + time * 0.05, 4);
+    float glow = fbm4(uv * 3.0 + time * 0.05);
     glow = pow(glow, 2.0);
 
     // Stronger at top

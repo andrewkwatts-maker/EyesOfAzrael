@@ -41,19 +41,18 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// FBM for organic shadow patterns
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm2(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0);
+}
+float fbm3(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0);
+}
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
 }
 
 // Domain-warped flowing shadows
@@ -62,17 +61,17 @@ float flowingShadows(vec2 uv, float time) {
 
     // Create flowing motion with domain warping
     vec2 warp1 = vec2(
-        fbm(p + vec2(time * 0.05, 0.0), 3),
-        fbm(p + vec2(0.0, time * 0.06), 3)
+        fbm3(p + vec2(time * 0.05, 0.0)),
+        fbm3(p + vec2(0.0, time * 0.06))
     );
 
     vec2 warp2 = vec2(
-        fbm(p + warp1 * 2.0 + vec2(time * 0.03, 0.0), 4),
-        fbm(p + warp1 * 2.0 + vec2(0.0, time * 0.04), 4)
+        fbm4(p + warp1 * 2.0 + vec2(time * 0.03, 0.0)),
+        fbm4(p + warp1 * 2.0 + vec2(0.0, time * 0.04))
     );
 
     // Final shadow pattern
-    float shadows = fbm(p + warp2 * 3.0, 5);
+    float shadows = fbm5(p + warp2 * 3.0);
 
     return shadows;
 }
@@ -100,7 +99,7 @@ float wispyParticles(vec2 uv_scaled, float time) {
         float drift_y = t * 2.8;
 
         // Add turbulence
-        drift_x += fbm(vec2(fi, time * 0.1), 2) * 0.3;
+        drift_x += fbm2(vec2(fi, time * 0.1)) * 0.3;
 
         vec2 particle_pos = start_pos + vec2(drift_x, drift_y);
 
@@ -151,13 +150,12 @@ float dimStars(vec2 uv, float layer) {
 
 // Void/cosmic depth effect with parallax
 vec3 voidEffect(vec2 uv, float time) {
-    // Multiple parallax layers for depth
+    // Two parallax layers for depth
     float layer1 = flowingShadows(uv * 0.8 + time * 0.02, time);
     float layer2 = flowingShadows(uv * 1.2 - time * 0.015, time);
-    float layer3 = flowingShadows(uv * 1.6 + time * 0.01, time);
 
     // Combine layers with different intensities
-    float combined = layer1 * 0.5 + layer2 * 0.3 + layer3 * 0.2;
+    float combined = layer1 * 0.625 + layer2 * 0.375;
 
     // Dark purple tint for void effect
     vec3 void_color = vec3(0.08, 0.06, 0.12);

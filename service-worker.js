@@ -121,6 +121,8 @@ const PRECACHE_ENHANCED = [
   '/js/components/multi-step-form.js',
   '/js/components/entity-form.js',
   '/js/components/user-dashboard.js',
+  '/js/config/features.js',
+  '/js/services/entity-base-loader.js',
   '/js/services/asset-service.js',
   '/js/user-preferences.js',
   '/js/services/user-preferences-service.js',

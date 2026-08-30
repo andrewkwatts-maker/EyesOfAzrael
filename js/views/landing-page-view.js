@@ -1968,26 +1968,42 @@ Discover & Explore
      * Load entity counts for each category and display on cards
      */
     async loadEntityCounts() {
-        if (!this.db) return;
-
         const countElements = document.querySelectorAll('.landing-category-count[data-count-for]');
-        for (const el of countElements) {
+        if (!countElements.length) return;
+
+        // Fetch manifest once — single CDN request covers all badges
+        let manifestCollections = null;
+        try {
+            const m = await window.entityBaseLoader?.getManifest();
+            manifestCollections = m?.collections || null;
+        } catch (_) {}
+
+        // Resolve all badges in parallel
+        await Promise.all(Array.from(countElements).map(async (el) => {
             const collection = el.dataset.countFor;
-            if (!collection) continue;
+            if (!collection) return;
+
+            const baseCount = manifestCollections?.[collection]?.total;
+            if (baseCount > 0) {
+                el.textContent = baseCount >= 100 ? `${baseCount}+` : `${baseCount}`;
+                el.classList.add('has-count');
+                return;
+            }
+
+            if (!this.db) { el.textContent = '?'; el.classList.add('has-count'); return; }
 
             try {
-                const snapshot = await this.db.collection(collection).get();
+                const snapshot = await this.db.collection(collection).limit(1000).get();
                 const count = snapshot.size;
                 if (count > 0) {
                     el.textContent = count >= 100 ? `${count}+` : `${count}`;
                     el.classList.add('has-count');
                 }
             } catch (err) {
-                // Collection may not exist or query failed - show "?" so badge isn't blank
                 el.textContent = '?';
                 el.classList.add('has-count');
             }
-        }
+        }));
     }
 
     getAssetTypeCardHTML(type, index = 0) {
@@ -2310,20 +2326,28 @@ Discover & Explore
                 'texts': document.getElementById('stat-texts')
             };
 
-            // Load counts for each collection
-            for (const collection of collections) {
+            // Prefer manifest counts — single CDN request, no Firestore reads
+            let manifestCollections = null;
+            try {
+                const m = await window.entityBaseLoader?.getManifest();
+                manifestCollections = m?.collections || null;
+            } catch (_) {}
+
+            // Resolve all stats in parallel
+            await Promise.all(collections.map(async (collection) => {
+                const el = statElements[collection];
+                if (!el) return;
+
+                const baseCount = manifestCollections?.[collection]?.total;
+                if (baseCount > 0) { this.animateNumber(el, baseCount); return; }
+
                 try {
-                    const snapshot = await this.db.collection(collection).get();
-                    const count = snapshot.size;
-                    const el = statElements[collection];
-                    if (el && count > 0) {
-                        // Animate number counting up
-                        this.animateNumber(el, count);
-                    }
+                    const snapshot = await this.db.collection(collection).limit(1000).get();
+                    if (snapshot.size > 0) this.animateNumber(el, snapshot.size);
                 } catch (err) {
                     console.warn(`[Landing Page] Could not get ${collection} count:`, err.message);
                 }
-            }
+            }));
 
             console.log('[Landing Page] Stats loaded');
         } catch (error) {

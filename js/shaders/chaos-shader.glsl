@@ -60,11 +60,11 @@ uniform float u_intensity;
 // ── Black hole ────────────────────────────────────────────────────────────────
 const float RS          = 0.120;
 const float BEND_FORCE  = 5.0;
-const int   STEPS       = 120;
+const int   STEPS       = 75;
 
 // ── Accretion disk ────────────────────────────────────────────────────────────
 const float DISK_INNER  = RS * 3.0;   // Schwarzschild ISCO = 3 * RS
-const float DISK_OUTER  = 8.0;
+const float DISK_OUTER  = 5.0;
 const float DISK_HEIGHT = 0.30;
 const float DISK_BRIGHT = 5.5;
 const float ISCO_RING   = 7.0;

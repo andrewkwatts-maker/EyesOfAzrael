@@ -38,18 +38,15 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
+}
+float fbm6(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0) + 0.015625*valueNoise(p*32.0);
 }
 
 // Nebula clouds
@@ -57,16 +54,16 @@ vec3 nebula(vec2 uv, float time) {
     vec2 p = uv * 2.5;
 
     // Multiple nebula layers
-    float n1 = fbm(p + vec2(time * 0.015, time * 0.01), 6);
-    float n2 = fbm(p * 1.3 - vec2(time * 0.012, time * 0.008), 5);
-    float n3 = fbm(p * 0.8 + vec2(time * 0.018, -time * 0.01), 5);
+    float n1 = fbm6(p + vec2(time * 0.015, time * 0.01));
+    float n2 = fbm5(p * 1.3 - vec2(time * 0.012, time * 0.008));
+    float n3 = fbm5(p * 0.8 + vec2(time * 0.018, -time * 0.01));
 
     // Combine for swirling effect
     float nebula_val = (n1 * 0.6 + n2 * 0.4 + n3 * 0.3);
     nebula_val = pow(nebula_val, 1.3);
 
     // Add bright spots
-    float bright_spots = fbm(p * 3.0 + time * 0.02, 4);
+    float bright_spots = fbm4(p * 3.0 + time * 0.02);
     bright_spots = pow(bright_spots, 3.0) * 0.5;
     nebula_val += bright_spots;
 
@@ -119,8 +116,8 @@ float stars(vec2 uv, float layer, float time) {
 vec3 cosmicDust(vec2 uv, float time) {
     vec2 p = uv * 4.0;
 
-    float dust1 = fbm(p + vec2(time * 0.01, time * 0.008), 5);
-    float dust2 = fbm(p * 1.5 - vec2(time * 0.012, -time * 0.006), 4);
+    float dust1 = fbm5(p + vec2(time * 0.01, time * 0.008));
+    float dust2 = fbm4(p * 1.5 - vec2(time * 0.012, -time * 0.006));
 
     float dust_val = (dust1 * 0.5 + dust2 * 0.5);
     dust_val = pow(dust_val, 2.5) * 0.4;

@@ -38,18 +38,15 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
+}
+float fbm6(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0) + 0.015625*valueNoise(p*32.0);
 }
 
 // Turbulent storm clouds
@@ -57,16 +54,16 @@ vec3 stormClouds(vec2 uv, float time) {
     vec2 p = uv * 3.0;
 
     // Multiple turbulent layers
-    float cloud1 = fbm(p + vec2(time * 0.05, time * 0.03), 6);
-    float cloud2 = fbm(p * 1.4 - vec2(time * 0.04, time * 0.02), 5);
-    float cloud3 = fbm(p * 0.8 + vec2(-time * 0.06, time * 0.04), 5);
+    float cloud1 = fbm6(p + vec2(time * 0.05, time * 0.03));
+    float cloud2 = fbm5(p * 1.4 - vec2(time * 0.04, time * 0.02));
+    float cloud3 = fbm5(p * 0.8 + vec2(-time * 0.06, time * 0.04));
 
     // Combine for turbulent effect
     float clouds = (cloud1 * 0.5 + cloud2 * 0.3 + cloud3 * 0.2);
     clouds = pow(clouds, 1.5);
 
     // Add billowing detail
-    float detail = fbm(p * 4.0 + time * 0.1, 4) * 0.3;
+    float detail = fbm4(p * 4.0 + time * 0.1) * 0.3;
     clouds += detail;
 
     // Dark storm cloud colors

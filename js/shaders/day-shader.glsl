@@ -42,19 +42,15 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// Fractal Brownian Motion for cloud patterns
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm3(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0);
+}
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
 }
 
 // Wispy, realistic cloud patterns using domain warping
@@ -67,15 +63,15 @@ float clouds(vec2 uv, float time) {
 
     // Domain warping for realistic cloud shapes
     vec2 warp = vec2(
-        fbm(p + vec2(time * 0.01, 0.0), 3),
-        fbm(p + vec2(0.0, time * 0.012), 3)
+        fbm3(p + vec2(time * 0.01, 0.0)),
+        fbm3(p + vec2(0.0, time * 0.012))
     );
 
     // Primary cloud layer
-    float cloud1 = fbm(p + warp * 1.2, 5);
+    float cloud1 = fbm5(p + warp * 1.2);
 
     // Secondary wispy layer
-    float cloud2 = fbm(p * 1.8 + warp * 0.8 + vec2(time * 0.02, 0.0), 4);
+    float cloud2 = fbm4(p * 1.8 + warp * 0.8 + vec2(time * 0.02, 0.0));
 
     // Combine layers
     float cloud = cloud1 * 0.6 + cloud2 * 0.4;
@@ -107,7 +103,7 @@ float sunRays(vec2 uv, float time) {
     rays *= rayFade;
 
     // Add noise variation to rays
-    rays *= 0.5 + 0.5 * fbm(vec2(angle * 2.0, dist * 3.0 + time * 0.05), 3);
+    rays *= 0.5 + 0.5 * fbm3(vec2(angle * 2.0, dist * 3.0 + time * 0.05));
 
     return rays * 0.08; // Very subtle
 }
@@ -127,7 +123,7 @@ float atmosphericGlow(vec2 uv) {
 // Subtle depth variation in sky
 float skyDepth(vec2 uv, float time) {
     // Very subtle noise for sky texture
-    float depth = fbm(uv * 6.0 + vec2(time * 0.005, time * 0.003), 4);
+    float depth = fbm4(uv * 6.0 + vec2(time * 0.005, time * 0.003));
     return depth * 0.03; // Very subtle
 }
 
@@ -170,7 +166,7 @@ void main() {
     color += golden_glow * rays;
 
     // Very subtle overall brightness variation
-    float ambient = fbm(uv * 4.0 + u_time * 0.01, 3) * 0.02;
+    float ambient = fbm3(uv * 4.0 + u_time * 0.01) * 0.02;
     color += ambient;
 
     // Slight vignette for depth (very subtle)

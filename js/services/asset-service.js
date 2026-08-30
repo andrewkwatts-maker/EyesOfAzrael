@@ -200,6 +200,91 @@ class AssetService {
     }
 
     async _executeStandardQuery(type, options) {
+        // Dispatch to static+delta path when feature flag is enabled
+        if (typeof window !== 'undefined' && window.FEATURES?.ENTITY_SOURCE === 'static+delta') {
+            return this._executeStaticDeltaQuery(type, options);
+        }
+        return this._executeFirestoreQuery(type, options);
+    }
+
+    // ── Static + delta path ───────────────────────────────────────────────────
+
+    async _executeStaticDeltaQuery(type, options) {
+        const { mythology = null, orderBy = 'name', limit = 500 } = options;
+        const collectionName = this.getCollectionName(type);
+        const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
+
+        if (!loader) {
+            console.warn('[AssetService] EntityBaseLoader not available, falling back to Firestore');
+            return this._executeFirestoreQuery(type, options);
+        }
+
+        // 1. Load static base
+        let baseMap = null;
+        try {
+            baseMap = await loader.load(collectionName, mythology);
+        } catch (err) {
+            console.warn('[AssetService] Base load error, falling back to Firestore:', err.message);
+        }
+
+        if (!baseMap) {
+            console.log(`[AssetService] Static base unavailable for ${type}, falling back to Firestore`);
+            return this._executeFirestoreQuery(type, options);
+        }
+
+        // 2. Fetch Firestore deltas — entities modified after the base was generated
+        const deltas = await this._fetchDeltas(collectionName, mythology, loader);
+
+        // 3. Merge: delta entries override base entries by id
+        const merged = new Map(baseMap);
+        for (const entity of deltas) {
+            if (entity.id) merged.set(String(entity.id), entity);
+        }
+
+        // 4. Sort and apply limit
+        let results = Array.from(merged.values());
+        results.sort((a, b) => (a[orderBy] || '').localeCompare(b[orderBy] || ''));
+        if (results.length > limit) results = results.slice(0, limit);
+
+        console.log(`[AssetService] Static+delta: ${baseMap.size} base + ${deltas.length} deltas = ${results.length} ${type}`);
+        return results;
+    }
+
+    async _fetchDeltas(collection, mythology, loader) {
+        if (!this.db) return [];
+
+        try {
+            const generatedAt = await loader.getGeneratedAt();
+            if (!generatedAt) return [];
+
+            const baseDate = new Date(generatedAt);
+            let query = this.db.collection(collection)
+                .where('updatedAt', '>', baseDate);
+
+            if (mythology) {
+                query = query.where('mythology', '==', mythology);
+            }
+
+            const snapshot = await query.limit(200).get();
+            const deltas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            if (deltas.length > 0) {
+                console.log(`[AssetService] ${deltas.length} delta(s) for ${collection}`);
+            }
+            return deltas;
+
+        } catch (err) {
+            // failed-precondition means the updatedAt index doesn't exist yet — safe to ignore
+            if (err.code !== 'failed-precondition') {
+                console.warn('[AssetService] Delta query error (non-blocking):', err.message);
+            }
+            return [];
+        }
+    }
+
+    // ── Firestore-only path (unchanged behaviour) ─────────────────────────────
+
+    async _executeFirestoreQuery(type, options) {
         const { mythology = null, orderBy = 'name', limit = 500, forceRefresh = false } = options;
 
         // Map URL category to Firebase collection name

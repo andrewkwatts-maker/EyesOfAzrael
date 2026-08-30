@@ -127,19 +127,23 @@ class SortFilterControls {
     }
 
     /**
-     * Load mythologies from Firebase
+     * Load mythologies from manifest
      */
     async loadMythologies() {
-        if (!this.db) return;
-
         try {
-            const snapshot = await this.db.collection('mythologies')
-                .orderBy('name', 'asc')
-                .get();
-
-            this.mythologies = snapshot.docs.map(doc => ({
-                value: doc.id,
-                label: doc.data().name || doc.id
+            const resp = await fetch('/static/entities/manifest.json');
+            if (!resp.ok) throw new Error('manifest fetch failed');
+            const manifest = await resp.json();
+            const mythSet = new Set();
+            for (const col of Object.values(manifest.collections || {})) {
+                for (const myth of col.mythologies || []) {
+                    if (myth && myth !== 'other') mythSet.add(myth);
+                }
+            }
+            const mythologies = Array.from(mythSet).sort();
+            this.mythologies = mythologies.map(m => ({
+                value: m,
+                label: m.charAt(0).toUpperCase() + m.slice(1)
             }));
 
             console.log('[SortFilterControls] Loaded mythologies:', this.mythologies.length);

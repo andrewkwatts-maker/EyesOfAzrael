@@ -243,19 +243,25 @@ class FirebaseEntityRenderer {
                 `${mythology}_${type.replace(/s$/, '')}_${id}`,
             ];
 
+            const lookups = [];
             for (const collection of allCollections) {
                 for (const variantId of idVariations) {
-                    if (collection === collectionName && variantId === id) continue; // already tried
-                    try {
-                        const fallbackDoc = await this.db.collection(collection).doc(variantId).get();
-                        if (fallbackDoc.exists) {
-                            console.log(`[EntityRenderer] Found "${variantId}" in "${collection}" (searched from "${collectionName}/${id}")`);
-                            const entity = { id: fallbackDoc.id, ...fallbackDoc.data() };
-                            this._cache.set(`${type}:${id}`, { data: entity, timestamp: Date.now() });
-                            return entity;
-                        }
-                    } catch (e) { /* skip */ }
+                    if (collection === collectionName && variantId === id) continue;
+                    lookups.push({ collection, variantId });
                 }
+            }
+            const results = await Promise.all(lookups.map(async ({ collection, variantId }) => {
+                try {
+                    const fallbackDoc = await this.db.collection(collection).doc(variantId).get();
+                    return fallbackDoc.exists ? { collection, variantId, doc: fallbackDoc } : null;
+                } catch (e) { return null; }
+            }));
+            const found = results.find(r => r !== null);
+            if (found) {
+                console.log(`[EntityRenderer] Found "${found.variantId}" in "${found.collection}" (searched from "${collectionName}/${id}")`);
+                const entity = { id: found.doc.id, ...found.doc.data() };
+                this._cache.set(`${type}:${id}`, { data: entity, timestamp: Date.now() });
+                return entity;
             }
             return null;
         }

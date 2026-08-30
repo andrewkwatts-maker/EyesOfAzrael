@@ -915,7 +915,7 @@ class SearchViewComplete {
     async performSearch(query) {
         query = query.trim();
 
-        if (!query || query.length < 2) {
+        if (!query || query.length < 1) {
             this.showEmptyState();
             return;
         }
@@ -951,13 +951,10 @@ class SearchViewComplete {
                 limit: 1000
             };
 
+            // Phase 1: exact/direct matches — render immediately
             const result = await this.searchEngine.search(query, searchOptions);
-
-            // Apply client-side filters
             this.state.results = this.applyClientFilters(result.items || []);
             this.state.totalResults = this.state.results.length;
-
-            console.log('[SearchView] Found', this.state.totalResults, 'results');
 
             // Ensure minimum loading time for smooth UX
             const elapsed = Date.now() - this.state.searchStartTime;
@@ -965,7 +962,30 @@ class SearchViewComplete {
                 await new Promise(resolve => setTimeout(resolve, this.minLoadingTime - elapsed));
             }
 
-            // Track search event
+            this.addToSearchHistory(query, this.state.totalResults);
+            this.renderResults();
+
+            // Phase 2: fuzzy matches — background, non-blocking
+            if (typeof this.searchEngine.genericSearchFuzzy === 'function') {
+                const capturedQuery = query;
+                const exactIds = new Set(
+                    this.state.results.map(r => `${r.collection}:${r.id}`)
+                );
+                setTimeout(async () => {
+                    try {
+                        const fuzzyItems = await this.searchEngine.genericSearchFuzzy(
+                            capturedQuery, searchOptions, exactIds
+                        );
+                        if (fuzzyItems.length > 0 && this.state.query === capturedQuery) {
+                            const filtered = this.applyClientFilters(fuzzyItems);
+                            this.state.results = [...this.state.results, ...filtered];
+                            this.state.totalResults = this.state.results.length;
+                            this.renderResults();
+                        }
+                    } catch (e) { /* fuzzy failure is non-fatal */ }
+                }, 0);
+            }
+
             if (window.AnalyticsManager) {
                 window.AnalyticsManager.trackSearch(query, {
                     mythology: this.state.filters.mythology,
@@ -973,12 +993,6 @@ class SearchViewComplete {
                     hasImage: this.state.filters.hasImage
                 }, this.state.totalResults);
             }
-
-            // Save to history
-            this.addToSearchHistory(query, this.state.totalResults);
-
-            // Render results
-            this.renderResults();
 
         } catch (error) {
             console.error('[SearchView] Search failed:', error);

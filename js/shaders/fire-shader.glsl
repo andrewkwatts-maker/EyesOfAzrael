@@ -41,19 +41,18 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// FBM with variable octaves
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm2(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0);
+}
+float fbm3(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0);
+}
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
 }
 
 // Domain-warped fire effect
@@ -64,17 +63,17 @@ float firePattern(vec2 uv, float time) {
 
     // Multi-layer domain warping for realistic flame turbulence
     vec2 warp1 = vec2(
-        fbm(p * 2.0 + vec2(time * 0.15, 0.0), 4),
-        fbm(p * 2.0 + vec2(0.0, time * 0.2), 4)
+        fbm4(p * 2.0 + vec2(time * 0.15, 0.0)),
+        fbm4(p * 2.0 + vec2(0.0, time * 0.2))
     );
 
     vec2 warp2 = vec2(
-        fbm(p * 3.0 + warp1 * 1.5 + vec2(time * 0.1, 0.0), 3),
-        fbm(p * 3.0 + warp1 * 1.5 + vec2(0.0, time * 0.12), 3)
+        fbm3(p * 3.0 + warp1 * 1.5 + vec2(time * 0.1, 0.0)),
+        fbm3(p * 3.0 + warp1 * 1.5 + vec2(0.0, time * 0.12))
     );
 
     // Final fire pattern
-    float fire = fbm(p + warp2 * 2.5, 5);
+    float fire = fbm5(p + warp2 * 2.5);
 
     // Sharpen flame edges
     fire = pow(fire, 1.8);
@@ -104,7 +103,7 @@ float embers(vec2 uv_scaled, float time) {
         );
 
         // Natural drift using turbulence
-        float drift_x = sin(time * 0.3 + fi) * 0.3 + fbm(vec2(fi, time * 0.1), 2) * 0.2;
+        float drift_x = sin(time * 0.3 + fi) * 0.3 + fbm2(vec2(fi, time * 0.1)) * 0.2;
         float drift_y = t * 2.5;
 
         vec2 ember_pos = start_pos + vec2(drift_x, drift_y);
@@ -133,8 +132,8 @@ float embers(vec2 uv_scaled, float time) {
 // Heat shimmer distortion effect
 vec2 heatDistortion(vec2 uv, float time) {
     vec2 distortion = vec2(
-        fbm(uv * 6.0 + vec2(time * 0.2, 0.0), 3),
-        fbm(uv * 6.0 + vec2(0.0, time * 0.25), 3)
+        fbm3(uv * 6.0 + vec2(time * 0.2, 0.0)),
+        fbm3(uv * 6.0 + vec2(0.0, time * 0.25))
     );
 
     return (distortion - 0.5) * 0.015;
@@ -169,7 +168,7 @@ void main() {
     vec3 bright_ember = vec3(1.0, 0.42, 0.1);          // #ff6b1a (bright orange)
 
     // Ambient glow
-    float ambient_glow = fbm(uv * 3.0 + u_time * 0.05, 3) * 0.02;
+    float ambient_glow = fbm3(uv * 3.0 + u_time * 0.05) * 0.02;
 
     // Build fire color with temperature gradient
     vec3 fire_color = mix(dark_ember, hot_ember, fire_val);

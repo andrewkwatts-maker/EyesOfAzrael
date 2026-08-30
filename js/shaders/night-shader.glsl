@@ -47,19 +47,15 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// FBM for organic patterns
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm3(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0);
+}
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
 }
 
 // Realistic star field with varied sizes
@@ -111,9 +107,9 @@ vec3 aurora(vec2 uv, float time) {
     vec2 p = vec2(uv.x * 4.0, uv.y * 2.0);
 
     // Flowing aurora waves
-    float wave1 = fbm(p + vec2(time * 0.08, time * 0.05), 4);
-    float wave2 = fbm(p * 1.3 - vec2(time * 0.06, time * 0.04), 4);
-    float wave3 = fbm(p * 0.8 + vec2(time * 0.1, -time * 0.03), 3);
+    float wave1 = fbm4(p + vec2(time * 0.08, time * 0.05));
+    float wave2 = fbm4(p * 1.3 - vec2(time * 0.06, time * 0.04));
+    float wave3 = fbm3(p * 0.8 + vec2(time * 0.1, -time * 0.03));
 
     // Combine waves
     float aurora_val = (wave1 + wave2 * 0.7 + wave3 * 0.5) / 2.2;
@@ -143,8 +139,8 @@ vec3 aurora(vec2 uv, float time) {
 vec3 nebula(vec2 uv, float time) {
     vec2 p = uv * 2.0;
 
-    float n1 = fbm(p + vec2(time * 0.02, time * 0.015), 5);
-    float n2 = fbm(p * 1.5 + vec2(-time * 0.018, time * 0.012), 4);
+    float n1 = fbm5(p + vec2(time * 0.02, time * 0.015));
+    float n2 = fbm4(p * 1.5 + vec2(-time * 0.018, time * 0.012));
 
     float nebula_val = (n1 + n2) * 0.5;
     nebula_val = pow(nebula_val, 2.0);

@@ -32,18 +32,12 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
 }
 
 // Flowing aurora curtains
@@ -51,10 +45,10 @@ vec3 aurora(vec2 uv, float time) {
     vec2 p = vec2(uv.x * 3.0, uv.y * 2.0);
 
     // Multiple flowing layers
-    float wave1 = fbm(p + vec2(time * 0.12, time * 0.08), 5);
-    float wave2 = fbm(p * 1.5 - vec2(time * 0.1, time * 0.06), 5);
-    float wave3 = fbm(p * 0.7 + vec2(time * 0.15, -time * 0.05), 4);
-    float wave4 = fbm(p * 2.0 + vec2(-time * 0.08, time * 0.1), 4);
+    float wave1 = fbm5(p + vec2(time * 0.12, time * 0.08));
+    float wave2 = fbm5(p * 1.5 - vec2(time * 0.1, time * 0.06));
+    float wave3 = fbm4(p * 0.7 + vec2(time * 0.15, -time * 0.05));
+    float wave4 = fbm4(p * 2.0 + vec2(-time * 0.08, time * 0.1));
 
     // Combine waves
     float aurora_val = (wave1 + wave2 * 0.8 + wave3 * 0.6 + wave4 * 0.5) / 3.0;
@@ -122,8 +116,8 @@ void main() {
     // Aurora
     vec3 aurora_color = aurora(uv, u_time);
 
-    // Add subtle glow around aurora
-    float glow = aurora(uv * 0.95, u_time * 1.1).g * 0.3;
+    // Add subtle glow around aurora (reuse already-computed result)
+    float glow = aurora_color.g * 0.3;
     sky_color += vec3(0.1, 0.2, 0.15) * glow;
 
     // Combine

@@ -46,19 +46,12 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// Fractal Brownian Motion
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm3(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
 }
 
 // Rotation matrix
@@ -209,7 +202,7 @@ float divineParticles(vec2 uv_scaled, float time) {
 // Pearl shimmer effect
 float pearlShimmer(vec2 uv, float time) {
     // Iridescent shimmer using interference pattern
-    float shimmer = fbm(uv * 20.0 + vec2(time * 0.02, -time * 0.015), 5);
+    float shimmer = fbm5(uv * 20.0 + vec2(time * 0.02, -time * 0.015));
 
     // Add directional shimmer waves
     float wave1 = sin(uv.x * 15.0 + time * 0.1) * 0.5 + 0.5;
@@ -258,7 +251,7 @@ void main() {
     base_color = mix(base_color, pure_white, radial * 0.1);
 
     // Gentle overall glow
-    float ambient = fbm(uv * 4.0 + u_time * 0.01, 3) * 0.03;
+    float ambient = fbm3(uv * 4.0 + u_time * 0.01) * 0.03;
     base_color += ambient;
 
     // Ensure bright, divine appearance

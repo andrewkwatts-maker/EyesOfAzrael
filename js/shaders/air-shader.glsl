@@ -42,32 +42,28 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// Fractal Brownian Motion
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm3(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0);
+}
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
 }
 
 // Advanced domain warping for wind flow visualization
 vec2 domainWarp(vec2 p, float time, int depth) {
     vec2 q = vec2(
-        fbm(p + vec2(0.0, 0.0), 4),
-        fbm(p + vec2(5.2, 1.3), 4)
+        fbm4(p + vec2(0.0, 0.0)),
+        fbm4(p + vec2(5.2, 1.3))
     );
 
     if(depth < 2) {
         vec2 r = vec2(
-            fbm(p + 4.0 * q + vec2(time * 0.05, time * 0.03), 3),
-            fbm(p + 4.0 * q + vec2(time * 0.04, -time * 0.06), 3)
+            fbm3(p + 4.0 * q + vec2(time * 0.05, time * 0.03)),
+            fbm3(p + 4.0 * q + vec2(time * 0.04, -time * 0.06))
         );
 
         if(depth < 1) {
@@ -88,9 +84,9 @@ float windFlow(vec2 uv, float time) {
     vec2 warped = domainWarp(p, time, 1);
 
     // Multi-scale wind patterns
-    float flow1 = fbm(warped + vec2(time * 0.08, 0.0), 5);
-    float flow2 = fbm(warped * 1.5 + vec2(-time * 0.06, time * 0.05), 4);
-    float flow3 = fbm(warped * 2.5 + vec2(time * 0.04, -time * 0.07), 3);
+    float flow1 = fbm5(warped + vec2(time * 0.08, 0.0));
+    float flow2 = fbm4(warped * 1.5 + vec2(-time * 0.06, time * 0.05));
+    float flow3 = fbm3(warped * 2.5 + vec2(time * 0.04, -time * 0.07));
 
     // Combine flows
     float wind = flow1 * 0.5 + flow2 * 0.3 + flow3 * 0.2;
@@ -113,7 +109,7 @@ float airCurrents(vec2 uv, float time) {
     current *= sin(angle * 5.0 - dist * 1.5 + time * 0.4) * 0.5 + 0.5;
 
     // Add noise variation
-    current *= fbm(p + vec2(time * 0.05, -time * 0.06), 3);
+    current *= fbm3(p + vec2(time * 0.05, -time * 0.06));
 
     // Make currents more defined
     current = smoothstep(0.3, 0.7, current);
@@ -144,8 +140,8 @@ float floatingParticles(vec2 uv_scaled, float time) {
 
         // Wind-affected motion (flowing, swirling)
         vec2 wind_offset = vec2(
-            fbm(vec2(fi, time * 0.1), 3) * 2.0 - 1.0,
-            fbm(vec2(fi + 10.0, time * 0.08), 3) * 2.0 - 1.0
+            fbm3(vec2(fi, time * 0.1)) * 2.0 - 1.0,
+            fbm3(vec2(fi + 10.0, time * 0.08)) * 2.0 - 1.0
         );
 
         // Spiral motion
@@ -188,7 +184,7 @@ float floatingParticles(vec2 uv_scaled, float time) {
 // Atmospheric transparency effect
 float atmosphericDepth(vec2 uv, float time) {
     // Very subtle atmospheric variation
-    float depth = fbm(uv * 5.0 + vec2(time * 0.02, time * 0.015), 4);
+    float depth = fbm4(uv * 5.0 + vec2(time * 0.02, time * 0.015));
     return depth * 0.04;
 }
 

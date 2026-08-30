@@ -41,19 +41,15 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// Fractal Brownian Motion for organic patterns
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// Fractal Brownian Motion — static versions (no loop overhead)
+float fbm3(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0);
+}
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
 }
 
 // Voronoi-based caustics
@@ -107,15 +103,15 @@ float waves(vec2 uv, float time) {
     vec2 p = vec2(uv.x * 12.0, uv.y * 4.0);
 
     // Primary wave motion
-    float wave = fbm(p + vec2(time * 0.3, 0.0), 4);
+    float wave = fbm4(p + vec2(time * 0.3, 0.0));
 
     // Domain warping for realistic wave deformation
     vec2 warp = vec2(
-        fbm(p + vec2(0.0, time * 0.2), 3),
-        fbm(p + vec2(time * 0.25, 0.0), 3)
+        fbm3(p + vec2(0.0, time * 0.2)),
+        fbm3(p + vec2(time * 0.25, 0.0))
     );
 
-    wave = fbm(p + warp * 1.5, 5);
+    wave = fbm5(p + warp * 1.5);
 
     return wave;
 }
@@ -170,7 +166,7 @@ float godRays(vec2 uv, float time) {
     rays *= smoothstep(0.0, 0.6, uv.y);
 
     // Subtle variation using noise
-    rays *= 0.5 + 0.5 * fbm(vec2(uv.x * 3.0, uv.y * 2.0 + time * 0.05), 3);
+    rays *= 0.5 + 0.5 * fbm3(vec2(uv.x * 3.0, uv.y * 2.0 + time * 0.05));
 
     return rays * 0.15;
 }
@@ -206,7 +202,7 @@ void main() {
     float rays = godRays(uv, u_time);
 
     // Ambient underwater texture
-    float ambient_noise = fbm(uv * 8.0 + u_time * 0.02, 4) * 0.03;
+    float ambient_noise = fbm4(uv * 8.0 + u_time * 0.02) * 0.03;
 
     // Combine all effects
     vec3 color = base_color;

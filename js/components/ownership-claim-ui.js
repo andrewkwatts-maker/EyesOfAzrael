@@ -1138,11 +1138,11 @@ class OwnershipClaimUI {
      */
     _refreshBanners(assetId) {
         const banners = document.querySelectorAll(`.ownership-banner[data-asset-id="${assetId}"]`);
-        banners.forEach(async (banner) => {
+        Promise.all(Array.from(banners).map(async (banner) => {
             const container = banner.parentElement;
             const newBanner = await this.createOwnershipBanner(assetId, { showActions: true });
             container.replaceChild(newBanner, banner);
-        });
+        })).catch(() => {});
     }
 
     /**

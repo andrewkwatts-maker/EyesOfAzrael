@@ -224,32 +224,24 @@ class CategoryLandingView {
      * Load category statistics
      */
     async loadCategoryStats(entityType) {
-        if (!this.db) {
-            return { total: 0, mythologies: 0, recentlyAdded: 0 };
-        }
-
         const collection = this.getCollectionName(entityType);
 
+        // Prefer manifest — zero Firestore reads
         try {
-            // Get total count
-            const totalSnapshot = await this.db.collection(collection).get();
-            const total = totalSnapshot.size;
+            const manifest = await window.entityBaseLoader?.getManifest();
+            const meta = manifest?.collections[collection];
+            if (meta) {
+                return { total: meta.total, mythologies: meta.mythologies.length, recentlyAdded: 0 };
+            }
+        } catch (_) {}
 
-            // Get unique mythologies
+        if (!this.db) return { total: 0, mythologies: 0, recentlyAdded: 0 };
+
+        try {
+            const snapshot = await this.db.collection(collection).limit(1000).get();
             const mythologySet = new Set();
-            totalSnapshot.docs.forEach(doc => {
-                const mythology = doc.data().mythology;
-                if (mythology) mythologySet.add(mythology);
-            });
-
-            // Get recently added (last 30 days) - simplified for now
-            const recentlyAdded = Math.floor(total * 0.15); // Estimate
-
-            return {
-                total,
-                mythologies: mythologySet.size,
-                recentlyAdded
-            };
+            snapshot.docs.forEach(doc => { const m = doc.data().mythology; if (m) mythologySet.add(m); });
+            return { total: snapshot.size, mythologies: mythologySet.size, recentlyAdded: 0 };
         } catch (error) {
             console.error('[CategoryLandingView] Error loading stats:', error);
             return { total: 0, mythologies: 0, recentlyAdded: 0 };
@@ -288,30 +280,31 @@ class CategoryLandingView {
      * Load mythology breakdown
      */
     async loadMythologyBreakdown(entityType) {
-        if (!this.db) {
-            return [];
-        }
-
         const collection = this.getCollectionName(entityType);
 
+        // Prefer manifest mythologyCounts — zero Firestore reads
         try {
-            const snapshot = await this.db.collection(collection).get();
+            const manifest = await window.entityBaseLoader?.getManifest();
+            const meta = manifest?.collections[collection];
+            if (meta?.mythologyCounts) {
+                return Object.entries(meta.mythologyCounts)
+                    .map(([name, count]) => ({ name, count }))
+                    .sort((a, b) => b.count - a.count);
+            }
+        } catch (_) {}
 
-            // Count by mythology
+        if (!this.db) return [];
+
+        try {
+            const snapshot = await this.db.collection(collection).limit(1000).get();
             const counts = {};
             snapshot.docs.forEach(doc => {
-                const mythology = doc.data().mythology;
-                if (mythology) {
-                    counts[mythology] = (counts[mythology] || 0) + 1;
-                }
+                const m = doc.data().mythology;
+                if (m) counts[m] = (counts[m] || 0) + 1;
             });
-
-            // Convert to array and sort by count
-            const mythologies = Object.entries(counts)
+            return Object.entries(counts)
                 .map(([name, count]) => ({ name, count }))
                 .sort((a, b) => b.count - a.count);
-
-            return mythologies;
         } catch (error) {
             console.error('[CategoryLandingView] Error loading mythologies:', error);
             return [];

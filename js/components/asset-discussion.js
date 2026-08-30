@@ -637,12 +637,10 @@ class AssetDiscussion {
         // Initialize badge displays
         if (window.BadgeDisplay) {
             const badgeContainers = this.commentsListEl.querySelectorAll('.comment-author-badges[data-user-id]');
-            badgeContainers.forEach(async container => {
+            Promise.all(Array.from(badgeContainers).map(async container => {
                 const userId = container.dataset.userId;
                 if (!userId) return;
-
                 try {
-                    // Load user badges from Firestore
                     const badgeAwards = await this._loadUserBadges(userId);
                     if (badgeAwards.length > 0) {
                         const badgeDisplay = new window.BadgeDisplay({
@@ -656,7 +654,7 @@ class AssetDiscussion {
                 } catch (error) {
                     console.warn('[AssetDiscussion] Failed to load badges for user:', userId);
                 }
-            });
+            })).catch(() => {});
         }
 
         // Load user votes for all visible comments

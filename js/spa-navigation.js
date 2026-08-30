@@ -1655,10 +1655,10 @@ class SPANavigation {
                 let snapshot = await this.db.collection(type)
                     .where('mythology', '==', mythologyId)
                     .get();
-                // If no results, fetch all and filter client-side (handles inconsistent casing)
+                // If no results, fetch up to 500 and filter client-side (handles inconsistent casing)
                 if (snapshot.empty) {
-                    snapshot = await this.db.collection(type).get();
-                    counts[type] = snapshot.docs.filter(doc => {
+                    const allSnapshot = await this.db.collection(type).limit(500).get();
+                    counts[type] = allSnapshot.docs.filter(doc => {
                         const m = (doc.data().mythology || '').toLowerCase();
                         return m === mythLower || m.startsWith(mythLower);
                     }).length;

@@ -42,19 +42,18 @@ float valueNoise(vec2 p) {
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
-// FBM for organic textures
-float fbm(vec2 p, int octaves) {
-    float value = 0.0;
-    float amplitude = 0.5;
-    float frequency = 1.0;
-
-    for(int i = 0; i < 8; i++) {
-        if(i >= octaves) break;
-        value += amplitude * valueNoise(p * frequency);
-        frequency *= 2.0;
-        amplitude *= 0.5;
-    }
-    return value;
+// FBM — static versions (no loop overhead)
+float fbm2(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0);
+}
+float fbm3(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0);
+}
+float fbm4(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0);
+}
+float fbm5(vec2 p) {
+    return 0.5*valueNoise(p) + 0.25*valueNoise(p*2.0) + 0.125*valueNoise(p*4.0) + 0.0625*valueNoise(p*8.0) + 0.03125*valueNoise(p*16.0);
 }
 
 // Voronoi pattern for organic earth texture
@@ -95,12 +94,12 @@ float growthPattern(vec2 uv, float time) {
 
     // Flowing growth direction
     vec2 flow = vec2(
-        fbm(p * 0.5 + vec2(time * 0.05, 0.0), 3),
-        fbm(p * 0.5 + vec2(0.0, time * 0.06), 3)
+        fbm3(p * 0.5 + vec2(time * 0.05, 0.0)),
+        fbm3(p * 0.5 + vec2(0.0, time * 0.06))
     );
 
     // Branch-like structure
-    float growth = fbm(p + flow * 2.0, 4);
+    float growth = fbm4(p + flow * 2.0);
 
     // Add veiny structure
     vec2 voro = voronoi(p * 2.0);
@@ -113,7 +112,7 @@ float growthPattern(vec2 uv, float time) {
 float particles(vec2 uv_scaled, float time) {
     float particle = 0.0;
 
-    for(int i = 0; i < 18; i++) {
+    for(int i = 0; i < 12; i++) {
         float fi = float(i);
         float seed = hash12(vec2(fi, 0.0));
 
@@ -138,8 +137,8 @@ float particles(vec2 uv_scaled, float time) {
 
         // Add drift
         particle_pos += vec2(
-            fbm(vec2(fi, time * 0.1), 2) * 0.3,
-            fbm(vec2(fi + 10.0, time * 0.12), 2) * 0.3
+            fbm2(vec2(fi, time * 0.1)) * 0.3,
+            fbm2(vec2(fi + 10.0, time * 0.12)) * 0.3
         );
 
         float dist = length(uv_scaled - particle_pos);
@@ -170,7 +169,7 @@ float grassBlades(vec2 uv, float time) {
     vec2 p = vec2(uv.x * 80.0, uv.y * 20.0);
 
     // Multiple grass blades
-    for(int i = 0; i < 30; i++) {
+    for(int i = 0; i < 20; i++) {
         float fi = float(i);
         float x = fi * 2.7 + hash12(vec2(fi, 0.0)) * 2.0;
 
@@ -198,7 +197,7 @@ float grassBlades(vec2 uv, float time) {
 float dandelionSeeds(vec2 uv_scaled, vec2 uv, float time) {
     float seeds = 0.0;
 
-    for(int i = 0; i < 8; i++) {
+    for(int i = 0; i < 5; i++) {
         float fi = float(i);
         float seed = hash12(vec2(fi, 10.0));
 
@@ -217,7 +216,7 @@ float dandelionSeeds(vec2 uv_scaled, vec2 uv, float time) {
         vec2 seed_pos = start_pos + vec2(drift, t * 2.5);
 
         // Add wind turbulence
-        seed_pos.x += fbm(vec2(fi, time * 0.15), 2) * 0.2;
+        seed_pos.x += fbm2(vec2(fi, time * 0.15)) * 0.2;
 
         float dist = length(uv_scaled - seed_pos);
         float size = 0.012;
@@ -256,7 +255,7 @@ float edgeFlowers(vec2 uv_scaled, vec2 uv, float time) {
     float edge_dist = min(min(uv.y, 1.0 - uv.y), min(uv.x, 1.0 - uv.x));
     if(edge_dist > 0.08) return 0.0;
 
-    for(int i = 0; i < 12; i++) {
+    for(int i = 0; i < 8; i++) {
         float fi = float(i);
         float seed = hash12(vec2(fi, 20.0));
 
@@ -320,8 +319,8 @@ void main() {
     growth = smoothstep(0.3, 0.7, growth);
 
     // Multi-octave noise for rich texture
-    float texture1 = fbm(uv * 10.0 + u_time * 0.03, 5);
-    float texture2 = fbm(uv * 15.0 - u_time * 0.02, 4);
+    float texture1 = fbm5(uv * 10.0 + u_time * 0.03);
+    float texture2 = fbm4(uv * 15.0 - u_time * 0.02);
 
     // Flowing particles
     float particle_val = particles(uv_scaled, u_time);

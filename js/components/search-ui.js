@@ -241,7 +241,7 @@ class SearchUI {
         // Search input
         const searchInput = document.getElementById('search-input');
         if (searchInput) {
-            searchInput.addEventListener('input', this.handleSearchInput.bind(this));
+            searchInput.addEventListener('input', this._debounce(this.handleSearchInput.bind(this), 300));
             searchInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') this.performSearch();
             });
@@ -354,8 +354,22 @@ class SearchUI {
             return;
         }
 
-        const suggestions = await this.corpusSearch.getSuggestions(query);
+        let suggestions;
+        if (typeof this.corpusSearch?.getSuggestions === 'function') {
+            suggestions = await this.corpusSearch.getSuggestions(query);
+        } else {
+            suggestions = [];
+        }
+        this.currentQuery = query;
         this.showSuggestions(suggestions);
+    }
+
+    /**
+     * Debounce helper
+     */
+    _debounce(fn, ms) {
+        let t;
+        return (...args) => { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), ms); };
     }
 
     /**
@@ -425,7 +439,8 @@ class SearchUI {
             this.updateResultsCount(results.total);
 
             // Show results controls
-            document.querySelector('.results-controls').style.display = 'flex';
+            const ctrl = document.querySelector('.results-controls');
+            if (ctrl) ctrl.style.display = 'flex';
 
         } catch (error) {
             console.error('Search error:', error);
@@ -437,7 +452,10 @@ class SearchUI {
      * Apply filters and re-search
      */
     applyFilters() {
-        const mythology = document.getElementById('filter-mythology').value;
+        const mythologyEl = document.getElementById('filter-mythology');
+        const mythology = mythologyEl
+            ? Array.from(mythologyEl.selectedOptions).map(o => o.value).filter(v => v !== '').join(',')
+            : '';
         const entityType = document.getElementById('filter-entity-type').value;
         const importanceMin = parseInt(document.getElementById('filter-importance-min').value) || 0;
         const importanceMax = parseInt(document.getElementById('filter-importance-max').value) || 100;
@@ -585,7 +603,8 @@ class SearchUI {
             `;
         }
 
-        document.querySelector('.results-controls').style.display = 'none';
+        const ctrl = document.querySelector('.results-controls');
+        if (ctrl) ctrl.style.display = 'none';
     }
 
     /**

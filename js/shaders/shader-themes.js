@@ -83,6 +83,13 @@ class ShaderThemeManager {
             space: 'cosmic-shader.glsl'
         };
 
+        // Per-shader resolution scale (multiplied against effective DPR)
+        this._shaderResolutionScale = {
+            'chaos': 0.6,
+            'earth': 0.75,
+            'dark':  0.8,
+        };
+
         // Performance settings
         this.settings = {
             targetFPS: 60,
@@ -185,20 +192,28 @@ class ShaderThemeManager {
     }
 
     /**
-     * Get appropriate device pixel ratio based on quality settings
+     * Get appropriate device pixel ratio based on quality settings,
+     * further scaled by per-shader resolution scale.
      */
     getDevicePixelRatio() {
         const dpr = window.devicePixelRatio || 1;
 
+        let effectiveDpr;
         switch (this.settings.quality) {
             case 'low':
-                return Math.min(dpr, 1);
+                effectiveDpr = Math.min(dpr, 1);
+                break;
             case 'medium':
-                return Math.min(dpr, 1.5);
+                effectiveDpr = Math.min(dpr, 1.5);
+                break;
             case 'high':
             default:
-                return Math.min(dpr, 2);
+                effectiveDpr = Math.min(dpr, 2);
         }
+
+        // Apply per-shader resolution scale
+        const shaderScale = this._shaderResolutionScale[this.currentTheme] ?? 1.0;
+        return effectiveDpr * shaderScale;
     }
 
     /**
@@ -465,7 +480,7 @@ class ShaderThemeManager {
      * Adjust quality based on FPS
      */
     adjustQuality() {
-        if (this.fpsCounter.fps < 30 && this.settings.quality !== 'low') {
+        if (this.fpsCounter.fps < 40 && this.settings.quality !== 'low') {
             console.log('[ShaderThemes] Low FPS detected, reducing quality');
             this.settings.quality = 'low';
             this.handleResize();

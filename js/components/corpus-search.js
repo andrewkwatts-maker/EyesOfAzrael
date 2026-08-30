@@ -84,7 +84,8 @@ class CorpusSearch {
      */
     async genericSearch(query, options = {}) {
         const { mythology, entityType } = options;
-        const searchTerms = this.tokenize(query.toLowerCase());
+        const rawQuery = query.toLowerCase().trim();
+        const searchTerms = this.tokenize(query);
         const results = [];
 
         for (const collection of this.collections) {
@@ -97,11 +98,11 @@ class CorpusSearch {
                     queryRef = queryRef.where('mythology', '==', mythology);
                 }
 
-                const snapshot = await queryRef.get();
+                const snapshot = await queryRef.limit(500).get();
 
                 snapshot.forEach(doc => {
                     const entity = doc.data();
-                    const score = this.calculateGenericScore(entity, searchTerms);
+                    const score = this.calculateGenericScore(entity, searchTerms, rawQuery);
 
                     if (score > 0) {
                         results.push({
@@ -116,7 +117,6 @@ class CorpusSearch {
                 });
             } catch (error) {
                 console.warn(`[CorpusSearch] Error searching collection '${collection}':`, error.message);
-                // Continue searching other collections
             }
         }
 
@@ -128,38 +128,36 @@ class CorpusSearch {
      */
     async searchByLanguage(query, options = {}) {
         const { mythology, language } = options;
-        const results = [];
 
-        for (const collection of this.collections) {
+        const perCollection = await Promise.all(this.collections.map(async collection => {
             try {
-                const snapshot = await this.db.collection(collection).get();
-
+                let q = this.db.collection(collection);
+                if (mythology) q = q.where('mythology', '==', mythology);
+                const snapshot = await q.limit(200).get();
+                const matches = [];
                 snapshot.forEach(doc => {
                     const entity = doc.data();
-
-                    // Skip if mythology filter doesn't match
-                    if (mythology && entity.mythology !== mythology) return;
-
                     const langData = entity.languages || {};
                     const score = this.calculateLanguageScore(langData, query, language);
-
                     if (score > 0) {
-                        results.push({
+                        matches.push({
                             ...entity,
                             id: entity.id || doc.id,
                             type: entity.type || collection,
-                            collection: collection,
+                            collection,
                             _searchScore: score,
                             _matchedLanguage: this.getMatchedLanguage(langData, query, language)
                         });
                     }
                 });
+                return matches;
             } catch (error) {
                 console.warn(`[CorpusSearch] Error searching collection '${collection}':`, error.message);
+                return [];
             }
-        }
+        }));
 
-        return results;
+        return perCollection.flat();
     }
 
     /**
@@ -167,38 +165,37 @@ class CorpusSearch {
      */
     async searchBySources(query, options = {}) {
         const { mythology } = options;
-        const results = [];
         const searchTerms = this.tokenize(query.toLowerCase());
 
-        for (const collection of this.collections) {
+        const perCollection = await Promise.all(this.collections.map(async collection => {
             try {
-                const snapshot = await this.db.collection(collection).get();
-
+                let q = this.db.collection(collection);
+                if (mythology) q = q.where('mythology', '==', mythology);
+                const snapshot = await q.limit(200).get();
+                const matches = [];
                 snapshot.forEach(doc => {
                     const entity = doc.data();
-
-                    if (mythology && entity.mythology !== mythology) return;
-
                     const sources = entity.sources || {};
                     const score = this.calculateSourceScore(sources, searchTerms);
-
                     if (score > 0) {
-                        results.push({
+                        matches.push({
                             ...entity,
                             id: entity.id || doc.id,
                             type: entity.type || collection,
-                            collection: collection,
+                            collection,
                             _searchScore: score,
                             _matchedSources: this.getMatchedSources(sources, searchTerms)
                         });
                     }
                 });
+                return matches;
             } catch (error) {
                 console.warn(`[CorpusSearch] Error searching collection '${collection}':`, error.message);
+                return [];
             }
-        }
+        }));
 
-        return results;
+        return perCollection.flat();
     }
 
     /**
@@ -206,38 +203,37 @@ class CorpusSearch {
      */
     async searchByCorpusTerm(query, options = {}) {
         const { mythology } = options;
-        const results = [];
         const searchTerm = query.toLowerCase().trim();
 
-        for (const collection of this.collections) {
+        const perCollection = await Promise.all(this.collections.map(async collection => {
             try {
-                const snapshot = await this.db.collection(collection).get();
-
+                let q = this.db.collection(collection);
+                if (mythology) q = q.where('mythology', '==', mythology);
+                const snapshot = await q.limit(200).get();
+                const matches = [];
                 snapshot.forEach(doc => {
                     const entity = doc.data();
-
-                    if (mythology && entity.mythology !== mythology) return;
-
                     const corpus = entity.corpusSearch || {};
                     const score = this.calculateCorpusScore(corpus, searchTerm);
-
                     if (score > 0) {
-                        results.push({
+                        matches.push({
                             ...entity,
                             id: entity.id || doc.id,
                             type: entity.type || collection,
-                            collection: collection,
+                            collection,
                             _searchScore: score,
                             _matchedTerms: this.getMatchedCorpusTerms(corpus, searchTerm)
                         });
                     }
                 });
+                return matches;
             } catch (error) {
                 console.warn(`[CorpusSearch] Error searching collection '${collection}':`, error.message);
+                return [];
             }
-        }
+        }));
 
-        return results;
+        return perCollection.flat();
     }
 
     /**
@@ -259,24 +255,23 @@ class CorpusSearch {
         if (text) {
             results = await this.genericSearch(text, options);
         } else {
-            // Get all entities
-            for (const collection of this.collections) {
+            // Get entities for filtering — bounded to 500 per collection
+            const perCollection = await Promise.all(this.collections.map(async collection => {
                 try {
-                    const snapshot = await this.db.collection(collection).get();
-                    snapshot.forEach(doc => {
-                        const entity = doc.data();
-                        results.push({
-                            ...entity,
-                            id: entity.id || doc.id,
-                            type: entity.type || collection,
-                            collection: collection,
-                            _searchScore: 50
-                        });
-                    });
+                    const snapshot = await this.db.collection(collection).limit(500).get();
+                    return snapshot.docs.map(doc => ({
+                        ...doc.data(),
+                        id: doc.data().id || doc.id,
+                        type: doc.data().type || collection,
+                        collection,
+                        _searchScore: 50
+                    }));
                 } catch (error) {
                     console.warn(`[CorpusSearch] Error in advancedSearch for '${collection}':`, error.message);
+                    return [];
                 }
-            }
+            }));
+            results.push(...perCollection.flat());
         }
 
         // Apply filters
@@ -319,32 +314,117 @@ class CorpusSearch {
     }
 
     /**
-     * Calculate generic search score across all entity fields
+     * Calculate search score with 5-tier priority:
+     *   1. Name starts with query        (1000)
+     *   2. Name contains query           (500)
+     *   3. Content/desc contains query   (100-150)
+     *   4. Fuzzy name match              → calculateFuzzyScore only
+     *   5. Fuzzy content match           → calculateFuzzyScore only
      */
-    calculateGenericScore(entity, searchTerms) {
+    calculateGenericScore(entity, searchTerms, rawQuery) {
+        const q = (rawQuery || '').toLowerCase();
+        const name = (entity.name || '').toLowerCase();
         let score = 0;
-        const text = JSON.stringify(entity).toLowerCase();
 
-        searchTerms.forEach(term => {
-            // Exact matches in key fields (higher weight)
-            if (entity.name?.toLowerCase().includes(term)) score += 50;
-            if (entity.description?.toLowerCase().includes(term)) score += 30;
-            if (entity.subtitle?.toLowerCase().includes(term)) score += 20;
+        if (q) {
+            if (name.startsWith(q)) {
+                score += 1000;
+            } else if (name.includes(q)) {
+                score += 500;
+            }
 
-            // Search terms array
-            const entitySearchTerms = entity.searchTerms || [];
-            if (entitySearchTerms.some(st => st.toLowerCase().includes(term))) score += 40;
+            const desc = (entity.description || '').toLowerCase();
+            if (desc.includes(q)) score += 150;
+            if ((entity.subtitle || '').toLowerCase().includes(q)) score += 100;
+            if ((entity.searchTerms || []).some(t => t.toLowerCase().includes(q))) score += 120;
+            if ((entity.tags || []).some(t => t.toLowerCase().includes(q))) score += 90;
+        }
 
-            // Tags
-            const tags = entity.tags || [];
-            if (tags.some(tag => tag.toLowerCase().includes(term))) score += 35;
-
-            // Generic text match (lower weight)
-            const matches = (text.match(new RegExp(term, 'gi')) || []).length;
-            score += matches * 5;
-        });
+        // Multi-word token bonuses for secondary terms
+        for (const term of searchTerms) {
+            if (term === q) continue;
+            if (name.includes(term)) score += 50;
+            else if ((entity.description || '').toLowerCase().includes(term)) score += 20;
+            if ((entity.searchTerms || []).some(t => t.toLowerCase().includes(term))) score += 40;
+        }
 
         return score;
+    }
+
+    /**
+     * Fuzzy score — runs only on the background pass.
+     * Uses character-sequence fuzzy on name (tier 4) and
+     * JSON wildcard on full entity body (tier 5).
+     */
+    calculateFuzzyScore(entity, searchTerms, rawQuery) {
+        const q = (rawQuery || '').toLowerCase();
+        const name = (entity.name || '').toLowerCase();
+        let score = 0;
+
+        // Tier 4: fuzzy name match
+        if (q && q.length >= 2 && this._fuzzyMatch(name, q)) score += 40;
+        for (const term of searchTerms) {
+            if (term.length >= 2 && this._fuzzyMatch(name, term)) score += 25;
+        }
+
+        // Tier 5: substring in full entity JSON (very low weight)
+        if (searchTerms.length > 0) {
+            const text = JSON.stringify(entity).toLowerCase();
+            for (const term of searchTerms) {
+                if (term.length < 2) continue;
+                const hits = (text.match(new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || []).length;
+                score += hits * 2;
+            }
+        }
+
+        return score;
+    }
+
+    /** All query chars appear in order somewhere in str */
+    _fuzzyMatch(str, query) {
+        let qi = 0;
+        for (let i = 0; i < str.length && qi < query.length; i++) {
+            if (str[i] === query[qi]) qi++;
+        }
+        return qi === query.length;
+    }
+
+    /**
+     * Background fuzzy search — skips entities already found by the exact pass.
+     * Called from the search view after exact results are rendered.
+     */
+    async genericSearchFuzzy(query, options = {}, excludeIds = new Set()) {
+        const { mythology, entityType } = options;
+        const searchTerms = this.tokenize(query);
+        const rawQuery = query.toLowerCase().trim();
+        const results = [];
+
+        for (const collection of this.collections) {
+            if (entityType && collection !== entityType) continue;
+            try {
+                let queryRef = this.db.collection(collection);
+                if (mythology) queryRef = queryRef.where('mythology', '==', mythology);
+                const snapshot = await queryRef.limit(500).get();
+                snapshot.forEach(doc => {
+                    const entity = doc.data();
+                    const id = entity.id || doc.id;
+                    if (excludeIds.has(`${collection}:${id}`)) return;
+                    const score = this.calculateFuzzyScore(entity, searchTerms, rawQuery);
+                    if (score > 0) {
+                        results.push({
+                            ...entity,
+                            id,
+                            type: entity.type || collection,
+                            collection,
+                            _searchScore: score,
+                            _fuzzy: true,
+                            _matchedFields: this.getMatchedFields(entity, searchTerms)
+                        });
+                    }
+                });
+            } catch (e) { /* continue */ }
+        }
+        return results;
     }
 
     /**
@@ -597,8 +677,8 @@ class CorpusSearch {
         return query
             .toLowerCase()
             .split(/[\s,;]+/)
-            .filter(term => term.length > 2)
-            .map(term => term.replace(/[^\w]/g, ''));
+            .map(term => term.replace(/[^\w]/g, ''))
+            .filter(Boolean);
     }
 
     /**
