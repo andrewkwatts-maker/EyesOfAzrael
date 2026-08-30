@@ -8,20 +8,44 @@ const { test, expect } = require('@playwright/test');
 
 // Theme configuration constants
 const STORAGE_KEY = 'eoaplot-selected-theme';
-const DEFAULT_THEME = 'night';
+// The site auto-selects day/night by local clock (lazy-loader.js: 06:00–18:00
+// → day). Tests must expect the same, or they only pass after dark.
+const hour = new Date().getHours();
+const DEFAULT_THEME = (hour >= 6 && hour < 18) ? 'day' : 'night';
 
-// All available themes from theme-config.json
+// All available themes from themes/theme-config.json (keep in sync!)
 const ALL_THEMES = [
-  'day', 'night', 'fire', 'water', 'earth', 'air',
-  'celestial', 'abyssal', 'chaos', 'order', 'aurora',
-  'storm', 'cosmic', 'void', 'light'
+  'abyssal', 'air', 'aurora', 'celestial', 'chaos', 'cosmic', 'day',
+  'earth', 'fire', 'golden', 'light', 'night', 'ocean', 'order',
+  'sacred', 'storm', 'void'
 ];
 
-// Light themes that should show sun icon
-const LIGHT_THEMES = ['day', 'light'];
+// Light themes that should show sun icon (matches shader-theme-picker.js)
+const LIGHT_THEMES = ['day', 'light', 'air', 'order'];
 
 // Dark themes that should show moon icon
 const DARK_THEMES = ALL_THEMES.filter(t => !LIGHT_THEMES.includes(t));
+
+/**
+ * Set a theme and wait until it is actually applied. The picker silently
+ * drops setTheme calls while a transition is in flight (isTransitioning
+ * guard), so a single fire-and-forget call right after load can be lost —
+ * re-issue until body[data-theme] reflects the request.
+ */
+async function setThemeAndWait(page, theme) {
+  await page.waitForFunction(
+    () => window.ShaderThemePicker && window.ShaderThemePicker.isInitialized(),
+    { timeout: 10000 }
+  ).catch(() => {});
+  await page.waitForFunction(
+    (t) => {
+      window.ShaderThemePicker?.setTheme(t);
+      return document.body.getAttribute('data-theme') === t;
+    },
+    theme,
+    { timeout: 10000, polling: 400 }
+  );
+}
 
 // Theme color mappings for verification (subset for testing)
 const THEME_COLORS = {
@@ -40,7 +64,7 @@ const THEME_COLORS = {
     'text-primary': '#fef2f2',
     'primary': '#dc2626'
   },
-  water: {
+  ocean: {
     'bg-primary': '#0a1929',
     'text-primary': '#e0f2fe',
     'primary': '#0891b2'
@@ -259,7 +283,7 @@ test.describe('Theme System - Theme Dropdown (Desktop)', () => {
     await page.waitForTimeout(500);
 
     // Try to select a different theme
-    const targetTheme = initialTheme === 'fire' ? 'water' : 'fire';
+    const targetTheme = initialTheme === 'fire' ? 'ocean' : 'fire';
     const themeOption = page.locator(`.theme-option[data-theme="${targetTheme}"]`);
 
     if (await themeOption.isVisible().catch(() => false)) {
@@ -328,11 +352,7 @@ test.describe('Theme System - CSS Variables Update', () => {
     });
 
     // Change theme via API
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('fire');
-      }
-    });
+    await setThemeAndWait(page, 'fire');
     await page.waitForTimeout(500);
 
     // Get new background color
@@ -353,11 +373,7 @@ test.describe('Theme System - CSS Variables Update', () => {
     });
 
     // Change to a theme with different text color
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('day');
-      }
-    });
+    await setThemeAndWait(page, 'day');
     await page.waitForTimeout(500);
 
     const newText = await page.evaluate(() => {
@@ -379,11 +395,7 @@ test.describe('Theme System - CSS Variables Update', () => {
     });
 
     // Change theme
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('fire');
-      }
-    });
+    await setThemeAndWait(page, 'fire');
     await page.waitForTimeout(500);
 
     const newBodyBg = await page.evaluate(() => {
@@ -403,11 +415,7 @@ test.describe('Theme System - CSS Variables Update', () => {
     });
 
     // Change to fire theme
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('fire');
-      }
-    });
+    await setThemeAndWait(page, 'fire');
     await page.waitForTimeout(500);
 
     const cardBgFire = await page.evaluate(() => {
@@ -426,11 +434,7 @@ test.describe('Theme System - CSS Variables Update', () => {
       return getComputedStyle(document.documentElement).getPropertyValue('--color-border-primary').trim();
     });
 
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('water');
-      }
-    });
+    await setThemeAndWait(page, 'ocean');
     await page.waitForTimeout(500);
 
     const newBorder = await page.evaluate(() => {
@@ -447,11 +451,7 @@ test.describe('Theme System - Persistence', () => {
     await page.waitForTimeout(1500);
 
     // Change to a specific theme
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('fire');
-      }
-    });
+    await setThemeAndWait(page, 'fire');
     await page.waitForTimeout(500);
 
     // Verify theme was set
@@ -472,11 +472,7 @@ test.describe('Theme System - Persistence', () => {
     await page.waitForTimeout(1500);
 
     // Set a theme
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('water');
-      }
-    });
+    await setThemeAndWait(page, 'ocean');
     await page.waitForTimeout(500);
 
     // Check localStorage
@@ -484,7 +480,7 @@ test.describe('Theme System - Persistence', () => {
       return localStorage.getItem(key);
     }, STORAGE_KEY);
 
-    expect(savedTheme).toBe('water');
+    expect(savedTheme).toBe('ocean');
   });
 
   test('Theme persists across navigation', async ({ page }) => {
@@ -492,11 +488,7 @@ test.describe('Theme System - Persistence', () => {
     await page.waitForTimeout(1500);
 
     // Set theme to earth
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('earth');
-      }
-    });
+    await setThemeAndWait(page, 'earth');
     await page.waitForTimeout(500);
 
     // Navigate to another page
@@ -523,11 +515,7 @@ test.describe('Theme System - Light/Dark Icon Toggle', () => {
     await page.waitForTimeout(1500);
 
     // Set to day theme (light)
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('day');
-      }
-    });
+    await setThemeAndWait(page, 'day');
     await page.waitForTimeout(500);
 
     // Sun icon should be visible, moon hidden
@@ -548,11 +536,7 @@ test.describe('Theme System - Light/Dark Icon Toggle', () => {
     await page.waitForTimeout(1500);
 
     // Set to night theme (dark)
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('night');
-      }
-    });
+    await setThemeAndWait(page, 'night');
     await page.waitForTimeout(500);
 
     // Moon icon should be visible, sun hidden
@@ -572,11 +556,7 @@ test.describe('Theme System - Light/Dark Icon Toggle', () => {
     await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('light');
-      }
-    });
+    await setThemeAndWait(page, 'light');
     await page.waitForTimeout(500);
 
     const sunDisplay = await page.locator('#themeToggle .theme-icon-sun').evaluate(el => {
@@ -590,11 +570,7 @@ test.describe('Theme System - Light/Dark Icon Toggle', () => {
     await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('fire');
-      }
-    });
+    await setThemeAndWait(page, 'fire');
     await page.waitForTimeout(500);
 
     const moonDisplay = await page.locator('#themeToggle .theme-icon-moon').evaluate(el => {
@@ -653,14 +629,10 @@ test.describe('Theme System - data-theme Attribute', () => {
     await page.waitForTimeout(1500);
 
     // Test multiple themes
-    const themesToTest = ['night', 'day', 'fire', 'water'];
+    const themesToTest = ['night', 'day', 'fire', 'ocean'];
 
     for (const theme of themesToTest) {
-      await page.evaluate((t) => {
-        if (window.ShaderThemePicker) {
-          window.ShaderThemePicker.setTheme(t);
-        }
-      }, theme);
+      await setThemeAndWait(page, theme);
       await page.waitForTimeout(300);
 
       const bodyTheme = await page.getAttribute('body', 'data-theme');
@@ -729,11 +701,7 @@ test.describe('Theme System - API', () => {
     await page.waitForTimeout(1500);
 
     // Set theme via API
-    await page.evaluate(() => {
-      if (window.ShaderThemePicker) {
-        window.ShaderThemePicker.setTheme('aurora');
-      }
-    });
+    await setThemeAndWait(page, 'aurora');
     await page.waitForTimeout(500);
 
     const bodyTheme = await page.getAttribute('body', 'data-theme');
@@ -770,9 +738,7 @@ test.describe('Theme System - Visual Verification', () => {
     await page.waitForTimeout(2000);
 
     // Take screenshot with night theme
-    await page.evaluate(() => {
-      window.ShaderThemePicker?.setTheme('night');
-    });
+    await setThemeAndWait(page, 'night');
     await page.waitForTimeout(500);
 
     const nightBg = await page.evaluate(() => {
@@ -780,9 +746,7 @@ test.describe('Theme System - Visual Verification', () => {
     });
 
     // Change to day theme
-    await page.evaluate(() => {
-      window.ShaderThemePicker?.setTheme('day');
-    });
+    await setThemeAndWait(page, 'day');
     await page.waitForTimeout(500);
 
     const dayBg = await page.evaluate(() => {
@@ -801,9 +765,7 @@ test.describe('Theme System - Visual Verification', () => {
     await page.waitForTimeout(1500);
 
     // Get header background for night theme
-    await page.evaluate(() => {
-      window.ShaderThemePicker?.setTheme('night');
-    });
+    await setThemeAndWait(page, 'night');
     await page.waitForTimeout(500);
 
     const headerExists = await page.locator('.site-header').isVisible();
