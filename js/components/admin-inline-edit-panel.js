@@ -721,6 +721,9 @@ class AdminInlineEditPanel {
             const updateData = {};
             updateData[fieldName] = newValue;
             updateData['lastModified'] = firebase.firestore.FieldValue.serverTimestamp();
+            // updatedAt drives the static+delta merge — without it an inline
+            // edit stays invisible until the next static-base export.
+            updateData['updatedAt'] = firebase.firestore.FieldValue.serverTimestamp();
             updateData['lastModifiedBy'] = firebase.auth().currentUser?.email || 'admin';
 
             await this.db.collection(collection).doc(entityId).update(updateData);

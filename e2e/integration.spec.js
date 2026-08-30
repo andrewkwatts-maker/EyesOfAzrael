@@ -20,7 +20,7 @@ const CONTENT_LOAD_WAIT = 3000;
 async function waitForSPAContent(page) {
   await page.waitForLoadState('domcontentloaded');
   try {
-    await page.waitForLoadState('networkidle', { timeout: 10000 });
+    await page.waitForLoadState('load', { timeout: 10000 });
   } catch {
     // Network idle might not be reached - continue anyway
   }

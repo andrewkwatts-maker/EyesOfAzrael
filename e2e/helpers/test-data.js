@@ -48,7 +48,7 @@ export const testUsers = {
  */
 export async function waitForPageLoad(page) {
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
+  await page.waitForLoadState('load', { timeout: 10000 }).catch(() => {
     // Network idle might not be reached, that's ok
   });
 }

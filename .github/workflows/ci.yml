@@ -31,7 +31,8 @@ jobs:
 
       - name: Check for debugger statements
         run: |
-          if grep -r "debugger" js/ --include="*.js"; then
+          # Match actual `debugger` statements, not the word in comments/filenames
+          if grep -rnE '^[[:space:]]*debugger[[:space:]]*;?[[:space:]]*$' js/ --include="*.js"; then
             echo "ERROR: debugger statements found in production code"
             exit 1
           fi

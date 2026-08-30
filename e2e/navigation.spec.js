@@ -60,7 +60,7 @@ test.describe('Home Route Navigation', () => {
     const { errors, cleanup } = createConsoleErrorCollector(page);
 
     const response = await page.goto(BASE_URL + '/', {
-      waitUntil: 'networkidle',
+      waitUntil: 'load',
       timeout: NAVIGATION_TIMEOUT
     });
 
@@ -82,7 +82,7 @@ test.describe('Home Route Navigation', () => {
 
   test('Home route with hash (#/) loads landing page', async ({ page }) => {
     await page.goto(BASE_URL + '/#/', {
-      waitUntil: 'networkidle',
+      waitUntil: 'load',
       timeout: NAVIGATION_TIMEOUT
     });
 
@@ -97,7 +97,7 @@ test.describe('Home Route Navigation', () => {
 
   test('Empty hash navigates to home page', async ({ page }) => {
     await page.goto(BASE_URL + '/#', {
-      waitUntil: 'networkidle',
+      waitUntil: 'load',
       timeout: NAVIGATION_TIMEOUT
     });
 
@@ -368,7 +368,7 @@ test.describe('Back Button Navigation', () => {
 
   test('Back button returns to previous page after category navigation', async ({ page }) => {
     // Navigate to home
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
     const homeUrl = page.url();
 
@@ -458,7 +458,7 @@ test.describe('Direct URL Access', () => {
 
     // Navigate directly to a deep route
     await page.goto(`${BASE_URL}/#/browse/creatures`, {
-      waitUntil: 'networkidle',
+      waitUntil: 'load',
       timeout: NAVIGATION_TIMEOUT
     });
 
@@ -471,7 +471,7 @@ test.describe('Direct URL Access', () => {
     await page.goto('about:blank');
 
     await page.goto(`${BASE_URL}/#/mythology/norse`, {
-      waitUntil: 'networkidle',
+      waitUntil: 'load',
       timeout: NAVIGATION_TIMEOUT
     });
 
@@ -484,7 +484,7 @@ test.describe('Direct URL Access', () => {
     await page.goto('about:blank');
 
     await page.goto(`${BASE_URL}/#/mythology/greek/deities/athena`, {
-      waitUntil: 'networkidle',
+      waitUntil: 'load',
       timeout: NAVIGATION_TIMEOUT
     });
 
@@ -500,7 +500,7 @@ test.describe('Direct URL Access', () => {
 
     try {
       await page.goto(`${BASE_URL}/#/browse/heroes`, {
-        waitUntil: 'networkidle',
+        waitUntil: 'load',
         timeout: NAVIGATION_TIMEOUT
       });
 
@@ -514,7 +514,7 @@ test.describe('Direct URL Access', () => {
 
   test('Page refresh maintains current route', async ({ page }) => {
     await page.goto(`${BASE_URL}/#/browse/items`, {
-      waitUntil: 'networkidle',
+      waitUntil: 'load',
       timeout: NAVIGATION_TIMEOUT
     });
     await waitForSPAContent(page);
@@ -522,7 +522,7 @@ test.describe('Direct URL Access', () => {
     const urlBeforeRefresh = page.url();
 
     // Reload the page
-    await page.reload({ waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT });
+    await page.reload({ waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
     await waitForSPAContent(page);
 
     const urlAfterRefresh = page.url();
@@ -649,7 +649,7 @@ test.describe('Hash-Based Routing Consistency', () => {
     const hashContent = await page.textContent('#main-content');
 
     // Navigate home first
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
 
     // For SPAs, path-based routes may redirect to hash or show same content
     // This test verifies the hash route is the canonical format
@@ -658,7 +658,7 @@ test.describe('Hash-Based Routing Consistency', () => {
   });
 
   test('Programmatic hash changes trigger navigation', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Programmatically change hash
@@ -673,7 +673,7 @@ test.describe('Hash-Based Routing Consistency', () => {
   });
 
   test('Hash navigation via link click works correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Find a category link and click it
@@ -724,7 +724,7 @@ test.describe('Navigation State and History Management', () => {
 
   test('Forward button works after back navigation', async ({ page }) => {
     // Build history
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'domcontentloaded' });
@@ -747,13 +747,13 @@ test.describe('Navigation State and History Management', () => {
   test('History state is preserved on page reload', async ({ page }) => {
     // Navigate to a deep route
     await page.goto(`${BASE_URL}/#/mythology/norse/deities`, {
-      waitUntil: 'networkidle',
+      waitUntil: 'load',
       timeout: NAVIGATION_TIMEOUT
     });
     await waitForSPAContent(page);
 
     // Reload
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Should still be on the same route
@@ -762,7 +762,7 @@ test.describe('Navigation State and History Management', () => {
   });
 
   test('Rapid navigation does not break state', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Rapid navigation sequence
@@ -800,7 +800,7 @@ test.describe('Click Navigation', () => {
   });
 
   test('Clicking internal links navigates without page reload', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Find a navigation link
@@ -821,7 +821,7 @@ test.describe('Click Navigation', () => {
   });
 
   test('Navigation links update URL hash correctly', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Find links with different destinations
@@ -854,7 +854,7 @@ test.describe('Loading States', () => {
   });
 
   test('Loading spinner appears during navigation', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Navigate to a page that requires data loading
@@ -909,7 +909,7 @@ test.describe('Edge Cases', () => {
   });
 
   test('Navigation works after long idle period', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Simulate idle period
@@ -935,7 +935,7 @@ test.describe('Edge Cases', () => {
   });
 
   test('Concurrent navigation attempts are handled', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Trigger multiple rapid navigations
@@ -956,7 +956,7 @@ test.describe('Edge Cases', () => {
   });
 
   test('Navigation after network interruption recovers', async ({ page }) => {
-    await page.goto(`${BASE_URL}/`, { waitUntil: 'networkidle' });
+    await page.goto(`${BASE_URL}/`, { waitUntil: 'load' });
     await waitForSPAContent(page);
 
     // Simulate offline

@@ -24,7 +24,7 @@ const THRESHOLDS = {
 
 test.describe('Core Web Vitals - Paint Metrics', () => {
   test('First Contentful Paint should be under 3 seconds', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     const paintMetrics = await page.evaluate(() => {
       const paintEntries = performance.getEntriesByType('paint');
@@ -61,7 +61,7 @@ test.describe('Core Web Vitals - Paint Metrics', () => {
       }).observe({ type: 'largest-contentful-paint', buffered: true });
     });
 
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Wait for LCP to be captured
     await page.waitForTimeout(2000);
@@ -110,7 +110,7 @@ test.describe('Page Interactivity', () => {
   });
 
   test('Time to Interactive (TTI) should be reasonable', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     const navigationMetrics = await page.evaluate(() => {
       const navigation = performance.getEntriesByType('navigation')[0];
@@ -139,7 +139,7 @@ test.describe('Page Interactivity', () => {
 
 test.describe('Navigation Performance', () => {
   test('Navigation between pages should be under 2 seconds', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Wait for landing page to be ready
     await page.waitForTimeout(1000);
@@ -168,7 +168,7 @@ test.describe('Navigation Performance', () => {
   });
 
   test('SPA navigation should be faster than full page reload', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Measure SPA navigation time
@@ -185,7 +185,7 @@ test.describe('Navigation Performance', () => {
     });
 
     // Navigate back and measure full reload for comparison
-    await page.goto('/#/mythologies', { waitUntil: 'networkidle' });
+    await page.goto('/#/mythologies', { waitUntil: 'load' });
 
     const fullLoadMetrics = await page.evaluate(() => {
       const navigation = performance.getEntriesByType('navigation')[0];
@@ -200,7 +200,7 @@ test.describe('Navigation Performance', () => {
   });
 
   test('Back/forward navigation should be performant', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Navigate to another page
@@ -243,7 +243,7 @@ test.describe('Layout Stability', () => {
       }).observe({ type: 'layout-shift', buffered: true });
     });
 
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Wait for content to stabilize
     await page.waitForTimeout(3000);
@@ -281,7 +281,7 @@ test.describe('Layout Stability', () => {
       }).observe({ type: 'layout-shift', buffered: true });
     });
 
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(3000);
 
     const imageShifts = await page.evaluate(() => window.__imageLayoutShifts);
@@ -337,7 +337,7 @@ test.describe('Image Lazy Loading', () => {
   });
 
   test('Below-fold images should load on scroll', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Get initial loaded images
     const initialImages = await page.evaluate(() => {
@@ -367,7 +367,7 @@ test.describe('Image Lazy Loading', () => {
 
 test.describe('Service Worker and Caching', () => {
   test('Service worker should cache assets', async ({ page, context }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Check if service worker is registered
     const swStatus = await page.evaluate(async () => {
@@ -414,7 +414,7 @@ test.describe('Service Worker and Caching', () => {
   test('Subsequent visits should be faster than first (cache hit)', async ({ page, context }) => {
     // First visit - cold cache
     const firstVisitStart = Date.now();
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     const firstVisitTime = Date.now() - firstVisitStart;
 
     // Get resource timing for first visit
@@ -432,7 +432,7 @@ test.describe('Service Worker and Caching', () => {
 
     // Second visit - warm cache
     const secondVisitStart = Date.now();
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     const secondVisitTime = Date.now() - secondVisitStart;
 
     const secondVisitResources = await page.evaluate(() => {
@@ -461,10 +461,10 @@ test.describe('Service Worker and Caching', () => {
   });
 
   test('Static assets should be served from cache on reload', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Reload and check cache hits
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'load' });
 
     const cacheHits = await page.evaluate(() => {
       const resources = performance.getEntriesByType('resource');
@@ -488,7 +488,7 @@ test.describe('Service Worker and Caching', () => {
 test.describe('Memory Management', () => {
   test('Memory should not grow excessively during navigation', async ({ page }) => {
     // Note: performance.memory is Chrome-only
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Get initial memory
@@ -540,7 +540,7 @@ test.describe('Memory Management', () => {
   });
 
   test('DOM node count should remain stable during navigation', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     const initialNodeCount = await page.evaluate(() => document.getElementsByTagName('*').length);
@@ -567,7 +567,7 @@ test.describe('Memory Management', () => {
   });
 
   test('Event listeners should be cleaned up during navigation', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // This is a heuristic check - actual listener count is hard to measure
     const checkListenerLeaks = await page.evaluate(() => {
@@ -596,7 +596,7 @@ test.describe('Memory Management', () => {
 
 test.describe('Render Blocking Resources', () => {
   test('No blocking resources should delay render', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     const blockingResources = await page.evaluate(() => {
       const resources = performance.getEntriesByType('resource');
@@ -627,7 +627,7 @@ test.describe('Render Blocking Resources', () => {
   });
 
   test('CSS should not block initial render excessively', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     const cssMetrics = await page.evaluate(() => {
       const resources = performance.getEntriesByType('resource');
@@ -656,7 +656,7 @@ test.describe('Render Blocking Resources', () => {
   });
 
   test('JavaScript should not block critical rendering path', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     const jsMetrics = await page.evaluate(() => {
       const resources = performance.getEntriesByType('resource');
@@ -721,7 +721,7 @@ test.describe('Firebase Performance', () => {
   });
 
   test('Firestore queries should complete within reasonable time', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Monitor network requests for Firestore
     const firestoreRequests = [];
@@ -757,7 +757,7 @@ test.describe('Firebase Performance', () => {
 
 test.describe('Resource Optimization', () => {
   test('Total page weight should be reasonable', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     const resourceMetrics = await page.evaluate(() => {
       const resources = performance.getEntriesByType('resource');
@@ -790,7 +790,7 @@ test.describe('Resource Optimization', () => {
   });
 
   test('Individual resources should not be excessively large', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     const largeResources = await page.evaluate(() => {
       const resources = performance.getEntriesByType('resource');
@@ -813,7 +813,7 @@ test.describe('Resource Optimization', () => {
   });
 
   test('HTTP/2 or HTTP/3 should be used for multiplexing', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     const protocolInfo = await page.evaluate(() => {
       const resources = performance.getEntriesByType('resource');

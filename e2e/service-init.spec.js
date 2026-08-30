@@ -72,7 +72,7 @@ test.describe('Service Initialization Tests', () => {
       }
     });
 
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(3000);
 
     console.log('All console errors:', consoleErrors);
@@ -94,7 +94,7 @@ test.describe('Service Initialization Tests', () => {
       }
     });
 
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Wait for Firebase to be ready
     const firebaseReady = await page.waitForFunction(() => {
@@ -143,7 +143,7 @@ test.describe('Service Initialization Tests', () => {
   });
 
   test('3. SPANavigation is available (window.SPANavigation)', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Wait for SPA to initialize
     await page.waitForTimeout(2000);
@@ -167,7 +167,7 @@ test.describe('Service Initialization Tests', () => {
   });
 
   test('4. Theme system initializes', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
 
     // Check if theme picker container exists
@@ -221,7 +221,7 @@ test.describe('Service Initialization Tests', () => {
     await clearStorage(page);
 
     // Navigate fresh without auth
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(3000);
 
     // Check that main content is visible (not blocked by login screen)
@@ -315,7 +315,7 @@ test.describe('Service Initialization Tests', () => {
       serviceErrors.length = 0; // Clear errors for each route
 
       console.log(`Testing route: ${route}`);
-      await page.goto(route, { waitUntil: 'networkidle' });
+      await page.goto(route, { waitUntil: 'load' });
       await page.waitForTimeout(2000);
 
       // Check page didn't crash
@@ -341,7 +341,7 @@ test.describe('Service Initialization Tests', () => {
       });
     });
 
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(3000);
 
     console.log('Page errors:', pageErrors);
@@ -358,7 +358,7 @@ test.describe('Service Initialization Tests', () => {
   });
 
   test('9. Service worker registers successfully', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(3000);
 
     const swStatus = await page.evaluate(async () => {
@@ -410,7 +410,7 @@ test.describe('Service Initialization Tests', () => {
   });
 
   test('10. Diagnostic panel does NOT show (indicates no critical failures)', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(3000);
 
     // Check for diagnostic/error panels that indicate critical failures
@@ -472,7 +472,7 @@ test.describe('Comprehensive Service Health Check', () => {
 
     // Load page
     const startTime = Date.now();
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     const loadTime = Date.now() - startTime;
 
     // Comprehensive service check

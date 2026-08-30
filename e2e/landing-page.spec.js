@@ -59,7 +59,7 @@ test.describe('Landing Page - Category Cards Display', () => {
     });
 
     test('1. Page loads with all 12 category cards visible', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Find all category cards
@@ -78,7 +78,7 @@ test.describe('Landing Page - Category Cards Display', () => {
     });
 
     test('2. Each category card has icon, title, and description', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const categoryCards = page.locator('.landing-category-card');
@@ -112,7 +112,7 @@ test.describe('Landing Page - Category Cards Display', () => {
     });
 
     test('3. Category cards are clickable and navigate correctly', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Test navigation for the first category (World Mythologies)
@@ -142,7 +142,7 @@ test.describe('Landing Page - Category Cards Display', () => {
     });
 
     test('All 12 category card routes match expected values', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         for (const category of EXPECTED_CATEGORIES) {
@@ -174,7 +174,7 @@ test.describe('Landing Page - Hero Section', () => {
     });
 
     test('4. Hero section displays with title and subtitle', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Check hero section exists
@@ -197,7 +197,7 @@ test.describe('Landing Page - Hero Section', () => {
     });
 
     test('Hero section has icon display', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Check for hero icon - could be either .hero-icon-display (emoji) or .site-logo-eye (SVG)
@@ -234,7 +234,7 @@ test.describe('Landing Page - Hero Section', () => {
     });
 
     test('Hero section has description text', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Check for description text in hero section (may have different selectors)
@@ -261,7 +261,7 @@ test.describe('Landing Page - Hero Section', () => {
     });
 
     test('Hero section has action buttons', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const heroActions = page.locator('.landing-hero-actions');
@@ -289,7 +289,7 @@ test.describe('Landing Page - Theme Toggle', () => {
     });
 
     test('5. Theme toggle works - click cycles themes', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Find theme toggle button
@@ -333,7 +333,7 @@ test.describe('Landing Page - Theme Toggle', () => {
     });
 
     test('Theme toggle button has accessible label', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const themeToggle = page.locator('#themeToggle, .theme-toggle-btn').first();
@@ -356,7 +356,7 @@ test.describe('Landing Page - Authentication', () => {
 
     test('6. Sign in button visible when not authenticated', async ({ page }) => {
         // Navigate and check auth UI elements
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Check auth UI state
@@ -398,7 +398,7 @@ test.describe('Landing Page - Authentication', () => {
     });
 
     test('Sign in button has Google icon', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const signInBtn = page.locator('#signInBtn').first();
@@ -439,7 +439,7 @@ test.describe('Landing Page - Loading States', () => {
         }
 
         // Wait for content to load
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('load');
         await waitForSPAContent(page);
 
         // Loading should be hidden after content loads
@@ -452,7 +452,7 @@ test.describe('Landing Page - Loading States', () => {
     });
 
     test('Loading spinner disappears after content loads', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // After full load, any loading spinners should be hidden
@@ -486,7 +486,7 @@ test.describe('Landing Page - Console Errors', () => {
             }
         });
 
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Allow a brief period for any async errors
@@ -530,7 +530,7 @@ test.describe('Landing Page - Console Errors', () => {
             pageErrors.push(error.message);
         });
 
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Filter out known race condition errors that don't affect functionality
@@ -570,7 +570,7 @@ test.describe('Landing Page - Responsive Design', () => {
         // Set mobile viewport (iPhone 12 size)
         await page.setViewportSize({ width: 390, height: 844 });
 
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Wait a bit for CSS to fully apply
@@ -621,7 +621,7 @@ test.describe('Landing Page - Responsive Design', () => {
     test('Hero section adapts to mobile viewport', async ({ page }) => {
         await page.setViewportSize({ width: 375, height: 667 });
 
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Hero section should be visible
@@ -658,7 +658,7 @@ test.describe('Landing Page - Responsive Design', () => {
         // Set tablet viewport (iPad)
         await page.setViewportSize({ width: 768, height: 1024 });
 
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const categoryGrid = page.locator('.landing-category-grid');
@@ -692,7 +692,7 @@ test.describe('Landing Page - Responsive Design', () => {
         // Set desktop viewport
         await page.setViewportSize({ width: 1440, height: 900 });
 
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Get grid template columns
@@ -726,7 +726,7 @@ test.describe('Landing Page - Accessibility', () => {
     });
 
     test('Page has proper heading hierarchy', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Get all headings
@@ -751,7 +751,7 @@ test.describe('Landing Page - Accessibility', () => {
     });
 
     test('Category cards are keyboard accessible', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Test 1: Category cards are focusable (use direct focus which works across all browsers)
@@ -801,7 +801,7 @@ test.describe('Landing Page - Accessibility', () => {
     });
 
     test('Images have alt text or are decorative', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const imagesInfo = await page.evaluate(() => {
@@ -833,7 +833,7 @@ test.describe('Landing Page - Accessibility', () => {
     });
 
     test('Category cards have descriptive aria-labels', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const categoryCards = page.locator('.landing-category-card');
@@ -851,7 +851,7 @@ test.describe('Landing Page - Accessibility', () => {
     });
 
     test('Focus states are visible on interactive elements', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Focus the first category card directly using JavaScript
@@ -899,7 +899,7 @@ test.describe('Landing Page - Navigation', () => {
     });
 
     test('SPA navigation works without full page reload', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Record initial page state
@@ -934,7 +934,7 @@ test.describe('Landing Page - Navigation', () => {
     });
 
     test('Back button returns to landing page', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Get initial hash
@@ -993,7 +993,7 @@ test.describe('Landing Page - Features Section', () => {
     });
 
     test('Features section is displayed', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const featuresSection = page.locator('.landing-features-section');
@@ -1007,7 +1007,7 @@ test.describe('Landing Page - Features Section', () => {
     });
 
     test('Feature cards are displayed', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const featureCards = page.locator('.landing-feature-card');
@@ -1048,7 +1048,7 @@ test.describe('Landing Page - Performance', () => {
         await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
         const domLoadTime = Date.now() - startTime;
 
-        await page.waitForLoadState('networkidle');
+        await page.waitForLoadState('load');
         const fullLoadTime = Date.now() - startTime;
 
         console.log(`DOM Load: ${domLoadTime}ms, Full Load: ${fullLoadTime}ms`);
@@ -1061,7 +1061,7 @@ test.describe('Landing Page - Performance', () => {
     });
 
     test('First Contentful Paint within threshold', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         const fcp = await page.evaluate(() => {
@@ -1078,7 +1078,7 @@ test.describe('Landing Page - Performance', () => {
     });
 
     test('No major layout shifts', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
         await page.waitForTimeout(2000);
 
@@ -1115,7 +1115,7 @@ test.describe('Landing Page - Error Handling', () => {
 
     test('Page handles missing icons gracefully', async ({ page }) => {
         // First load page normally
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Check that category cards exist
@@ -1149,7 +1149,7 @@ test.describe('Landing Page - Error Handling', () => {
     });
 
     test('Page remains functional after network errors', async ({ page }) => {
-        await page.goto(BASE_URL, { waitUntil: 'networkidle' });
+        await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
         // Verify page is interactive

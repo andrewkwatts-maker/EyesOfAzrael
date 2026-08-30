@@ -21,7 +21,7 @@ const MIN_TOUCH_TARGET = 44;
  */
 async function waitForPageLoad(page) {
   await page.waitForLoadState('domcontentloaded');
-  await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+  await page.waitForLoadState('load', { timeout: 15000 }).catch(() => {
     // Network idle might not be reached, that's ok
   });
 }
@@ -67,7 +67,7 @@ test.describe('Landing Page Cards - Responsive Layout', () => {
 
   test('Cards stack vertically on mobile viewport', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     // Wait for category cards to render
@@ -101,7 +101,7 @@ test.describe('Landing Page Cards - Responsive Layout', () => {
 
   test('Cards show in grid layout on tablet viewport', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.tablet);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -119,7 +119,7 @@ test.describe('Landing Page Cards - Responsive Layout', () => {
 
   test('Cards show in multi-column grid on desktop viewport', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.desktop);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -217,7 +217,7 @@ test.describe('Header - Mobile Adaptation', () => {
 
   test('Mobile menu opens and closes correctly', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     const menuToggle = page.locator(
@@ -259,7 +259,7 @@ test.describe('Header - Mobile Adaptation', () => {
 test.describe('Entity Cards - Full Width on Mobile', () => {
   test('Entity cards are full-width on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -293,7 +293,7 @@ test.describe('Entity Cards - Full Width on Mobile', () => {
 
     for (const [viewportName, viewport] of Object.entries(VIEWPORTS)) {
       await page.setViewportSize(viewport);
-      await page.goto('/', { waitUntil: 'networkidle' });
+      await page.goto('/', { waitUntil: 'load' });
       await page.waitForTimeout(1500);
 
       const card = page.locator(cardSelector).first();
@@ -315,7 +315,7 @@ test.describe('Entity Cards - Full Width on Mobile', () => {
 test.describe('Text Readability', () => {
   test('Text is readable on mobile (font-size >= 14px)', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     // Check various text elements
@@ -360,7 +360,7 @@ test.describe('Text Readability', () => {
 
   test('Line height provides good readability', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     // Check paragraph line height
@@ -403,7 +403,7 @@ test.describe('Text Readability', () => {
 test.describe('Touch Targets - Minimum Size', () => {
   test('Interactive elements meet minimum touch target size (44x44px)', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -471,7 +471,7 @@ test.describe('Touch Targets - Minimum Size', () => {
 
   test('Navigation links have adequate tap area', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     // Check navigation links specifically
@@ -510,7 +510,7 @@ test.describe('Touch Targets - Minimum Size', () => {
 test.describe('No Horizontal Scrolling', () => {
   test('No horizontal scrollbar on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -525,7 +525,7 @@ test.describe('No Horizontal Scrolling', () => {
 
   test('No horizontal scrollbar on tablet', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.tablet);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -539,7 +539,7 @@ test.describe('No Horizontal Scrolling', () => {
 
   test('Content does not overflow viewport on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     // Check main container widths
@@ -580,7 +580,7 @@ test.describe('No Horizontal Scrolling', () => {
 test.describe('Images Scale Appropriately', () => {
   test('Images are responsive and scale to container', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -629,7 +629,7 @@ test.describe('Images Scale Appropriately', () => {
 
   test('Category icons scale appropriately on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -660,7 +660,7 @@ test.describe('Images Scale Appropriately', () => {
 test.describe('Modals and Overlays Fit Viewport', () => {
   test('Modal fits within mobile viewport', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -711,7 +711,7 @@ test.describe('Modals and Overlays Fit Viewport', () => {
 
   test('Overlay covers full viewport on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     // Check for any overlay elements that might be present
@@ -799,7 +799,7 @@ test.describe('Theme Toggle - Mobile Accessibility', () => {
 
   test('Theme toggle is interactive on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     const themeToggle = page.locator(
@@ -846,7 +846,7 @@ test.describe('Theme Toggle - Mobile Accessibility', () => {
 test.describe('Navigation Works with Touch', () => {
   test('Category cards are tappable on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -878,7 +878,7 @@ test.describe('Navigation Works with Touch', () => {
 
   test('Swipe gestures do not break navigation', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     // Perform a swipe gesture (horizontal)
@@ -906,7 +906,7 @@ test.describe('Navigation Works with Touch', () => {
 
   test('Back button navigation works on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(2000);
 
@@ -940,7 +940,7 @@ test.describe('Navigation Works with Touch', () => {
 
   test('Scroll works smoothly on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
     await page.waitForTimeout(1000);
 
@@ -973,7 +973,7 @@ test.describe('Cross-Viewport Consistency', () => {
 
     for (const [viewportName, viewport] of Object.entries(VIEWPORTS)) {
       await page.setViewportSize(viewport);
-      await page.goto('/', { waitUntil: 'networkidle' });
+      await page.goto('/', { waitUntil: 'load' });
       await waitForPageLoad(page);
       await page.waitForTimeout(1500);
 
@@ -1001,7 +1001,7 @@ test.describe('Cross-Viewport Consistency', () => {
   });
 
   test('Responsive breakpoints transition smoothly', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await waitForPageLoad(page);
 
     // Test viewport sizes from mobile to desktop

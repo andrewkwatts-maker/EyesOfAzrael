@@ -98,7 +98,7 @@ function validateHeadingHierarchy(headings) {
 test.describe('Landing Page Accessibility', () => {
     test.beforeEach(async ({ page }) => {
         test.setTimeout(TEST_TIMEOUT);
-        await page.goto('/', { waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT });
+        await page.goto('/', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
     });
 
@@ -414,7 +414,7 @@ test.describe('Browse Category Page Accessibility', () => {
     test.beforeEach(async ({ page }) => {
         test.setTimeout(TEST_TIMEOUT);
         // Navigate to a category page (deities is a common one)
-        await page.goto('#/browse/deities', { waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT });
+        await page.goto('#/browse/deities', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
     });
 
@@ -580,7 +580,7 @@ test.describe('Entity Detail Page Accessibility', () => {
         test.setTimeout(TEST_TIMEOUT);
 
         // First navigate to browse page to find an entity
-        await page.goto('#/browse/deities', { waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT });
+        await page.goto('#/browse/deities', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
 
         // Click on first entity card to navigate to detail page
@@ -728,7 +728,7 @@ test.describe('Entity Detail Page Accessibility', () => {
 test.describe('Global Accessibility Requirements', () => {
     test('9. Error messages are announced - Login error scenario', async ({ page }) => {
         test.setTimeout(TEST_TIMEOUT);
-        await page.goto('/', { waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT });
+        await page.goto('/', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
 
         // Find sign in button if present
@@ -847,7 +847,7 @@ test.describe('Global Accessibility Requirements', () => {
 test.describe('Comprehensive axe-core Accessibility Audit', () => {
     test('Landing page - Full accessibility audit', async ({ page }) => {
         test.setTimeout(TEST_TIMEOUT);
-        await page.goto('/', { waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT });
+        await page.goto('/', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
 
         await injectAxe(page);
@@ -882,7 +882,7 @@ test.describe('Comprehensive axe-core Accessibility Audit', () => {
 
     test('Browse page - Full accessibility audit', async ({ page }) => {
         test.setTimeout(TEST_TIMEOUT);
-        await page.goto('#/browse/deities', { waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT });
+        await page.goto('#/browse/deities', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
 
         await injectAxe(page);
@@ -902,7 +902,7 @@ test.describe('Comprehensive axe-core Accessibility Audit', () => {
 
     test('Mythologies page - Full accessibility audit', async ({ page }) => {
         test.setTimeout(TEST_TIMEOUT);
-        await page.goto('#/mythologies', { waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT });
+        await page.goto('#/mythologies', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
 
         await injectAxe(page);

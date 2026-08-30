@@ -22,7 +22,7 @@ test.describe('Browse Deities View', () => {
 
     test('shows deity cards with proper layout', async ({ page }) => {
         // Navigate to the deities browse page
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for the browse view to render
         await page.waitForSelector('.browse-view, .entity-grid, #entityGrid', { timeout: 15000 });
@@ -55,7 +55,7 @@ test.describe('Browse Deities View', () => {
     });
 
     test('deity cards display image/icon, name, and description snippet', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -87,7 +87,7 @@ test.describe('Browse Deities View', () => {
 
 test.describe('Browse Heroes View', () => {
     test('shows hero cards', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/heroes`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/heroes`, { waitUntil: 'load' });
 
         // Wait for the browse view to render
         await page.waitForSelector('.browse-view, .entity-grid', { timeout: 15000 });
@@ -116,7 +116,7 @@ test.describe('Browse Heroes View', () => {
 
 test.describe('Browse Creatures View', () => {
     test('shows creature cards', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/creatures`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/creatures`, { waitUntil: 'load' });
 
         // Wait for the browse view to render
         await page.waitForSelector('.browse-view, .entity-grid', { timeout: 15000 });
@@ -140,7 +140,7 @@ test.describe('Browse Creatures View', () => {
 
 test.describe('Entity Card Interactions', () => {
     test('card hover effects work (scale, shadow)', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -185,7 +185,7 @@ test.describe('Entity Card Interactions', () => {
     });
 
     test('clicking a card navigates to entity detail', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -224,7 +224,7 @@ test.describe('Responsive Grid Layout', () => {
     test('grid reflows on mobile viewport', async ({ page }) => {
         // Start with desktop viewport
         await page.setViewportSize({ width: 1200, height: 800 });
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -266,7 +266,7 @@ test.describe('Responsive Grid Layout', () => {
 
     test('cards remain visible and accessible on mobile', async ({ page }) => {
         await page.setViewportSize({ width: 375, height: 667 });
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -317,7 +317,7 @@ test.describe('Loading and Empty States', () => {
     });
 
     test('empty state shown if no results (simulated via filter)', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -358,7 +358,7 @@ test.describe('Loading and Empty States', () => {
 
 test.describe('Content Filter Toggle', () => {
     test('content filter toggle works (if visible)', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for page to load
         await page.waitForSelector('.browse-view', { timeout: 15000 });
@@ -397,7 +397,7 @@ test.describe('Content Filter Toggle', () => {
 
 test.describe('Pagination and Infinite Scroll', () => {
     test('pagination or infinite scroll works (if implemented)', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -479,7 +479,7 @@ test.describe('Pagination and Infinite Scroll', () => {
 
 test.describe('Browse View Filters', () => {
     test('quick filter chips work', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for page to load
         await page.waitForSelector('.browse-view', { timeout: 15000 });
@@ -523,7 +523,7 @@ test.describe('Browse View Filters', () => {
     });
 
     test('sort order changes card order', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -566,7 +566,7 @@ test.describe('Browse View Filters', () => {
 
 test.describe('View Mode Toggle', () => {
     test('grid and list view toggle works', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -617,7 +617,7 @@ test.describe('View Mode Toggle', () => {
 
 test.describe('Browse Header and Statistics', () => {
     test('browse header displays category info', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for page to load
         await page.waitForSelector('.browse-view', { timeout: 15000 });
@@ -647,7 +647,7 @@ test.describe('Browse Header and Statistics', () => {
     });
 
     test('statistics show count of entities', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -680,7 +680,7 @@ test.describe('Browse Header and Statistics', () => {
 
 test.describe('Accessibility', () => {
     test('cards are keyboard accessible', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
@@ -712,7 +712,7 @@ test.describe('Accessibility', () => {
     });
 
     test('filter chips have proper ARIA attributes', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for page to load
         await page.waitForSelector('.filter-chip', { timeout: 15000 }).catch(() => {});
@@ -740,11 +740,11 @@ test.describe('Accessibility', () => {
 test.describe('Cross-Category Navigation', () => {
     test('can navigate between different browse categories', async ({ page }) => {
         // Start at deities
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
         await page.waitForSelector('.entity-card, .empty-state', { timeout: 15000 });
 
         // Navigate to creatures
-        await page.goto(`${BASE_URL}/#/browse/creatures`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/creatures`, { waitUntil: 'load' });
         await page.waitForSelector('.browse-view', { timeout: 15000 });
         await page.waitForTimeout(2000);
 
@@ -755,7 +755,7 @@ test.describe('Cross-Category Navigation', () => {
         expect(headerText?.toLowerCase()).toMatch(/creature/i);
 
         // Navigate to heroes
-        await page.goto(`${BASE_URL}/#/browse/heroes`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/heroes`, { waitUntil: 'load' });
         await page.waitForSelector('.browse-view', { timeout: 15000 });
         await page.waitForTimeout(2000);
 
@@ -788,7 +788,7 @@ test.describe('Error Handling', () => {
 
     test('error state shows retry option', async ({ page }) => {
         // This test checks if error handling includes recovery options
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'networkidle' });
+        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for page to load
         await page.waitForSelector('.browse-view', { timeout: 15000 }).catch(() => {});

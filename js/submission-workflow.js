@@ -429,6 +429,9 @@ class SubmissionWorkflow {
                 approvedBy: currentUser.uid,
                 approvedByName: currentUser.displayName || currentUser.email,
                 approvedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                // updatedAt drives the static+delta merge — without it a newly
+                // approved contribution is invisible until the next base export.
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 status: 'approved',
                 isUserContributed: true
             };

@@ -152,7 +152,7 @@ async function testNavigation(page, url, expectedNameOrPattern, entityInfo = {})
 
     // Wait for network to settle
     try {
-      await page.waitForLoadState('networkidle', { timeout: NETWORK_IDLE_TIMEOUT });
+      await page.waitForLoadState('load', { timeout: NETWORK_IDLE_TIMEOUT });
     } catch (e) {
       // Network idle timeout is not critical
     }
@@ -612,7 +612,7 @@ test.describe('Navigation Error Handling', () => {
   });
 
   test('Empty hash navigates to home', async ({ page }) => {
-    await page.goto('/#/', { waitUntil: 'networkidle', timeout: NAVIGATION_TIMEOUT });
+    await page.goto('/#/', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
 
     await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
 

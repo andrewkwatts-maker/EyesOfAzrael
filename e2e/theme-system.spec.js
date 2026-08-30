@@ -78,7 +78,7 @@ test.describe('Theme System - Default Theme Loading', () => {
   });
 
   test('Night theme CSS variables are applied by default', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Wait for theme to be applied
     await page.waitForTimeout(1000);
@@ -114,7 +114,7 @@ test.describe('Theme System - Theme Toggle Button', () => {
   });
 
   test('Theme toggle button has correct aria-label', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     const themeToggle = page.locator('#themeToggle');
@@ -125,7 +125,7 @@ test.describe('Theme System - Theme Toggle Button', () => {
   });
 
   test('Theme toggle button has moon icon for dark themes', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Default is night (dark theme), should show moon
@@ -141,7 +141,7 @@ test.describe('Theme System - Theme Toggle Button', () => {
   });
 
   test('Theme toggle button is keyboard accessible', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
 
     // Tab to theme toggle
     const themeToggle = page.locator('#themeToggle');
@@ -162,7 +162,7 @@ test.describe('Theme System - Theme Cycling (Mobile)', () => {
   test.use({ viewport: { width: 375, height: 667 } }); // iPhone SE viewport
 
   test('Mobile: clicking toggle cycles through themes', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500); // Wait for theme system init
 
     const themeToggle = page.locator('#themeToggle');
@@ -184,7 +184,7 @@ test.describe('Theme System - Theme Cycling (Mobile)', () => {
   });
 
   test('Mobile: theme cycles through all available themes', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     const themeToggle = page.locator('#themeToggle');
@@ -214,7 +214,7 @@ test.describe('Theme System - Theme Dropdown (Desktop)', () => {
   test.use({ viewport: { width: 1280, height: 720 } }); // Desktop viewport
 
   test('Desktop: theme dropdown shows all available themes on click', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000); // Wait for theme picker to create dropdown
 
     const themeToggle = page.locator('#themeToggle');
@@ -246,7 +246,7 @@ test.describe('Theme System - Theme Dropdown (Desktop)', () => {
   });
 
   test('Desktop: selecting theme from dropdown changes theme', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
 
     const themeToggle = page.locator('#themeToggle');
@@ -272,7 +272,7 @@ test.describe('Theme System - Theme Dropdown (Desktop)', () => {
   });
 
   test('Desktop: dropdown closes when clicking outside', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
 
     const themeToggle = page.locator('#themeToggle');
@@ -297,7 +297,7 @@ test.describe('Theme System - Theme Dropdown (Desktop)', () => {
   });
 
   test('Desktop: dropdown shows current theme as active', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
 
     const themeToggle = page.locator('#themeToggle');
@@ -319,7 +319,7 @@ test.describe('Theme System - Theme Dropdown (Desktop)', () => {
 
 test.describe('Theme System - CSS Variables Update', () => {
   test('Changing theme updates --color-bg-primary CSS variable', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Get initial background color
@@ -345,7 +345,7 @@ test.describe('Theme System - CSS Variables Update', () => {
   });
 
   test('Changing theme updates --color-text-primary CSS variable', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     const initialText = await page.evaluate(() => {
@@ -370,7 +370,7 @@ test.describe('Theme System - CSS Variables Update', () => {
   });
 
   test('Theme affects body background color', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Get body computed background
@@ -394,7 +394,7 @@ test.describe('Theme System - CSS Variables Update', () => {
   });
 
   test('Theme updates card background color', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
 
     // Check for --color-bg-card variable
@@ -419,7 +419,7 @@ test.describe('Theme System - CSS Variables Update', () => {
   });
 
   test('Theme updates border color', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     const initialBorder = await page.evaluate(() => {
@@ -443,7 +443,7 @@ test.describe('Theme System - CSS Variables Update', () => {
 
 test.describe('Theme System - Persistence', () => {
   test('Theme persists across page refresh', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Change to a specific theme
@@ -459,7 +459,7 @@ test.describe('Theme System - Persistence', () => {
     expect(themeBeforeRefresh).toBe('fire');
 
     // Refresh the page
-    await page.reload({ waitUntil: 'networkidle' });
+    await page.reload({ waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Theme should still be fire
@@ -468,7 +468,7 @@ test.describe('Theme System - Persistence', () => {
   });
 
   test('Theme is saved to localStorage', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Set a theme
@@ -488,7 +488,7 @@ test.describe('Theme System - Persistence', () => {
   });
 
   test('Theme persists across navigation', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Set theme to earth
@@ -500,7 +500,7 @@ test.describe('Theme System - Persistence', () => {
     await page.waitForTimeout(500);
 
     // Navigate to another page
-    await page.goto('/#/mythologies', { waitUntil: 'networkidle' });
+    await page.goto('/#/mythologies', { waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Theme should still be earth
@@ -508,7 +508,7 @@ test.describe('Theme System - Persistence', () => {
     expect(themeOnNewPage).toBe('earth');
 
     // Navigate back home
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1000);
 
     // Still earth
@@ -519,7 +519,7 @@ test.describe('Theme System - Persistence', () => {
 
 test.describe('Theme System - Light/Dark Icon Toggle', () => {
   test('Light themes (day, light) show sun icon', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Set to day theme (light)
@@ -544,7 +544,7 @@ test.describe('Theme System - Light/Dark Icon Toggle', () => {
   });
 
   test('Dark themes show moon icon', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Set to night theme (dark)
@@ -569,7 +569,7 @@ test.describe('Theme System - Light/Dark Icon Toggle', () => {
   });
 
   test('Light theme (light) shows sun icon', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     await page.evaluate(() => {
@@ -587,7 +587,7 @@ test.describe('Theme System - Light/Dark Icon Toggle', () => {
   });
 
   test('Fire theme (dark) shows moon icon', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     await page.evaluate(() => {
@@ -607,7 +607,7 @@ test.describe('Theme System - Light/Dark Icon Toggle', () => {
 
 test.describe('Theme System - Shader Background', () => {
   test('Shader background activates for appropriate themes', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
 
     // Check if shader manager is available
@@ -632,7 +632,7 @@ test.describe('Theme System - Shader Background', () => {
   });
 
   test('Body has shader-active class when shaders enabled', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
 
     // Check if shader canvas or shader-active class exists
@@ -649,7 +649,7 @@ test.describe('Theme System - Shader Background', () => {
 
 test.describe('Theme System - data-theme Attribute', () => {
   test('Body has correct data-theme attribute', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Test multiple themes
@@ -690,7 +690,7 @@ test.describe('Theme System - data-theme Attribute', () => {
 
 test.describe('Theme System - API', () => {
   test('ShaderThemePicker.getCurrentTheme returns current theme', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     const currentTheme = await page.evaluate(() => {
@@ -706,7 +706,7 @@ test.describe('Theme System - API', () => {
   });
 
   test('ShaderThemePicker.getAvailableThemes returns all themes', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     const availableThemes = await page.evaluate(() => {
@@ -725,7 +725,7 @@ test.describe('Theme System - API', () => {
   });
 
   test('ShaderThemePicker.setTheme changes theme', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Set theme via API
@@ -741,7 +741,7 @@ test.describe('Theme System - API', () => {
   });
 
   test('ShaderThemePicker.cycleTheme cycles to next theme', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     const initialTheme = await page.evaluate(() => {
@@ -766,7 +766,7 @@ test.describe('Theme System - API', () => {
 
 test.describe('Theme System - Visual Verification', () => {
   test('Theme change has visible effect on page', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
 
     // Take screenshot with night theme
@@ -797,7 +797,7 @@ test.describe('Theme System - Visual Verification', () => {
   });
 
   test('Header respects theme colors', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Get header background for night theme
@@ -820,7 +820,7 @@ test.describe('Theme System - Visual Verification', () => {
 
 test.describe('Theme System - Error Handling', () => {
   test('Invalid theme name falls back to default', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Try to set an invalid theme
@@ -850,7 +850,7 @@ test.describe('Theme System - Error Handling', () => {
       });
     });
 
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(2000);
 
     // Page should still load and have a theme
@@ -862,7 +862,7 @@ test.describe('Theme System - Error Handling', () => {
 
 test.describe('Theme System - Transition Effects', () => {
   test('Theme change adds transition class', async ({ page }) => {
-    await page.goto('/', { waitUntil: 'networkidle' });
+    await page.goto('/', { waitUntil: 'load' });
     await page.waitForTimeout(1500);
 
     // Watch for transition class being added

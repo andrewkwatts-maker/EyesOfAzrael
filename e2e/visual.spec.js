@@ -3,7 +3,7 @@ const { test, expect } = require('@playwright/test');
 test.describe('Visual Regression Tests', () => {
   test('Homepage visual appearance', async ({ page }) => {
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await page.waitForLoadState('load', { timeout: 10000 }).catch(() => {});
 
     // Wait for any animations to complete
     await page.waitForTimeout(1000);
@@ -61,7 +61,7 @@ test.describe('Visual Regression Tests', () => {
     const pageExists = await page.locator('body').isVisible().catch(() => false);
 
     if (pageExists) {
-      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+      await page.waitForLoadState('load', { timeout: 10000 }).catch(() => {});
       await page.waitForTimeout(1000);
 
       await expect(page).toHaveScreenshot('compare-page.png', {
@@ -115,7 +115,7 @@ test.describe('Visual Regression Tests', () => {
   test('Mobile view - Homepage', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await page.waitForLoadState('load', { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(1000);
 
     await expect(page).toHaveScreenshot('mobile-homepage.png', {
@@ -128,7 +128,7 @@ test.describe('Visual Regression Tests', () => {
   test('Tablet view - Homepage', async ({ page }) => {
     await page.setViewportSize({ width: 768, height: 1024 });
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
+    await page.waitForLoadState('load', { timeout: 10000 }).catch(() => {});
     await page.waitForTimeout(1000);
 
     await expect(page).toHaveScreenshot('tablet-homepage.png', {

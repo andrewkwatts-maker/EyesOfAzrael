@@ -51,3 +51,23 @@ git tag vX.Y.Z && git push --tags        # tag triggers the PyPI publish workflo
 
 Suite repos: EyeCore→`eyecore`, Azrael→`azrael`, Apocrypha→`esoterica`,
 Clio→`mnema`, Augur→`synomosia`.
+
+## Promote the mnema/synomosia seeds to a live Firestore upstream
+
+When per-domain Firebase projects exist (the packages read `CLIO_PROJECT` /
+`AUGUR_PROJECT`), upload the committed seeds so `Refresh()` has an upstream:
+
+```bash
+node scripts/upload-seed-collections.js --seed ../Clio/seed_data  --project <clio-project>  --key <serviceAccount.json>
+node scripts/upload-seed-collections.js --seed ../Augur/seed_data --project <augur-project> --key <serviceAccount.json>
+```
+
+Do **not** target `eyesofazrael` — its `events`/`figures`/`theories`
+collections already hold mythology and user content.
+
+> ⚠ The admin-SDK key currently on disk
+> (`eyesofazrael-firebase-adminsdk-fbsvc-c8104bb0d2.json`) is **revoked** —
+> Firestore rejects it as UNAUTHENTICATED. Mint a fresh service-account key in
+> the Firebase console for any admin-write tooling (this uploader, the JS
+> downloader) and for the `FIREBASE_SERVICE_ACCOUNT` GitHub secret that the
+> auto-deploy workflow needs (it has never been set).
