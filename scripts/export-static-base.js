@@ -97,10 +97,15 @@ function main() {
             continue;
         }
 
-        // Group by mythology (lowercase, default 'other')
+        // Group by mythology (lowercase, default 'other'). Some documents
+        // carry a non-string mythology (array of traditions, or a map) —
+        // coerce: first array element, else 'other'.
         const byMythology = {};
         for (const entity of entities) {
-            const myth = (entity.mythology || 'other').toLowerCase().trim();
+            let raw = entity.mythology;
+            if (Array.isArray(raw)) raw = raw[0];
+            if (typeof raw !== 'string' || !raw.trim()) raw = 'other';
+            const myth = raw.toLowerCase().trim();
             (byMythology[myth] = byMythology[myth] || []).push(entity);
         }
 

@@ -18,7 +18,7 @@
  *   location.reload();
  */
 const FEATURES = {
-    ENTITY_SOURCE: 'firestore-only',
+    ENTITY_SOURCE: 'static+delta',
 };
 
 if (typeof window !== 'undefined') {

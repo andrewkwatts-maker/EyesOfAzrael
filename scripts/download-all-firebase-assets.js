@@ -11,8 +11,15 @@ const admin = require('firebase-admin');
 const fs = require('fs');
 const path = require('path');
 
-// Initialize Firebase Admin
-const serviceAccount = require('../eyesofazrael-firebase-adminsdk-fbsvc-8366e4dac5.json');
+// Initialize Firebase Admin — find whichever admin-SDK key file is present
+// (key files are gitignored and get rotated; don't hardcode one key id).
+const keyFile = fs.readdirSync(path.resolve(__dirname, '..'))
+    .find(f => /^eyesofazrael-firebase-adminsdk-.*\.json$/.test(f));
+if (!keyFile) {
+    console.error('No eyesofazrael-firebase-adminsdk-*.json key file found in repo root.');
+    process.exit(1);
+}
+const serviceAccount = require(path.resolve(__dirname, '..', keyFile));
 
 admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
