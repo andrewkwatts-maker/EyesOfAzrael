@@ -103,6 +103,34 @@ class ShaderThemeManager {
             fps: 60
         };
 
+        // ── Continuous self-monitoring governor ─────────────────────────────
+        // Beyond the low/medium/high tiers, a dynamic resolution scale
+        // (0.35–1.0) and a ray-march step budget (u_steps) let the same
+        // shader degrade smoothly on weak GPUs and recover when there is
+        // headroom. If even the floor can't hold a usable frame rate, the
+        // shader deactivates for the session and the CSS background stands.
+        this._dynScale = 1.0;        // multiplies the quality-tier DPR
+        this._dynScaleMin = 0.35;
+        this._headroomSeconds = 0;   // consecutive seconds above recover threshold
+        this._starvedSeconds = 0;    // consecutive seconds below give-up threshold
+        this._stepBudgetFactor = 1.0; // fraction of the shader's STEPS ceiling
+
+        // prefers-reduced-motion: render a single static frame, no animation.
+        this._reducedMotion = false;
+        if (window.matchMedia) {
+            const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+            this._reducedMotion = mq.matches;
+            const onChange = (e) => {
+                this._reducedMotion = e.matches;
+                if (this.enabled) {
+                    if (e.matches) { this.renderOnce(); }
+                    else { this.resume(); }
+                }
+            };
+            if (mq.addEventListener) mq.addEventListener('change', onChange);
+            else if (mq.addListener) mq.addListener(onChange);
+        }
+
         // Check WebGL support
         this.webglSupported = this.checkWebGLSupport();
 
@@ -211,9 +239,9 @@ class ShaderThemeManager {
                 effectiveDpr = Math.min(dpr, 2);
         }
 
-        // Apply per-shader resolution scale
+        // Apply per-shader resolution scale, then the dynamic governor scale
         const shaderScale = this._shaderResolutionScale[this.currentTheme] ?? 1.0;
-        return effectiveDpr * shaderScale;
+        return Math.max(0.1, effectiveDpr * shaderScale * this._dynScale);
     }
 
     /**
@@ -379,12 +407,21 @@ class ShaderThemeManager {
         // Setup vertex buffer
         this.setupVertexBuffer(program);
 
-        // Get uniform locations
+        // Get uniform locations (u_steps is null for shaders without a march
+        // loop — uniform1f on a null location is a silent no-op, by spec)
         this.uniforms = {
             resolution: this.gl.getUniformLocation(program, 'u_resolution'),
             time: this.gl.getUniformLocation(program, 'u_time'),
-            intensity: this.gl.getUniformLocation(program, 'u_intensity')
+            intensity: this.gl.getUniformLocation(program, 'u_intensity'),
+            steps: this.gl.getUniformLocation(program, 'u_steps')
         };
+
+        // Fresh theme: reset the governor so a heavy previous theme doesn't
+        // penalize a light successor.
+        this._dynScale = 1.0;
+        this._stepBudgetFactor = this._initialStepFactor();
+        this._headroomSeconds = 0;
+        this._starvedSeconds = 0;
 
         console.log(`[ShaderThemes] Loaded theme: ${themeName}`);
         return true;
@@ -399,6 +436,15 @@ class ShaderThemeManager {
             return false;
         }
 
+        // The governor gave up on this theme earlier in the session — the GPU
+        // could not hold a usable frame rate even at minimum quality.
+        try {
+            if (sessionStorage.getItem(`eoa-shader-disabled-${themeName}`)) {
+                console.log(`[ShaderThemes] ${themeName} disabled this session (GPU starved)`);
+                return false;
+            }
+        } catch (e) { /* private mode */ }
+
         // Guard against duplicate canvas elements
         if (!this.canvas.parentElement) {
             const existing = document.getElementById('shader-background');
@@ -412,7 +458,12 @@ class ShaderThemeManager {
         const success = await this.loadTheme(themeName);
         if (success) {
             this.enabled = true;
-            this.resume();
+            if (this._reducedMotion) {
+                // Respect prefers-reduced-motion: one static frame, no loop.
+                this.renderOnce();
+            } else {
+                this.resume();
+            }
             return true;
         }
 
@@ -468,26 +519,116 @@ class ShaderThemeManager {
         this.gl.uniform2f(this.uniforms.resolution, this.canvas.width, this.canvas.height);
         this.gl.uniform1f(this.uniforms.time, elapsedTime);
         this.gl.uniform1f(this.uniforms.intensity, this.intensity);
+        if (this.uniforms.steps) {
+            this.gl.uniform1f(this.uniforms.steps, this._currentStepBudget());
+        }
 
         // Draw
         this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+
+        // Reduced motion: one static frame is enough.
+        if (this._reducedMotion) {
+            this.animationId = null;
+            return;
+        }
 
         // Continue animation
         this.animationId = requestAnimationFrame(() => this.render());
     }
 
     /**
-     * Adjust quality based on FPS
+     * Render a single frame without scheduling animation (reduced motion).
+     */
+    renderOnce() {
+        this.pause();
+        const wasReduced = this._reducedMotion;
+        this._reducedMotion = true;
+        this.render();
+        this._reducedMotion = wasReduced;
+    }
+
+    /**
+     * Initial step-budget fraction from the quality tier.
+     */
+    _initialStepFactor() {
+        switch (this.settings.quality) {
+            case 'low': return 0.5;
+            case 'medium': return 0.75;
+            default: return 1.0;
+        }
+    }
+
+    /**
+     * Current ray-march step budget (shader clamps to its own STEPS ceiling:
+     * 75 desktop chaos, 60 mobile). high tier ≈ uncapped, medium ≈ −10%,
+     * low ≈ −40%, sliding further as the resolution scale drops.
+     */
+    _currentStepBudget() {
+        const base = 90 * this._stepBudgetFactor * (0.5 + 0.5 * this._dynScale);
+        return Math.max(16, Math.round(base));
+    }
+
+    /**
+     * Continuous self-monitoring governor. Runs once per second from render().
+     *
+     * Escalation ladder when starved:   quality tier ▸ dynamic resolution
+     * scale (to 0.35×) ▸ step budget rides the same scale ▸ after 6 s below
+     * 24 fps at the floor, deactivate for the session (CSS background stands).
+     * Recovery ladder mirrors it upward after 3 s of headroom.
      */
     adjustQuality() {
-        if (this.fpsCounter.fps < 40 && this.settings.quality !== 'low') {
-            console.log('[ShaderThemes] Low FPS detected, reducing quality');
-            this.settings.quality = 'low';
-            this.handleResize();
-        } else if (this.fpsCounter.fps > 55 && this.settings.quality === 'low') {
-            console.log('[ShaderThemes] Good FPS, increasing quality');
-            this.settings.quality = 'medium';
-            this.handleResize();
+        const fps = this.fpsCounter.fps;
+
+        if (fps < 40) {
+            this._headroomSeconds = 0;
+
+            if (this.settings.quality !== 'low') {
+                console.log(`[ShaderThemes] ${fps}fps — dropping quality tier`);
+                this.settings.quality = this.settings.quality === 'high' ? 'medium' : 'low';
+                this._stepBudgetFactor = this._initialStepFactor();
+                this.handleResize();
+            } else if (this._dynScale > this._dynScaleMin) {
+                this._dynScale = Math.max(this._dynScaleMin,
+                    this._dynScale * (fps < 28 ? 0.75 : 0.88));
+                console.log(`[ShaderThemes] ${fps}fps — resolution scale → ${this._dynScale.toFixed(2)}`);
+                this.handleResize();
+            } else if (fps < 24) {
+                // At the floor and still starved — count down to giving up.
+                this._starvedSeconds++;
+                if (this._starvedSeconds >= 6) {
+                    console.warn('[ShaderThemes] GPU cannot sustain the shader at minimum '
+                        + 'quality — deactivating for this session (CSS background remains).');
+                    try {
+                        sessionStorage.setItem(`eoa-shader-disabled-${this.currentTheme}`, '1');
+                    } catch (e) { /* private mode */ }
+                    this.deactivate();
+                }
+            }
+            return;
+        }
+
+        this._starvedSeconds = 0;
+
+        if (fps > 55) {
+            this._headroomSeconds++;
+            if (this._headroomSeconds >= 3) {
+                this._headroomSeconds = 0;
+                if (this._dynScale < 1.0) {
+                    this._dynScale = Math.min(1.0, this._dynScale * 1.15);
+                    console.log(`[ShaderThemes] headroom — resolution scale → ${this._dynScale.toFixed(2)}`);
+                    this.handleResize();
+                } else if (this.settings.quality === 'low') {
+                    console.log('[ShaderThemes] headroom — quality → medium');
+                    this.settings.quality = 'medium';
+                    this._stepBudgetFactor = this._initialStepFactor();
+                    this.handleResize();
+                }
+                // Deliberately never climbs back to 'high' on its own: the
+                // medium tier is visually close, and re-probing high risks
+                // a visible stutter loop on borderline hardware.
+            }
+        } else {
+            this._headroomSeconds = 0;
         }
     }
 
@@ -562,7 +703,10 @@ class ShaderThemeManager {
             theme: this.currentTheme,
             fps: this.fpsCounter.fps,
             quality: this.settings.quality,
-            intensity: this.intensity
+            intensity: this.intensity,
+            resolutionScale: this._dynScale,
+            stepBudget: this._currentStepBudget(),
+            reducedMotion: this._reducedMotion
         };
     }
 }

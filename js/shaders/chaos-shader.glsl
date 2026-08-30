@@ -2,6 +2,8 @@ precision highp float;
 uniform vec2 u_resolution;
 uniform float u_time;
 uniform float u_intensity;
+// Adaptive step budget set by ShaderThemeManager (<= STEPS). 0 = use STEPS.
+uniform float u_steps;
 
 // ============================================================================
 // CHAOS — Ray-Marched Black Hole  (physically-grounded rewrite)
@@ -255,7 +257,10 @@ void main() {
     vec3  color = vec3(0.0);
     float trans = 1.0;
 
+    // GLSL ES 1.0 needs a constant loop bound; the adaptive budget breaks early.
+    float stepBudget = (u_steps > 0.5) ? min(u_steps, float(STEPS)) : float(STEPS);
     for (int i = 0; i < STEPS; i++) {
+        if (float(i) >= stepBudget) break;
         float r = length(pos);
 
         if (r < RS) break;
