@@ -60,9 +60,49 @@ service cloud.firestore {
       return getUserRole() == 'admin';
     }
 
-    // Admin bypass for all rate limits
-    function isAdminEmail() {
-      return isAuthenticated() && request.auth.token.email == 'andrewkwatts@gmail.com';
+    // ===== SITE ADMIN =====
+    // Single source of truth for privileged (owner-level) access. This replaces
+    // the hardcoded email literal that was previously repeated 24 times through
+    // this file, and the `isAdminEmail()` helper it used to back (56 call sites
+    // in total collapsed onto this one function).
+    //
+    // !! SAFETY: THE EMAIL CLAUSE IS LOAD-BEARING, NOT LEGACY CRUFT. !!
+    // No account in this project has had the `admin` custom claim provisioned
+    // yet. If the email comparison is deleted before a claim is actually set
+    // (admin.auth().setCustomUserClaims(uid, { admin: true }) against project
+    // `eyesofazrael`, then a token refresh on the client), the owner is locked
+    // out of their own production database with no way back in through the
+    // rules. Provision the claim, verify it resolves, and only then consider
+    // removing the fallback.
+    //
+    // Distinct from isAdmin() above, which reads role == 'admin' from the
+    // /users/{uid} document and costs a get(); this one is claim-only and free.
+    function isSiteAdmin() {
+      return request.auth != null &&
+             (request.auth.token.admin == true ||
+              request.auth.token.email == 'andrewkwatts@gmail.com');
+    }
+
+    // Collections whose documents must never be world-readable. The catch-all
+    // match at the bottom of this file grants `read: if true` to every path in
+    // the database, and Firestore ORs all matching rules together - so without
+    // this denylist the restrictive read rules written for these collections
+    // (moderation queue, subscriber emails, per-user settings) would be
+    // silently overridden by the catch-all and have no effect at all.
+    function isPrivateCollection(collection) {
+      return collection in [
+        'contentReports',
+        'newsletter_subscribers',
+        'userSettings',
+        'user_diagrams',
+        'userIcons',
+        // Pre-existing leak: /private_notes has had an owner-only read rule
+        // since it was written, but the catch-all has been overriding it and
+        // exposing every user's private annotations. Every query in
+        // js/services/private-notes-service.js is already scoped by
+        // `userId == uid`, so closing this breaks nothing.
+        'private_notes'
+      ];
     }
 
     // Rate limiting helpers
@@ -71,7 +111,7 @@ service cloud.firestore {
       // For anonymous: 50 reads/hour
       // For authenticated: 500 reads/hour
       // For admin: unlimited
-      return !isAdminEmail() && exists(/databases/$(database)/documents/system/rate_limits/$(request.auth != null ? request.auth.uid : request.path));
+      return !isSiteAdmin() && exists(/databases/$(database)/documents/system/rate_limits/$(request.auth != null ? request.auth.uid : request.path));
     }
 
     // Query size validation
@@ -84,7 +124,7 @@ service cloud.firestore {
     // Check if user is the asset owner or an admin
     function isOwnerOrAdmin(assetId) {
       let ownership = get(/databases/$(database)/documents/assetOwnership/$(assetId));
-      return isAdminEmail() || (isAuthenticated() && ownership.data.ownerId == request.auth.uid);
+      return isSiteAdmin() || (isAuthenticated() && ownership.data.ownerId == request.auth.uid);
     }
 
     // Check if user has contributed to an asset
@@ -401,8 +441,7 @@ service cloud.firestore {
       allow read: if true;
 
       // Only author (Andrew Watts) can create/update/delete
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== DEITIES COLLECTION =====
@@ -414,8 +453,7 @@ service cloud.firestore {
       allow read: if true;
 
       // Only author can create/update/delete official content
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== HEROES COLLECTION =====
@@ -423,8 +461,7 @@ service cloud.firestore {
 
     match /heroes/{heroId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== CREATURES COLLECTION =====
@@ -432,8 +469,7 @@ service cloud.firestore {
 
     match /creatures/{creatureId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== COSMOLOGY COLLECTION =====
@@ -441,8 +477,7 @@ service cloud.firestore {
 
     match /cosmology/{cosmologyId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== ITEMS COLLECTION =====
@@ -450,8 +485,7 @@ service cloud.firestore {
 
     match /items/{itemId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== HERBS COLLECTION =====
@@ -459,8 +493,7 @@ service cloud.firestore {
 
     match /herbs/{herbId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== RITUALS COLLECTION =====
@@ -468,8 +501,7 @@ service cloud.firestore {
 
     match /rituals/{ritualId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== TEXTS COLLECTION =====
@@ -477,8 +509,7 @@ service cloud.firestore {
 
     match /texts/{textId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== ARCHETYPES COLLECTION =====
@@ -490,8 +521,7 @@ service cloud.firestore {
       allow read: if true;
 
       // Only author can create/update/delete
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== MYTHS COLLECTION =====
@@ -499,8 +529,7 @@ service cloud.firestore {
 
     match /myths/{mythId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== EVENTS COLLECTION =====
@@ -508,8 +537,7 @@ service cloud.firestore {
 
     match /events/{eventId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== CONCEPTS COLLECTION =====
@@ -517,8 +545,7 @@ service cloud.firestore {
 
     match /concepts/{conceptId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== SYMBOLS COLLECTION =====
@@ -526,8 +553,7 @@ service cloud.firestore {
 
     match /symbols/{symbolId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== PLACES COLLECTION =====
@@ -535,8 +561,7 @@ service cloud.firestore {
 
     match /places/{placeId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== SEARCH INDEX COLLECTION =====
@@ -548,8 +573,7 @@ service cloud.firestore {
       allow read: if true;
 
       // Only author can create/update/delete
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== CROSS REFERENCES COLLECTION =====
@@ -557,8 +581,7 @@ service cloud.firestore {
 
     match /cross_references/{refId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== SVG GRAPHICS COLLECTION =====
@@ -575,12 +598,12 @@ service cloud.firestore {
       // Users can update their own, author can update any
       allow update: if isAuthenticated()
         && (request.resource.data.authorId == request.auth.uid
-            || request.auth.token.email == 'andrewkwatts@gmail.com');
+            || isSiteAdmin());
 
       // Users can delete their own, author can delete any
       allow delete: if isAuthenticated()
         && (resource.data.authorId == request.auth.uid
-            || request.auth.token.email == 'andrewkwatts@gmail.com');
+            || isSiteAdmin());
     }
 
     // ===== USER THEORIES COLLECTION =====
@@ -597,7 +620,7 @@ service cloud.firestore {
       // Public read for published theories
       allow read: if resource.data.status == 'published'
                   || isOwner(resource.data.authorId)
-                  || request.auth.token.email == 'andrewkwatts@gmail.com';
+                  || isSiteAdmin();
 
       // Authenticated users can create theories
       allow create: if isAuthenticated() && isValidUserTheory();
@@ -605,13 +628,13 @@ service cloud.firestore {
       // Users can update their own theories, author can update any
       allow update: if isAuthenticated()
                     && (isOwner(resource.data.authorId)
-                        || request.auth.token.email == 'andrewkwatts@gmail.com')
+                        || isSiteAdmin())
                     && isValidUserTheory();
 
       // Users can delete their own, author can delete any
       allow delete: if isAuthenticated()
                     && (isOwner(resource.data.authorId)
-                        || request.auth.token.email == 'andrewkwatts@gmail.com');
+                        || isSiteAdmin());
     }
 
     // ===== SUBMISSIONS COLLECTION =====
@@ -641,7 +664,7 @@ service cloud.firestore {
                   && resource.data.submittedBy == request.auth.uid;
 
       // Admin can read all submissions
-      allow read: if isAdminEmail();
+      allow read: if isSiteAdmin();
 
       // Authenticated users can create submissions
       allow create: if isAuthenticated()
@@ -657,7 +680,7 @@ service cloud.firestore {
                     && isValidSubmission();
 
       // Admin can approve/reject any submission
-      allow update: if isAdminEmail()
+      allow update: if isSiteAdmin()
                     && request.resource.data.submittedBy == resource.data.submittedBy;
 
       // Users can delete their own pending or rejected submissions
@@ -666,7 +689,7 @@ service cloud.firestore {
                     && resource.data.status in ['pending', 'rejected'];
 
       // Admin can delete any submission
-      allow delete: if isAdminEmail();
+      allow delete: if isSiteAdmin();
     }
 
     // ===== USER PREFERENCES COLLECTION =====
@@ -708,13 +731,13 @@ service cloud.firestore {
 
     match /system/security_logs/{logId} {
       // Only admin can read security logs
-      allow read: if isAdminEmail();
+      allow read: if isSiteAdmin();
       allow write: if false;
     }
 
     match /system/abuse_reports/{reportId} {
       // Authenticated users can report abuse
-      allow read: if isAdminEmail();
+      allow read: if isSiteAdmin();
       allow create: if isAuthenticated()
                     && request.resource.data.reporterId == request.auth.uid;
       allow update, delete: if false;
@@ -726,21 +749,21 @@ service cloud.firestore {
 
     match /moderation_bans/{userId} {
       // Only admin can read banned users list
-      allow read: if isAdminEmail();
+      allow read: if isSiteAdmin();
 
       // Only admin can ban users
-      allow create: if isAdminEmail()
+      allow create: if isSiteAdmin()
                     && request.resource.data.keys().hasAll(['userId', 'bannedBy', 'bannedAt', 'status'])
                     && request.resource.data.userId == userId
                     && request.resource.data.bannedBy == request.auth.uid
                     && request.resource.data.status == 'active';
 
       // Only admin can update ban status (unban)
-      allow update: if isAdminEmail()
+      allow update: if isSiteAdmin()
                     && request.resource.data.userId == resource.data.userId;
 
       // Only admin can delete bans
-      allow delete: if isAdminEmail();
+      allow delete: if isSiteAdmin();
     }
 
     // ===== MODERATION FLAGS COLLECTION =====
@@ -749,19 +772,19 @@ service cloud.firestore {
 
     match /moderation_flags/{flagId} {
       // Only admin can read flags
-      allow read: if isAdminEmail();
+      allow read: if isSiteAdmin();
 
       // Only admin can create flags
-      allow create: if isAdminEmail()
+      allow create: if isSiteAdmin()
                     && request.resource.data.keys().hasAll(['contentType', 'contentId', 'reason', 'flaggedBy', 'flaggedAt', 'status'])
                     && request.resource.data.flaggedBy == request.auth.uid
                     && request.resource.data.status == 'pending';
 
       // Only admin can update flags (resolve them)
-      allow update: if isAdminEmail();
+      allow update: if isSiteAdmin();
 
       // Only admin can delete flags
-      allow delete: if isAdminEmail();
+      allow delete: if isSiteAdmin();
     }
 
     // ===== MODERATION HISTORY COLLECTION =====
@@ -770,10 +793,10 @@ service cloud.firestore {
 
     match /moderation_history/{historyId} {
       // Only admin can read moderation history
-      allow read: if isAdminEmail();
+      allow read: if isSiteAdmin();
 
       // Only admin can create history entries
-      allow create: if isAdminEmail()
+      allow create: if isSiteAdmin()
                     && request.resource.data.keys().hasAll(['action', 'performedBy', 'timestamp'])
                     && request.resource.data.performedBy == request.auth.uid;
 
@@ -859,7 +882,7 @@ service cloud.firestore {
       allow update: if (isOwner(resource.data.suggestedBy)
                        && resource.data.status in ['pending', 'rejected']
                        && request.resource.data.suggestedBy == resource.data.suggestedBy)
-                    || (isAdminEmail() && request.resource.data.suggestedBy == resource.data.suggestedBy);
+                    || (isSiteAdmin() && request.resource.data.suggestedBy == resource.data.suggestedBy);
 
       // Owner can delete pending, moderators can delete any
       allow delete: if (isOwner(resource.data.suggestedBy) && resource.data.status == 'pending')
@@ -908,7 +931,7 @@ service cloud.firestore {
       allow read: if true;
 
       // Only admin can manage badges
-      allow create, update, delete: if isAdminEmail();
+      allow create, update, delete: if isSiteAdmin();
     }
 
     // ===== BADGE AWARDS COLLECTION =====
@@ -936,13 +959,13 @@ service cloud.firestore {
       }
 
       // Only admin can read flags
-      allow read: if isAdminEmail();
+      allow read: if isSiteAdmin();
 
       // Authenticated users can flag content
       allow create: if isAuthenticated() && isValidFlag();
 
       // Only admin can update/delete flags
-      allow update, delete: if isAdminEmail();
+      allow update, delete: if isSiteAdmin();
     }
 
     // ===== DISCUSSIONS COLLECTION =====
@@ -1037,7 +1060,7 @@ service cloud.firestore {
       // Owner can update their own queries, standard queries are admin-only
       allow update: if isAuthenticated()
                     && (resource.data.userId == request.auth.uid
-                        || (resource.data.isStandard == true && isAdminEmail()))
+                        || (resource.data.isStandard == true && isSiteAdmin()))
                     && request.resource.data.userId == resource.data.userId;
 
       // Owner can delete their own queries
@@ -1077,7 +1100,7 @@ service cloud.firestore {
         allow read: if isAuthenticated()
                     && (resource.data.userId == request.auth.uid
                         || isOwnerOrAdmin(assetId)
-                        || isAdminEmail());
+                        || isSiteAdmin());
 
         // Authenticated users can create claims (one active claim per user per asset)
         allow create: if isAuthenticated()
@@ -1085,7 +1108,7 @@ service cloud.firestore {
                       && !hasActiveClaim(assetId, request.auth.uid);
 
         // Only admin can approve/deny claims (update status)
-        allow update: if isAdminEmail()
+        allow update: if isSiteAdmin()
                       && request.resource.data.userId == resource.data.userId
                       && request.resource.data.assetId == resource.data.assetId;
 
@@ -1125,15 +1148,15 @@ service cloud.firestore {
       // Asset owner or admin can create deletion record
       allow create: if isAuthenticated()
                     && isValidDeletedAsset()
-                    && (isOwnerOrAdmin(assetId) || isAdminEmail());
+                    && (isOwnerOrAdmin(assetId) || isSiteAdmin());
 
       // Asset owner or admin can update deletion info
       allow update: if isAuthenticated()
-                    && (isOwnerOrAdmin(assetId) || isAdminEmail())
+                    && (isOwnerOrAdmin(assetId) || isSiteAdmin())
                     && request.resource.data.originalAssetId == resource.data.originalAssetId;
 
       // Only admin can restore (delete the deletion record)
-      allow delete: if isAdminEmail();
+      allow delete: if isSiteAdmin();
     }
 
     // ===== VOTE AGGREGATES COLLECTION =====
@@ -1217,7 +1240,7 @@ service cloud.firestore {
     match /contributions/{contribId} {
       // Contribution owner or admin can read
       allow read: if isAuthenticated()
-                  && (resource.data.userId == request.auth.uid || isAdminEmail());
+                  && (resource.data.userId == request.auth.uid || isSiteAdmin());
 
       // Only Cloud Functions can write contributions
       allow create, update, delete: if false;
@@ -1285,11 +1308,11 @@ service cloud.firestore {
                          && resource.data.status == 'pending'
                          && request.resource.data.authorId == resource.data.authorId
                          && request.resource.data.status == 'pending')
-                        || isAdminEmail());
+                        || isSiteAdmin());
 
       // Edit author or admin can delete
       allow delete: if isAuthenticated()
-                    && (resource.data.authorId == request.auth.uid || isAdminEmail());
+                    && (resource.data.authorId == request.auth.uid || isSiteAdmin());
 
       // Comments on suggested edits
       match /comments/{commentId} {
@@ -1301,7 +1324,7 @@ service cloud.firestore {
                       && request.resource.data.content.size() <= 2000;
         allow update: if isOwner(resource.data.authorId)
                       && request.resource.data.authorId == resource.data.authorId;
-        allow delete: if isOwner(resource.data.authorId) || isAdminEmail();
+        allow delete: if isOwner(resource.data.authorId) || isSiteAdmin();
       }
 
       // Votes on suggested edits
@@ -1345,8 +1368,8 @@ service cloud.firestore {
         allow update: if isAuthenticated()
                       && request.resource.data.authorId == resource.data.authorId;
         // Admin can also update (for moderation status changes)
-        allow update: if isAdminEmail();
-        allow delete: if isOwner(resource.data.authorId) || isAdminEmail();
+        allow update: if isSiteAdmin();
+        allow delete: if isOwner(resource.data.authorId) || isSiteAdmin();
 
         match /votes/{voteUserId} {
           allow read: if true;
@@ -1365,13 +1388,298 @@ service cloud.firestore {
       allow delete: if isAuthenticated() && resource.data.userId == request.auth.uid;
     }
 
-    // ===== DEFAULT FALLBACK FOR UNDEFINED COLLECTIONS =====
-    // Allow read access to any collection not explicitly defined above
-    // This is useful for new collections during development
-    match /{collection}/{document=**} {
+    // ===== NOTES COLLECTION =====
+    // Path: /notes/{noteId}
+    // Public user annotations on entities, written by js/services/notes-service.js
+    // (createNote / updateNote / deleteNote). Owner field is `userId`.
+    // Doc shape: entityId, entityCollection, entityName, userId, userName,
+    // userAvatar, content, contentHtml, tags, upvoteCount, downvoteCount,
+    // netVotes, status ('active'|'flagged'|'deleted'), createdAt, updatedAt.
+
+    match /notes/{noteId} {
+      function isValidNote() {
+        return request.resource.data.keys().hasAll(['entityId', 'entityCollection', 'userId', 'content', 'status'])
+               && request.resource.data.userId == request.auth.uid
+               && request.resource.data.entityId is string
+               && request.resource.data.entityCollection is string
+               && request.resource.data.content is string
+               && request.resource.data.content.size() >= 10
+               && request.resource.data.content.size() <= 2000
+               && request.resource.data.status in ['active', 'flagged', 'deleted'];
+      }
+
+      // Notes are public user content - they carry vote tallies and are listed
+      // on every entity page. Same posture as /entity_posts/{}/posts.
       allow read: if true;
-      allow write: if isAuthenticated()
-        && request.auth.token.email == 'andrewkwatts@gmail.com';
+
+      // Authenticated users create their own notes, with vote counts zeroed
+      allow create: if isAuthenticated()
+                    && isValidNote()
+                    && request.resource.data.status == 'active'
+                    && request.resource.data.upvoteCount == 0
+                    && request.resource.data.downvoteCount == 0
+                    && request.resource.data.netVotes == 0;
+
+      // Owner can edit or soft-delete their own note (cannot reassign it)
+      allow update: if isOwner(resource.data.userId)
+                    && request.resource.data.userId == resource.data.userId;
+
+      // Any authenticated user may move the vote tallies, because voting runs
+      // client-side in a transaction (notes-service.js voteOnNote). Content
+      // must be left untouched, so this cannot be used to rewrite a note.
+      allow update: if isAuthenticated()
+                    && request.resource.data.userId == resource.data.userId
+                    && request.resource.data.content == resource.data.content;
+
+      // Moderation (isSiteAdmin only - deliberately avoids isModerator(), which
+      // costs a get() on /users/{uid} and errors when that doc has no `role`)
+      allow update: if isSiteAdmin();
+
+      // Owner or admin can hard-delete
+      allow delete: if isOwner(resource.data.userId) || isSiteAdmin();
+
+      // Votes subcollection - notes/{noteId}/votes/{userId}
+      match /votes/{voteUserId} {
+        allow read: if true;
+        // request.resource is null on delete (vote toggle-off), which must be
+        // allowed or the vote transaction fails halfway through.
+        allow write: if isAuthenticated()
+                     && request.auth.uid == voteUserId
+                     && (request.resource == null
+                         || request.resource.data.value in [1, -1]);
+      }
+    }
+
+    // ===== CONTENT REPORTS COLLECTION =====
+    // Path: /contentReports/{reportId}
+    // Moderation queue, written by js/components/user-notes.js.
+    // Reporter field is `reportedBy`. Admin-read only.
+
+    match /contentReports/{reportId} {
+      function isValidReport() {
+        return request.resource.data.keys().hasAll(['contentType', 'contentId', 'reportedBy', 'status'])
+               && request.resource.data.reportedBy == request.auth.uid
+               && request.resource.data.contentType is string
+               && request.resource.data.contentId is string
+               && request.resource.data.status == 'pending';
+      }
+
+      // Moderation queue - never readable by the people being reported
+      allow read: if isSiteAdmin();
+
+      // Any authenticated user can file a report
+      allow create: if isAuthenticated() && isValidReport();
+
+      // Only admin can triage or clear reports
+      allow update, delete: if isSiteAdmin();
+    }
+
+    // ===== NEWSLETTER SUBSCRIBERS COLLECTION =====
+    // Path: /newsletter_subscribers/{subscriberId}
+    // Written by the footer signup form in js/header-nav.js
+    // (_submitNewsletterEmail). Doc shape: { email, subscribedAt, source }.
+    // There is no owner field - the form is open to signed-out visitors.
+
+    match /newsletter_subscribers/{subscriberId} {
+      // Email addresses are never world-readable or listable
+      allow read: if isSiteAdmin();
+
+      // Open signup, but the document shape is pinned so the collection cannot
+      // be used as free storage and no extra fields can be smuggled in.
+      allow create: if request.resource.data.keys().hasOnly(['email', 'subscribedAt', 'source'])
+                    && request.resource.data.email is string
+                    && request.resource.data.email.size() >= 5
+                    && request.resource.data.email.size() <= 254
+                    && request.resource.data.email.matches('^[^@]+@[^@]+[.][^@]+$')
+                    && request.resource.data.source is string
+                    && request.resource.data.source.size() <= 64;
+
+      // Only admin can edit or remove subscriptions
+      allow update, delete: if isSiteAdmin();
+    }
+
+    // ===== USER DIAGRAMS COLLECTION =====
+    // Path: /user_diagrams/{diagramId}
+    // Written by js/components/diagram-builder.js (saveDiagram).
+    // Owner field is `userId`. Doc shape: title, type, nodes[], links[],
+    // userId, createdAt, updatedAt.
+
+    match /user_diagrams/{diagramId} {
+      // Owner-scoped: diagrams are private working documents
+      allow read: if isOwner(resource.data.userId) || isSiteAdmin();
+
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() <= 200;
+
+      allow update: if isOwner(resource.data.userId)
+                    && request.resource.data.userId == resource.data.userId;
+
+      allow delete: if isOwner(resource.data.userId) || isSiteAdmin();
+    }
+
+    // ===== USER SETTINGS COLLECTION =====
+    // Path: /userSettings/{userId}
+    // Written by js/content-filter.js (saveUserSettings), keyed by uid as the
+    // DOCUMENT ID - the documents carry no userId field, only
+    // { contentFilter, updatedAt }, so ownership must key on the wildcard.
+    // Owner-only read AND write.
+
+    match /userSettings/{userId} {
+      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow create: if isAuthenticated() && request.auth.uid == userId;
+      allow update: if isAuthenticated() && request.auth.uid == userId;
+      allow delete: if isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // ===== USER ICONS COLLECTION =====
+    // Path: /userIcons/{iconId}
+    // Written by js/components/icon-picker.js (AI-generated SVG icons).
+    // Owner field is `userId`. Doc shape: userId, prompt, svgCode, style,
+    // color, createdAt, usageCount.
+
+    match /userIcons/{iconId} {
+      // Owner-scoped: the picker only ever lists the current user's icons
+      allow read: if isOwner(resource.data.userId) || isSiteAdmin();
+
+      allow create: if isAuthenticated()
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.prompt is string
+                    && request.resource.data.svgCode is string
+                    && request.resource.data.svgCode.size() <= 100000;
+
+      allow update: if isOwner(resource.data.userId)
+                    && request.resource.data.userId == resource.data.userId;
+
+      allow delete: if isOwner(resource.data.userId) || isSiteAdmin();
+    }
+
+    // ===== CONTENT COLLECTION =====
+    // Path: /content/{contentId}
+    // Written by js/firebase-content-db.js. This is CMS-shaped, not user-owned:
+    // createContent/batchCreateContent are migration entry points and the class
+    // has no callers in the running UI today. Documents carry `isDefault` -
+    // true means seeded/admin-authored (authorId null, status 'published'),
+    // false means a user draft with authorId == uid. Rules follow that split:
+    // public read of published content, admin write, plus the author-owned
+    // draft path the class actually implements.
+
+    match /content/{contentId} {
+      // Published public content is world-readable; drafts only to author/admin
+      allow read: if resource.data.status == 'published'
+                  || isSiteAdmin()
+                  || (isAuthenticated() && resource.data.authorId == request.auth.uid);
+
+      // Admin may seed anything; users may only create non-default drafts
+      allow create: if isSiteAdmin()
+                    || (isAuthenticated()
+                        && request.resource.data.isDefault == false
+                        && request.resource.data.authorId == request.auth.uid
+                        && request.resource.data.status != 'published');
+
+      // Admin may edit anything; authors may edit their own non-default docs
+      // without promoting them to default or reassigning authorship
+      allow update: if isSiteAdmin()
+                    || (isAuthenticated()
+                        && resource.data.isDefault == false
+                        && resource.data.authorId == request.auth.uid
+                        && request.resource.data.isDefault == false
+                        && request.resource.data.authorId == resource.data.authorId);
+
+      allow delete: if isSiteAdmin()
+                    || (isAuthenticated()
+                        && resource.data.isDefault == false
+                        && resource.data.authorId == request.auth.uid);
+    }
+
+    // ===== HISTORY DOMAIN COLLECTIONS (mnema / hist_*) =====
+    // See docs/PLAN-MULTIDOMAIN.md §2-3. Single Firestore project, prefixed
+    // collection names to avoid colliding with mythology's `events`/`figures`.
+    // Same posture as the existing entity collections above: public read, no
+    // direct client write. Community contributions arrive through
+    // /submissions and are written here on admin approval.
+    // Facet field for these collections is `era` (not `mythology`).
+
+    match /hist_events/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /hist_figures/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /hist_periods/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /hist_cultures/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /hist_wars/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /hist_discoveries/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /hist_artifacts/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    // ===== CONSPIRACY DOMAIN COLLECTIONS (synomosia / con_*) =====
+    // Facet field for these collections is `category` (not `mythology`).
+
+    match /con_theories/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /con_figures/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /con_organizations/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /con_events/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /con_documents/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    match /con_concepts/{docId} {
+      allow read: if true;
+      allow create, update, delete: if isSiteAdmin();
+    }
+
+    // ===== DEFAULT FALLBACK FOR UNDEFINED COLLECTIONS =====
+    // Allow read access to any collection not explicitly defined above.
+    // This is what keeps the unruled esoterica collections (magic, beings,
+    // teachings, spells, traditions, ...) publicly readable, so it cannot
+    // simply be removed - but it must NOT blanket-grant read on collections
+    // that carry private data, because Firestore ORs every matching rule
+    // together and `read: if true` here would override the restrictive read
+    // rules written above. See isPrivateCollection().
+    match /{collection}/{document=**} {
+      allow read: if !isPrivateCollection(collection);
+      allow write: if isSiteAdmin();
     }
   }
 }

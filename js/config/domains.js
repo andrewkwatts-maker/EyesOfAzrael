@@ -46,7 +46,7 @@ const DOMAIN_LIST = [
         collections: [
             'deities', 'creatures', 'heroes', 'places', 'items', 'concepts',
             'symbols', 'archetypes', 'cosmology', 'texts', 'mythologies',
-            'beings', 'events',
+            'beings', 'events', 'figures', 'teachings',
         ],
     },
     {
