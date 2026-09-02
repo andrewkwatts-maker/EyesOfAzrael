@@ -182,6 +182,22 @@ is why they are worth doing before building more on top.
 3. Re-bake all four domains against one shared `generatedAt` epoch, cut `data-v1.2.0`
    releases with checksums, bump the packages to **1.2.0**, tag → PyPI trusted publishing.
 
+**Release order is not optional.** `eyecore` is at **1.2.0** on `main` and **unpublished**;
+PyPI still has 1.1.0. Azrael's `main` now depends on `eyecore>=1.2.0`, because it uses the
+type-alias API added there. So:
+
+> **Publish `eyecore` 1.2.0 before tagging `azrael`.** Tagging azrael first produces a
+> release that cannot be installed at all — pip will fail to resolve `eyecore>=1.2.0`.
+
+Nothing is broken for existing users today: published azrael 1.1.0 depends on
+`eyecore>=1.1.0`, which resolves fine. The hazard is entirely in the next release.
+
+**Checksums are pinned to a specific asset.** The four `_DATA_SHA256` values were verified
+by downloading the published `data-v1.1.0` assets and confirming they are byte-identical to
+the local bakes. **Any re-bake invalidates all four.** A new release asset and its checksum
+must land in the same commit, or every first-query download hard-fails — which is the
+correct behaviour for a checksum, and a self-inflicted outage if the two drift.
+
 **Verification:** in a fresh venv with `_data/` empty, `import mnema; mnema.search(...)`
 downloads the snapshot, then `mnema.Refresh()` returns a **non-zero** count and pulls only
 documents newer than the bake.
