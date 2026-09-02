@@ -2247,13 +2247,35 @@ class EntityForm {
         });
 
         // Add metadata
-        data.updatedAt = new Date().toISOString();
+        // updatedAt drives the static+delta merge. The delta query is
+        // where('updatedAt', '>', <bake time>), which compares against a
+        // Firestore Timestamp — an ISO string never matches it, so a document
+        // stamped with one is invisible to the whole site until the next
+        // static-base export.
+        data.updatedAt = this.getServerTimestamp();
         if (!this.isEditing) {
-            data.createdAt = new Date().toISOString();
+            data.createdAt = this.getServerTimestamp();
             data.status = 'pending_review';
         }
 
         return data;
+    }
+
+    /**
+     * Firestore server timestamp sentinel.
+     *
+     * Matches the convention used by js/submission-workflow.js and
+     * js/components/admin-inline-edit-panel.js. Falls back to a Date when the
+     * Firebase SDK is not loaded — the SDK stores a Date as a Timestamp, so
+     * either way the value is never a string.
+     *
+     * @returns {Object|Date} serverTimestamp sentinel, or a Date fallback
+     */
+    getServerTimestamp() {
+        const fieldValue = (typeof firebase !== 'undefined' && firebase?.firestore?.FieldValue)
+            || (typeof window !== 'undefined' && window.firebase?.firestore?.FieldValue);
+
+        return fieldValue ? fieldValue.serverTimestamp() : new Date();
     }
 
     /**
@@ -2293,7 +2315,14 @@ class EntityForm {
         const data = this.collectFormData();
         const draftKey = `draft_${this.collection}_${this.entityId || 'new'}`;
 
-        localStorage.setItem(draftKey, JSON.stringify(data));
+        // Drafts are plain JSON in localStorage. The Firestore timestamp
+        // sentinels added by collectFormData() do not survive JSON.stringify
+        // and a draft has no use for them, so drop them before persisting.
+        const draftData = { ...data };
+        delete draftData.updatedAt;
+        delete draftData.createdAt;
+
+        localStorage.setItem(draftKey, JSON.stringify(draftData));
         this.lastAutoSave = new Date();
 
         // Show indicator

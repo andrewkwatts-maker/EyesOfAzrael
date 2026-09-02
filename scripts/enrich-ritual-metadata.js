@@ -646,8 +646,11 @@ function enrichRitual(ritualData, ritualId) {
       completeness: calculateCompleteness(ritualData, metadata)
     },
 
-    // Update modification timestamp
-    updatedAt: new Date().toISOString(),
+    // `updatedAt` is deliberately absent. It drives the static+delta merge, which
+    // compares it against a Date, so it must be a Firestore Timestamp; a string
+    // would leave the ritual invisible to the site until the next re-bake. This
+    // object is written to JSON and re-read before upload, and a serverTimestamp()
+    // sentinel cannot survive that round-trip, so it is stamped at the write.
     _modified: new Date().toISOString()
   };
 }
@@ -840,7 +843,10 @@ async function uploadToFirebase(dirPath, options = {}) {
       const docId = path.basename(file, '.json');
       const data = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
-      await db.collection('rituals').doc(docId).set(data, { merge: true });
+      await db.collection('rituals').doc(docId).set({
+        ...data,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      }, { merge: true });
       uploadedCount++;
 
       if (verbose) {

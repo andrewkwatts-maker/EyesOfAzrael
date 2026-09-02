@@ -1536,6 +1536,14 @@ class FirebaseCRUDManager {
             'createdByEmail',
             'createdByName',
             'createdAt',
+            // `updatedAt` drives the static+delta merge: the site fetches documents
+            // where updatedAt > the static base's generation time. A caller-supplied
+            // value — especially an ISO string, which can never satisfy a comparison
+            // against a Date — makes the document invisible to the site until the
+            // next re-bake. Stripping it here means this manager's own
+            // serverTimestamp() always wins, rather than winning only because it
+            // happens to be assigned after the caller's spread.
+            'updatedAt',
             'deletedAt',
             'deletedBy',
             'deletedByEmail',

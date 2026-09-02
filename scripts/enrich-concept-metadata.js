@@ -614,8 +614,12 @@ class ConceptEnricher {
     // Mark as enriched
     enriched.isEnriched = true;
 
-    // Update timestamp
-    enriched.updatedAt = new Date().toISOString();
+    // `updatedAt` is deliberately NOT set here. It drives the static+delta merge,
+    // which compares it against a Date, so it must be a Firestore Timestamp — and
+    // a string here would overwrite a good Timestamp with one that can never match
+    // the query, making the concept invisible to the site until the next re-bake.
+    // A serverTimestamp() sentinel cannot survive the JSON round-trip this object
+    // goes through, so the stamp is applied at the Firestore write instead.
 
     return enriched;
   }
@@ -652,7 +656,10 @@ class ConceptEnricher {
         if (this.firebase) {
           try {
             const conceptId = concept.id || filename;
-            await this.firebase.collection('concepts').doc(conceptId).update(enriched);
+            await this.firebase.collection('concepts').doc(conceptId).update({
+                ...enriched,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            });
             console.log(`   ☁️  Uploaded to Firebase: ${conceptId}`);
           } catch (firebaseErr) {
             console.log(`   ⚠️  Firebase update failed: ${firebaseErr.message}`);

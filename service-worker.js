@@ -122,6 +122,7 @@ const PRECACHE_ENHANCED = [
   '/js/components/entity-form.js',
   '/js/components/user-dashboard.js',
   '/js/config/features.js',
+  '/js/config/domains.js',
   '/js/services/entity-base-loader.js',
   '/js/services/asset-service.js',
   '/js/user-preferences.js',

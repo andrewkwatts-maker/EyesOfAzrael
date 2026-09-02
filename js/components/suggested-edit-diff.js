@@ -1186,6 +1186,73 @@ class SuggestedEditDiff {
     }
 
     /**
+     * Resolve which entity document an edit targets.
+     *
+     * Prefers the values stored on the edit itself (an edit loaded from
+     * Firestore carries its own entityId/entityCollection) and falls back to
+     * the component options for locally-constructed edits.
+     *
+     * @param {Object} edit
+     * @returns {{collection: string, id: string}|null} null when unresolvable
+     */
+    getEditTarget(edit) {
+        const collection = edit?.entityCollection || this.options.entityCollection;
+        const id = edit?.entityId || this.options.entityId;
+        return (collection && id) ? { collection, id } : null;
+    }
+
+    /**
+     * Write an approved edit onto the target entity document.
+     *
+     * This is the step that makes an approval real. Without it the
+     * suggestedEdits document flips to "approved" and the editHistory record is
+     * written, but the entity itself never changes and the contribution is
+     * silently discarded.
+     *
+     * Throws on failure so callers can abort BEFORE marking the suggestion
+     * approved — otherwise the suggestion and the entity go permanently out of
+     * sync with no way to tell that the edit was lost.
+     *
+     * @param {Object} edit - The edit being approved
+     * @param {string} approvedBy - Display name credited with the approval
+     * @returns {Promise<boolean>} true when the entity document was written
+     */
+    async applyApprovedEditToEntity(edit, approvedBy) {
+        const target = this.getEditTarget(edit);
+
+        if (!target) {
+            // Nothing we can write ourselves. That is only acceptable when a
+            // parent component has explicitly taken over the entity write.
+            if (this.options.onEditMerge) return false;
+            throw new Error(
+                'Cannot apply approved edit: no target entity document and no onEditMerge handler'
+            );
+        }
+
+        if (!edit?.field) {
+            throw new Error('Cannot apply approved edit: suggestion has no target field');
+        }
+
+        if (!window.firebase?.firestore) return false;
+
+        const db = firebase.firestore();
+
+        // Apply ONLY the single field this suggestion changed. Writing the whole
+        // entity back would clobber any other field edited since the suggestion
+        // was created.
+        const updateData = {};
+        updateData[edit.field] = edit.diff?.newValue ?? null;
+        updateData['lastModified'] = firebase.firestore.FieldValue.serverTimestamp();
+        // updatedAt drives the static+delta merge — without it an approved
+        // suggested edit stays invisible until the next static-base export.
+        updateData['updatedAt'] = firebase.firestore.FieldValue.serverTimestamp();
+        updateData['lastModifiedBy'] = approvedBy || this.options.userName || 'unknown';
+
+        await db.collection(target.collection).doc(target.id).update(updateData);
+        return true;
+    }
+
+    /**
      * Handle merge action
      */
     async handleMerge(editId) {
@@ -1194,26 +1261,29 @@ class SuggestedEditDiff {
 
         if (!confirm('Are you sure you want to merge this edit?')) return;
 
+        const resolvedBy = this.options.userName;
+        const resolvedAt = new Date().toISOString();
+
         try {
-            // Update edit status
-            edit.status = 'approved';
-            edit.resolvedBy = this.options.userName;
-            edit.resolvedAt = new Date().toISOString();
+            // Write the entity FIRST. If this throws we must not mark the
+            // suggestion approved, or the approval and the data diverge.
+            await this.applyApprovedEditToEntity(edit, resolvedBy);
 
             if (window.firebase?.firestore) {
                 const db = firebase.firestore();
+                const target = this.getEditTarget(edit);
 
                 // Update the edit document
                 await db.collection('suggestedEdits').doc(editId).update({
                     status: 'approved',
-                    resolvedBy: this.options.userName,
-                    resolvedAt: edit.resolvedAt
+                    resolvedBy: resolvedBy,
+                    resolvedAt: resolvedAt
                 });
 
                 // Create history entry
                 await db.collection('editHistory').add({
-                    entityId: this.options.entityId,
-                    entityCollection: this.options.entityCollection,
+                    entityId: target?.id ?? this.options.entityId,
+                    entityCollection: target?.collection ?? this.options.entityCollection,
                     editId: editId,
                     field: edit.field,
                     oldValue: edit.diff.oldValue,
@@ -1221,16 +1291,24 @@ class SuggestedEditDiff {
                     authorId: edit.authorId,
                     authorName: edit.authorName,
                     authorPhoto: edit.authorPhoto,
-                    approvedBy: this.options.userName,
-                    mergedAt: edit.resolvedAt
+                    approvedBy: resolvedBy,
+                    mergedAt: resolvedAt
                 });
-
-                // Update the actual entity (this would require access to the entity document)
-                // This should be handled by the parent component via callback
             }
 
+            // Only now is the approval real — reflect it locally.
+            edit.status = 'approved';
+            edit.resolvedBy = resolvedBy;
+            edit.resolvedAt = resolvedAt;
+
             if (this.options.onEditMerge) {
-                this.options.onEditMerge(edit);
+                try {
+                    this.options.onEditMerge(edit);
+                } catch (callbackError) {
+                    // The entity is already written; a bad consumer callback
+                    // must not report the merge as failed.
+                    console.error('Error in onEditMerge callback:', callbackError);
+                }
             }
 
             this.updateContent();
@@ -1245,26 +1323,38 @@ class SuggestedEditDiff {
      * Handle auto-approve when threshold is reached
      */
     async handleAutoApprove(edit) {
-        edit.status = 'approved';
-        edit.resolvedBy = 'Auto-Approved (Community Vote)';
-        edit.resolvedAt = new Date().toISOString();
+        const resolvedBy = 'Auto-Approved (Community Vote)';
+        const resolvedAt = new Date().toISOString();
 
         try {
+            // Land the change on the entity before recording the approval.
+            await this.applyApprovedEditToEntity(edit, resolvedBy);
+
             if (window.firebase?.firestore) {
                 const db = firebase.firestore();
                 await db.collection('suggestedEdits').doc(edit.id).update({
                     status: 'approved',
-                    resolvedBy: edit.resolvedBy,
-                    resolvedAt: edit.resolvedAt
+                    resolvedBy: resolvedBy,
+                    resolvedAt: resolvedAt
                 });
             }
 
+            edit.status = 'approved';
+            edit.resolvedBy = resolvedBy;
+            edit.resolvedAt = resolvedAt;
+
             if (this.options.onEditMerge) {
-                this.options.onEditMerge(edit);
+                try {
+                    this.options.onEditMerge(edit);
+                } catch (callbackError) {
+                    console.error('Error in onEditMerge callback:', callbackError);
+                }
             }
 
             this.showToast('Edit auto-approved by community vote!', 'success');
         } catch (error) {
+            // Leave the edit pending so a moderator can retry rather than
+            // losing the contribution.
             console.error('Error auto-approving:', error);
         }
     }
