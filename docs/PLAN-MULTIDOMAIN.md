@@ -41,10 +41,22 @@ remaining work is correctness, not construction.
 serves a static base of **15 collections / 13,591 documents** stamped
 `2026-08-30T06:05:03.548Z`, with `ENTITY_SOURCE: 'static+delta'` active. The base is 610
 files (290 MB) sharded per collection by mythology (`deities/norse.json`, plus an
-`_all.json` per collection), tracked in git, and included in the Firebase Hosting deploy.
+`_all.json` per collection) and tracked in git.
+
+**Production is served by GitHub Pages, not Firebase Hosting.** `www.eyesofazrael.com`
+answers with `Server: GitHub.com` and is published by the GitHub-managed "pages build and
+deployment" workflow on every push to `main`, driven by the `CNAME` file. Firebase Hosting
+is *also* live at `eyesofazrael.web.app` serving identical content. This matters more than
+it first appears: **every header in `firebase.json` is inert in production** — the CSP, the
+HSTS header, the `/static/entities/**` `max-age=21600, stale-while-revalidate` caching
+rule, the `** → /index.html` SPA rewrite, and `cleanUrls`. The site is running without the
+caching and security headers it is configured for.
 
 **The site is mythology + esoteric only.** Its 15 collections are azrael's and esoterica's.
-There is no history and no conspiracy content on the site at all.
+There is no `domain` field on any entity, no domain enum, no router segment, and no filter.
+The one conspiracy-shaped thing in the UI is a dead admin-only stub
+(`js/views/landing-page-view.js:61-67`) routing `#/browse/conspiracies` to a collection that
+exists in no static base, no Firestore rule, and no index.
 
 ### The three gaps
 
@@ -52,10 +64,15 @@ There is no history and no conspiracy content on the site at all.
    `os.getenv("CLIO_PROJECT", "")` / `AUGUR_PROJECT`, find them empty, and return `0`. The
    delta code path behind the env var is real and already written — it is simply not
    pointed anywhere.
-2. **Two domains never reach the website.** The static base export and the entity loader
-   know nothing about history or conspiracy.
-3. **Deploys are manual.** The site is current because it was pushed by hand with the
-   Firebase CLI. The GitHub Actions deploy does not run — see §6.
+2. **Two domains never reach the website**, and the reason is structural rather than a
+   missing branch: **the entire data model is keyed on `mythology`, not on domain.** The
+   manifest shape is `collections.{c}.mythologies[] / mythologyCounts{}`; the loader
+   resolves files as `static/entities/{collection}/{mythology}.json`; the delta query
+   filters `.where('mythology','==',…)`; and **all 47 composite indexes lead with
+   `mythology`**. Adding a domain axis reshapes all five of those.
+3. **Contributors cannot contribute.** This is the gap that most directly blocks the goal —
+   see §7. It is not a multi-domain problem; it is broken today, on the live site, for
+   mythology.
 
 ---
 
@@ -187,31 +204,82 @@ documents newer than the bake.
    previously failed to stamp it, which made those changes invisible to every delta
    consumer. Adding collections is exactly the moment that regresses.
 
-## 7. Phase E — deploys run from GitHub Actions (0.5 day + user action)
+## 7. Phase E — make contribution actually work (3–4 days)
 
-The site is current only because it was deployed by hand. `.github/workflows/deploy.yml` is
-structurally sound — it triggers on push to `main`, gates on a `test` job running
-`npm run test:ci` (which exists), and deploys via `FirebaseExtended/action-hosting-deploy`.
-Nothing about the workflow needs rewriting. What blocks it is credentials, and **both items
-need the user** — neither can be done from this machine:
+"Users can submit and edit" is currently false on the live site, for reasons that have
+nothing to do with multi-domain work. Each of these fails *silently* — no error surfaces to
+the user, and nothing logs. Fix these before adding two more domains on top.
 
-- **Two repository secrets are unset**: `FIREBASE_SERVICE_ACCOUNT` *and*
-  `FIREBASE_PROJECT_ID` (the workflow reads the project id from a secret too, so supplying
-  only the key still fails). The service account key must be **freshly generated** from the
-  Firebase console — the key previously on disk is revoked and must not be reused.
-- **The `gh` CLI is no longer authenticated** on this machine (`git push` still works via
-  the credential helper, but the GitHub API does not). Workflow runs cannot be inspected
-  and secrets cannot be set until `gh auth login` is run, or the work is done from a cloud
-  agent with its own token, or the secret is added through the GitHub web UI.
+1. **Seven user-write collections have no security rule**, so they fall through to the
+   catch-all at `firestore.rules:1371`, which permits writes only from one hardcoded email.
+   Every one of these actions returns PERMISSION_DENIED for every normal user today:
+   `notes`, `contentReports`, `newsletter_subscribers`, `user_diagrams`, `userSettings`,
+   `userIcons`, `content`.
+2. **Approved suggested edits never reach the entity.** `suggested-edit-diff.js:1204-1259`
+   updates the `suggestedEdits` document's status and writes an `editHistory` record, but
+   never writes the entity itself — the code comment at `:1229` says the entity write
+   "should be handled by the parent component via callback", and that callback is optional.
+   Community edits are approved and then permanently discarded.
+3. **`entity-form.js:2250` writes `updatedAt` as an ISO string**, not a Firestore
+   `Timestamp`. The delta query is `where('updatedAt', '>', new Date(...))`, which never
+   matches a string field, so documents saved through that form are invisible to the delta
+   layer forever.
+4. **Write access is one hardcoded email, repeated ~40 times** (`request.auth.token.email
+   == 'andrewkwatts@gmail.com'`). There is no admin custom claim, no role, no per-domain
+   moderator. A four-domain site with contributors cannot be gated this way — introduce a
+   role claim and collapse the 40 duplicated conditions onto it.
+5. **The delta query is capped at 200 documents** (`asset-service.js:268`) with no
+   pagination and no overflow signal. Past 200 edits since a bake, the site is silently
+   wrong. At minimum detect the cap and surface it; better, paginate.
+6. **Two live queries have no index** — `notes` and the `entity_posts/*/posts` collection
+   group — and in the delta path a `failed-precondition` is deliberately swallowed
+   (`asset-service.js:277-281`), so a missing index degrades to base-only results with no
+   warning at all. Add the indexes and log the swallow.
 
-Also fix `.firebaserc`: it has explanatory comments appended after the closing brace, so it
-is **not valid strict JSON**. The Firebase CLI tolerates this (it strips `//` comments); any
-plain `JSON.parse` in a script or CI step does not.
+## 8. Phase F — publishing (1 day + user action)
 
-## 8. Phase F — verification
+**Correction to the obvious assumption: deploys are *not* manual.** Every push to `main`
+publishes through GitHub Pages, which is why the live site is current. What is broken is a
+*second, parallel* publish path: `.github/workflows/deploy.yml` has **never succeeded** —
+every run fails at exactly the `Deploy to Firebase` step with all prior steps green, the
+signature of an empty `firebaseServiceAccount`.
+
+So the decision to make is which publisher is authoritative, because two publish paths for
+one site will drift the moment either is used alone:
+
+- **Keep GitHub Pages** (it already works) and delete or disable the Firebase deploy job.
+  Then `firebase.json`'s headers must be reimplemented for Pages or consciously abandoned —
+  today they are silently inert.
+- **Switch to Firebase Hosting** (gets the CSP, HSTS and the 6-hour static-base caching
+  actually applied) and remove the `CNAME`. This needs the user: two unset secrets,
+  `FIREBASE_SERVICE_ACCOUNT` *and* `FIREBASE_PROJECT_ID`, with a **freshly generated** key.
+
+Recommendation: **switch to Firebase Hosting.** The static base is the site's dominant
+payload, and the `stale-while-revalidate` caching rule is worth real money in load time —
+but this is a judgement call about which surface you want to own, so it is flagged rather
+than assumed.
+
+Regardless of choice:
+- **Scrub the committed service-account key.** `eyesofazrael-firebase-adminsdk-fbsvc-c8104bb0d2.json`
+  is committed at repo root and published by Pages. It is revoked, so this is not an active
+  breach, but a credential file must not sit in a public tree.
+- **`firebase.json` publishes the whole repo root** (`"public": "."` with a blocklist that
+  does not exclude them), so screenshots, `AGENT_*_SUMMARY.txt` files, source texts, `.py`
+  migration scripts and `.env` are all shipped. Tighten it.
+- **Fix `.firebaserc`**: explanatory comments sit after the closing brace, so it is not
+  valid strict JSON. The Firebase CLI tolerates it; any plain `JSON.parse` does not.
+- **`gh` is not authenticated** on this machine — `git push` works via the credential
+  helper, but the API does not, so runs cannot be inspected and secrets cannot be set
+  without `gh auth login`, a cloud agent's own token, or the GitHub web UI.
+
+## 9. Phase G — verification
 
 - `fetch_deltas` on the history collections returns history documents only — no mythology
   leakage. *(This is the test the whole design exists to pass.)*
+- A signed-in non-admin user can save a note, submit content, and have an approved
+  suggested edit appear on the entity — all three fail today.
+- A document saved through `entity-form.js` is picked up by the delta query (proves the
+  Timestamp fix).
 - Fresh venv per package, `_data/` empty: query → snapshot downloads → `Refresh()` returns
   non-zero for all four domains.
 - Snapshot checksums verify; a corrupted download is rejected rather than cached.
@@ -220,24 +288,30 @@ plain `JSON.parse` in a script or CI step does not.
 - Static base `generatedAt` equals the bake epoch across all four domains.
 - A push to `main` deploys via Actions with no manual step.
 
-## 9. Effort
+## 10. Effort
 
 | Phase | Work | Estimate |
 |---|---|---|
 | A | Firebase structure, seed promotion, rules, indexes | 1–2 d |
 | B | Baked-state correctness (6 defects) | 2–3 d |
 | C | Wire mnema/synomosia, re-bake, release 1.2.0 | 2 d |
-| D | Website: four domains, base + delta + UI | 3–5 d |
-| E | Actions deploy | 0.5 d + user action |
-| F | Verification | 1 d |
-| | **Total** | **≈ 2–2.5 weeks** |
+| D | Website: domain axis through manifest, export, loader, queries, indexes | 5–8 d |
+| E | Make contribution work (6 blocking defects) | 3–4 d |
+| F | Publishing: pick one path, scrub the key, tighten the deploy set | 1 d + user action |
+| G | Verification | 1 d |
+| | **Total** | **≈ 3–4 weeks** |
 
-**Minimum viable slice:** A + C + D steps 1–2 → roughly one week, and it is the slice that
-actually delivers the headline goal (all four domains live, baked state plus live changes).
-B and E are correctness and automation, valuable but not on the critical path to "connected
-and working".
+Phase D is revised up from the initial estimate. The first read suggested "add two more
+collections to the export"; the model is in fact keyed on `mythology` through the manifest
+shape, the loader's file resolution, the delta query filter, and all 47 composite indexes,
+so introducing a domain axis touches every layer rather than one script.
 
-## 10. Risks
+**Minimum viable slice:** A + C + D → roughly two weeks, delivering the headline goal (all
+four domains live, baked state plus live changes). **Phase E is the one to promote if
+anything slips** — a site whose contributors cannot contribute does not become more useful
+by gaining two more domains they also cannot contribute to.
+
+## 11. Risks
 
 - **The single-project decision is hard to reverse** once seed data is uploaded under
   prefixed names and the site queries them. It is the right call for auth reasons, but it
@@ -249,3 +323,24 @@ and working".
   It needs an assertion in the export script, not a convention.
 - **No user-blocked step can be completed autonomously**: the Firebase service account key
   and GitHub auth both require the user.
+- **There is no green browser-level gate for a refactor of this size.** The E2E suite has
+  been fully red for at least three nightly runs (firefox, a11y and perf fail; chromium,
+  webkit and mobile are cancelled by the `fail-fast` cascade). Unit tests are effectively
+  green — 3,357 of 3,358 pass, the sole failure a timing flake at
+  `__tests__/integration/performance.test.js:474`. Getting E2E green is cheap insurance
+  before touching the loader and the manifest shape.
+- **The static base is already at an awkward size and this makes it larger.** 290 MB across
+  610 files, with `concepts/_all.json` at 39 MB and `deities/_all.json` at 31 MB — single
+  responses of 40 MB and ~5 s. It is committed git content published by GitHub Pages, whose
+  1 GB site limit is within reach. The new domains add only ~206 documents, so they are not
+  the problem; the problem is that the existing `_all.json` pattern does not scale and a
+  domain axis multiplies the shard count.
+- **The base cache silently never populates.** `entity-base-loader.js:152` writes each
+  payload to `localStorage` inside a bare `try {} catch (_) {}`. A 4.6 MB payload exceeds
+  the ~5 MB quota, the throw is swallowed, and **every page view re-downloads multi-MB
+  JSON** with nothing logged. The 24-hour cache the code appears to implement does not
+  exist in practice for the large collections.
+- **An unknown shard renders empty rather than failing.** `entity-base-loader.js:123-126`
+  returns an empty `Map` for a key absent from the manifest, with no Firestore fallback. New
+  domain content published before a re-bake will show a blank page and no error — the exact
+  failure mode most likely to occur while rolling this out.
