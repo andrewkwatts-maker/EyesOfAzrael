@@ -186,15 +186,92 @@ is why they are worth doing before building more on top.
 downloads the snapshot, then `mnema.Refresh()` returns a **non-zero** count and pulls only
 documents newer than the bake.
 
-## 6. Phase D — the website carries four domains (3–5 days)
+## 6. Phase D — the website carries four domains (5–8 days)
 
-1. **Extend `scripts/export-static-base.js`** to emit the `hist_*` and `con_*` collections,
-   sharded by their own shard key (era / category) exactly as mythology collections shard
-   by mythology. ~206 new documents — negligible next to the existing 290 MB.
-2. **Teach the loader and delta merge the four domains**, so a `hist_events` delta merges
-   into history and never into mythology's `events`.
-3. **Surface domain in the UI** — navigation, search scoping, and filters — with correct
-   per-domain shard labels ("Era" for history, "Category" for conspiracy).
+**Shape: one interface, four datasets, selected by a top-level tab.** Mythology, History,
+Esoteric and Conspiracy each get a tab. Everything below the tab — browse grids, entity
+detail, search, submissions, suggested edits, notes, votes, moderation — is the *same*
+code operating on a different dataset. No per-domain views, no forked components.
+
+This is deliberately narrower than a merged cross-domain experience, and that narrowness is
+what makes it affordable:
+
+- **Queries stay inside one domain**, so no Firestore collection-group queries and no
+  cross-domain composite indexes. The existing per-collection index pattern
+  (`<facet> ASC + updatedAt ASC`) simply repeats for the new collections with their own
+  facet field. The 47-index problem does not multiply — it extends.
+- **The contribution machinery is written once.** Every fix in §7 lands for all four
+  domains simultaneously, because there is only one submission path, one edit path, one
+  vote path.
+- **The static base keeps its current sharding strategy**, one facet value per file.
+
+### The enabling refactor: a domain registry
+
+The single change that makes the tabs work is generalising the hardcoded `mythology` axis
+into a declared facet. Today `mythology` is baked into the manifest shape
+(`collections.{c}.mythologies[]`), the loader's file resolution
+(`static/entities/{collection}/{mythology}.json`), the delta filter
+(`.where('mythology','==',…)`), and every index. All four read the same field name.
+
+Introduce one config that declares the four domains, and have every layer read from it
+rather than from a literal:
+
+| domain | prefix | collections | facet field | facet label |
+|---|---|---|---|---|
+| mythology | *(none)* | 16 existing | `mythology` | "Mythology" |
+| esoteric | *(none)* | 9 existing | `tradition` | "Tradition" |
+| history | `hist_` | 7 | `era` | "Era" |
+| conspiracy | `con_` | 6 | `category` | "Category" |
+
+`mnema` and `synomosia` already store era and category in the `mythology` column of their
+baked databases, so the data side of this is a rename at export time, not a migration.
+
+1. **Add the registry** and route every consumer through it: manifest generation, the
+   loader, the delta query, the index definitions, and the tab bar itself.
+2. **Extend `scripts/export-static-base.js`** to emit `hist_*` and `con_*` sharded by their
+   own facet. ~206 new documents — negligible against the existing 290 MB.
+3. **Teach the loader and delta merge the domain**, so a `hist_events` delta merges into
+   history and never into mythology's `events`. This is the correctness core of the phase.
+4. **Keep existing URLs working.** Mythology routes are live and deep-linked; the new
+   domain segment must default to mythology rather than breaking them.
+5. **Retire the dead stub.** `landing-page-view.js:61-67` routes `#/browse/conspiracies` to
+   a collection that does not exist. It becomes the real conspiracy tab or it goes.
+
+### Cross-domain links (wiki-style)
+
+Tabs separate the datasets for *browsing*; they must not separate them for *linking*. A
+history figure cites a mythological archetype, a conspiracy theory cites a historical event,
+an esoteric ritual cites both. Any entity must be able to link to any other entity in any
+domain, and following that link should switch tabs rather than dead-end.
+
+**The prefix scheme already provides the hard part.** Because collection names are globally
+unique — enforced by a collision check in the registry, which throws rather than picking a
+winner — `collection/id` is a globally unique reference. No separate namespace, no UUID, no
+domain segment to keep in sync: `deities/zeus` and `hist_figures/napoleon` cannot collide,
+and a reference resolves to its own domain, which is what tells the UI which tab to open.
+Had we gone with a project per domain, a reference would have needed to carry the project
+too, and resolving it would have meant a cross-project read under a different auth realm.
+
+Design decisions this implies:
+
+1. **Forward links live on the entity** as an array of refs, so they travel with the entity
+   through both the static base and the delta layer with no extra read.
+2. **Backlinks are computed at export time**, not queried at runtime. "What links here" as a
+   live Firestore query would be an `array-contains` against every collection in every
+   domain on every page view. The bake already walks every entity, so it can invert the link
+   graph once and ship the result in the static base; deltas patch it.
+3. **Link integrity needs a cross-domain validator.** The existing link checkers
+   (`validate-cross-links.js`, `auto-fix-links.js`, `crosslink-report.json`) only understand
+   mythology collections, so they will report every history and conspiracy reference as
+   broken. That is a false alarm to fix before it trains everyone to ignore the report.
+4. **A ref to a retired collection must render as a broken link, not an exception.** Content
+   outlives config; `parseRef` returns a parsed ref with a null domain rather than throwing,
+   and callers check `isKnownRef`.
+
+The existing `topics` / `entity_topics` / `topic_links` tables in the packages (11,916
+topics and 105,142 entity-topic rows in azrael alone) are the natural substrate for this —
+topics are already a cross-cutting axis that is not collection-specific. Prefer extending
+them over inventing a parallel link store.
 4. **One shared epoch.** The static base export and the package bakes must stamp the *same*
    `generatedAt`. If the base is older than the bake, the site re-fetches deltas it already
    has; if newer, it silently misses changes. This is the single most important invariant in

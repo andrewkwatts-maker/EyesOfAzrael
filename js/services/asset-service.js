@@ -253,6 +253,11 @@ class AssetService {
     async _fetchDeltas(collection, mythology, loader) {
         if (!this.db) return [];
 
+        // Cap on documents changed since the base was generated. Not arbitrary:
+        // exceeding it means the base is too stale to patch and needs re-baking,
+        // which is why saturation is reported rather than quietly truncated.
+        const DELTA_LIMIT = 200;
+
         try {
             const generatedAt = await loader.getGeneratedAt();
             if (!generatedAt) return [];
@@ -262,20 +267,44 @@ class AssetService {
                 .where('updatedAt', '>', baseDate);
 
             if (mythology) {
-                query = query.where('mythology', '==', mythology);
+                // Which field holds the shard value depends on the domain: mythology
+                // and esoteric use `mythology`, history uses `era`, conspiracy uses
+                // `category`. Filtering the wrong field returns nothing and looks
+                // exactly like "no changes", so ask the registry rather than assume.
+                const facetField = (typeof window !== 'undefined' && window.DOMAINS)
+                    ? window.DOMAINS.facetFieldFor(collection)
+                    : 'mythology';
+                query = query.where(facetField, '==', mythology);
             }
 
-            const snapshot = await query.limit(200).get();
+            const snapshot = await query.limit(DELTA_LIMIT).get();
             const deltas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-            if (deltas.length > 0) {
+            if (deltas.length >= DELTA_LIMIT) {
+                // At the cap there is no way to tell how many changes were dropped,
+                // and the ones dropped are silently missing from the page. This is a
+                // correctness problem, not a performance note.
+                console.error(
+                    `[AssetService] Delta query for "${collection}" hit the ${DELTA_LIMIT}-document cap. ` +
+                    `Changes beyond it are NOT being shown. The static base ` +
+                    `(generated ${generatedAt}) needs regenerating.`
+                );
+            } else if (deltas.length > 0) {
                 console.log(`[AssetService] ${deltas.length} delta(s) for ${collection}`);
             }
             return deltas;
 
         } catch (err) {
-            // failed-precondition means the updatedAt index doesn't exist yet — safe to ignore
-            if (err.code !== 'failed-precondition') {
+            if (err.code === 'failed-precondition') {
+                // Previously swallowed entirely. A missing index degrades the page to
+                // base-only — every edit since the last bake vanishes — and without
+                // this line nothing anywhere says so. The error text carries the
+                // console link to create the index.
+                console.error(
+                    `[AssetService] Delta query for "${collection}" needs a Firestore composite index. ` +
+                    `Serving the static base only, so recent edits are missing. Details: ${err.message}`
+                );
+            } else {
                 console.warn('[AssetService] Delta query error (non-blocking):', err.message);
             }
             return [];
