@@ -1,0 +1,81 @@
+/**
+ * Dataset tabs — mythology / esoteric / history / conspiracy.
+ *
+ * Sits between the site header and the breadcrumb. The container is always in
+ * the DOM but stays empty (and therefore invisible, having no padding of its
+ * own) until DomainTabs finds at least two datasets with data, so this adds no
+ * vertical space to the page before then.
+ *
+ * Colours come from the existing theme custom properties with literal
+ * fallbacks, so the tabs inherit light/dark automatically rather than
+ * introducing a third palette.
+ */
+
+.domain-tabs-container:empty {
+    display: none;
+}
+
+.domain-tabs {
+    display: flex;
+    gap: 0.25rem;
+    align-items: stretch;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+    background: var(--surface-color, transparent);
+    /* Narrow screens scroll the tabs rather than wrapping them onto a second
+       line, which would shift the whole page down. */
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.domain-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.domain-tab {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.6rem 1rem;
+    white-space: nowrap;
+    text-decoration: none;
+    color: var(--text-secondary, #8a8a8a);
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    /* Transparent border reserves the active underline's space, so activating a
+       tab does not nudge the row by a pixel. */
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.domain-tab:hover,
+.domain-tab:focus-visible {
+    color: var(--text-primary, #e8e8e8);
+}
+
+.domain-tab:focus-visible {
+    outline: 2px solid var(--accent-color, #c9a227);
+    outline-offset: -2px;
+}
+
+.domain-tab--active {
+    color: var(--text-primary, #e8e8e8);
+    border-bottom-color: var(--accent-color, #c9a227);
+    font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .domain-tab {
+        transition: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .domain-tabs {
+        padding: 0 0.5rem;
+    }
+
+    .domain-tab {
+        padding: 0.55rem 0.75rem;
+        font-size: 0.85rem;
+    }
+}

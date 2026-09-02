@@ -356,6 +356,7 @@
     <link rel="stylesheet" href="css/content-submission.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/universal-submission-wizard.css" media="print" onload="this.media='all'">
     <link rel="stylesheet" href="css/submission-workflow.css" media="print" onload="this.media='all'">
+    <link rel="stylesheet" href="css/domain-tabs.css" media="print" onload="this.media='all'">
 
     <!-- Fallback for browsers with JS disabled -->
     <noscript>
@@ -672,6 +673,11 @@
         </div>
     </header>
 
+    <!-- Dataset tabs — mythology / esoteric / history / conspiracy.
+         Populated by DomainTabs, which renders only datasets present in the
+         static base, so this stays empty until at least two have data. -->
+    <div id="domain-tabs" class="domain-tabs-container"></div>
+
     <!-- Breadcrumb Navigation -->
     <nav id="breadcrumb-nav" aria-label="Breadcrumb" role="navigation" class="breadcrumb-nav-container" aria-live="polite" aria-atomic="false"></nav>
 
@@ -896,6 +902,7 @@
          LAYER 8: Component Scripts
          Requires: View classes, renderers
          ============================================ -->
+    <script src="js/components/domain-tabs.js"></script>
     <script src="js/components/breadcrumb-nav.js"></script>
     <script src="js/components/mythology-overview.js"></script>
     <script src="js/components/universal-display-renderer.js"></script>
@@ -1052,5 +1059,32 @@
          MUST be LAST - bootstraps the entire application
          ============================================ -->
     <script src="js/app-init-simple.js"></script>
+
+    <!-- Mount the dataset tabs. Deliberately non-blocking and self-silencing:
+         the tab bar is navigation, not content, so a failure here must never
+         take the page down with it. Renders nothing until at least two datasets
+         are present in the static base. -->
+    <script>
+        (function mountDomainTabs() {
+            function mount() {
+                try {
+                    if (typeof DomainTabs !== 'function') return;
+                    var host = document.getElementById('domain-tabs');
+                    if (!host) return;
+                    window.domainTabs = new DomainTabs();
+                    window.domainTabs.mount(host).catch(function (err) {
+                        console.warn('[DomainTabs] mount failed:', err && err.message);
+                    });
+                } catch (err) {
+                    console.warn('[DomainTabs] unavailable:', err && err.message);
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', mount);
+            } else {
+                mount();
+            }
+        })();
+    </script>
 </body>
 </html>

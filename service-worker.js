@@ -123,6 +123,7 @@ const PRECACHE_ENHANCED = [
   '/js/components/user-dashboard.js',
   '/js/config/features.js',
   '/js/config/domains.js',
+  '/js/components/domain-tabs.js',
   '/js/services/entity-base-loader.js',
   '/js/services/asset-service.js',
   '/js/user-preferences.js',
