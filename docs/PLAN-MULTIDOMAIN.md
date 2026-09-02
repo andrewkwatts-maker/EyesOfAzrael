@@ -189,11 +189,15 @@ documents newer than the bake.
 
 ## 7. Phase E — deploys run from GitHub Actions (0.5 day + user action)
 
-The site is current only because it was deployed by hand. Two things block automation, and
-**both need the user** — neither can be done from this machine:
+The site is current only because it was deployed by hand. `.github/workflows/deploy.yml` is
+structurally sound — it triggers on push to `main`, gates on a `test` job running
+`npm run test:ci` (which exists), and deploys via `FirebaseExtended/action-hosting-deploy`.
+Nothing about the workflow needs rewriting. What blocks it is credentials, and **both items
+need the user** — neither can be done from this machine:
 
-- **`FIREBASE_SERVICE_ACCOUNT` is not set** as a repository secret, so the deploy workflow
-  cannot authenticate. It needs a **freshly generated** service account key from the
+- **Two repository secrets are unset**: `FIREBASE_SERVICE_ACCOUNT` *and*
+  `FIREBASE_PROJECT_ID` (the workflow reads the project id from a secret too, so supplying
+  only the key still fails). The service account key must be **freshly generated** from the
   Firebase console — the key previously on disk is revoked and must not be reused.
 - **The `gh` CLI is no longer authenticated** on this machine (`git push` still works via
   the credential helper, but the GitHub API does not). Workflow runs cannot be inspected
