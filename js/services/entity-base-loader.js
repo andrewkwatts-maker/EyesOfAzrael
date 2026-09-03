@@ -9,8 +9,15 @@
  *   1. GET /static/entities/manifest.json
  *      → cached in localStorage for MANIFEST_TTL (5 min), re-checked on expiry
  *   2. If localStorage has a fresh entry for this version+collection+mythology, return it
- *   3. Otherwise GET /static/entities/{collection}/{mythology}.json (or _all.json)
+ *   3. Otherwise GET /static/entities/{collection}/{mythology}.json
  *      → parse, cache in localStorage, return as Map<id, entity>
+ *
+ * An unfiltered load (no facet) reads `_cards.json` when the manifest declares
+ * it, and `_all.json` otherwise. Cards carry every field the browse grid reads,
+ * in full, at roughly a quarter of the bytes — `_all.json` for concepts is
+ * 38.7 MB against 9.0 MB of cards, to draw a grid that then slices to 500. A
+ * caller needing whole entities should read them from Firestore by id, which is
+ * what the entity detail page already does.
  *
  * Returns null on any fetch failure so callers can fall back to Firestore.
  *
@@ -125,7 +132,15 @@ class EntityBaseLoader {
         // Decide which static file covers this request
         let fileName;
         if (!mythology) {
-            fileName = '_all';
+            // An unfiltered list wants cards, not whole entities: the browse grid
+            // renders cards and slices to 500, so `_all.json` meant downloading
+            // 38.7 MB of concepts to draw 500 of them. `_cards.json` carries every
+            // field the grid reads, in full, at 9.0 MB.
+            //
+            // Gated on the manifest rather than attempted optimistically. A base
+            // deployed before this export has no `_cards.json`, and requesting one
+            // would cost every visitor a 404 before the real fetch.
+            fileName = collMeta.cards ? '_cards' : '_all';
         } else {
             const facetKey = mythology.toLowerCase().trim();
             fileName = facetValues.includes(facetKey) ? facetKey : null;

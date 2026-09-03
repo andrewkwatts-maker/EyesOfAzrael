@@ -45,6 +45,47 @@ const OUT_DIR = outArg !== -1
 // their seeds are promoted.
 const COLLECTIONS = DOMAINS.allCollections();
 
+/**
+ * The fields a browse card actually reads.
+ *
+ * `_all.json` exists to answer one question — "list this collection" — and the
+ * browse grid then renders cards and slices to 500. For `concepts` that means
+ * downloading 38.7 MB of full entities to draw 500 cards. Every field below is
+ * one the browse view reads; projecting to them and nothing else takes concepts
+ * to 9.0 MB, deities from 30.4 to 4.1 and creatures from 19.8 to 1.7.
+ *
+ * The list is deliberately generous. Values are copied whole, never truncated:
+ * the grid's own search filters on `description`, so shortening it here would
+ * quietly change which entities a reader can find. Cutting 77% with no
+ * behavioural change is worth more than cutting 94% with one.
+ *
+ * A field the browse view starts reading must be added here, or it reads
+ * undefined for every entity — `__tests__/services/static-base-cards.test.js`
+ * pins the list against the view to make that a test failure rather than a
+ * blank column.
+ */
+const CARD_FIELDS = [
+    'id', 'name', 'type', 'category', '_collection',
+    // Facet values across all four domains.
+    'mythology', 'era',
+    // Card body.
+    'icon', 'description', 'summary', 'symbols',
+    'domains', 'attributes', 'roles', 'altNames',
+    // Badges and ownership.
+    'isStandard', 'userId',
+    // Sorting inputs.
+    'views', 'likes', 'shares', 'createdAt', 'dateAdded',
+];
+
+/** Project one entity down to the card fields it actually needs. */
+function toCard(entity) {
+    const card = {};
+    for (const field of CARD_FIELDS) {
+        if (entity[field] !== undefined) card[field] = entity[field];
+    }
+    return card;
+}
+
 // ── helpers ──────────────────────────────────────────────────────────────────
 
 function readCollection(name) {
@@ -247,6 +288,15 @@ function main() {
         }
         writeJson(path.join(collDir, '_all.json'), entities);
 
+        // The card projection an unfiltered browse actually needs. `_all.json`
+        // stays for anything wanting whole entities; the loader prefers this
+        // when the manifest declares it, which is why the flag is written here
+        // rather than assumed — a deployed base that predates this export has
+        // no `_cards.json`, and a client must not request one that 404s.
+        const cards = entities.map(toCard);
+        const cardsJson = JSON.stringify(cards);
+        writeJson(path.join(collDir, '_cards.json'), cards);
+
         const facetCounts = {};
         for (const facet of facets) facetCounts[facet] = byFacet[facet].length;
 
@@ -256,6 +306,8 @@ function main() {
             facetField,
             facets,
             facetCounts,
+            cards: true,
+            cardBytes: cardsJson.length,
             // Legacy keys, kept so a browser running the previously deployed
             // bundle against a newly generated manifest still resolves shards.
             // Remove once no cached client predates the domain registry.
@@ -325,6 +377,8 @@ module.exports = {
     readCollection,
     buildBacklinks,
     facetValueOf,
+    toCard,
+    CARD_FIELDS,
     COLLECTIONS,
     ASSETS,
 };

@@ -38,6 +38,37 @@ generated from the local seed files rather than by reading Firestore. Those file
 same data that was uploaded, so the base is correct — but it was not derived from
 production, and that assumption should be checked once reads are available.
 
+### Correction, 2026-09-03: the base was never actually regenerated
+
+Checked on disk rather than assumed. `static/entities/` holds the **same 15-collection,
+mythology-and-esoteric base stamped `2026-08-30T06:05:03.548Z`** that was there before the
+domain work began. There is no `hist_*` or `con_*` directory, no `_backlinks` on any
+entity, no `_broken-links.json`, and the manifest still carries only the legacy
+`mythologies` / `mythologyCounts` keys. The export script *was* made domain-aware and does
+compute backlinks and the broken-link report — it has simply never been run and committed.
+
+Re-running it would not help yet, and this is the part worth recording. The export reads
+`firebase-assets-downloaded/`, which has no `hist_*` or `con_*` directories either; the
+history and conspiracy seeds live in sibling repositories (`../Mnema/seed_data`,
+`../Augur/seed_data`) that are not checked out here. A re-export today therefore emits
+**two domains, not four** — confirmed by a dry run: `Domains: 2 (mythology, esoteric)`.
+
+So the current state is: **the registry, the tab bar, the facet-aware views and the
+cross-domain link rendering all exist and are tested, and none of them is visible on the
+live site**, because `DomainTabs` only shows a domain the manifest lists and the manifest
+lists two. That is the correct behaviour — an empty tab leading to a blank page is worse
+than no tab — but it means the four-domain UI is built and dark rather than shipped.
+
+**Why the base was deliberately not re-exported in this session.** Stamping a fresh
+`generatedAt` is not free. `firebase-assets-downloaded/` is a snapshot taken at some earlier
+date, and Firestore reads are blocked by the exhausted quota so it cannot be refreshed.
+Exporting it now would write a base whose *content* is old but whose *epoch* says "now",
+and the delta layer would then fetch only changes newer than that epoch — silently skipping
+every live edit made between the snapshot and today. That is precisely the shared-epoch
+invariant §6 calls the most important in the design, and breaking it fails silently in the
+direction that loses data. The re-export belongs in the same run that can refresh the
+snapshot from Firestore.
+
 ---
 
 ## 1. Where things actually stand
@@ -519,7 +550,24 @@ by gaining two more domains they also cannot contribute to.
   1 GB site limit is within reach. The new domains add only ~206 documents, so they are not
   the problem; the problem is that the existing `_all.json` pattern does not scale and a
   domain axis multiplies the shard count.
-- **The base cache silently never populates.** `entity-base-loader.js:152` writes each
+- **The `_all.json` problem now has a fix waiting on a re-bake.** The export writes a
+  `_cards.json` beside each `_all.json`: the same entities projected to the fields the
+  browse grid actually reads, copied whole. Measured on the current base, `concepts` goes
+  from 38.7 MB to 9.0 MB, `deities` from 30.4 to 4.1, `creatures` from 19.8 to 1.7. The
+  loader prefers it for an unfiltered list, gated on a manifest flag so a base predating
+  it is unaffected rather than 404-ing on every page view. Descriptions are deliberately
+  *not* truncated — that would take concepts to 2.4 MB, but the grid's own search filters
+  on `description`, so shortening it would quietly change which entities a reader can
+  find. Like everything else here, it activates on the next export.
+
+- ~~**The base cache silently never populates.**~~ Fixed. `_tryCache` now measures the
+  payload, skips one that cannot fit, prunes and retries on quota, and logs instead of
+  swallowing. Verified in the source on 2026-09-03; this risk is stale.
+
+- ~~**An unknown shard renders empty rather than failing.**~~ Fixed. The loader warns
+  naming the collection, the requested facet and the shard count. Verified 2026-09-03.
+
+- **Historic wording, kept for context.** `entity-base-loader.js:152` writes each
   payload to `localStorage` inside a bare `try {} catch (_) {}`. A 4.6 MB payload exceeds
   the ~5 MB quota, the throw is swallowed, and **every page view re-downloads multi-MB
   JSON** with nothing logged. The 24-hour cache the code appears to implement does not
