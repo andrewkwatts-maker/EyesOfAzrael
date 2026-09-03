@@ -205,8 +205,15 @@ class SearchViewComplete {
         }
     }
 
+    /**
+     * Title-case a facet value for display.
+     *
+     * Coerced to a string first: this now formats eras and categories as well as
+     * mythologies, and a document carrying a numeric year would otherwise throw
+     * on `.split` and take the whole result list with it.
+     */
     formatMythologyName(id) {
-        return id.split('_').map(word =>
+        return String(id ?? '').split('_').map(word =>
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
     }
@@ -1230,25 +1237,66 @@ class SearchViewComplete {
     }
 
     /**
+     * Everything a search hit needs to render, resolved once for both views.
+     *
+     * A result can come from any of the four datasets, and they do not agree on
+     * where the facet lives: mythology and esoteric use `mythology`, history uses
+     * `era`, conspiracy uses `category`. Reading `entity.mythology` unconditionally
+     * labelled every history and conspiracy hit "Unknown".
+     *
+     * @returns {{facet, facetLabel, entityType, entityId, icon, name, href, path}}
+     */
+    describeResult(entity) {
+        const entityType = entity.type || entity.collection || 'entity';
+        // The registry is keyed by collection. A hit may carry it explicitly or
+        // only as a type, so try the explicit ones first.
+        const collection = entity.collection || entity._collection || entityType;
+
+        const registry = (typeof window !== 'undefined' && window.DOMAINS) ? window.DOMAINS : null;
+        const domain = registry ? registry.domainForCollection(collection) : null;
+        const facetField = registry ? registry.facetFieldFor(collection) : 'mythology';
+
+        const facet = entity[facetField] || entity.mythology || 'unknown';
+        const entityId = entity.id || entity.name?.toLowerCase().replace(/\s+/g, '-');
+
+        // History and conspiracy go through the collection route. The legacy
+        // `#/mythology/{facet}/{type}/{id}` shape would put an era or a category
+        // where a mythology belongs — it resolves, but it names the wrong thing,
+        // and `#/entity/{collection}/{id}` needs no facet at all. Mythology and
+        // esoteric keep the legacy shape, which is live and proven.
+        const useCollectionRoute = Boolean(domain && domain.prefix);
+        const href = useCollectionRoute
+            ? `#/entity/${encodeURIComponent(collection)}/${encodeURIComponent(entityId)}`
+            : `#/mythology/${facet}/${entityType}/${entityId}`;
+
+        return {
+            facet,
+            facetLabel: registry ? registry.facetLabelFor(collection) : 'Mythology',
+            entityType,
+            entityId,
+            collection,
+            icon: entity.icon || entity.gridDisplay?.icon || this.getDefaultIcon(entityType),
+            name: entity.name || 'Unknown',
+            href,
+            path: `${this.formatMythologyName(facet)} / ${this.formatEntityType(entityType)}`,
+        };
+    }
+
+    /**
      * Render entity card with text truncation and highlighting
      */
     renderEntityCard(entity) {
-        const mythology = entity.mythology || 'unknown';
-        const entityType = entity.type || entity.collection || 'entity';
-        const entityId = entity.id || entity.name?.toLowerCase().replace(/\s+/g, '-');
-        const icon = entity.icon || entity.gridDisplay?.icon || this.getDefaultIcon(entityType);
-        const name = entity.name || 'Unknown';
+        const { facet, facetLabel, entityType, icon, name, href, path } = this.describeResult(entity);
         const description = entity.description || entity.subtitle || '';
         const importance = entity.importance || 50;
         const stars = Math.round(importance / 20);
-        const path = `${this.formatMythologyName(mythology)} / ${this.formatEntityType(entityType)}`;
 
         return `
-            <a href="#/mythology/${mythology}/${entityType}/${entityId}"
+            <a href="${href}"
                class="entity-card grid-card"
                role="listitem"
                tabindex="0">
-                <span class="card-badge">${this.formatMythologyName(mythology)}</span>
+                <span class="card-badge" title="${this.escapeHtml(facetLabel)}: ${this.escapeHtml(this.formatMythologyName(facet))}">${this.formatMythologyName(facet)}</span>
                 <div class="card-icon">${icon}</div>
                 <h3 class="card-title">${this.highlightMatch(name, this.state.query)}</h3>
                 <p class="card-description">${this.highlightMatchInDescription(description, this.state.query)}</p>
@@ -1280,17 +1328,12 @@ class SearchViewComplete {
      * Render list item
      */
     renderListItem(entity) {
-        const mythology = entity.mythology || 'unknown';
-        const entityType = entity.type || entity.collection || 'entity';
-        const entityId = entity.id || entity.name?.toLowerCase().replace(/\s+/g, '-');
-        const icon = entity.icon || entity.gridDisplay?.icon || this.getDefaultIcon(entityType);
-        const name = entity.name || 'Unknown';
+        const { icon, name, href, path } = this.describeResult(entity);
         const description = entity.description || '';
-        const path = `${this.formatMythologyName(mythology)} / ${this.formatEntityType(entityType)}`;
 
         return `
             <li class="entity-list-item" role="listitem">
-                <a href="#/mythology/${mythology}/${entityType}/${entityId}" class="list-item-link" tabindex="0">
+                <a href="${href}" class="list-item-link" tabindex="0">
                     <span class="list-icon">${icon}</span>
                     <div class="list-content">
                         <h3 class="list-title">${this.highlightMatch(name, this.state.query)}</h3>
@@ -1671,6 +1714,10 @@ class SearchViewComplete {
 // Global export
 if (typeof window !== 'undefined') {
     window.SearchViewComplete = SearchViewComplete;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = SearchViewComplete;
 }
 
 // Global instance for pagination callbacks

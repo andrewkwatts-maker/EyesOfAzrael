@@ -585,3 +585,7 @@ window.RenderHelpers = {
     // Initialization
     initRenderHelpers
 };
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = window.RenderHelpers;
+}
