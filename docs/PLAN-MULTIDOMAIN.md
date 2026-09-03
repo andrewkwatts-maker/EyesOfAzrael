@@ -69,6 +69,35 @@ invariant §6 calls the most important in the design, and breaking it fails sile
 direction that loses data. The re-export belongs in the same run that can refresh the
 snapshot from Firestore.
 
+### Resolved, 2026-09-03: four domains shipped, epoch preserved
+
+The correction above was right on both counts, and both are now fixed rather than worked
+around.
+
+**The missing sources are committed.** `firebase-assets-downloaded/hist_*` and `con_*` now
+exist in this repository — 206 documents, 124 KB. They were only ever in sibling
+repositories, which is why a checkout of this repo alone could export just two domains and
+had no way to know two were missing. That precondition is gone.
+
+**The epoch objection was the important one, and it did not require waiting.** The fix is
+not to refresh the snapshot but to stop lying about its age: `export-static-base.js` now
+takes `--generated-at <iso>`, and the base was exported with the epoch **pinned to
+`2026-08-30T06:05:03.548Z`**, the snapshot's real capture date, rather than to the moment
+the script ran. The delta layer therefore still fetches everything changed since 30 August,
+exactly as it did before, and no live edit is skipped.
+
+Preserving an older epoch is safe in the only direction that matters. The cost is
+re-fetching documents the base already holds — including the 206 new history and conspiracy
+documents, whose `updatedAt` is newer than the pinned epoch — and the merge prefers the
+Firestore copy anyway. The alternative, a fresh epoch over stale content, silently drops
+edits. Given the choice between redundant reads and invisible data loss, redundant reads
+win every time.
+
+**Result:** 27 collections, 13,978 entities, four domains, 10,615 entities carrying inbound
+links. `validate-base` passes 860/860. The tab bar shows four tabs because the manifest now
+lists four domains, which was always the mechanism — no further change was needed to light
+them up.
+
 ---
 
 ## 1. Where things actually stand
