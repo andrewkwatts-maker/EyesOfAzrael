@@ -451,6 +451,12 @@ describe('Performance Integration Tests', () => {
         const batchSize = 50;
         const totalBatches = 20;
         const loadedItems = [];
+        // Timed here rather than read back from perfMonitor.metrics.searches:
+        // searchEngine.search() records into that same array itself, so the shared
+        // array holds two entries per iteration — the engine's and the test's. The
+        // old assertion read [0] and [length-1], which were samples of two
+        // different measurements, not the first and last batch.
+        const durations = [];
 
         for (let i = 0; i < totalBatches; i++) {
             const timer = perfMonitor.startTimer('search');
@@ -461,17 +467,41 @@ describe('Performance Integration Tests', () => {
 
             perfMonitor.endTimer(timer);
             perfMonitor.recordSearch(timer.duration);
+            durations.push(timer.duration);
         }
 
         expect(loadedItems.length).toBe(totalBatches * batchSize);
 
-        // Later batches should not be significantly slower
-        const firstBatch = perfMonitor.metrics.searches[0];
-        const lastBatch = perfMonitor.metrics.searches[perfMonitor.metrics.searches.length - 1];
+        // What this test is really asserting: loading batch 20 costs about what
+        // loading batch 1 cost, i.e. the accumulated result set does not make each
+        // subsequent load slower. That is an algorithmic property (no super-linear
+        // degradation), and it has to be measured as one.
+        //
+        // It used to compare the single first sample against the single last one.
+        // The mock engine sleeps `Math.random() * 100` ms per call, so those two
+        // numbers are independent uniform draws from [0, 100] — the assertion
+        // `last < max(first * 3, 100)` was reading the random number generator, not
+        // the code, and failed whenever the final draw landed high. That is the
+        // suite's one persistent flake, and no bound on a single sample can fix it.
+        //
+        // Comparing the median of each half removes the noise instead of tolerating
+        // it. The median of ten uniform[0,100] draws concentrates tightly around 50,
+        // so both halves agree closely on a healthy run, while genuine degradation —
+        // every later batch slower, which is what an O(n^2) accumulation looks like —
+        // moves the second median and still fails.
+        const median = (values) => {
+            const sorted = [...values].sort((a, b) => a - b);
+            const mid = Math.floor(sorted.length / 2);
+            return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+        };
 
-        // With Date.now() millisecond resolution, allow margin for noise
-        // Use max(firstBatch * 3, 100) to account for sub-ms operations
-        expect(lastBatch).toBeLessThan(Math.max(firstBatch * 3, 100));
+        expect(durations).toHaveLength(totalBatches);
+
+        const firstHalf = median(durations.slice(0, totalBatches / 2));
+        const secondHalf = median(durations.slice(totalBatches / 2));
+
+        // The +1 ms floor keeps the ratio meaningful if both halves measure 0 ms.
+        expect(secondHalf).toBeLessThanOrEqual((firstHalf + 1) * 4);
     });
 
     test('15. Background task processing', async () => {
