@@ -241,7 +241,31 @@ function buildBacklinks(byCollection) {
 function main() {
     console.log(DRY_RUN ? '\n📦 DRY RUN — no files written\n' : `\n📦 Exporting static entity base → ${OUT_DIR}\n`);
 
-    const generatedAt = new Date().toISOString();
+    // `generatedAt` is the epoch the delta layer measures against: the site
+    // fetches Firestore documents with `updatedAt > generatedAt` and trusts the
+    // base for everything older. So this timestamp must describe **when the
+    // source content was captured**, not when this script happened to run.
+    //
+    // Those differ whenever the export runs over a `firebase-assets-downloaded/`
+    // snapshot that was not refreshed first. Stamping "now" onto older content
+    // tells the site there is nothing to fetch between the snapshot date and now,
+    // and every live edit made in that window disappears — silently, and in the
+    // direction that loses data rather than the direction that shows too much.
+    //
+    // `--generated-at <iso>` pins the epoch to when the snapshot was actually
+    // taken. Preserving an older epoch is always safe: the worst case is
+    // re-fetching a few documents the base already has, and the merge prefers the
+    // Firestore copy anyway.
+    const genArg = process.argv.indexOf('--generated-at');
+    const pinnedEpoch = genArg !== -1 ? process.argv[genArg + 1] : null;
+    if (pinnedEpoch && Number.isNaN(Date.parse(pinnedEpoch))) {
+        console.error(`--generated-at "${pinnedEpoch}" is not a parsable date. Refusing to guess.`);
+        process.exit(1);
+    }
+    const generatedAt = pinnedEpoch || new Date().toISOString();
+    if (pinnedEpoch) {
+        console.log(`  ⏱  Epoch pinned to ${pinnedEpoch} (source snapshot date, not now)\n`);
+    }
     const manifest = { version: null, generatedAt, collections: {} };
     let hashInput = generatedAt;
     let totalEntities = 0;
