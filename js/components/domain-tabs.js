@@ -176,16 +176,14 @@ class DomainTabs {
             return `
                 <a class="domain-tab${isActive ? ' domain-tab--active' : ''}"
                    href="${routes[i]}"
-                   role="tab"
                    id="domain-tab-${this._escape(domain.id)}"
-                   aria-selected="${isActive ? 'true' : 'false'}"
-                   ${isActive ? '' : 'tabindex="-1"'}
+                   ${isActive ? 'aria-current="page"' : ''}
                    title="${this._escape(domain.blurb || domain.label)}">
                     <span class="domain-tab__label">${this._escape(domain.label)}</span>
                 </a>`;
         }).join('');
 
-        return `<nav class="domain-tabs" role="tablist" aria-label="Dataset">${tabs}</nav>`;
+        return `<nav class="domain-tabs" aria-label="Dataset">${tabs}</nav>`;
     }
 
     async mount(container) {
@@ -222,9 +220,20 @@ class DomainTabs {
     }
 
     /**
-     * Arrow-key movement between tabs, as the tablist role implies. Without this
-     * a keyboard user must tab through every tab to reach the last one, and
-     * `tabindex="-1"` on inactive tabs would make them unreachable entirely.
+     * Arrow-key movement between the tabs, as a convenience.
+     *
+     * These are navigation links, not an ARIA tablist. They were previously
+     * marked up with `role="tablist"` / `role="tab"` / `aria-selected`, which
+     * promises assistive technology something the widget does not do: a real tab
+     * controls a `tabpanel` via `aria-controls` and swaps it in place, whereas
+     * these change the route and replace the whole view. The pattern also
+     * requires a roving `tabindex="-1"` on inactive tabs, which made every
+     * dataset but the current one unreachable by Tab — a keyboard user had to
+     * discover that arrow keys were needed.
+     *
+     * `<nav>` plus `aria-current="page"` describes what this actually is, and
+     * every tab is Tab-reachable again. Arrow keys still work for anyone who
+     * expects them.
      */
     _bindKeyboard(container) {
         const tabs = Array.from(container.querySelectorAll('.domain-tab'));

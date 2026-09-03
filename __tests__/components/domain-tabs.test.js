@@ -180,16 +180,28 @@ describe('DomainTabs', () => {
 
         test('marks exactly one tab active, matching the route', async () => {
             const html = await tabs.render();
-            expect(html).toContain('aria-selected="true"');
-            expect(html.match(/aria-selected="true"/g)).toHaveLength(1);
+            expect(html.match(/aria-current="page"/g)).toHaveLength(1);
             expect(html).toContain('id="domain-tab-mythology"');
             expect(html).toMatch(/domain-tab--active[\s\S]*?Mythology/);
         });
 
-        test('exposes tablist semantics', async () => {
+        test('is navigation, not an ARIA tablist', async () => {
+            // These links change the route and replace the view. A real tab
+            // controls a tabpanel via aria-controls and swaps it in place, so
+            // role="tab" promised assistive tech behaviour this does not have.
             const html = await tabs.render();
-            expect(html).toContain('role="tablist"');
-            expect(html.match(/role="tab"/g)).toHaveLength(3);
+            expect(html).toContain('<nav class="domain-tabs" aria-label="Dataset">');
+            expect(html).not.toContain('role="tablist"');
+            expect(html).not.toContain('role="tab"');
+            expect(html).not.toContain('aria-selected');
+        });
+
+        test('every dataset is reachable by Tab', async () => {
+            // The tablist pattern needs a roving tabindex, and tabindex="-1" on
+            // the inactive tabs made every dataset but the current one
+            // unreachable without discovering that arrow keys were required.
+            const html = await tabs.render();
+            expect(html).not.toContain('tabindex="-1"');
         });
 
         test('mounts into a container and reports success', async () => {
