@@ -313,4 +313,18 @@ function main() {
     console.log();
 }
 
-main();
+if (require.main === module) {
+    main();
+}
+
+// Exported so the broken-reference fixer analyses the link graph with *this*
+// code rather than a second implementation of "what counts as broken". Two
+// implementations would drift, and the fixer would then repair references the
+// export still reports, or miss ones it does not.
+module.exports = {
+    readCollection,
+    buildBacklinks,
+    facetValueOf,
+    COLLECTIONS,
+    ASSETS,
+};
