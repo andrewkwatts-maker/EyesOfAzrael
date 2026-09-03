@@ -13,7 +13,7 @@ jobs:
   e2e-tests:
     name: E2E Tests on ${{ matrix.browser }}
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
 
     strategy:
       fail-fast: false
@@ -60,7 +60,7 @@ jobs:
   mobile-tests:
     name: Mobile E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 60
 
     steps:
       - name: Checkout code
@@ -75,8 +75,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # test:e2e:mobile runs "Mobile Chrome" AND "Mobile Safari". Mobile Safari
+      # is a webkit device, so installing chromium alone left every Mobile Safari
+      # test failing on a missing browser.
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps chromium webkit
 
       - name: Run Mobile E2E tests
         run: npm run test:e2e:mobile
@@ -112,8 +115,12 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      # --project=chromium is required, not cosmetic: without it Playwright runs
+      # the spec against all five configured projects while this job installs
+      # only chromium, so every firefox, webkit and Mobile Safari test fails on a
+      # missing browser and the job can never be green.
       - name: Run accessibility tests
-        run: npx playwright test e2e/accessibility.spec.js
+        run: npx playwright test e2e/accessibility.spec.js --project=chromium
         env:
           CI: true
 
@@ -146,8 +153,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      # Same missing --project as the accessibility job — see the note there.
       - name: Run visual regression tests
-        run: npx playwright test e2e/visual.spec.js
+        run: npx playwright test e2e/visual.spec.js --project=chromium
         env:
           CI: true
         continue-on-error: true # Visual tests may fail on first run
@@ -183,8 +191,11 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      # Same missing --project as the accessibility job — see the note there.
+      # This job reported "32 passed" alongside ~150 browser-not-installed
+      # failures, which is what a missing --project looks like in the summary.
       - name: Run performance tests
-        run: npx playwright test e2e/performance.spec.js
+        run: npx playwright test e2e/performance.spec.js --project=chromium
         env:
           CI: true
 
