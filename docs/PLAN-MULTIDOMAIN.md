@@ -417,11 +417,36 @@ by gaining two more domains they also cannot contribute to.
 - **No user-blocked step can be completed autonomously**: the Firebase service account key
   and GitHub auth both require the user.
 - **There is no green browser-level gate for a refactor of this size.** The E2E suite has
-  been fully red for at least three nightly runs (firefox, a11y and perf fail; chromium,
-  webkit and mobile are cancelled by the `fail-fast` cascade). Unit tests are effectively
-  green — 3,357 of 3,358 pass, the sole failure a timing flake at
-  `__tests__/integration/performance.test.js:474`. Getting E2E green is cheap insurance
-  before touching the loader and the manifest shape.
+  been fully red for at least three nightly runs. Unit tests are green — 3,423 of 3,423
+  pass as of 2026-09-03; the timing flake at `__tests__/integration/performance.test.js:474`
+  is fixed. Getting E2E green is cheap insurance before touching the loader and the
+  manifest shape.
+
+  **Corrected diagnosis (2026-09-03).** Two of the three causes originally listed were
+  wrong, and both were configuration rather than code:
+
+  1. *Not `fail-fast`.* `fail-fast: false` was already set. The chromium, webkit and mobile
+     jobs were **cancelled at the 40-minute `timeout-minutes` wall** having reached 37
+     minutes with tests still running — firefox needs 28 minutes to finish. Raised to 60.
+  2. *The a11y, visual and performance jobs could not pass at all.* Each installs only
+     chromium, then runs `npx playwright test <spec>` with **no `--project`**, so Playwright
+     runs the spec against all five configured projects and every firefox, webkit and Mobile
+     Safari test fails on a missing browser. The performance job's own summary showed it:
+     "32 passed" beside ~150 browser-not-installed failures. The mobile job had the mirror
+     defect — `test:e2e:mobile` runs Mobile Safari, a webkit device, with only chromium
+     installed. Both fixed.
+  3. *Firefox's 71 failures are real* and untouched: genuine cross-browser defects spread
+     across every spec (accessibility, browse-category, entity-detail, error-handling,
+     landing-page, theme-system, visual). This is the remaining blocker and it is days of
+     work, not a config change.
+
+  **A cloud agent cannot verify E2E work in the sandbox.** The container's egress policy
+  denies `www.gstatic.com` (403 on CONNECT), so the Firebase SDK at `index.html:472-473`
+  never loads, the init chain breaks, and `document.body` is null. Every local Playwright
+  failure is an artifact of that, not of the app — locally the landing page reports zero
+  `nav` and zero `main` landmarks purely because it never rendered. Only chromium is
+  preinstalled, so firefox cannot be reproduced at all. **Do not "fix" app code against
+  local E2E results from this environment**; use CI runs, whose runners have open egress.
 - **The static base is already at an awkward size and this makes it larger.** 290 MB across
   610 files, with `concepts/_all.json` at 39 MB and `deities/_all.json` at 31 MB — single
   responses of 40 MB and ~5 s. It is committed git content published by GitHub Pages, whose
