@@ -10,6 +10,36 @@ prior context can pick it up.
 
 ---
 
+## 0. Status — 2026-09-03
+
+**Done and in production:**
+
+- **Seeds promoted.** 126 history entities across six `hist_*` collections and 80 conspiracy
+  across five `con_*`, each stamped `updatedAt` with server time. The seed data already
+  carried `era` and `category`, so no field mapping was needed.
+- **Rules and indexes deployed.** Rules compiled and released. The seven user-write
+  collections that returned PERMISSION_DENIED for every normal user now have rules, and the
+  catch-all read hole is closed.
+- **Domain registry, tab bar, domain-aware export, cross-domain backlinks** — all merged,
+  with 3,438 tests passing across 88 suites.
+
+**Blocked, and why:**
+
+- **The Firestore free-tier daily read quota was exhausted**, so none of the upload could be
+  read back to verify it. Writes still worked — that is how the seeds landed — but every
+  read returns `RESOURCE_EXHAUSTED`. Notably the quota was consumed within roughly four
+  hours of the previous reset, which is far more than this site's traffic should need and is
+  itself a bug worth finding (see §11).
+- Consequently the **delta round-trip has never been demonstrated for the new domains**.
+  That is the headline requirement, and it is unverified rather than known-good.
+
+**Deliberate consequence of the above:** the static base for history and conspiracy was
+generated from the local seed files rather than by reading Firestore. Those files are the
+same data that was uploaded, so the base is correct — but it was not derived from
+production, and that assumption should be checked once reads are available.
+
+---
+
 ## 1. Where things actually stand
 
 Everything below was verified against the code, the published packages, and the live site
@@ -458,6 +488,19 @@ by gaining two more domains they also cannot contribute to.
   the ~5 MB quota, the throw is swallowed, and **every page view re-downloads multi-MB
   JSON** with nothing logged. The 24-hour cache the code appears to implement does not
   exist in practice for the large collections.
+- **The Firestore free tier is now a live operational constraint, not a background detail.**
+  The daily read quota (50,000 documents) was exhausted on 2026-09-03 within about four
+  hours of its reset. Two things follow. First, something is reading far more than this site
+  should need — the static+delta design exists precisely to keep reads near zero, so a
+  collection scan, an unbounded listener or a polling loop is the likely cause and finding it
+  matters more than raising the ceiling. Second, when the quota is gone the site **degrades
+  rather than fails**: readers still get the complete baked base, and only edits made since
+  the last bake go missing. That is the failure mode static+delta was built for, and it is
+  now logged rather than silent — but it means a contributor's change can appear to vanish,
+  which is the worst possible experience for the exact people the contribution fixes were
+  meant to serve. Upgrading to Blaze keeps the same free allowance and bills overage; at this
+  scale that is pennies, and it removes a daily cliff from a site that is meant to accept
+  contributions.
 - **An unknown shard renders empty rather than failing.** `entity-base-loader.js:123-126`
   returns an empty `Map` for a key absent from the manifest, with no Firestore fallback. New
   domain content published before a re-bake will show a blank page and no error — the exact

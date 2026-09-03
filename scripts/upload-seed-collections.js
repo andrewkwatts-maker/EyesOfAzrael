@@ -64,8 +64,19 @@ if (!seedDir || !projectId) {
     console.error('Required: --seed <dir> --project <id> [--prefix hist_] [--key <serviceAccount.json>] [--upload]');
     process.exit(1);
 }
-if (upload && !keyPath) {
-    console.error('--upload requires --key <serviceAccount.json>');
+// Credentials come from --key or, preferably, from GOOGLE_APPLICATION_CREDENTIALS
+// (Application Default Credentials). The env var is the better habit: a path on
+// the command line lands in shell history and is visible in the process list to
+// anyone on the machine, which is not where a route to a production admin
+// credential belongs.
+const adcPath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
+const credentialPath = keyPath || adcPath;
+
+if (upload && !credentialPath) {
+    console.error(
+        '--upload needs credentials. Either set GOOGLE_APPLICATION_CREDENTIALS to the\n' +
+        'service account JSON path (preferred), or pass --key <serviceAccount.json>.'
+    );
     process.exit(1);
 }
 
@@ -129,8 +140,19 @@ async function main() {
     let admin = null;
     if (!dryRun) {
         admin = require('firebase-admin');
+        const serviceAccount = require(path.resolve(credentialPath));
+        if (serviceAccount.project_id && serviceAccount.project_id !== projectId) {
+            // Writing a domain's seeds into the wrong project with a credential
+            // that happens to be valid there is the one mistake this script
+            // cannot undo, so refuse rather than trust the --project flag alone.
+            console.error(
+                `Credential is for project "${serviceAccount.project_id}" but --project ` +
+                `says "${projectId}". Refusing to upload.`
+            );
+            process.exit(1);
+        }
         admin.initializeApp({
-            credential: admin.credential.cert(require(path.resolve(keyPath))),
+            credential: admin.credential.cert(serviceAccount),
             projectId,
         });
         db = admin.firestore();
