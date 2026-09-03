@@ -25,6 +25,19 @@
  *   await tabs.mount(document.getElementById('domain-tabs'));
  */
 
+/**
+ * `decodeURIComponent` throws on a lone `%`, which a hand-edited URL can easily
+ * contain. A malformed segment should fail to match a domain, not break the tab
+ * bar for the whole page.
+ */
+function safeDecode(segment) {
+    try {
+        return decodeURIComponent(segment);
+    } catch (_) {
+        return segment;
+    }
+}
+
 class DomainTabs {
     constructor(options = {}) {
         this.registry = options.registry
@@ -88,14 +101,44 @@ class DomainTabs {
             ? hash
             : (typeof window !== 'undefined' ? window.location.hash : '');
 
-        // #/browse/{collection} and #/browse/{collection}/{filter}
-        const match = String(raw || '').match(/^#?\/browse\/([^/]+)/);
-        if (match) {
-            const domain = this.registry.domainForCollection(decodeURIComponent(match[1]));
+        const collection = DomainTabs.collectionFromHash(raw);
+        if (collection) {
+            const domain = this.registry.domainForCollection(collection);
             if (domain) return domain;
         }
 
         return this.registry.default();
+    }
+
+    /**
+     * The collection a route names, or null.
+     *
+     * Browse routes are not the only way into a dataset — following a
+     * cross-domain link lands on an *entity* route, and if only `#/browse/…`
+     * were recognised the tab bar would highlight mythology while the reader was
+     * looking at a history figure. Every route that names a collection has to be
+     * read, or the derived-not-tracked property this class relies on is a lie.
+     *
+     *   #/browse/{collection}[/{facet}]
+     *   #/entity/{collection}/{id}
+     *   #/entity/{collection}/{facet}/{id}
+     *
+     * `#/mythology/{myth}/{collection}/{id}` is deliberately absent: it is the
+     * mythology domain's own route shape, and its default answer is correct.
+     *
+     * @param {string} hash
+     * @returns {string|null}
+     */
+    static collectionFromHash(hash) {
+        const raw = String(hash || '');
+
+        const browse = raw.match(/^#?\/browse\/([^/?#]+)/);
+        if (browse) return safeDecode(browse[1]);
+
+        const entity = raw.match(/^#?\/entity\/([^/?#]+)/);
+        if (entity) return safeDecode(entity[1]);
+
+        return null;
     }
 
     /** Where a tab points: the domain's first collection that actually has data. */

@@ -43,6 +43,7 @@ const DOMAIN_LIST = [
         prefix: '',
         facetField: 'mythology',
         facetLabel: 'Mythology',
+        facetLabelPlural: 'Mythologies',
         collections: [
             'deities', 'creatures', 'heroes', 'places', 'items', 'concepts',
             'symbols', 'archetypes', 'cosmology', 'texts', 'mythologies',
@@ -58,6 +59,7 @@ const DOMAIN_LIST = [
         // Shares the `mythology` field with the mythology domain — see header note.
         facetField: 'mythology',
         facetLabel: 'Tradition',
+        facetLabelPlural: 'Traditions',
         collections: [
             'rituals', 'herbs', 'magic',
             // Declared by the esoterica package but not yet present in the base:
@@ -72,6 +74,7 @@ const DOMAIN_LIST = [
         prefix: 'hist_',
         facetField: 'era',
         facetLabel: 'Era',
+        facetLabelPlural: 'Eras',
         collections: [
             'hist_events', 'hist_figures', 'hist_periods', 'hist_cultures',
             'hist_wars', 'hist_discoveries', 'hist_artifacts',
@@ -85,6 +88,7 @@ const DOMAIN_LIST = [
         prefix: 'con_',
         facetField: 'category',
         facetLabel: 'Category',
+        facetLabelPlural: 'Categories',
         collections: [
             'con_theories', 'con_figures', 'con_organizations',
             'con_events', 'con_documents', 'con_concepts',
@@ -153,6 +157,17 @@ const DOMAINS = {
     facetLabelFor(collection) {
         const domain = _BY_COLLECTION.get(collection);
         return domain ? domain.facetLabel : 'Mythology';
+    },
+
+    /**
+     * Plural of the facet label, for counts and headings ("6 Eras").
+     * Carried in the registry rather than derived, because English pluralisation
+     * of the four actual values is irregular — "Mythology" → "Mythologies",
+     * "Category" → "Categories" — and a naive `+ 's'` produces "Mythologys".
+     */
+    facetLabelPluralFor(collection) {
+        const domain = _BY_COLLECTION.get(collection);
+        return domain ? domain.facetLabelPlural : 'Mythologies';
     },
 
     /** @returns {string[]} collections belonging to a domain id. */

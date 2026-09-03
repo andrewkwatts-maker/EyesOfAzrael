@@ -1,0 +1,117 @@
+/**
+ * Entity connections — outbound links and "what links here".
+ *
+ * Links cross datasets, so a link that leaves the current one carries a badge
+ * naming its destination. The badge is text, not just a colour: a reader who
+ * cannot distinguish the accent still sees "History" beside the link, which is
+ * the whole point of marking it.
+ *
+ * Colours come from the existing theme custom properties with literal
+ * fallbacks, so this inherits light/dark rather than introducing a palette.
+ */
+
+.entity-connections {
+    margin: 2rem 0;
+}
+
+.entity-connections__heading {
+    font-size: 1.15rem;
+    margin: 0 0 0.25rem;
+}
+
+.entity-connections__summary {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    opacity: 0.7;
+}
+
+.entity-connections__inbound {
+    margin-top: 1.75rem;
+}
+
+.entity-connections__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.entity-connections__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
+    border-radius: 999px;
+    background: var(--surface-color, rgba(128, 128, 128, 0.06));
+    /* Long entity names wrap inside the chip instead of forcing the page to
+       scroll sideways on a phone. */
+    max-width: 100%;
+    min-width: 0;
+}
+
+.entity-connections__link {
+    color: var(--link-color, var(--entity-primary, #6ea8fe));
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.entity-connections__link:hover,
+.entity-connections__link:focus-visible {
+    text-decoration: underline;
+}
+
+.entity-connections__relationship {
+    font-size: 0.75rem;
+    opacity: 0.65;
+}
+
+/* A link into another dataset. The left border is a secondary cue only — the
+   badge below carries the meaning. */
+.entity-connections__item--cross-domain {
+    border-left-width: 3px;
+    border-left-color: var(--accent-color, #b58ce8);
+}
+
+.entity-connections__domain {
+    font-size: 0.7rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    background: var(--accent-color, #b58ce8);
+    color: var(--accent-contrast, #14121a);
+    white-space: nowrap;
+}
+
+/* A reference whose collection the registry no longer knows. Content outlives
+   config, so this renders as a dead name rather than disappearing — a silently
+   dropped link is indistinguishable from an entity that never had one. */
+.entity-connections__item--broken {
+    opacity: 0.6;
+    border-style: dashed;
+}
+
+.entity-connections__broken-note {
+    font-size: 0.7rem;
+    font-style: italic;
+}
+
+.entity-connections__more {
+    margin: 0.6rem 0 0;
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+@media (max-width: 600px) {
+    .entity-connections__list {
+        gap: 0.4rem;
+    }
+
+    .entity-connections__item {
+        padding: 0.3rem 0.55rem;
+        font-size: 0.9rem;
+    }
+}

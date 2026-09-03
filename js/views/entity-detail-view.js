@@ -259,6 +259,44 @@
             return collectionMap[entityType.toLowerCase()] || entityType;
         }
 
+        // ── Domain awareness ────────────────────────────────────────────────
+        //
+        // The third URL segment of an entity route is the collection's facet
+        // value — a mythology for `deities`, an era for `hist_events`, a category
+        // for `con_theories`. These helpers keep the view from assuming it is
+        // always a mythology.
+
+        /** The domain registry, or null if it has not loaded. */
+        get registry() {
+            return (typeof window !== 'undefined' && window.DOMAINS) ? window.DOMAINS : null;
+        }
+
+        /** Singular UI label for a collection's facet, e.g. 'Era'. */
+        facetLabel(collection) {
+            const r = this.registry;
+            return r ? r.facetLabelFor(collection) : 'Mythology';
+        }
+
+        /**
+         * Where a facet crumb or badge should link.
+         *
+         * Only the mythology domain has a dedicated overview page at
+         * `#/mythology/{id}`. Every other domain links to its browse grid
+         * filtered to that facet value, which the existing
+         * `#/browse/{collection}/{facet}` route already serves.
+         */
+        facetHref(collection, facetValue) {
+            if (!facetValue) return `#/browse/${encodeURIComponent(collection || 'entities')}`;
+
+            const r = this.registry;
+            const domain = r ? r.domainForCollection(collection) : null;
+            const isMythology = !domain || domain.id === 'mythology';
+
+            return isMythology
+                ? `#/mythology/${encodeURIComponent(facetValue)}`
+                : `#/browse/${encodeURIComponent(collection)}/${encodeURIComponent(facetValue)}`;
+        }
+
         /**
          * Render loading state
          */
@@ -391,6 +429,9 @@
                     <!-- Main Asset Detail Panel -->
                     ${this.assetDetailPanel.render(entity, entityType, mythology)}
 
+                    <!-- Outbound links and "what links here", across all four datasets -->
+                    ${this.renderConnections(entity, entityType)}
+
                     <!-- Corpus Search -->
                     <div class="entity-corpus-search-container"></div>
 
@@ -472,6 +513,9 @@
                             </section>
                         ` : ''}
 
+                        <!-- Outbound links and "what links here" -->
+                        ${this.renderConnections(entity, entityType)}
+
                         <!-- Sources -->
                         ${entity.sources && entity.sources.length > 0 ? `
                             <section class="edv-fallback-section">
@@ -536,12 +580,39 @@
         }
 
         /**
+         * Render the entity's links in both directions.
+         *
+         * Returns '' when the component is unavailable or the entity has no
+         * links, so the caller can interpolate it unconditionally.
+         */
+        renderConnections(entity, entityType) {
+            const Connections = (typeof window !== 'undefined' && window.EntityConnections) || null;
+            if (!Connections || !entity) return '';
+
+            try {
+                if (!this._connections) this._connections = new Connections();
+                return this._connections.render(entity, entityType);
+            } catch (err) {
+                // A malformed relatedEntities map must not take the whole page
+                // down — the rest of the entity is still worth reading.
+                console.warn('[EntityDetailView] Connections failed to render:', err.message);
+                return '';
+            }
+        }
+
+        /**
          * Render breadcrumb navigation
          */
         renderBreadcrumb(mythology, entityType, entityName) {
             const safeEntityType = entityType || 'entities';
             const safeMythology = mythology && mythology !== 'undefined' ? mythology : null;
             const safeEntityName = entityName || 'Unknown';
+
+            // `#/mythology/{id}` renders the mythology overview page, which only
+            // exists for the mythology domain. A history entity's era or a
+            // conspiracy entity's category has no such page, so its crumb goes to
+            // the browse grid filtered to that facet instead of a dead route.
+            const facetHref = this.facetHref(safeEntityType, safeMythology);
 
             return `
                 <nav class="edv-breadcrumb" aria-label="Breadcrumb navigation">
@@ -553,7 +624,7 @@
                             <a href="#/browse/${this.escapeAttr(safeEntityType)}" class="edv-breadcrumb__link">${this.getEntityTypeLabel(safeEntityType)}</a>
                         </li>
                         ${safeMythology ? `<li class="edv-breadcrumb__item">
-                            <a href="#/mythology/${this.escapeAttr(safeMythology)}" class="edv-breadcrumb__link">${this.capitalize(safeMythology)}</a>
+                            <a href="${this.escapeAttr(facetHref)}" class="edv-breadcrumb__link">${this.capitalize(safeMythology)}</a>
                         </li>` : ''}
                         <li class="edv-breadcrumb__item edv-breadcrumb__item--current" aria-current="page">
                             <span>${this.escapeHtml(safeEntityName)}</span>

@@ -97,7 +97,20 @@ describe('DomainTabs', () => {
         test('following a cross-domain link lights up the destination tab', () => {
             // The whole point of deriving rather than tracking: a wiki link out of
             // mythology into history cannot leave the highlight behind.
-            expect(tabs().activeDomain('#/browse/con_theories').id).toBe('conspiracy');
+            //
+            // A cross-domain link lands on an ENTITY route, not a browse route —
+            // EntityConnections emits `#/entity/{collection}/{id}`. Asserting this
+            // with a browse route, as this test originally did, passes while the
+            // real journey shows the mythology tab over a history figure.
+            expect(tabs().activeDomain('#/entity/hist_figures/napoleon').id).toBe('history');
+            expect(tabs().activeDomain('#/entity/con_theories/moon-landing').id).toBe('conspiracy');
+            expect(tabs().activeDomain('#/entity/rituals/samhain').id).toBe('esoteric');
+        });
+
+        test('resolves the domain from a three-segment entity route', () => {
+            // `#/entity/{collection}/{facet}/{id}` is what the browse grid links to.
+            expect(tabs().activeDomain('#/entity/hist_events/medieval/hastings').id).toBe('history');
+            expect(tabs().activeDomain('#/entity/deities/greek/zeus').id).toBe('mythology');
         });
 
         test('defaults to mythology for routes naming no collection', () => {
@@ -108,6 +121,22 @@ describe('DomainTabs', () => {
 
         test('an unregistered collection falls back rather than throwing', () => {
             expect(tabs().activeDomain('#/browse/spiritual-items').id).toBe('mythology');
+            expect(tabs().activeDomain('#/entity/spiritual-items/censer').id).toBe('mythology');
+        });
+
+        test('a malformed percent-escape falls back instead of throwing', () => {
+            // decodeURIComponent throws on a lone '%'. A hand-edited URL must not
+            // take the tab bar down with it.
+            expect(() => tabs().activeDomain('#/browse/%')).not.toThrow();
+            expect(tabs().activeDomain('#/browse/%').id).toBe('mythology');
+        });
+
+        test('a percent-encoded collection still resolves', () => {
+            expect(tabs().activeDomain('#/browse/hist%5Ffigures').id).toBe('history');
+        });
+
+        test('ignores a query string after the collection', () => {
+            expect(tabs().activeDomain('#/browse/hist_figures?sort=name').id).toBe('history');
         });
 
         test('decodes percent-encoded collection names', () => {

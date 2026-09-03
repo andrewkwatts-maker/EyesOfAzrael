@@ -62,6 +62,66 @@ class BrowseCategoryView {
         this.scrollTimeout = null;
     }
 
+    // ── Facet ────────────────────────────────────────────────────────────────
+    //
+    // This view shards and filters on one field per collection. For mythology and
+    // esoteric that field is `mythology`; for history it is `era` and for
+    // conspiracy `category`. Which one applies comes from the domain registry, so
+    // the same grid serves all four datasets instead of silently reading a field
+    // that history and conspiracy documents do not have.
+    //
+    // `this.mythology` keeps its name because it is the route parameter and the
+    // public shape callers and tests already use; `facetValue` is the honest name
+    // for what it holds.
+
+    get facetValue() {
+        return this.mythology;
+    }
+
+    /**
+     * The domain registry, or null when it has not loaded.
+     *
+     * Every facet getter below degrades to the mythology defaults when this is
+     * null, so a failure to load `js/config/domains.js` costs the two new domains
+     * their labels rather than blanking the browse page for all four.
+     */
+    get registry() {
+        return (typeof window !== 'undefined' && window.DOMAINS) ? window.DOMAINS : null;
+    }
+
+    /** The document field this collection filters on, e.g. 'era'. */
+    get facetField() {
+        const r = this.registry;
+        return r ? r.facetFieldFor(this.category) : 'mythology';
+    }
+
+    /** Singular UI label for the facet, e.g. 'Era'. */
+    get facetLabel() {
+        const r = this.registry;
+        return r ? r.facetLabelFor(this.category) : 'Mythology';
+    }
+
+    /** Plural UI label for the facet, e.g. 'Eras'. */
+    get facetLabelPlural() {
+        const r = this.registry;
+        return r ? r.facetLabelPluralFor(this.category) : 'Mythologies';
+    }
+
+    /**
+     * An entity's value for this collection's facet.
+     *
+     * Falls back to `mythology` when the domain's own field is absent, because
+     * the two new domains were seeded from packages that stored era and category
+     * in a column named `mythology`; documents predating the export's rename
+     * still carry it there.
+     */
+    facetValueOf(entity) {
+        if (!entity) return '';
+        const own = entity[this.facetField];
+        if (own !== undefined && own !== null && own !== '') return own;
+        return entity.mythology || '';
+    }
+
     /**
      * Render browse view for a category with smooth loading transitions
      * @param {HTMLElement} container - Container to render into
@@ -231,8 +291,13 @@ class BrowseCategoryView {
         let baseQuery = db.collection(collectionName);
         const mythFilter = this.mythology;
 
+        // Filter on the collection's own facet field. Querying `mythology` on a
+        // `hist_*` collection matches nothing, which would render an empty grid
+        // rather than an error — the worst kind of wrong.
+        const facetField = this.facetField;
+
         if (mythFilter) {
-            baseQuery = baseQuery.where('mythology', '==', mythFilter);
+            baseQuery = baseQuery.where(facetField, '==', mythFilter);
         }
 
         // Try ordered query first, fall back to unordered
@@ -260,7 +325,8 @@ class BrowseCategoryView {
                     timeoutPromise
                 ]);
                 const filtered = allSnapshot.docs.filter(doc => {
-                    const m = (doc.data().mythology || '').toLowerCase();
+                    const data = doc.data() || {};
+                    const m = String(data[facetField] ?? data.mythology ?? '').toLowerCase();
                     return m === mythLower;
                 });
                 return { docs: filtered, empty: filtered.length === 0 };
@@ -428,7 +494,7 @@ class BrowseCategoryView {
             ${!this.mythology && mythCount > 1 ? `
                 <div class="browse-hero-stat">
                     <span class="browse-hero-stat-value">${mythCount}</span>
-                    <span class="browse-hero-stat-label">Mythologies</span>
+                    <span class="browse-hero-stat-label">${this.facetLabelPlural}</span>
                 </div>
             ` : ''}
             ${domainCount > 0 ? `
@@ -459,13 +525,14 @@ class BrowseCategoryView {
     }
 
     /**
-     * Group entities by mythology
+     * Group entities by this collection's facet — mythology, tradition, era or
+     * category depending on which domain the collection belongs to.
      */
     groupByMythology(entities) {
         const grouped = {};
 
         entities.forEach(entity => {
-            const myth = entity.mythology || 'unknown';
+            const myth = this.facetValueOf(entity) || 'unknown';
             if (!grouped[myth]) {
                 grouped[myth] = [];
             }
@@ -699,7 +766,7 @@ class BrowseCategoryView {
                 <div class="browse-hero-content">
                     <div class="browse-hero-icon">${categoryInfo.icon}</div>
                     <h1 class="browse-hero-title">${categoryInfo.name}</h1>
-                    ${mythLabel ? `<p class="browse-hero-mythology">${mythLabel} Mythology</p>` : ''}
+                    ${mythLabel ? `<p class="browse-hero-mythology">${mythLabel} ${this.facetLabel}</p>` : ''}
                     <p class="browse-hero-description">${this.getCategoryLongDescription(this.category, mythLabel)}</p>
                     <div class="browse-hero-stats" id="browseStats">
                         <div class="browse-hero-stat">
@@ -709,7 +776,7 @@ class BrowseCategoryView {
                         ${!this.mythology && mythCount > 1 ? `
                             <div class="browse-hero-stat">
                                 <span class="browse-hero-stat-value">${mythCount}</span>
-                                <span class="browse-hero-stat-label">Mythologies</span>
+                                <span class="browse-hero-stat-label">${this.facetLabelPlural}</span>
                             </div>
                         ` : ''}
                         ${domainCount > 0 ? `
@@ -740,9 +807,27 @@ class BrowseCategoryView {
                 texts: `Holy scriptures, epic poems, and sacred writings that preserve the wisdom of ${mythologyName} mythology.`,
                 symbols: `Sacred symbols, sigils, and icons encoding the spiritual language of ${mythologyName} mythology.`,
                 cosmology: `The cosmological framework of ${mythologyName} mythology — creation narratives, cosmic structures, and the nature of existence.`,
-                magic: `Magical systems and supernatural arts from the esoteric dimension of ${mythologyName} mythology.`
+                magic: `Magical systems and supernatural arts from the esoteric dimension of ${mythologyName} mythology.`,
+
+                // History — filed by era rather than mythology.
+                hist_figures: `People who shaped the ${mythologyName} era — rulers, thinkers, builders and dissenters, and what the record actually says about them.`,
+                hist_events: `Events of the ${mythologyName} era, their causes and their consequences.`,
+                hist_periods: `Periods within the ${mythologyName} era and the boundaries historians draw between them.`,
+                hist_cultures: `Cultures of the ${mythologyName} era — their institutions, beliefs and material life.`,
+                hist_wars: `Conflicts of the ${mythologyName} era, their combatants and their settlements.`,
+                hist_discoveries: `Discoveries and inventions of the ${mythologyName} era and what they changed.`,
+                hist_artifacts: `Surviving objects from the ${mythologyName} era and what they evidence.`,
+
+                // Conspiracy — filed by category rather than mythology.
+                con_theories: `Theories in the ${mythologyName} category: what is claimed, who claims it, and what the evidence supports.`,
+                con_figures: `Figures central to ${mythologyName} claims, and their documented roles.`,
+                con_organizations: `Organizations named in ${mythologyName} claims, and what is established about them.`,
+                con_events: `Events at the centre of ${mythologyName} claims, and the contemporaneous record.`,
+                con_documents: `Documents cited in support of ${mythologyName} claims, with their provenance.`,
+                con_concepts: `Recurring concepts and motifs within ${mythologyName} claims.`
             };
-            return descs[category] || `Explore ${category} from ${mythologyName} mythology.`;
+            return descs[category]
+                || `Explore ${this.categoryNoun(category)} filed under ${mythologyName}.`;
         }
 
         const descs = {
@@ -756,9 +841,52 @@ class BrowseCategoryView {
             texts: 'Holy scriptures, epic poems, and sacred writings that preserve humanity\'s oldest stories and deepest wisdom.',
             symbols: 'Sacred symbols, ritual signs, and mystical icons that encode spiritual meaning across the world\'s mythological traditions.',
             cosmology: 'Creation myths, cosmic structures, and metaphysical frameworks that explain how different cultures understood the origin and nature of existence.',
-            magic: 'Magical traditions, supernatural arts, and esoteric practices from the mystical dimensions of world mythology.'
+            magic: 'Magical traditions, supernatural arts, and esoteric practices from the mystical dimensions of world mythology.',
+
+            // History.
+            hist_figures: 'People who shaped the historical record — rulers, thinkers, builders and dissenters — and what the sources actually establish about them.',
+            hist_events: 'Events that redirected the course of history, with their causes, their participants and their consequences.',
+            hist_periods: 'The periods historians divide the past into, and the arguments over where each begins and ends.',
+            hist_cultures: 'Cultures and civilizations: their institutions, beliefs, technologies and material life.',
+            hist_wars: 'Wars and armed conflicts, their combatants, their conduct and their settlements.',
+            hist_discoveries: 'Discoveries, inventions and turning points in knowledge, and what each made possible.',
+            hist_artifacts: 'Objects that survived — what they are, where they were found, and what they evidence.',
+
+            // Conspiracy.
+            con_theories: 'Conspiracy theories catalogued by what is claimed, who claims it, and what the evidence does and does not support.',
+            con_figures: 'Figures recurring across conspiracy claims, and their documented roles.',
+            con_organizations: 'Organizations named in conspiracy claims, and what is established about them.',
+            con_events: 'Events at the centre of conspiracy claims, set beside the contemporaneous record.',
+            con_documents: 'Documents cited as evidence in conspiracy claims, with their provenance and status.',
+            con_concepts: 'Concepts and motifs that recur across conspiracy narratives.'
         };
-        return descs[category] || `Browse and explore ${category} from world mythologies.`;
+        return descs[category] || `Browse and explore ${this.categoryNoun(category)}.`;
+    }
+
+    /**
+     * A category slug rendered as readable prose: `hist_figures` → "history figures".
+     *
+     * The prefix that keeps collection names globally unique in one Firestore
+     * project is an implementation detail, and showing a reader "hist_figures"
+     * leaks it into the page.
+     */
+    categoryNoun(category) {
+        const raw = String(category || '');
+        const r = this.registry;
+
+        // Prefer the registry's own answer, then fall back to matching any
+        // declared prefix. A collection added to Firestore before the registry
+        // catches up is unregistered but still prefixed, and showing a reader
+        // "Hist treaties" leaks the prefix just as badly as "hist_treaties".
+        const domain = r
+            ? (r.domainForCollection(raw)
+                || r.list().find(d => d.prefix && raw.startsWith(d.prefix)))
+            : null;
+
+        if (domain && domain.prefix && raw.startsWith(domain.prefix)) {
+            return `${domain.label.toLowerCase()} ${raw.slice(domain.prefix.length).replace(/_/g, ' ')}`;
+        }
+        return raw.replace(/_/g, ' ');
     }
 
     /**
@@ -777,7 +905,7 @@ class BrowseCategoryView {
                 <div class="quick-filter-section">
                     <h3 class="quick-filter-title" id="mythology-filter-heading">
                         <span class="quick-filter-icon" aria-hidden="true">🌍</span>
-                        Quick Filter by Mythology
+                        Quick Filter by ${this.facetLabel}
                     </h3>
                     <div class="filter-chips" role="group" aria-labelledby="mythology-filter-heading">
                         ${topMythologies.map(([myth, entities]) => `
@@ -787,7 +915,7 @@ class BrowseCategoryView {
                                 data-filter-type="mythology"
                                 data-filter-value="${myth}"
                                 aria-pressed="${this.selectedMythologies.has(myth)}"
-                                aria-label="Filter by ${this.capitalize(myth)} mythology (${entities.length} entities)">
+                                aria-label="Filter by ${this.capitalize(myth)} ${this.facetLabel.toLowerCase()} (${entities.length} entities)">
                                 <span class="chip-label">${this.capitalize(myth)}</span>
                                 <span class="chip-count" aria-hidden="true">${entities.length}</span>
                             </button>
@@ -861,7 +989,7 @@ class BrowseCategoryView {
                                 <option value="name-desc" ${this.sortBy === 'name-desc' ? 'selected' : ''}>Z-A (Name)</option>
                                 <option value="dateAdded" ${this.sortBy === 'dateAdded' ? 'selected' : ''}>Recently Added</option>
                                 <option value="popularity" ${this.sortBy === 'popularity' ? 'selected' : ''}>Most Popular</option>
-                                <option value="mythology" ${this.sortBy === 'mythology' ? 'selected' : ''}>By Mythology</option>
+                                <option value="mythology" ${this.sortBy === 'mythology' ? 'selected' : ''}>By ${this.facetLabel}</option>
                             </select>
                             <span class="sort-select-arrow">&#9662;</span>
                         </div>
@@ -982,16 +1110,22 @@ class BrowseCategoryView {
         const favorites = this.getFavorites();
         const isFavorited = favorites.includes(`${this.category}:${entity.id}`);
 
+        // The URL's third segment is the facet value, whichever field it lives in
+        // for this collection — `era` for history, `category` for conspiracy.
+        const facet = this.facetValueOf(entity);
+
         return `
-            <a href="#/entity/${this.category}/${entity.mythology || 'unknown'}/${entity.id}"
+            <a href="#/entity/${this.category}/${facet || 'unknown'}/${entity.id}"
                class="entity-card card-strict-height ${entity.isStandard ? '' : 'entity-card-community'}"
                data-entity-id="${entity.id}"
-               data-mythology="${entity.mythology}"
+               data-mythology="${facet}"
+               data-facet="${facet}"
+               data-facet-field="${this.facetField}"
                data-entity-type="${this.category.replace(/s$/, '')}"
                data-collection="${this.category}"
                data-name="${entity.name.toLowerCase()}"
                role="article"
-               aria-label="${this.escapeHtml(entity.name)} - ${this.capitalize(entity.mythology || '')} ${this.category.replace(/s$/, '')}">
+               aria-label="${this.escapeHtml(entity.name)} - ${this.capitalize(facet || '')} ${this.category.replace(/s$/, '')}">
                 ${badgeHTML}
 
                 <!-- Quick Actions -->
@@ -1013,7 +1147,7 @@ class BrowseCategoryView {
                             data-action="compare"
                             data-entity-id="${entity.id}"
                             data-collection="${this.category}"
-                            data-entity='${JSON.stringify({id: entity.id, name: entity.name, mythology: entity.mythology, icon: entity.icon, type: entity.type || this.category}).replace(/'/g, "&apos;")}'
+                            data-entity='${JSON.stringify({id: entity.id, name: entity.name, mythology: facet, icon: entity.icon, type: entity.type || this.category}).replace(/'/g, "&apos;")}'
                             title="${isInCompare ? 'In comparison' : 'Add to compare'}"
                             aria-label="${isInCompare ? 'Already in comparison' : 'Add to compare'}"
                             aria-pressed="${isInCompare}">
@@ -1030,7 +1164,7 @@ class BrowseCategoryView {
                     ${iconHTML}
                     <div class="entity-card-info">
                         <h3 class="entity-card__name card-title-truncate" aria-label="${this.escapeHtml(entity.name)}">${this.escapeHtml(entity.name)}</h3>
-                        <span class="entity-card__mythology">${this.capitalize(entity.mythology)}</span>
+                        <span class="entity-card__mythology">${this.capitalize(facet)}</span>
                     </div>
                 </div>
 
@@ -1345,7 +1479,7 @@ class BrowseCategoryView {
         // Build filter summary for suggestion
         const activeFiltersList = [];
         if (this.searchTerm) activeFiltersList.push(`search term "${this.searchTerm}"`);
-        if (this.selectedMythologies.size > 0) activeFiltersList.push(`${this.selectedMythologies.size} mythology filter${this.selectedMythologies.size > 1 ? 's' : ''}`);
+        if (this.selectedMythologies.size > 0) activeFiltersList.push(`${this.selectedMythologies.size} ${this.facetLabel.toLowerCase()} filter${this.selectedMythologies.size > 1 ? 's' : ''}`);
         if (this.selectedDomains.size > 0) activeFiltersList.push(`${this.selectedDomains.size} domain filter${this.selectedDomains.size > 1 ? 's' : ''}`);
 
         // Show offline-specific message when no data and no active filters
@@ -1377,7 +1511,7 @@ class BrowseCategoryView {
                     ${hasActiveFilters
                         ? `No ${this.category} match your current filters.`
                         : this.mythology
-                            ? `No ${this.category} found in ${this.capitalize(this.mythology)} mythology.`
+                            ? `No ${this.category} found in ${this.capitalize(this.mythology)} ${this.facetLabel.toLowerCase()}.`
                             : `No ${this.category} available at this time. Check back later for updates.`
                     }
                 </p>
@@ -1386,7 +1520,7 @@ class BrowseCategoryView {
                         <p class="empty-state__suggestion-title">Suggestions:</p>
                         <ul class="empty-state__suggestion-list">
                             ${this.searchTerm ? `<li>Try a different search term or use fewer keywords</li>` : ''}
-                            ${this.selectedMythologies.size > 0 ? `<li>Select fewer mythology filters or try different mythologies</li>` : ''}
+                            ${this.selectedMythologies.size > 0 ? `<li>Select fewer ${this.facetLabel.toLowerCase()} filters or try different ${this.facetLabelPlural.toLowerCase()}</li>` : ''}
                             ${this.selectedDomains.size > 0 ? `<li>Remove some domain filters to broaden results</li>` : ''}
                             <li>Clear all filters to see all available ${this.category}</li>
                         </ul>
@@ -1434,10 +1568,31 @@ class BrowseCategoryView {
             rituals: { name: 'Rituals', icon: '🕯️', description: 'Ceremonies and sacred rites' },
             texts: { name: 'Sacred Texts', icon: '📜', description: 'Holy scriptures and ancient writings' },
             symbols: { name: 'Sacred Symbols', icon: '☯️', description: 'Religious icons and mystical symbols' },
-            cosmology: { name: 'Cosmology', icon: '🌌', description: 'Creation myths and cosmic structures' }
+            cosmology: { name: 'Cosmology', icon: '🌌', description: 'Creation myths and cosmic structures' },
+
+            // History.
+            hist_figures: { name: 'Historical Figures', icon: '👤', description: 'People who shaped the record' },
+            hist_events: { name: 'Historical Events', icon: '📅', description: 'Events and their consequences' },
+            hist_periods: { name: 'Periods', icon: '⏳', description: 'The eras historians divide the past into' },
+            hist_cultures: { name: 'Cultures', icon: '🏛️', description: 'Civilizations and their institutions' },
+            hist_wars: { name: 'Wars & Conflicts', icon: '⚔️', description: 'Armed conflicts and their settlements' },
+            hist_discoveries: { name: 'Discoveries', icon: '🔬', description: 'Inventions and turning points in knowledge' },
+            hist_artifacts: { name: 'Artifacts', icon: '🏺', description: 'Objects that survived, and what they evidence' },
+
+            // Conspiracy.
+            con_theories: { name: 'Theories', icon: '🕸️', description: 'What is claimed, and what the evidence supports' },
+            con_figures: { name: 'Figures', icon: '🕵️', description: 'People recurring across claims' },
+            con_organizations: { name: 'Organizations', icon: '🏢', description: 'Bodies named in claims' },
+            con_events: { name: 'Events', icon: '📌', description: 'Events at the centre of claims' },
+            con_documents: { name: 'Documents', icon: '🗄️', description: 'Cited documents and their provenance' },
+            con_concepts: { name: 'Concepts', icon: '🔗', description: 'Motifs recurring across narratives' }
         };
 
-        return info[category] || { name: this.capitalize(category), icon: '📖', description: '' };
+        return info[category] || {
+            name: this.capitalize(this.categoryNoun(category)),
+            icon: '📖',
+            description: ''
+        };
     }
 
     /**
@@ -2152,14 +2307,15 @@ class BrowseCategoryView {
     applyFilters() {
         let filtered = [...this.entities];
 
-        // Apply mythology filter (from quick chips or initial param)
+        // Apply facet filter (from quick chips or initial param). The facet is
+        // whichever field this collection shards on — mythology, era or category.
         // Use case-insensitive comparison to handle data from cache/Firebase that may differ in casing
         if (this.mythology && this.selectedMythologies.size === 0) {
             const mythLower = this.mythology.toLowerCase();
-            filtered = filtered.filter(entity => (entity.mythology || '').toLowerCase() === mythLower);
+            filtered = filtered.filter(entity => String(this.facetValueOf(entity)).toLowerCase() === mythLower);
         } else if (this.selectedMythologies.size > 0) {
             const selectedLower = new Set([...this.selectedMythologies].map(m => m.toLowerCase()));
-            filtered = filtered.filter(entity => selectedLower.has((entity.mythology || '').toLowerCase()));
+            filtered = filtered.filter(entity => selectedLower.has(String(this.facetValueOf(entity)).toLowerCase()));
         }
 
         // Apply domain filter
@@ -2202,8 +2358,8 @@ class BrowseCategoryView {
                     return (b.name || '').localeCompare(a.name || '');
 
                 case 'mythology':
-                    const mythA = a.mythology || '';
-                    const mythB = b.mythology || '';
+                    const mythA = String(this.facetValueOf(a) || '');
+                    const mythB = String(this.facetValueOf(b) || '');
                     const mythCompare = mythA.localeCompare(mythB);
                     if (mythCompare !== 0) return mythCompare;
                     return (a.name || '').localeCompare(b.name || '');
