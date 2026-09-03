@@ -550,6 +550,15 @@ by gaining two more domains they also cannot contribute to.
   1 GB site limit is within reach. The new domains add only ~206 documents, so they are not
   the problem; the problem is that the existing `_all.json` pattern does not scale and a
   domain axis multiplies the shard count.
+- ~~**CI Pipeline has been failing on every push.**~~ Fixed 2026-09-03. It was not
+  failing tests — those all passed — but the coverage thresholds, which the repo had been
+  under for long enough that a red CI had stopped carrying information. Measured at
+  `0d9bf103`: statements 52.99 against 55, branches 46.29 against 48, functions 54.48
+  against 57, lines 54.04 against 55; all four short. Closed by covering the code rather
+  than lowering the bar — search rendering, the render and modal helpers, the static+delta
+  merge and the moderation gate — now 55.19 / 48.56 / 57.59 / 56.20. The margin on
+  statements is thin, so the next sizeable uncovered addition will need tests with it.
+
 - **The `_all.json` problem now has a fix waiting on a re-bake.** The export writes a
   `_cards.json` beside each `_all.json`: the same entities projected to the fields the
   browse grid actually reads, copied whole. Measured on the current base, `concepts` goes
