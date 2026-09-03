@@ -23,7 +23,9 @@
  * - Add truncateDescription() to prevent text overflow in card grids
  */
 
-const CACHE_VERSION = 'v4.0.2';
+// Bumped for the entity-connections component joining the precache list — an
+// existing client keeps serving the old precache until the version changes.
+const CACHE_VERSION = 'v4.0.3';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 
 // Separate caches for different content types
