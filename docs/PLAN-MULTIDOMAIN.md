@@ -470,6 +470,35 @@ by gaining two more domains they also cannot contribute to.
      landing-page, theme-system, visual). This is the remaining blocker and it is days of
      work, not a config change.
 
+  **Measured after those fixes (run 305, `0d9bf103`, 2026-09-03).** The config
+  changes worked, and they exposed the next layer:
+
+  | Job | Result | Wall |
+  |---|---|---|
+  | Visual regression | **success** — was previously impossible | 1.5 min |
+  | Accessibility | failure: 9 passed, 9 flaky, ~14 failed of 32 | 7.6 min |
+  | Performance | failure (now actually runs) | 3.8 min |
+  | E2E firefox | failure | 35 min |
+  | E2E webkit | failure | 51 min |
+  | E2E chromium | **CANCELLED at the 60-minute wall** | 58 min |
+  | Mobile | **CANCELLED at the 60-minute wall** | 57 min |
+
+  Two things follow. First, raising the timeout from 40 to 60 minutes did not
+  buy enough: 406 tests per project at the observed ~14 s each, across 4
+  workers, plus a retry on each of roughly 200 failures, does not fit. A
+  cancelled job produces *no* results — not even a list of what failed — so
+  chromium and mobile were contributing nothing at all. Both are now sharded
+  two ways, which is what turns them back into signal.
+
+  Second, video recording was costing far more than it returned: 512 MB of
+  artifact for firefox and 118 MB for a 32-test accessibility job. It is off in
+  CI now. The trace captured on retry already carries screenshots, DOM
+  snapshots, console and network, which is strictly more than a video shows.
+
+  The **9 flaky** accessibility tests are worth more attention than the 14 hard
+  failures: they pass on retry, so they are a timing problem rather than a
+  cross-browser defect, and they are the cheapest tests to make honest.
+
   **A cloud agent cannot verify E2E work in the sandbox.** The container's egress policy
   denies `www.gstatic.com` (403 on CONNECT), so the Firebase SDK at `index.html:472-473`
   never loads, the init chain breaks, and `document.body` is null. Every local Playwright
@@ -477,6 +506,13 @@ by gaining two more domains they also cannot contribute to.
   `nav` and zero `main` landmarks purely because it never rendered. Only chromium is
   preinstalled, so firefox cannot be reproduced at all. **Do not "fix" app code against
   local E2E results from this environment**; use CI runs, whose runners have open egress.
+
+  Re-verified 2026-09-03 rather than taken on trust:
+  `curl https://www.gstatic.com/firebasejs/...` returns `CONNECT tunnel failed,
+  response 403`. The limitation is real and still current, so E2E work from a
+  cloud session is confined to CI configuration and to reading CI results. The
+  remaining failures are app-level cross-browser defects and need an
+  environment that can actually load the page.
 - **The static base is already at an awkward size and this makes it larger.** 290 MB across
   610 files, with `concepts/_all.json` at 39 MB and `deities/_all.json` at 31 MB — single
   responses of 40 MB and ~5 s. It is committed git content published by GitHub Pages, whose

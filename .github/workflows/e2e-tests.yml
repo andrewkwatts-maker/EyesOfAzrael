@@ -11,14 +11,21 @@ on:
 
 jobs:
   e2e-tests:
-    name: E2E Tests on ${{ matrix.browser }}
+    name: E2E Tests on ${{ matrix.browser }} (shard ${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
 
+    # 406 tests per project. At the observed ~14s per test with 4 workers, plus a
+    # retry on each of the ~200 failures, chromium and mobile ran past the
+    # 60-minute wall and were CANCELLED — which yields no results at all, not
+    # even a list of what failed. Two shards halves each job's work so every
+    # browser reports, and a red job you can read beats a cancelled one you
+    # cannot.
     strategy:
       fail-fast: false
       matrix:
         browser: [chromium, firefox, webkit]
+        shard: [1, 2]
 
     steps:
       - name: Checkout code
@@ -37,30 +44,39 @@ jobs:
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run E2E tests
-        run: npm run test:e2e:${{ matrix.browser }}
+        run: npm run test:e2e:${{ matrix.browser }} -- --shard=${{ matrix.shard }}/2
         env:
           CI: true
 
+      # Artifact names must carry the shard: uploads do not overwrite by
+      # default, so two shards writing one name fails the upload.
       - name: Upload test results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-${{ matrix.browser }}
+          name: playwright-report-${{ matrix.browser }}-${{ matrix.shard }}
           path: playwright-report/
-          retention-days: 30
+          retention-days: 14
 
       - name: Upload test artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results-${{ matrix.browser }}
+          name: test-results-${{ matrix.browser }}-${{ matrix.shard }}
           path: test-results/
           retention-days: 7
 
   mobile-tests:
-    name: Mobile E2E Tests
+    name: Mobile E2E Tests (shard ${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 45
+
+    # test:e2e:mobile runs two projects, so it carries twice the work of a single
+    # browser job — it was cancelled at the 60-minute wall for the same reason.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
 
     steps:
       - name: Checkout code
@@ -82,7 +98,7 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
 
       - name: Run Mobile E2E tests
-        run: npm run test:e2e:mobile
+        run: npm run test:e2e:mobile -- --shard=${{ matrix.shard }}/2
         env:
           CI: true
 
@@ -90,9 +106,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report-mobile
+          name: playwright-report-mobile-${{ matrix.shard }}
           path: playwright-report/
-          retention-days: 30
+          retention-days: 14
 
   accessibility-tests:
     name: Accessibility Tests

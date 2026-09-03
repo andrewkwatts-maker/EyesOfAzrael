@@ -17,7 +17,13 @@ module.exports = defineConfig({
     baseURL: process.env.BASE_URL || 'http://localhost:8080',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    // Video is off in CI. With this many failing tests it produced a 512 MB
+    // firefox artifact and a 118 MB one for the 32-test accessibility job, and
+    // recording costs wall-clock on every test whether or not it is kept. The
+    // trace captured on retry already carries screenshots, DOM snapshots,
+    // console and network — strictly more than a video shows — so this loses no
+    // diagnostic information.
+    video: process.env.CI ? 'off' : 'retain-on-failure',
     actionTimeout: 10000,
     navigationTimeout: 30000,
   },
