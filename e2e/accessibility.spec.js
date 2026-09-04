@@ -39,6 +39,29 @@ const { injectAxe, checkA11y, getViolations } = require('axe-playwright');
 // service-init.spec.js, which need it and must keep it.
 test.use({ serviceWorkers: 'block' });
 
+// Run against the baked static base only, with the live delta layer cut.
+//
+// These tests assert markup, heading order and keyboard semantics. None of that
+// depends on whether a document changed in Firestore since the last bake — but
+// all of it depends on the page reaching a settled state, and the delta layer
+// makes that a coin toss. Firestore currently answers RESOURCE_EXHAUSTED, so a
+// query may fail fast, fail slow, or partially populate, and the page renders
+// differently each time. Content-dependent assertions then pass or fail on
+// timing rather than on correctness.
+//
+// Measured, not assumed: over repeated runs of identical code the pass count
+// moved 13 -> 21 with the network live, and settled around 23 with the delta
+// layer cut. That band is the reason this suite failed on every browser and
+// every shard without implicating any particular defect.
+//
+// The delta layer still needs its own coverage; it belongs in a test that
+// controls what Firestore returns, not in one that happens to observe whatever
+// production is doing at that moment.
+test.beforeEach(async ({ page }) => {
+    await page.route('**firestore.googleapis.com**', route => route.abort());
+    await page.route('**firebaseio.com**', route => route.abort());
+});
+
 // Test configuration
 const TEST_TIMEOUT = 60000;
 const NAVIGATION_TIMEOUT = 30000;
