@@ -157,60 +157,80 @@ class VoteService {
                     throw new Error('Item not found');
                 }
 
+                // ── Decide, then write. Never the other way round. ───────────
+                //
+                // This block used to apply its writes first and then read the
+                // whole `votes/{itemType}/{itemId}` collection to recount from
+                // scratch. Two separate things made that impossible against a
+                // real backend:
+                //
+                //   1. Firestore requires every read in a transaction to happen
+                //      before every write. Reading after a delete/update/set
+                //      throws "Firestore transactions require all reads to be
+                //      executed before all writes."
+                //   2. `transaction.get()` in the web SDK accepts a
+                //      DocumentReference only. Querying a collection inside a
+                //      transaction is an Admin-SDK feature.
+                //
+                // Either alone meant every vote threw and was swallowed by the
+                // catch below as `{success: false}`. The test double accepted
+                // both forms, which is why a green suite never noticed.
+                //
+                // Counting incrementally also removes a full collection read per
+                // vote — cost that grew with popularity, on the write path most
+                // likely to be hot.
+                const previous = voteDoc.exists ? voteDoc.data().value : 0;
                 let voteDelta = 0;
                 let newUserVote = 0;
+                let upvoteDelta = 0;
+                let downvoteDelta = 0;
 
-                if (voteDoc.exists) {
-                    const oldVote = voteDoc.data().value;
-
-                    if (oldVote === voteValue) {
-                        // Remove vote (clicked same button again)
-                        transaction.delete(voteRef);
-                        voteDelta = -voteValue;
-                        newUserVote = 0;
-
-                        console.log(`[VoteService] Removed vote for ${itemType}/${itemId}`);
-                    } else {
-                        // Change vote (upvote → downvote or vice versa)
-                        transaction.update(voteRef, {
-                            value: voteValue,
-                            timestamp: Date.now()
-                        });
-                        voteDelta = voteValue - oldVote; // Will be +2 or -2
-                        newUserVote = voteValue;
-
-                        console.log(`[VoteService] Changed vote for ${itemType}/${itemId} from ${oldVote} to ${voteValue}`);
-                    }
+                if (previous === voteValue) {
+                    // Same button again — retract.
+                    voteDelta = -voteValue;
+                    newUserVote = 0;
+                    if (voteValue === 1) upvoteDelta = -1; else downvoteDelta = -1;
+                } else if (previous !== 0) {
+                    // Flip between up and down: one side loses, the other gains.
+                    voteDelta = voteValue - previous;
+                    newUserVote = voteValue;
+                    if (voteValue === 1) { upvoteDelta = 1; downvoteDelta = -1; }
+                    else { upvoteDelta = -1; downvoteDelta = 1; }
                 } else {
-                    // New vote
+                    voteDelta = voteValue;
+                    newUserVote = voteValue;
+                    if (voteValue === 1) upvoteDelta = 1; else downvoteDelta = 1;
+                }
+
+                // Clamped at zero deliberately. Voting has been failing in
+                // production, so stored counts may be stale or absent; a negative
+                // tally would be a visible lie where a floor is merely imprecise.
+                const itemData = itemDoc.data() || {};
+                const upvoteCount = Math.max(0, (itemData.upvoteCount || 0) + upvoteDelta);
+                const downvoteCount = Math.max(0, (itemData.downvoteCount || 0) + downvoteDelta);
+
+                const newVotes = upvoteCount - downvoteCount;
+                const totalEngagement = upvoteCount + downvoteCount;
+                const contestedScore = this.calculateContestedScore(upvoteCount, downvoteCount);
+
+                // ── Writes only, from here down ──────────────────────────────
+                if (previous === voteValue) {
+                    transaction.delete(voteRef);
+                    console.log(`[VoteService] Removed vote for ${itemType}/${itemId}`);
+                } else if (previous !== 0) {
+                    transaction.update(voteRef, {
+                        value: voteValue,
+                        timestamp: Date.now()
+                    });
+                    console.log(`[VoteService] Changed vote for ${itemType}/${itemId} from ${previous} to ${voteValue}`);
+                } else {
                     transaction.set(voteRef, {
                         value: voteValue,
                         userId: userId,
                         timestamp: Date.now()
                     });
-                    voteDelta = voteValue;
-                    newUserVote = voteValue;
-
                     console.log(`[VoteService] New vote for ${itemType}/${itemId}: ${voteValue}`);
                 }
-
-                // Get current vote counts (need to count individual votes for accuracy)
-                const votesCollectionRef = this.db.collection(`votes/${itemType}/${itemId}`);
-                const votesSnapshot = await transaction.get(votesCollectionRef);
-
-                let upvoteCount = 0;
-                let downvoteCount = 0;
-
-                votesSnapshot.forEach(doc => {
-                    const voteData = doc.data();
-                    if (voteData.value === 1) upvoteCount++;
-                    else if (voteData.value === -1) downvoteCount++;
-                });
-
-                // Calculate metrics
-                const newVotes = upvoteCount - downvoteCount;
-                const totalEngagement = upvoteCount + downvoteCount;
-                const contestedScore = this.calculateContestedScore(upvoteCount, downvoteCount);
 
                 // Update item with comprehensive vote data
                 transaction.update(itemRef, {
