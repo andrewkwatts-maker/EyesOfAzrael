@@ -35,6 +35,13 @@
   let pendingWorker = null;
   let retryCount = 0;
 
+  // Whether a service worker was already controlling this page when the script
+  // ran. Captured here, at module evaluation, rather than inside the
+  // controllerchange handler — by the time a first-install worker calls
+  // clients.claim(), navigator.serviceWorker.controller is already set, so
+  // reading it later cannot tell an install apart from an update.
+  const hadController = !!navigator.serviceWorker.controller;
+
   // Register service worker on page load
   window.addEventListener('load', () => {
     registerServiceWorker();
@@ -123,8 +130,28 @@
       });
     });
 
-    // Handle controller change (new SW activated)
+    // Handle controller change (new SW activated).
+    //
+    // This must only fire for a genuine *update*, i.e. a new worker replacing one
+    // that was already controlling this page. `controllerchange` also fires on the
+    // very first install, when service-worker.js calls clients.claim() during
+    // activate — and this handler used to reload on that too, so every first-time
+    // visitor had the page yank itself out from under them ~1.5s after it
+    // finished loading. Guarding on hadController is the whole fix: if the page
+    // started life uncontrolled, the claim is an install, not an update, and
+    // there is nothing stale to reload away from.
+    //
+    // reloadScheduled additionally makes the reload idempotent — controllerchange
+    // can fire more than once, and two overlapping timers meant two reloads.
+    let reloadScheduled = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController) {
+        console.log('[SW] Service Worker took control on first install - no reload needed');
+        return;
+      }
+      if (reloadScheduled) return;
+      reloadScheduled = true;
+
       console.log('[SW] Service Worker updated, preparing to reload...');
 
       // Show brief notification before reload

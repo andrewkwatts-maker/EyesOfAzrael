@@ -613,7 +613,12 @@
                         </svg>
                     </button>
                     <div id="headerSearchDropdown" class="header-search-dropdown" style="display: none;">
-                        <input type="text" id="headerSearchInput" class="header-search-input" placeholder="Search mythologies, entities..." autocomplete="off" />
+                        <!-- aria-label, not a visible <label>: the dropdown has no room
+                             for one and the placeholder disappears the moment the user
+                             types, leaving a screen reader with an unnamed edit field.
+                             Matches the convention already used by the newsletter input
+                             below. -->
+                        <input type="text" id="headerSearchInput" class="header-search-input" placeholder="Search mythologies, entities..." aria-label="Search mythologies and entities" autocomplete="off" />
                         <div class="header-search-options">
                             <a href="#/search" class="header-search-option" data-search-type="site">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -718,7 +723,20 @@
 
                 <!-- Newsletter Signup -->
                 <div class="footer-newsletter">
-                    <h4 class="footer-newsletter-title">Stay Updated</h4>
+                    <!--
+                      Footer section titles are h2, not h4.
+
+                      They are top-level sections of the contentinfo landmark, not
+                      subsections of anything in <main>, so nothing sits at h3 between
+                      them and the page h1. As h4 they produced a skipped level on
+                      every page whose main content stopped at h2 (h2 -> h4), which
+                      breaks heading-based navigation for screen-reader users.
+
+                      Styling is unaffected: navigation-polish.css targets
+                      .footer-newsletter-title / .footer-section-title by class, never
+                      by tag.
+                    -->
+                    <h2 class="footer-newsletter-title">Stay Updated</h2>
                     <p class="footer-newsletter-desc">Get mythology insights and new additions delivered to your inbox.</p>
                     <form class="footer-newsletter-form" aria-label="Newsletter signup">
                         <input type="email" placeholder="Enter your email" class="footer-newsletter-input" aria-label="Email address">
@@ -732,7 +750,7 @@
             <!-- Sitemap Navigation -->
             <nav class="footer-sitemap" aria-label="Sitemap">
                 <div class="footer-section">
-                    <h4 class="footer-section-title">Explore</h4>
+                    <h2 class="footer-section-title">Explore</h2>
                     <div class="footer-section-links">
                         <a href="#/" class="footer-section-link">Home</a>
                         <a href="#/mythologies" class="footer-section-link">Mythologies</a>
@@ -744,7 +762,7 @@
                     </div>
                 </div>
                 <div class="footer-section">
-                    <h4 class="footer-section-title">Resources</h4>
+                    <h2 class="footer-section-title">Resources</h2>
                     <div class="footer-section-links">
                         <a href="#/browse/texts" class="footer-section-link">Sacred Texts</a>
                         <a href="#/browse/rituals" class="footer-section-link">Rituals</a>
@@ -755,7 +773,7 @@
                     </div>
                 </div>
                 <div class="footer-section">
-                    <h4 class="footer-section-title">Tools</h4>
+                    <h2 class="footer-section-title">Tools</h2>
                     <div class="footer-section-links">
                         <a href="#/search" class="footer-section-link">Advanced Search</a>
                         <a href="#/compare" class="footer-section-link">Compare Entities</a>
@@ -763,7 +781,7 @@
                     </div>
                 </div>
                 <div class="footer-section">
-                    <h4 class="footer-section-title">Company</h4>
+                    <h2 class="footer-section-title">Company</h2>
                     <div class="footer-section-links">
                         <a href="#/about" class="footer-section-link">About Us</a>
                         <a href="#/privacy" class="footer-section-link">Privacy Policy</a>

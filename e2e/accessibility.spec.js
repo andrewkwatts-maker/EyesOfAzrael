@@ -22,6 +22,23 @@
 const { test, expect } = require('@playwright/test');
 const { injectAxe, checkA11y, getViolations } = require('axe-playwright');
 
+// Run these without a service worker.
+//
+// service-worker.js calls skipWaiting() and then clients.claim() on install, so
+// a fresh browser context installs a worker, the worker takes control, and
+// `controllerchange` fires — mid-test, at a moment determined by how fast the
+// install happens to finish. The page then navigated out from under whatever
+// assertion was in flight, producing "Execution context was destroyed" in
+// whichever test lost the race that run. Pass counts swung between 13 and 21
+// across runs of identical code, which is why this suite failed on every browser
+// and every shard without pointing at any particular defect.
+//
+// Blocking it here is scoped deliberately: these tests are about markup and
+// keyboard semantics and have nothing to say about caching. The service worker's
+// own behaviour is still covered, by performance.spec.js and
+// service-init.spec.js, which need it and must keep it.
+test.use({ serviceWorkers: 'block' });
+
 // Test configuration
 const TEST_TIMEOUT = 60000;
 const NAVIGATION_TIMEOUT = 30000;
