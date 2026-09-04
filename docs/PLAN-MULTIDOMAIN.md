@@ -156,6 +156,34 @@ documents at random, sum them on read. It costs N reads instead of one and remov
 ceiling entirely. This should land before traffic arrives, not after — retrofitting a
 counter means reconciling the counts you already lost.
 
+**0. The read leak — found, in this repo, on 2026-09-04.**
+Three call sites in `js/spa-navigation.js` accounted for it, and none needed App Check to
+explain them:
+
+- `renderBasicCategoryPage` ran an exact-case query and, **if it returned nothing, fetched
+  the entire collection** and filtered client-side. For `concepts` that is 5,313 document
+  reads in one call — roughly ten visitors on that path exhaust a day's allowance between
+  them. The identical pattern in the sibling counter already carried a `limit(500)`; this
+  call site was simply missed.
+- `loadMythologyCounts` called `.get()` and read `snapshot.size` — downloading every
+  matching document purely to learn how many there were. Across ~105 mythologies and six
+  collections that is a walk of essentially the whole corpus, per render.
+- `renderBasicMythologyPage` did the same across eleven entity types, for a heading that
+  says "Explore N entities".
+
+All three now use `count()` aggregations or bounded queries, and the casing fallbacks ask a
+second narrow question rather than widening to the whole collection. Aggregation bills about
+one read per thousand index entries instead of one per document.
+
+`__tests__/components/spa-navigation-read-cost.test.js` records the *shape* of every query
+this file issues and fails on any collection read that neither bounds itself nor asks for a
+count — so the next instance is caught by structure rather than by someone remembering. The
+detector was verified by reverting a fix and confirming it fires.
+
+This does not fully close the question: it explains how a modest number of visits could
+consume the quota, but nobody has confirmed these paths were actually being hit. App Check
+below remains worth enabling for the same reason.
+
 **2. There is no App Check, and that may be the quota mystery.**
 The Firebase web API key is public by design; security rules are the only thing standing
 between the internet and the database. Without App Check, nothing distinguishes the real

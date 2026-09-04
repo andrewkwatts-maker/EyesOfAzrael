@@ -1405,12 +1405,22 @@ class SPANavigation {
 
             for (const collection of collections) {
                 try {
+                    // Counted with an aggregation, not by fetching the documents.
+                    //
+                    // This used to call .get() and read snapshot.size — downloading
+                    // every matching document purely to learn how many there were.
+                    // Across ~105 mythologies and six collections that is a walk of
+                    // essentially the whole corpus, billed per document, every time
+                    // the overview renders. An aggregation bills roughly one read
+                    // per thousand index entries instead, so the same number costs
+                    // about a thousandth as much.
                     const snapshot = await this._retryWithBackoff(async () => {
                         return await this.db.collection(collection)
                             .where('mythology', '==', myth.id)
+                            .count()
                             .get();
                     });
-                    totalCount += snapshot.size;
+                    totalCount += snapshot.data().count;
                 } catch (error) {
                     spaError(`Error loading count for ${myth.id} after retries:`, error);
                 }
@@ -1651,20 +1661,34 @@ class SPANavigation {
         const mythLower = mythologyId.toLowerCase();
         await Promise.all(entityTypes.map(async (type) => {
             try {
-                // Try exact match first (most common case)
-                let snapshot = await this.db.collection(type)
+                // Counted by aggregation rather than by downloading the documents.
+                //
+                // Both branches here used to read rows to produce a number: the
+                // exact match fetched every matching document for its .size, and
+                // the casing fallback pulled up to 500 documents to filter and
+                // count them. Across eleven entity types that is several hundred
+                // document reads for a single mythology page view, on a page whose
+                // only use of the result is a heading that says "Explore N
+                // entities". An aggregation bills about one read per thousand
+                // index entries instead.
+                const exact = await this.db.collection(type)
                     .where('mythology', '==', mythologyId)
+                    .count()
                     .get();
-                // If no results, fetch up to 500 and filter client-side (handles inconsistent casing)
-                if (snapshot.empty) {
-                    const allSnapshot = await this.db.collection(type).limit(500).get();
-                    counts[type] = allSnapshot.docs.filter(doc => {
-                        const m = (doc.data().mythology || '').toLowerCase();
-                        return m === mythLower || m.startsWith(mythLower);
-                    }).length;
-                } else {
-                    counts[type] = snapshot.size;
+                counts[type] = exact.data().count;
+
+                // The fallback asks the same narrow question of the lowercased
+                // value, rather than widening to the whole collection and
+                // filtering. It covers the casing mismatch it was written for
+                // without reading anything it does not need.
+                if (counts[type] === 0 && mythLower !== mythologyId) {
+                    const lowered = await this.db.collection(type)
+                        .where('mythology', '==', mythLower)
+                        .count()
+                        .get();
+                    counts[type] = lowered.data().count;
                 }
+
                 totalCount += counts[type];
             } catch (error) {
                 spaError(`Error loading count for ${type}:`, error);
@@ -1733,21 +1757,38 @@ class SPANavigation {
         let entities = [];
         const mythLower = mythology.toLowerCase();
         try {
-            // Try exact match first
+            // Both queries are bounded. The casing fallback here used to be
+            // `db.collection(category).get()` with no limit — an entire-collection
+            // download filtered client-side. For `concepts` that is 5,313 document
+            // reads in a single call, so roughly ten visitors landing on this path
+            // exhaust a day's free-tier quota between them. The sibling counter at
+            // `loadEntityTypeCounts` already had a limit on the identical pattern;
+            // this call site was simply missed.
+            //
+            // Rather than widen the net and filter, the fallback now asks a second,
+            // equally narrow question — the lowercased value — which covers the
+            // casing mismatch it was written for without reading anything extra.
+            const PAGE_LIMIT = 500;
+
             let snapshot = await this.db.collection(category)
                 .where('mythology', '==', mythology)
+                .limit(PAGE_LIMIT)
                 .get();
-            // If no results, fetch all and filter client-side (handles inconsistent casing)
+
+            if (snapshot.empty && mythLower !== mythology) {
+                snapshot = await this.db.collection(category)
+                    .where('mythology', '==', mythLower)
+                    .limit(PAGE_LIMIT)
+                    .get();
+            }
+
+            entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
             if (snapshot.empty) {
-                snapshot = await this.db.collection(category).get();
-                entities = snapshot.docs
-                    .filter(doc => {
-                        const m = (doc.data().mythology || '').toLowerCase();
-                        return m === mythLower || m.startsWith(mythLower);
-                    })
-                    .map(doc => ({ id: doc.id, ...doc.data() }));
-            } else {
-                entities = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // Previously this would have triggered a full-collection scan. Say
+                // so instead: an unmatched facet is a data problem to fix at the
+                // source, not something to paper over by reading everything.
+                spaLog(`No ${category} found for mythology "${mythology}" (tried exact and lowercase)`);
             }
         } catch (error) {
             spaError(`Error loading ${category} for ${mythology}:`, error);
