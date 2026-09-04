@@ -98,6 +98,81 @@ links. `validate-base` passes 860/860. The tab bar shows four tabs because the m
 lists four domains, which was always the mechanism — no further change was needed to light
 them up.
 
+### Status, 2026-09-04: the quota reset, but the verification still cannot run
+
+The run scheduled for the quota reset could not do the Firestore-side half of
+its job. **No service-account credential exists in the execution environment** —
+`GOOGLE_APPLICATION_CREDENTIALS` is unset, there is no
+`eyesofazrael-firebase-adminsdk-*.json` anywhere on disk, and neither `gcloud`
+nor a `firebase login` is present. So three things remain exactly as they were:
+
+- **The seed upload is still unverified.** 126 history and 80 conspiracy
+  documents were written on 2026-09-03 and have never been read back. Nobody has
+  confirmed the per-collection counts, that `updatedAt` is a real Timestamp
+  rather than a string, or — the check the whole prefix scheme exists for — that
+  no `hist_*` / `con_*` document carries a `mythology` field and that the
+  unprefixed `events` / `figures` / `concepts` / `artifacts` collections still
+  hold only their original content.
+- **The delta round-trip has still never been demonstrated** for the new
+  domains. It is the headline requirement of this plan and it remains
+  unverified rather than known-good.
+- **The re-bake has not happened**, so azrael's 142 `heroe`-typed entities and
+  esoterica's herb/magic type mismatches are still in the stored data. Both are
+  aliased around at query time, so nothing is user-visible.
+
+Everything below that does *not* need Firestore was done, and is recorded in
+place: the read-leak follow-up in §0c, the index reconciliation immediately
+below, and the security-rules tests in §7.
+
+### Index drift — reconciled from the code side (2026-09-04)
+
+`firebase deploy --only firestore:indexes` reported 70 indexes present in the
+project and absent from `firestore.indexes.json`. Enumerating those 70 needs
+project credentials, so that half is still open. The half that is answerable
+from the repository has been answered, and it found a live bug.
+
+`scripts/audit-firestore-indexes.js` derives the composite index every query in
+`js/` requires and diffs it against the declared file. Crucially it also
+resolves the one query shape a syntactic scan cannot see: `_fetchDeltas` builds
+its collection name at runtime, so the ~40 `<facet> + updatedAt` indexes it
+depends on look unreferenced. Expanding that shape across the domain registry —
+the same source `_fetchDeltas` itself consults — is what keeps the audit from
+recommending the deletion of the site's core mechanism.
+
+**The bug: seven collections had no delta index at all** — `figures`,
+`grimoires`, `ingredients`, `practitioners`, `spells`, `teachings`,
+`traditions`. Firestore rejects an unindexed composite query with
+`failed-precondition`, and `asset-service.js:277-281` deliberately swallows
+exactly that, returning an empty delta array. Those seven collections were
+therefore rendering the baked base alone — looking entirely healthy while
+showing none of the edits made since the last bake, with no error and no way
+for a reader to tell. Four of the seven (`spells`, `traditions`, `grimoires`,
+`practitioners`) are the empty esoterica collections of §4, so the live damage
+was limited to `figures`, `ingredients` and `teachings`. All seven indexes are
+now declared, and `__tests__/integration/firestore-indexes.test.js` asserts the
+invariant rather than the seven fixes: every collection the registry lists has
+a `<its own facet> + updatedAt` index, facet field first.
+
+The audit's remaining output is a starting point, not a verdict:
+
+- **26 query shapes are required and undeclared**, almost all in the
+  contribution and moderation paths (`submissions`, `claims`, `contributions`,
+  `user_assets`, `user_perspectives`, `badge_awards`, `notifications`). These
+  are the §7 flows, which no normal user could reach until the rules landed —
+  so their indexes were never exercised and never noticed. They should be added
+  before contribution is announced as working.
+- **43 declared indexes match no query in `js/`.** This is *not* a delete list.
+  Three innocent explanations apply and the audit cannot tell them apart: the
+  query lives outside `js/` (the Python packages, `scripts/`, the console); the
+  index is a sort-direction sibling of one that did match, which the audit's
+  set-based comparison cannot distinguish (the `notes` and `posts` families are
+  exactly this); or it serves a subcollection reached through a variable path.
+
+**Do not run `firebase deploy --only firestore:indexes --force`.** It would
+delete the 70 project-side indexes, and now also has 26 undeclared shapes to
+make wrong. Reconcile by adding to the file, never by forcing it over the
+project.
+
 ---
 
 ## 0b. Source of truth — which store wins
@@ -183,6 +258,54 @@ detector was verified by reverting a fix and confirming it fires.
 This does not fully close the question: it explains how a modest number of visits could
 consume the quota, but nobody has confirmed these paths were actually being hit. App Check
 below remains worth enabling for the same reason.
+
+**0b. The read leak, continued — the fix had landed on the wrong renderer (2026-09-04).**
+
+The three fixes above were real and are still right, but one of them guarded a
+path that almost never runs. `renderBasicMythologyPage` is the *fallback*
+mythology renderer; `spa-navigation.js:1567` routes every mythology page to
+`MythologyOverview` first and reaches the basic page only when that component
+throws. The expensive renderer was the one left alone.
+
+`MythologyOverview._loadSingleCategory` fetched **every** matching document in
+each of the eleven `ENTITY_TYPES` collections, in parallel, on every mythology
+page view — then rendered `PREVIEW_LIMIT` (20) of them and used the rest only
+to call `.length`. Measured against the static base's own counts, the Greek
+page cost **987 document reads** to display at most 220 cards and a set of
+totals; hindu 574, norse 551, japanese 490, egyptian 488. **Fifty views of the
+Greek page is the entire daily allowance.** That is a completely ordinary
+amount of traffic, and it means the quota exhaustion needs no abuse to explain
+it — though App Check below is still worth enabling.
+
+It now asks the two questions separately: `count()` for the total, and a
+`limit(PREVIEW_LIMIT)` query for the rows actually rendered, with the
+capitalized-variant fallback driven off the count so a casing miss costs one
+aggregation rather than a second full fetch. Greek drops from 987 reads to
+about 231, and most mythologies to near the count-aggregation floor.
+
+One behavioural change, deliberately accepted and noted in the code: the
+preview grid showed the alphabetically-first twenty of the whole set and now
+shows twenty in Firestore's order, sorted among themselves. Ordering by name
+would need a `mythology + name` composite index on all eleven collections, and
+a missing composite index fails the query outright. The full ordered set is one
+click away behind "View all".
+
+`__tests__/components/mythology-overview-read-cost.test.js` pins the shape the
+same way its sibling does — no query in this component may read rows without a
+`limit()` or a `count()`.
+
+**Still unbounded, reported rather than changed.** A repo-wide scan of all 498
+Firestore call sites found 68 chains that read rows with no bound. Most are
+per-user or per-entity subcollections where the bound is the data model, and a
+few are admin- or script-only. Two are worth a decision:
+
+- `js/components/search-view-complete.js:191` reads the whole `mythologies`
+  collection (~263 documents) on every search view render, to populate a filter
+  dropdown. The static base manifest already lists every mythology, so this
+  could cost zero reads instead.
+- `js/sitemap-generator.js:103,119,194,212,230` walks entire collections, but
+  nothing in `index.html` loads it, so it is a manual script rather than a live
+  path.
 
 **2. There is no App Check, and that may be the quota mystery.**
 The Firebase web API key is public by design; security rules are the only thing standing
@@ -510,11 +633,40 @@ them over inventing a parallel link store.
 nothing to do with multi-domain work. Each of these fails *silently* — no error surfaces to
 the user, and nothing logs. Fix these before adding two more domains on top.
 
-1. **Seven user-write collections have no security rule**, so they fall through to the
+1. ~~**Seven user-write collections have no security rule**~~, so they fall through to the
    catch-all at `firestore.rules:1371`, which permits writes only from one hardcoded email.
    Every one of these actions returns PERMISSION_DENIED for every normal user today:
    `notes`, `contentReports`, `newsletter_subscribers`, `user_diagrams`, `userSettings`,
    `userIcons`, `content`.
+
+   **Rules written 2026-09-03; proven 2026-09-04.** The rules were deployed but
+   never tested, which for a security rule is barely different from not having
+   one — a rule that denies everything compiles and releases exactly as
+   cleanly as a rule that works. `__tests__/rules/firestore-rules.test.js` runs
+   **51 assertions against the Firestore rules emulator**, which needs neither
+   credentials nor read quota, so this is the one part of the verification that
+   was never blocked. `npm run test:rules` starts the emulator around it; it is
+   excluded from the default `jest` run because CI has no emulator.
+
+   It covers both halves. A signed-in user can create their own note, file a
+   report, save settings, a diagram and an icon, and draft `/content`; a
+   signed-out visitor can subscribe to the newsletter. And the fraud cases
+   fail: a note attributed to another user, a note pre-loaded with votes, a
+   report filed in someone else's name, a draft published straight to
+   `published`, the newsletter collection used as free storage.
+
+   The catch-all fix is pinned in both directions, which matters because
+   over-tightening it would take the unruled esoterica collections offline.
+   Each private collection is asserted unreadable by a non-owner *and* readable
+   by its owner or an admin; `magic` and `beings` are asserted still publicly
+   readable. Both admin routes — the `admin: true` claim and the hardcoded
+   email — are exercised.
+
+   **The detector was verified by reverting the fix**, not assumed: neutering
+   `isPrivateCollection()` to return false turns exactly 8 of the 51 red —
+   every private-read case and nothing else. The 13 `hist_*` / `con_*`
+   collections are covered too: world-readable, admin-writable, and closed to a
+   normal user's write.
 2. **Approved suggested edits never reach the entity.** `suggested-edit-diff.js:1204-1259`
    updates the `suggestedEdits` document's status and writes an `editHistory` record, but
    never writes the entity itself — the code comment at `:1229` says the entity write
