@@ -239,12 +239,26 @@ describe('BrowseCategoryView', () => {
             });
         });
 
-        test('entity cards have role="article" for accessibility', () => {
-            const cards = container.querySelectorAll('.entity-card[role="article"]');
-            // Should have at least one card with proper role
+        test('entity cards keep their link role rather than overriding it', () => {
+            // This test previously asserted `role="article"` on the card, and
+            // that attribute was a defect rather than a feature: the card is an
+            // `<a>`, and `role="article"` overrides the implicit link role, so
+            // assistive technology announced each card as an article and
+            // dropped the one fact a reader needs about it — that it is
+            // clickable. axe reports it as `aria-allowed-role`.
+            //
+            // The accessible name still carries everything the role attribute
+            // was reaching for; see __tests__/accessibility-rendered-views.test.js.
+            const cards = container.querySelectorAll('a.entity-card');
+
             if (view.entities.length > 0) {
                 expect(cards.length).toBeGreaterThan(0);
             }
+
+            cards.forEach(card => {
+                expect(card.hasAttribute('role')).toBe(false);
+                expect(card.getAttribute('aria-label')).toBeTruthy();
+            });
         });
     });
 

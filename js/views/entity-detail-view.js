@@ -298,6 +298,35 @@
         }
 
         /**
+         * The badge naming which slice of its dataset an entity belongs to.
+         *
+         * Carries the label as well as the value, because the value alone is
+         * ambiguous the moment there is more than one dataset: "Classical" is a
+         * mythology to a reader who has only ever seen this site's mythology tab,
+         * and an era to a reader on the history tab. The label removes the guess.
+         *
+         * Renders nothing at all when there is no value. A badge reading
+         * "Unknown" looks like a data error on a young dataset; absence does not.
+         */
+        renderFacetBadge(collection, facetValue) {
+            const value = typeof facetValue === 'string' ? facetValue.trim() : '';
+            const lower = value.toLowerCase();
+            if (!value || lower === 'undefined' || lower === 'unknown' || lower === 'null') {
+                return '';
+            }
+
+            const label = this.facetLabel(collection);
+            const shown = this.capitalize(value);
+
+            return `<span class="edv-badge edv-badge--mythology edv-badge--facet"`
+                + ` data-facet-label="${this.escapeAttr(label)}"`
+                + ` aria-label="${this.escapeAttr(label)}: ${this.escapeAttr(shown)}">`
+                + `<span class="edv-badge__label">${this.escapeHtml(label)}:</span> `
+                + `<span class="edv-badge__value">${this.escapeHtml(shown)}</span>`
+                + `</span>`;
+        }
+
+        /**
          * Render loading state
          */
         renderLoadingState(mythology, entityType, entityId) {
@@ -471,7 +500,7 @@
                             <h1 class="edv-fallback-title">${this.escapeHtml(entity.name || entity.title)}</h1>
                             <div class="edv-fallback-badges">
                                 <span class="edv-badge edv-badge--type">${this.getEntityTypeLabel(entityType)}</span>
-                                <span class="edv-badge edv-badge--mythology">${this.capitalize(mythology)}</span>
+                                ${this.renderFacetBadge(entityType, mythology)}
                             </div>
                         </div>
                     </header>

@@ -35,14 +35,90 @@
             // Section collapse state (persistent per session)
             this.collapsedSections = new Set();
             this.loadCollapseState();
+
+            // Domain registry, injectable for tests. Every facet helper below
+            // degrades to the mythology defaults when it is null, so a failure to
+            // load `js/config/domains.js` costs the two new domains their labels
+            // rather than blanking the detail page for all four.
+            this.registry = options.registry
+                || (typeof window !== 'undefined' ? window.DOMAINS : null);
+        }
+
+        // ── Facet ────────────────────────────────────────────────────────────
+        //
+        // This panel is the primary entity detail renderer for all four datasets.
+        // It used to read `entity.primaryMythology || entity.mythology`
+        // unconditionally, which is correct for mythology and esoteric and wrong
+        // for the other two: a history document carries `era` and a conspiracy
+        // document carries `category`, so both fell through to the literal string
+        // "Unknown" in the header badge and in the Quick Info list — the latter
+        // labelled "Mythology". Both now come from the domain registry.
+
+        /** Singular UI label for a collection's facet, e.g. 'Era'. */
+        facetLabelOf(collection) {
+            const r = this.registry;
+            return r ? r.facetLabelFor(collection) : 'Mythology';
+        }
+
+        /** Plural of the facet label, e.g. 'Eras'. */
+        pluralFacetLabelOf(collection) {
+            const r = this.registry;
+            return r ? r.facetLabelPluralFor(collection) : 'Mythologies';
+        }
+
+        /**
+         * An entity's value for its collection's facet.
+         *
+         * Falls back to the mythology-shaped fields when the domain's own field
+         * is absent, because history and conspiracy were seeded from packages
+         * that stored era and category in a column named `mythology`; documents
+         * predating the export's rename still carry them there.
+         *
+         * `explicit` is the facet value carried in the route's third segment,
+         * which is authoritative when the document itself has none.
+         *
+         * @returns {string} '' when there is genuinely no value — callers must
+         *   omit the field rather than render "Unknown", which reads as a data
+         *   error to someone browsing a young dataset.
+         */
+        facetValueOf(entity, collection, explicit) {
+            if (!entity) return explicit || '';
+
+            const r = this.registry;
+            const field = r ? r.facetFieldFor(collection) : 'mythology';
+
+            const candidates = [
+                entity[field],
+                entity.primaryMythology,
+                entity.mythology,
+                explicit,
+            ];
+
+            for (const value of candidates) {
+                if (typeof value !== 'string') continue;
+                const trimmed = value.trim();
+                // 'unknown' and 'undefined' reach here from routes and older
+                // exports; they carry no more information than an empty string.
+                if (!trimmed) continue;
+                const lower = trimmed.toLowerCase();
+                if (lower === 'unknown' || lower === 'undefined' || lower === 'null') continue;
+                return trimmed;
+            }
+
+            return '';
         }
 
         /**
          * Main render method - generates complete HTML for an asset
          * @param {Object} entity - The entity data object
+         * @param {string} [collection] - The entity's collection, e.g. 'hist_figures'.
+         *   Determines which facet field and label apply. Omitting it keeps the
+         *   pre-registry mythology behaviour.
+         * @param {string} [facetValue] - Facet value from the route, used when the
+         *   document does not carry one.
          * @returns {string} Complete HTML string
          */
-        render(entity) {
+        render(entity, collection, facetValue) {
             if (!entity) {
                 return this.renderError('No entity data provided');
             }
@@ -58,7 +134,7 @@
                          style="--asset-primary: ${primaryColor}; --asset-secondary: ${secondaryColor}; --asset-primary-rgb: ${this.hexToRgb(primaryColor)}; --asset-secondary-rgb: ${this.hexToRgb(secondaryColor)};">
 
                     <!-- Full Header Section -->
-                    ${this.renderHeader(entity)}
+                    ${this.renderHeader(entity, collection, facetValue)}
 
                     <div class="asset-detail-body">
                         <!-- Main Content Area -->
@@ -80,7 +156,7 @@
 
                         <!-- Sidebar with Quick Info -->
                         <aside class="asset-sidebar">
-                            ${this.renderQuickInfoSidebar(entity)}
+                            ${this.renderQuickInfoSidebar(entity, collection, facetValue)}
                             ${this.renderTagsSidebar(entity)}
                             ${this.renderMetadataSidebar(entity)}
                         </aside>
@@ -92,9 +168,19 @@
         /**
          * Render the full header section
          */
-        renderHeader(entity) {
-            const mythologies = entity.mythologies || [entity.primaryMythology || entity.mythology];
-            const primaryMythology = entity.primaryMythology || entity.mythology || 'unknown';
+        renderHeader(entity, collection, facetValue) {
+            const facetLabel = this.facetLabelOf(collection);
+            const primaryFacet = this.facetValueOf(entity, collection, facetValue);
+
+            // `mythologies` is a mythology-domain concept: one entity appearing in
+            // several pantheons. The other three domains have no equivalent, so an
+            // absent array means "one facet value", not "unknown".
+            const secondary = Array.isArray(entity.mythologies)
+                ? entity.mythologies.filter(m =>
+                    typeof m === 'string'
+                    && m.trim()
+                    && m.toLowerCase() !== primaryFacet.toLowerCase())
+                : [];
 
             return `
                 <header class="asset-header">
@@ -131,14 +217,22 @@
                             <span class="asset-type-badge type-${this.escapeAttr(entity.type || 'unknown')}">
                                 ${this.getTypeIcon(entity.type)} ${this.formatType(entity.type)}
                             </span>
-                            <span class="asset-mythology-badge">
-                                ${this.getMythologyIcon(primaryMythology)} ${this.capitalize(primaryMythology)}
-                            </span>
-                            ${mythologies.length > 1 ? `
+                            ${primaryFacet ? `
+                                <span class="asset-mythology-badge asset-facet-badge"
+                                      data-facet-label="${this.escapeAttr(facetLabel)}"
+                                      title="${this.escapeAttr(facetLabel)}: ${this.escapeAttr(this.capitalize(primaryFacet))}"
+                                      aria-label="${this.escapeAttr(facetLabel)}: ${this.escapeAttr(this.capitalize(primaryFacet))}">
+                                    ${this.getMythologyIcon(primaryFacet)}
+                                    <span class="asset-facet-badge__label">${this.escapeHtml(facetLabel)}:</span>
+                                    <span class="asset-facet-badge__value">${this.escapeHtml(this.capitalize(primaryFacet))}</span>
+                                </span>
+                            ` : ''}
+                            ${secondary.length > 0 ? `
                                 <button class="asset-multi-mythology"
-                                        title="${mythologies.slice(1).map(m => this.capitalize(m)).join(', ')}"
-                                        aria-label="Also found in ${mythologies.length - 1} other mythologies">
-                                    +${mythologies.length - 1} more
+                                        type="button"
+                                        title="${this.escapeAttr(secondary.map(m => this.capitalize(m)).join(', '))}"
+                                        aria-label="Also found in ${secondary.length} other ${this.escapeAttr(secondary.length === 1 ? facetLabel.toLowerCase() : this.pluralFacetLabelOf(collection).toLowerCase())}">
+                                    +${secondary.length} more
                                 </button>
                             ` : ''}
                         </div>
@@ -2129,7 +2223,17 @@
         /**
          * Render quick info sidebar
          */
-        renderQuickInfoSidebar(entity) {
+        renderQuickInfoSidebar(entity, collection, facetValue) {
+            const facetLabel = this.facetLabelOf(collection);
+            const facet = this.facetValueOf(entity, collection, facetValue);
+
+            const alsoIn = Array.isArray(entity.mythologies)
+                ? entity.mythologies.filter(m =>
+                    typeof m === 'string'
+                    && m.trim()
+                    && m.toLowerCase() !== facet.toLowerCase())
+                : [];
+
             return `
                 <div class="sidebar-section sidebar-quick-info">
                     <h3 class="sidebar-title">Quick Info</h3>
@@ -2137,12 +2241,14 @@
                         <dt>Type</dt>
                         <dd>${this.formatType(entity.type)}</dd>
 
-                        <dt>Mythology</dt>
-                        <dd>${this.capitalize(entity.primaryMythology || entity.mythology || 'Unknown')}</dd>
+                        ${facet ? `
+                            <dt>${this.escapeHtml(facetLabel)}</dt>
+                            <dd>${this.escapeHtml(this.capitalize(facet))}</dd>
+                        ` : ''}
 
-                        ${entity.mythologies?.length > 1 ? `
+                        ${alsoIn.length > 0 ? `
                             <dt>Also in</dt>
-                            <dd>${entity.mythologies.filter(m => m !== entity.primaryMythology).map(m => this.capitalize(m)).join(', ')}</dd>
+                            <dd>${alsoIn.map(m => this.escapeHtml(this.capitalize(m))).join(', ')}</dd>
                         ` : ''}
 
                         ${entity.temporal?.culturalPeriod ? `

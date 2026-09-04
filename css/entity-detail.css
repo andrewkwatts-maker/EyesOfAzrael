@@ -5491,3 +5491,61 @@ html {
     );
     transition: width 0.1s linear;
 }
+
+/* ============================================================================
+   Facet badge — which slice of its dataset an entity belongs to
+   ============================================================================
+
+   The badge used to print a bare value: "Greek", "Classical", "Financial".
+   That was legible while the site had one dataset, because the only thing a
+   bare value could be was a mythology. With four tabs it is ambiguous —
+   "Classical" is a mythology on one tab and an era on another — so the badge
+   now carries its label too, supplied by the domain registry.
+
+   The label is de-emphasised rather than hidden. Hiding it visually and
+   leaving it only in `aria-label` would give a screen-reader user the context
+   and deny it to everyone else, which is the wrong way round: sighted readers
+   are the ones looking at four tabs of similar-looking values.
+   ---------------------------------------------------------------------------*/
+
+.edv-badge--facet,
+.asset-facet-badge {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.3em;
+    /* Long era and category names must wrap rather than push the badge row
+       into a horizontal scroll on a phone. */
+    flex-wrap: wrap;
+    max-width: 100%;
+}
+
+.edv-badge__label,
+.asset-facet-badge__label {
+    /* 0.78 keeps the label subordinate to the value while staying above the
+       ~12px floor where small text stops being comfortably readable on a
+       phone. `currentColor` at 80% opacity inherits whatever contrast the
+       surrounding badge already satisfies, rather than hardcoding a grey that
+       passes on one theme and fails on the other. */
+    font-size: 0.78em;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
+.edv-badge__value,
+.asset-facet-badge__value {
+    font-weight: 600;
+}
+
+/* On narrow viewports the label sits above the value rather than beside it,
+   so a long value keeps the full line width instead of being squeezed. */
+@media (max-width: 420px) {
+    .edv-badge--facet,
+    .asset-facet-badge {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.1em;
+    }
+}

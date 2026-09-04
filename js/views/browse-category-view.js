@@ -489,7 +489,7 @@ class BrowseCategoryView {
         statsEl.innerHTML = `
             <div class="browse-hero-stat">
                 <span class="browse-hero-stat-value">${totalCount}</span>
-                <span class="browse-hero-stat-label">${this.category}</span>
+                <span class="browse-hero-stat-label">${this.escapeHtml(this.categoryNoun(this.category))}</span>
             </div>
             ${!this.mythology && mythCount > 1 ? `
                 <div class="browse-hero-stat">
@@ -716,6 +716,9 @@ class BrowseCategoryView {
                 <!-- Content Filter Toggle -->
                 <div id="contentFilterContainer"></div>
 
+                <!-- Early-collection notice, shown only when one is warranted -->
+                ${this.getEarlyCollectionNoticeHTML()}
+
                 <!-- Quick Filters & Statistics -->
                 ${this.getQuickFiltersHTML()}
 
@@ -724,7 +727,25 @@ class BrowseCategoryView {
 
                 <!-- Entity Grid/List Container -->
                 <div class="entity-container" id="entityContainer">
-                    <div class="entity-grid ${this.viewMode}-view density-${this.viewDensity}" id="entityGrid">
+                    <!--
+                      The results region needs a heading of its own.
+
+                      Card titles are h3, and before this the page went straight
+                      from the hero h1 to those h3s with no h2 anywhere — a
+                      heading-order violation axe flags on every browse page in
+                      all four domains. It also left a screen-reader user with no
+                      way to jump to the results, which is the entire point of
+                      the page.
+
+                      Visually hidden rather than displayed: the hero already
+                      says what this list is, so showing it again would be
+                      redundant to a sighted reader while the structure it
+                      provides is exactly what a non-visual reader is missing.
+                    -->
+                    <h2 class="sr-only" id="browseResultsHeading">${this.escapeHtml(this.capitalize(this.categoryNoun(this.category)))}</h2>
+                    <div class="entity-grid ${this.viewMode}-view density-${this.viewDensity}"
+                         id="entityGrid"
+                         aria-labelledby="browseResultsHeading">
                         ${this.getGridPlaceholder()}
                     </div>
                 </div>
@@ -771,7 +792,7 @@ class BrowseCategoryView {
                     <div class="browse-hero-stats" id="browseStats">
                         <div class="browse-hero-stat">
                             <span class="browse-hero-stat-value">${this.entities.length}</span>
-                            <span class="browse-hero-stat-label">${this.category}</span>
+                            <span class="browse-hero-stat-label">${this.escapeHtml(this.categoryNoun(this.category))}</span>
                         </div>
                         ${!this.mythology && mythCount > 1 ? `
                             <div class="browse-hero-stat">
@@ -892,43 +913,102 @@ class BrowseCategoryView {
     /**
      * Get quick filters HTML (chip-based)
      */
+    /**
+     * How thin a collection is: 'empty', 'early', or 'populated'.
+     *
+     * The grid, the filters and the counts were all designed against mythology's
+     * 12,672 entities. History has 126 spread over seven collections and
+     * conspiracy 80 over six, so a page there routinely holds a dozen cards in a
+     * layout built for hundreds. That is not a fault, but it looks like one, and
+     * an interface that looks broken gets treated as broken. Naming the state
+     * lets the page say "early" out loud instead of leaving a reader to guess.
+     *
+     * The threshold is a judgement, not a measurement: below roughly two dozen a
+     * grid reads as sparse on a desktop viewport, above it the layout fills.
+     */
+    collectionDensity() {
+        const count = Array.isArray(this.entities) ? this.entities.length : 0;
+        if (count === 0) return 'empty';
+        if (count < BrowseCategoryView.EARLY_COLLECTION_THRESHOLD) return 'early';
+        return 'populated';
+    }
+
+    /**
+     * A one-line note that a collection is early rather than broken.
+     *
+     * Deliberately states the real count and claims nothing else — no fake
+     * "coming soon" roadmap, no inflated total. Suppressed once a collection has
+     * enough entities to fill the grid on its own, and suppressed while a filter
+     * is active, where a short result list is the filter working correctly.
+     */
+    getEarlyCollectionNoticeHTML() {
+        if (this.collectionDensity() !== 'early') return '';
+        if (this.searchTerm || this.selectedMythologies.size > 0 || this.selectedDomains.size > 0) return '';
+
+        const count = this.entities.length;
+        const noun = this.categoryNoun(this.category);
+
+        return `
+            <aside class="browse-early-notice" role="note">
+                <span class="browse-early-notice__icon" aria-hidden="true">🌱</span>
+                <p class="browse-early-notice__text">
+                    This part of the encyclopedia is still early —
+                    ${count === 1 ? `just one entry` : `${count} entries`}
+                    in ${this.escapeHtml(noun)} so far.
+                    Everything here is real; there is simply not much of it yet.
+                </p>
+            </aside>
+        `;
+    }
+
     getQuickFiltersHTML() {
+        // Chips come from `groupedEntities`, which is built from the entities
+        // actually loaded — so a facet with zero results can never be offered.
+        // The remaining hazard is the opposite one: a young collection whose
+        // entities all share one facet value renders a single chip that filters
+        // nothing away. History has 126 entities across seven collections and
+        // conspiracy 80 across six, so that is the common case there, not an
+        // edge case. One option is not a filter, so the section is omitted.
         const topMythologies = Object.entries(this.groupedEntities)
             .sort((a, b) => b[1].length - a[1].length)
             .slice(0, 8);
+
+        const facetFilterIsUseful = Object.keys(this.groupedEntities).length > 1;
 
         const topDomains = Array.from(this.availableDomains)
             .slice(0, 10);
 
         return `
             <div class="quick-filters" role="region" aria-label="Quick filters">
+                ${facetFilterIsUseful ? `
                 <div class="quick-filter-section">
-                    <h3 class="quick-filter-title" id="mythology-filter-heading">
+                    <h2 class="quick-filter-title" id="mythology-filter-heading">
                         <span class="quick-filter-icon" aria-hidden="true">🌍</span>
-                        Quick Filter by ${this.facetLabel}
-                    </h3>
+                        Quick Filter by ${this.escapeHtml(this.facetLabel)}
+                    </h2>
                     <div class="filter-chips" role="group" aria-labelledby="mythology-filter-heading">
                         ${topMythologies.map(([myth, entities]) => `
                             <button
                                 type="button"
                                 class="filter-chip"
                                 data-filter-type="mythology"
-                                data-filter-value="${myth}"
+                                data-filter-value="${this.escapeHtml(myth)}"
                                 aria-pressed="${this.selectedMythologies.has(myth)}"
-                                aria-label="Filter by ${this.capitalize(myth)} ${this.facetLabel.toLowerCase()} (${entities.length} entities)">
-                                <span class="chip-label">${this.capitalize(myth)}</span>
+                                aria-label="Filter by ${this.escapeHtml(this.capitalize(myth))} ${this.escapeHtml(this.facetLabel.toLowerCase())} (${entities.length} entities)">
+                                <span class="chip-label">${this.escapeHtml(this.capitalize(myth))}</span>
                                 <span class="chip-count" aria-hidden="true">${entities.length}</span>
                             </button>
                         `).join('')}
                     </div>
                 </div>
+                ` : ''}
 
                 ${this.availableDomains.size > 0 && this.category === 'deities' ? `
                     <div class="quick-filter-section">
-                        <h3 class="quick-filter-title" id="domain-filter-heading">
+                        <h2 class="quick-filter-title" id="domain-filter-heading">
                             <span class="quick-filter-icon" aria-hidden="true">🏷️</span>
                             Filter by Domain
-                        </h3>
+                        </h2>
                         <div class="filter-chips" role="group" aria-labelledby="domain-filter-heading">
                             ${topDomains.map(domain => `
                                 <button
@@ -1114,6 +1194,11 @@ class BrowseCategoryView {
         // for this collection — `era` for history, `category` for conspiracy.
         const facet = this.facetValueOf(entity);
 
+        // No `role="article"` on this anchor. It used to carry one, which
+        // overrode the implicit link role: assistive technology announced each
+        // card as an article and dropped the one fact a reader needs about it,
+        // that it is clickable. axe reports it as `aria-allowed-role`, and the
+        // element is a link, so it keeps the link role.
         return `
             <a href="#/entity/${this.category}/${facet || 'unknown'}/${entity.id}"
                class="entity-card card-strict-height ${entity.isStandard ? '' : 'entity-card-community'}"
@@ -1124,8 +1209,7 @@ class BrowseCategoryView {
                data-entity-type="${this.category.replace(/s$/, '')}"
                data-collection="${this.category}"
                data-name="${entity.name.toLowerCase()}"
-               role="article"
-               aria-label="${this.escapeHtml(entity.name)} - ${this.capitalize(facet || '')} ${this.category.replace(/s$/, '')}">
+               aria-label="${this.escapeHtml(entity.name)} — ${this.escapeHtml(this.categoryNoun(this.category))}${facet ? `, ${this.escapeHtml(this.facetLabel)}: ${this.escapeHtml(this.capitalize(facet))}` : ''}">
                 ${badgeHTML}
 
                 <!-- Quick Actions -->
@@ -1164,7 +1248,7 @@ class BrowseCategoryView {
                     ${iconHTML}
                     <div class="entity-card-info">
                         <h3 class="entity-card__name card-title-truncate" aria-label="${this.escapeHtml(entity.name)}">${this.escapeHtml(entity.name)}</h3>
-                        <span class="entity-card__mythology">${this.capitalize(facet)}</span>
+                        ${facet ? `<span class="entity-card__mythology" title="${this.escapeHtml(this.facetLabel)}: ${this.escapeHtml(this.capitalize(facet))}">${this.escapeHtml(this.capitalize(facet))}</span>` : ''}
                     </div>
                 </div>
 
@@ -1487,7 +1571,7 @@ class BrowseCategoryView {
             return `
                 <div class="empty-state">
                     <div class="empty-state__icon">📡</div>
-                    <h3 class="empty-state__title">You're Offline</h3>
+                    <h2 class="empty-state__title">You're Offline</h2>
                     <p class="empty-state__message">
                         Unable to load ${categoryInfo.name.toLowerCase()}. Please check your internet connection and try again.
                     </p>
@@ -1506,13 +1590,16 @@ class BrowseCategoryView {
         return `
             <div class="empty-state">
                 <div class="empty-state__icon">${categoryInfo.icon}</div>
-                <h3 class="empty-state__title">No ${categoryInfo.name} Found</h3>
+                <h2 class="empty-state__title">No ${categoryInfo.name} Found</h2>
                 <p class="empty-state__message">
                     ${hasActiveFilters
-                        ? `No ${this.category} match your current filters.`
+                        ? `No ${this.escapeHtml(this.categoryNoun(this.category))} match your current filters.`
                         : this.mythology
-                            ? `No ${this.category} found in ${this.capitalize(this.mythology)} ${this.facetLabel.toLowerCase()}.`
-                            : `No ${this.category} available at this time. Check back later for updates.`
+                            ? `No ${this.escapeHtml(this.categoryNoun(this.category))} filed under the ${this.escapeHtml(this.capitalize(this.mythology))} ${this.escapeHtml(this.facetLabel.toLowerCase())} yet.`
+                            // "Nothing here yet" is the truthful reading for a
+                            // collection nobody has written into, and it invites a
+                            // contribution. "Check back later" reads as an outage.
+                            : `This collection is empty so far — no ${this.escapeHtml(this.categoryNoun(this.category))} have been added yet.`
                     }
                 </p>
                 ${hasActiveFilters ? `
@@ -1802,11 +1889,15 @@ class BrowseCategoryView {
             });
         }
 
-        // Virtual scrolling for large lists
-        const container = document.getElementById('entityContainer');
-        if (container && this.entities.length > 50) {
-            container.addEventListener('scroll', () => this.handleScroll(), { signal });
-        }
+        // No scroll listener is registered here any more.
+        //
+        // It used to bind `handleScroll` to `#entityContainer`, but that element
+        // auto-sizes to its content and never scrolls, so the handler never ran.
+        // Paging is driven by the Load More button and the IntersectionObserver
+        // in `setupInfiniteScroll`, which observe the document scroller and do
+        // work. Binding a scroll handler that reads `offsetWidth`,
+        // `offsetHeight` and `scrollTop` — three forced synchronous layouts —
+        // only to have it advance nothing was pure cost.
 
         // Quick action buttons on entity cards (delegated)
         this.setupQuickActionListeners(signal);
@@ -2430,19 +2521,35 @@ class BrowseCategoryView {
             return;
         }
 
-        // Use pagination or virtual scrolling for large lists
-        const useVirtualScrolling = this.filteredEntities.length > 100;
-
-        if (useVirtualScrolling) {
-            this.displayedEntities = this.filteredEntities.slice(
-                this.visibleRange.start,
-                this.visibleRange.end
-            );
-        } else {
-            const start = (this.currentPage - 1) * this.itemsPerPage;
-            const end = start + this.itemsPerPage;
-            this.displayedEntities = this.filteredEntities.slice(start, end);
-        }
+        // One paging model for every list length.
+        //
+        // There used to be a second branch here: lists longer than 100 entities
+        // took a "virtual scrolling" path that sliced `visibleRange` instead of
+        // the current page. That path could not advance. It was driven by
+        // `handleScroll`, which listens for `scroll` on `#entityContainer` and
+        // reads `container.scrollTop` — but `.entity-container` is
+        // `max-height: none; overflow-y: auto`, so it grows to fit its content,
+        // never overflows, never emits a scroll event, and reports `scrollTop`
+        // 0 forever. `visibleRange` therefore stayed at its constructed value of
+        // `{start: 0, end: itemsPerPage}`.
+        //
+        // The same `> 100` threshold simultaneously hid the Load More button and
+        // disconnected the infinite-scroll observer (`updateLoadMoreButton`) and
+        // cleared the pagination controls (`updatePagination`). The three
+        // together meant a browse list over 100 entities rendered its first 24
+        // cards and offered no way — button, pagination or scroll — to reach the
+        // 25th. That is every large mythology collection on the live site.
+        //
+        // Slicing by page and letting Load More plus the IntersectionObserver
+        // drive it is the path that already demonstrably works below 100, so
+        // extending it upward restores reachability without introducing
+        // anything new. Real virtualisation is still worth having — see
+        // `js/components/virtual-scroller.js` — but it assumes a fixed row
+        // height and this grid's cards vary with density and description
+        // length, so it is not a drop-in and is not attempted here.
+        const start = (this.currentPage - 1) * this.itemsPerPage;
+        const end = start + this.itemsPerPage;
+        this.displayedEntities = this.filteredEntities.slice(start, end);
 
         grid.innerHTML = this.displayedEntities
             .map(entity => this.getEntityCardHTML(entity))
@@ -2465,7 +2572,10 @@ class BrowseCategoryView {
         const totalDisplayed = this.currentPage * this.itemsPerPage;
         const hasMore = totalDisplayed < this.filteredEntities.length;
 
-        if (hasMore && this.filteredEntities.length <= 100) {
+        // No upper bound on list length. The `<= 100` that used to be here
+        // handed long lists to a virtual-scrolling path that could not advance,
+        // so the button was hidden and the content behind it became unreachable.
+        if (hasMore) {
             loadMoreContainer.style.display = 'flex';
             loadMoreBtn.style.display = 'inline-flex';
             loadMoreSpinner.style.display = 'none';
@@ -2670,45 +2780,41 @@ class BrowseCategoryView {
                     this.updateGrid();
                     this.updatePagination();
 
-                    // Scroll to top
-                    document.getElementById('entityContainer')?.scrollTo({ top: 0, behavior: 'smooth' });
+                    // Scroll the results back into view.
+                    //
+                    // This used to call `scrollTo` on `#entityContainer`, which
+                    // does nothing: that element auto-sizes to its content and
+                    // has no scrollable overflow. The page is what scrolls, so
+                    // bring the grid to the top of the viewport instead —
+                    // otherwise changing page leaves the reader looking at
+                    // wherever they already were, with the content silently
+                    // replaced beneath them.
+                    const container = document.getElementById('entityContainer');
+                    if (container && typeof container.scrollIntoView === 'function') {
+                        container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                 }
             });
         });
     }
 
     /**
-     * Handle scroll for virtual scrolling
+     * Retained no-op: nothing scrolls `#entityContainer`.
+     *
+     * This was the window-into-a-long-list calculation for the virtual
+     * scrolling branch removed from {@link updateGrid}. It is kept as a method
+     * rather than deleted because it is a public name on the view, but it no
+     * longer registers a listener and no longer drives rendering — the grid
+     * pages through Load More and the IntersectionObserver instead.
+     *
+     * Left here deliberately rather than reimplemented against the document
+     * scroller: doing that properly needs a measured row height, and this grid's
+     * cards vary in height with view density and description length. Guessing
+     * one (as the old code did — a hardcoded 200/280/350) misplaces the window
+     * as soon as the guess is wrong, which is worse than paging.
      */
     handleScroll() {
-        if (this.filteredEntities.length <= 100) return;
-
-        clearTimeout(this.scrollTimeout);
-        this.scrollTimeout = setTimeout(() => {
-            const container = document.getElementById('entityContainer');
-            if (!container) return;
-
-            const scrollTop = container.scrollTop;
-            const containerWidth = container.offsetWidth;
-
-            // Calculate columns based on container width (responsive)
-            let columns = 1;
-            if (containerWidth >= 1200) columns = 4;
-            else if (containerWidth >= 900) columns = 3;
-            else if (containerWidth >= 600) columns = 2;
-
-            const itemHeight = this.viewDensity === 'compact' ? 200 : (this.viewDensity === 'detailed' ? 350 : 280);
-            const rowHeight = itemHeight + 24; // Include gap
-
-            const start = Math.floor(scrollTop / rowHeight) * columns;
-            const visibleRows = Math.ceil(container.offsetHeight / rowHeight) + 2; // Add buffer rows
-            const end = start + (visibleRows * columns);
-
-            if (start !== this.visibleRange.start || end !== this.visibleRange.end) {
-                this.visibleRange = { start: Math.max(0, start), end: Math.min(this.filteredEntities.length, end) };
-                this.updateGrid();
-            }
-        }, 100);
+        /* intentionally does nothing — see the doc comment above */
     }
 
     /**
@@ -2724,6 +2830,47 @@ class BrowseCategoryView {
                     max-width: 1400px;
                     margin: 0 auto;
                     padding: var(--spacing-xl, 2rem);
+                }
+
+                /* ==========================================
+                   Early-collection notice
+                   Shown on the thin datasets (history, conspiracy) so a short
+                   grid reads as young rather than as a failed load.
+                   ========================================== */
+                .browse-early-notice {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                    max-width: 62ch;
+                    margin: 0 auto var(--spacing-lg, 1.5rem);
+                    padding: 0.85rem 1.1rem;
+                    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.18));
+                    border-radius: 10px;
+                    background: var(--surface-2, rgba(255, 255, 255, 0.04));
+                }
+
+                .browse-early-notice__icon {
+                    font-size: 1.1rem;
+                    line-height: 1.5;
+                    flex: 0 0 auto;
+                }
+
+                .browse-early-notice__text {
+                    margin: 0;
+                    font-size: 0.925rem;
+                    line-height: 1.5;
+                    /* Full body colour rather than a muted grey: this is
+                       information, not a disclaimer, and muted text on a muted
+                       panel is where contrast ratios go to die. */
+                    color: var(--text-primary, #e8e8ef);
+                }
+
+                @media (max-width: 640px) {
+                    .browse-early-notice {
+                        margin-left: 0;
+                        margin-right: 0;
+                        padding: 0.75rem 0.9rem;
+                    }
                 }
 
                 /* ==========================================
@@ -3155,7 +3302,32 @@ class BrowseCategoryView {
                    ========================================== */
                 .entity-container {
                     max-height: none;
-                    overflow-y: auto;
+                    /* Not a scroll container: with max-height none this box
+                       grows to fit its content, so overflow-y auto never
+                       produces a scrollbar. The page scrolls, not this. Stated
+                       explicitly because code used to assume otherwise. */
+                    overflow-y: visible;
+                }
+
+                /* Off-screen cards cost nothing to lay out.
+                   Infinite scroll appends 24 cards at a time and never removes
+                   them, so a reader who keeps scrolling accumulates DOM without
+                   bound. content-visibility auto lets the browser skip layout
+                   and paint for cards outside the viewport, which is what keeps
+                   that accumulation affordable. contain-intrinsic-size supplies
+                   a placeholder height so the scrollbar does not jump as cards
+                   are skipped and unskipped — without it this optimisation
+                   causes exactly the scroll-jank it is meant to prevent. */
+                .entity-grid > .entity-card {
+                    content-visibility: auto;
+                    contain-intrinsic-size: auto 280px;
+                }
+
+                /* Honour reduced-motion by not animating appended cards. */
+                @media (prefers-reduced-motion: reduce) {
+                    .entity-grid > .entity-card {
+                        transition: none !important;
+                    }
                 }
 
                 .entity-grid {
@@ -4566,6 +4738,13 @@ class BrowseCategoryView {
         }
     }
 }
+
+/**
+ * Below this many entities a browse grid reads as sparse rather than full, and
+ * the page says so. Declared as a static rather than inlined so a test can pin
+ * the boundary and so it is tunable in one place.
+ */
+BrowseCategoryView.EARLY_COLLECTION_THRESHOLD = 24;
 
 // Global export for non-module script loading
 // Note: ES module export removed to prevent SyntaxError in non-module context
