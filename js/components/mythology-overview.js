@@ -145,7 +145,7 @@ class MythologyOverview {
                 try {
                     // Race each category query against a timeout to prevent stuck loading
                     const queryWithTimeout = Promise.race([
-                        this._loadSingleCategory(type, mythologyId, mythLower, mythCapitalized),
+                        this._loadSingleCategory(type, mythologyId, mythCapitalized),
                         new Promise(resolve => setTimeout(() => {
                             console.warn(`[MythologyOverview] Timeout loading ${type.collection} for ${mythologyId}`);
                             resolve(null);
@@ -167,30 +167,59 @@ class MythologyOverview {
 
     /**
      * Load a single category's entities for a mythology.
-     * Tries exact match, then capitalized variant — avoids full-collection scan.
+     * Tries exact match, then capitalized variant.
+     *
+     * Read cost matters more here than anywhere else on the site: this is the
+     * primary renderer for every mythology page (spa-navigation.js routes to
+     * MythologyOverview first and only falls back to renderBasicMythologyPage
+     * on error), and it runs once per entry in ENTITY_TYPES — eleven
+     * collections in parallel, per page view.
+     *
+     * It used to `.get()` every matching document and then show
+     * `PREVIEW_LIMIT` of them. For a large mythology that is hundreds of
+     * document reads to render at most twenty cards plus a number. The rows
+     * beyond the preview were fetched, sorted, and thrown away.
+     *
+     * So the two questions are now asked separately: `count()` for the total,
+     * which bills roughly one read per thousand index entries, and a
+     * `limit(PREVIEW_LIMIT)` query for the rows actually rendered. The
+     * capitalized-variant fallback is driven off the count, so a miss costs
+     * one aggregation rather than a second full fetch.
+     *
+     * One behavioural consequence, deliberately accepted: the preview grid
+     * previously showed the alphabetically-first twenty of the whole set, and
+     * now shows twenty in Firestore's own order, sorted among themselves.
+     * Ordering by name instead would need a `mythology + name` composite index
+     * on all eleven collections, and a missing one fails the query outright.
+     * The full, ordered set is one click away behind "View all".
      */
-    async _loadSingleCategory(type, mythologyId, mythLower, mythCapitalized) {
-        let entities = [];
+    async _loadSingleCategory(type, mythologyId, mythCapitalized) {
+        const collection = this.db.collection(type.collection);
 
-        // Try exact match first (e.g. "polynesian")
-        let snapshot = await this.db.collection(type.collection)
-            .where('mythology', '==', mythologyId)
+        // Ask how many there are before asking for any of them.
+        let facetValue = mythologyId;
+        let count = (await collection.where('mythology', '==', facetValue).count().get())
+            .data().count;
+
+        if (count === 0 && mythologyId !== mythCapitalized) {
+            // Try capitalized variant (e.g. "Polynesian")
+            facetValue = mythCapitalized;
+            count = (await collection.where('mythology', '==', facetValue).count().get())
+                .data().count;
+        }
+
+        if (count === 0) return null;
+
+        // Fetch only the rows the preview grid renders.
+        const snapshot = await collection
+            .where('mythology', '==', facetValue)
+            .limit(this.PREVIEW_LIMIT)
             .get();
 
-        if (snapshot.empty && mythologyId !== mythCapitalized) {
-            // Try capitalized variant (e.g. "Polynesian")
-            snapshot = await this.db.collection(type.collection)
-                .where('mythology', '==', mythCapitalized)
-                .get();
-        }
-
-        if (!snapshot.empty) {
-            snapshot.forEach(doc => {
-                entities.push({ id: doc.id, ...doc.data() });
-            });
-        }
-
-        if (entities.length === 0) return null;
+        const entities = [];
+        snapshot.forEach(doc => {
+            entities.push({ id: doc.id, ...doc.data() });
+        });
 
         // Sort alphabetically by name
         entities.sort((a, b) => {
@@ -201,7 +230,7 @@ class MythologyOverview {
 
         return {
             ...type,
-            count: entities.length,
+            count,
             entities
         };
     }
@@ -335,9 +364,11 @@ class MythologyOverview {
     renderCategorySection(mythology, section) {
         const mythName = this.escapeHtml(mythology.name);
         const mythId = mythology.id;
+        // `section.entities` is now capped at PREVIEW_LIMIT by the query, so
+        // "is there more" has to come from the aggregate count rather than
+        // from the length of what was fetched.
         const entitiesToShow = section.entities.slice(0, this.PREVIEW_LIMIT);
-        const hasMore = section.entities.length > this.PREVIEW_LIMIT;
-        const remaining = section.entities.length - this.PREVIEW_LIMIT;
+        const hasMore = section.count > entitiesToShow.length;
 
         // Build an intro from the first few entities' context
         const intro = this.generateCategoryIntro(mythology, section);
