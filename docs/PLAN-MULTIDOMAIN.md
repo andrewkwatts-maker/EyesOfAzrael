@@ -134,6 +134,61 @@ and an empty browse grid.
 
 ---
 
+## 0c. Scaling to a social site — what actually breaks
+
+The static+delta architecture is unusually well suited to a large read audience: content
+reads are served from a CDN and Firestore only carries the diff. That decoupling is the
+site's best asset and it should be defended.
+
+**But it only covers content.** Social features — feeds, comments, votes, notifications,
+profiles — cannot come from a baked snapshot, because they change per user and per second.
+Their reads scale with *audience*, not with corpus size. That is the real cost curve, and
+nothing built so far touches it.
+
+Four specific hazards, all verified in the code rather than assumed:
+
+**1. Vote counters will throttle under exactly the load that means success.**
+`vote-service.js:152` runs a Firestore transaction against an aggregate document. Firestore
+sustains roughly **one write per second to a single document** — a hard limit no plan
+removes. An entity popular enough for a hundred simultaneous voters is an entity whose vote
+counter is now failing and retrying. The fix is a sharded counter: write to one of N shard
+documents at random, sum them on read. It costs N reads instead of one and removes the
+ceiling entirely. This should land before traffic arrives, not after — retrofitting a
+counter means reconciling the counts you already lost.
+
+**2. There is no App Check, and that may be the quota mystery.**
+The Firebase web API key is public by design; security rules are the only thing standing
+between the internet and the database. Without App Check, nothing distinguishes the real
+site from a script pointed at the same endpoint — which means anyone can walk the entity
+collections directly and burn the daily read quota. **50,000 reads in four hours on a site
+architected to make almost none is more consistent with direct API traffic than with page
+views.** Enabling App Check is both the abuse control and a way to test that theory.
+
+**3. Search does not scale past the encyclopedia.**
+There is no external index — search is client-side over the cards projection, and
+`concepts/_cards.json` is already 9 MB. That is acceptable for a corpus browsed slowly and
+untenable for a social site where search *is* the discovery mechanism. A hosted index
+(Typesense or Algolia) becomes necessary somewhere between here and scale; the cards
+projection is a reasonable thing to feed it.
+
+**4. Fan-out is unbuilt.**
+`notification-center.js` exists but the write-side fan-out does not. The choice — write to
+every follower's inbox on publish, versus assembling a feed on read — is the decision that
+sets the cost of the whole social layer, and it is much cheaper to make now than to migrate
+later. For this shape of site (many readers, few authors, no follow graph yet) fan-out on
+read is almost certainly right, and it keeps the write path cheap.
+
+**What is already correct and should not be disturbed:** comments live in
+`entity_posts/{id}/posts` as a subcollection rather than an array on the entity. That is the
+right call — an array would have collided with the 1 MiB document ceiling and made every
+comment a rewrite of the whole entity.
+
+**Sequencing.** App Check first, because it is both an abuse control and a diagnostic for
+the quota question. Sharded counters second, before the load that needs them. Search index
+and fan-out are demand-driven — build them when there is demand, not in anticipation of it.
+
+---
+
 ## 1. Where things actually stand
 
 Everything below was verified against the code, the published packages, and the live site
