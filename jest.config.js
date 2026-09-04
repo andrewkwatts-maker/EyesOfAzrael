@@ -11,6 +11,11 @@ module.exports = {
   roots: ['<rootDir>/__tests__'],
   testMatch: ['**/__tests__/**/*.test.js'],
 
+  // The security-rules suite needs a running Firestore emulator and a node
+  // environment, so it is driven separately by `npm run test:rules`
+  // (jest.rules.config.js) rather than from the default jsdom run.
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/__tests__/rules/'],
+
   // Coverage configuration — collect from tested modules only
   collectCoverageFrom: [
     'js/components/**/*.js',
