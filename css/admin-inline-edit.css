@@ -68,13 +68,23 @@ div:hover > .admin-field-edit-icon,
     display: flex;
     flex-direction: column;
     transform: translateX(100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Same reasoning as the debug panel: sliding a panel off-screen leaves it
+       rendered, focusable and present in the accessibility tree. This one is the
+       admin editing panel, so every anonymous visitor's screen reader was walking
+       through administrative controls they can neither see nor use.
+
+       visibility rather than `display: none` so the slide-out still animates —
+       delayed by the transform's duration on close, immediate on open. */
+    visibility: hidden;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s linear 0.3s;
     box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
     overflow: hidden;
 }
 
 body.admin-edit-active .admin-edit-panel {
     transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s;
 }
 
 /* Push main content when panel is open */

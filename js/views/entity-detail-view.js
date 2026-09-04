@@ -693,7 +693,13 @@
             container.innerHTML = `
                 <div class="edv-not-found">
                     <div class="edv-not-found__icon" aria-hidden="true">&#128533;</div>
-                    <h2 class="edv-not-found__title">Entity Not Found</h2>
+                    <!-- h1, not h2: this is the page's own top-level heading, not a
+                         section of something above it. A not-found page is still a
+                         page, and one with no h1 leaves a screen-reader user with
+                         nothing to orient on at exactly the moment they are already
+                         lost. It is also the state most likely to be reached by
+                         someone following a stale link. -->
+                    <h1 class="edv-not-found__title">Entity Not Found</h1>
                     <p class="edv-not-found__message">
                         The ${this.getEntityTypeLabel(entityType).toLowerCase()} "${this.escapeHtml(entityId)}" could not be found.
                     </p>

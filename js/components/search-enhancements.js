@@ -124,6 +124,7 @@ class SearchEnhancements {
                             id="command-palette-input"
                             class="command-palette-input"
                             placeholder="Search mythology... (type to search)"
+                            aria-label="Search mythology"
                             autocomplete="off"
                             autocapitalize="off"
                             spellcheck="false"
