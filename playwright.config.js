@@ -51,8 +51,15 @@ module.exports = defineConfig({
     },
   ],
 
+  // dev-server.js rather than http-server, because it gzips text responses and
+  // http-server does not. Both GitHub Pages and Firebase Hosting serve this site
+  // gzipped, so measuring transferSize against an uncompressed server described a
+  // transport no visitor uses — the page-weight assertion read 6.87 MB where the
+  // real site transfers a fraction of that. It is also the server `npm run dev`
+  // uses, so local and CI now exercise the same code path.
   webServer: {
-    command: 'npx http-server -p 8080 --silent',
+    command: 'node dev-server.js',
+    env: { PORT: '8080' },
     port: 8080,
     reuseExistingServer: !process.env.CI,
     timeout: 120000,

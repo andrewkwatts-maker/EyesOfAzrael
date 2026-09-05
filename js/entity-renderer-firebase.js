@@ -2722,14 +2722,18 @@ class FirebaseEntityRenderer {
         const isOffline = !navigator.onLine;
         const isNotFound = message.includes('not found') || message.includes('No entity');
 
+        // h1, not h2. This replaces the whole page's main content, so it is the
+        // document's only title — with an h2 the error page had no level-one
+        // heading at all, which is how a screen-reader user finds out where they
+        // landed. The explicit font-size keeps it looking as it did before.
         container.innerHTML = `
             <div class="error-state-container" style="text-align: center; padding: 3rem 1.5rem; max-width: 500px; margin: 2rem auto;">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">
+                <div style="font-size: 3rem; margin-bottom: 1rem;" aria-hidden="true">
                     ${isOffline ? '📡' : isNotFound ? '🔍' : '⚠️'}
                 </div>
-                <h2 style="color: ${isOffline ? '#f59e0b' : '#DC143C'}; margin-bottom: 0.75rem;">
+                <h1 style="color: ${isOffline ? '#f59e0b' : '#DC143C'}; margin-bottom: 0.75rem; font-size: 1.5rem;">
                     ${isOffline ? 'You\'re Offline' : isNotFound ? 'Not Found' : 'Something Went Wrong'}
-                </h2>
+                </h1>
                 <p style="color: var(--color-text-secondary, #9ca3af); margin-bottom: 1.5rem; line-height: 1.6;">
                     ${isOffline
                         ? 'Please check your internet connection and try again.'

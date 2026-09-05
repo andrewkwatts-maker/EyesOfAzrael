@@ -1,17 +1,36 @@
 /**
  * Dataset tabs — mythology / esoteric / history / conspiracy.
  *
- * Sits between the site header and the breadcrumb. The container is always in
- * the DOM but stays empty (and therefore invisible, having no padding of its
- * own) until DomainTabs finds at least two datasets with data, so this adds no
- * vertical space to the page before then.
+ * Sits between the site header and the breadcrumb.
+ *
+ * The container RESERVES its height from the first paint rather than growing
+ * when the tabs mount. Collapsing an empty container to nothing and letting it
+ * expand later is what it did before, and it was the single largest layout
+ * shift on the site: DomainTabs mounts about 1.8s in, and everything below it
+ * jumped down by the height of the strip — 0.284 of a measured 0.418 CLS,
+ * against a 0.25 budget for the whole page.
+ *
+ * --domain-tabs-height is shared by the reservation and the strip itself, so
+ * the space held and the space filled cannot drift apart.
+ *
+ * The reservation is only given back when DomainTabs positively decides it has
+ * nothing to show (fewer than two datasets with data), which it signals with
+ * .domain-tabs-absent. That way the common path — tabs do appear — shifts
+ * nothing, and only the rare path pays a collapse.
  *
  * Colours come from the existing theme custom properties with literal
  * fallbacks, so the tabs inherit light/dark automatically rather than
  * introducing a third palette.
  */
 
-.domain-tabs-container:empty {
+.domain-tabs-container {
+    --domain-tabs-height: 44px;
+    min-height: var(--domain-tabs-height);
+}
+
+/* Set by DomainTabs.mount() when there is nothing to render. */
+.domain-tabs-container.domain-tabs-absent {
+    min-height: 0;
     display: none;
 }
 
@@ -19,6 +38,8 @@
     display: flex;
     gap: 0.25rem;
     align-items: stretch;
+    min-height: var(--domain-tabs-height, 44px);
+    box-sizing: border-box;
     padding: 0 1rem;
     border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
     background: var(--surface-color, transparent);

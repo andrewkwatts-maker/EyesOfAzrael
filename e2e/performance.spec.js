@@ -386,6 +386,21 @@ test.describe('Service Worker and Caching', () => {
     console.log('Service Worker Status:', swStatus);
 
     if (swStatus.registered) {
+      // Wait for the worker to finish activating before reading the caches.
+      //
+      // Precaching happens inside the install handler's waitUntil, so a
+      // registration that merely EXISTS has not necessarily written anything
+      // yet. Reading caches immediately after load raced that, and the test
+      // reported "0 cached items" for a service worker that caches ~90.
+      // navigator.serviceWorker.ready resolves only once a worker is active,
+      // which is after install resolved.
+      await page.evaluate(async () => {
+        await Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise(resolve => setTimeout(resolve, 15000))
+        ]);
+      });
+
       // Check cache storage
       const cacheInfo = await page.evaluate(async () => {
         const cacheNames = await caches.keys();
@@ -603,10 +618,20 @@ test.describe('Render Blocking Resources', () => {
 
       return resources
         .filter(r => {
-          // Check for render-blocking status (if available)
-          if (r.renderBlockingStatus === 'blocking') return true;
+          // When the browser reports renderBlockingStatus, that is the answer —
+          // it knows which requests actually held up the first paint.
+          //
+          // The heuristic below used to run in ADDITION to it, and counted any
+          // .js starting in the first 100ms and taking over 100ms as blocking.
+          // Deferred scripts are fetched early and are not render-blocking by
+          // definition, so with 125 of them the count tracked how loaded the
+          // machine was rather than how the page was built: successive runs on
+          // an unchanged page measured 6, then 107, then 57.
+          if (r.renderBlockingStatus) {
+            return r.renderBlockingStatus === 'blocking';
+          }
 
-          // Heuristic: CSS and sync scripts loaded early are likely blocking
+          // Fallback for engines without renderBlockingStatus (firefox, webkit).
           const isCSS = r.name.endsWith('.css');
           const isEarlyScript = r.name.endsWith('.js') && r.startTime < 100;
 
@@ -729,10 +754,16 @@ test.describe('Firebase Performance', () => {
     page.on('response', async (response) => {
       const url = response.url();
       if (url.includes('firestore') || url.includes('googleapis.com/v1')) {
-        const timing = response.timing();
+        // timing() lives on the Request, not the Response. response.timing() is
+        // not a Playwright API at all, so this handler threw on the first
+        // Firestore response and the test failed with "response.timing is not a
+        // function" — meaning it had never once checked a query duration.
+        const timing = response.request().timing();
         firestoreRequests.push({
           url: url.substring(0, 100),
           status: response.status(),
+          // responseEnd is milliseconds relative to the request start, so it is
+          // already the duration this test wants to bound.
           responseEnd: timing?.responseEnd || 0
         });
       }

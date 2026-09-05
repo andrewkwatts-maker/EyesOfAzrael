@@ -425,7 +425,62 @@ describe('SimpleThemeToggle - Theme Application', () => {
         // Assert - Check that day theme text colors were set
         expect(setPropertySpy).toHaveBeenCalledWith('--color-text-primary', '#0f172a');
         expect(setPropertySpy).toHaveBeenCalledWith('--color-text-secondary', '#475569');
-        expect(setPropertySpy).toHaveBeenCalledWith('--color-text-muted', '#94a3b8');
+        // Was #94a3b8, which measured 2.35:1 against this theme's card background
+        // and failed WCAG AA everywhere a muted string sat on one.
+        expect(setPropertySpy).toHaveBeenCalledWith('--color-text-muted', '#5d6b7f');
+    });
+
+    test('day theme text colors all meet WCAG AA against the light backgrounds', () => {
+        // Pinning hex values catches a change but not a BAD change — the previous
+        // muted value was pinned and wrong. This asserts the property that
+        // actually matters, so any future palette edit has to stay readable.
+        mockLocalStorage.getItem.mockReturnValue('day');
+        themeToggle = new SimpleThemeToggle();
+
+        const set = new Map(setPropertySpy.mock.calls);
+
+        const srgb = (hex) => {
+            const n = parseInt(hex.slice(1), 16);
+            return [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(c => {
+                const s = c / 255;
+                return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+            });
+        };
+        const luminance = (hex) => {
+            const [r, g, b] = srgb(hex);
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        };
+        const contrast = (a, b) => {
+            const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+            return (hi + 0.05) / (lo + 0.05);
+        };
+
+        const backgrounds = [
+            set.get('--color-bg-primary'),
+            set.get('--color-bg-secondary'),
+            set.get('--color-bg-card')
+        ];
+        const foregrounds = [
+            '--color-text-primary',
+            '--color-text-secondary',
+            '--color-text-muted'
+        ];
+
+        // Collected rather than asserted one at a time, so a failure names every
+        // offending pair instead of stopping at the first.
+        const tooLow = [];
+        for (const token of foregrounds) {
+            const fg = set.get(token);
+            expect(fg).toMatch(/^#[0-9a-f]{6}$/i);
+            for (const bg of backgrounds) {
+                const ratio = contrast(fg, bg);
+                if (ratio < 4.5) {
+                    tooLow.push(`${token} (${fg}) on ${bg} = ${ratio.toFixed(2)}:1`);
+                }
+            }
+        }
+
+        expect(tooLow).toEqual([]);
     });
 
     test('should update border colors correctly', () => {

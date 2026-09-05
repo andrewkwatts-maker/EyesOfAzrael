@@ -161,6 +161,10 @@ class ShaderThemeManager {
         // Create canvas
         this.canvas = document.createElement('canvas');
         this.canvas.id = 'shader-background';
+        // Purely decorative: an ambient WebGL backdrop with nothing to announce.
+        // Without this it sat in the accessibility tree on every page as content
+        // outside any landmark, so a screen reader had to step past it each time.
+        this.canvas.setAttribute('aria-hidden', 'true');
         this.canvas.style.cssText = `
             position: fixed;
             top: 0;

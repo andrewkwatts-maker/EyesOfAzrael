@@ -25,7 +25,9 @@
 
 // Bumped for the entity-connections component joining the precache list — an
 // existing client keeps serving the old precache until the version changes.
-const CACHE_VERSION = 'v4.0.3';
+// Bumped for the CSS bundle: returning visitors hold caches keyed to the old
+// per-file stylesheets, which index.html no longer requests.
+const CACHE_VERSION = 'v4.1.0';
 const CACHE_NAME = `eyes-of-azrael-${CACHE_VERSION}`;
 
 // Separate caches for different content types
@@ -48,8 +50,9 @@ const PRECACHE_ASSETS = [
   '/offline.html',
   '/404.html',
   '/500.html',
-  '/styles.css',
-  '/themes/theme-base.css',
+  // One bundle replaces the 70 stylesheets index.html used to link. Precaching
+  // the individual files instead would download CSS the page never requests.
+  '/css/bundle.css',
   '/manifest.json',
   '/firebase-config.js',
   '/js/app-init-simple.js',
@@ -75,12 +78,10 @@ const PRECACHE_CRITICAL = [
 
 // Additional assets to precache for enhanced offline experience
 const PRECACHE_ENHANCED = [
-  '/css/loading-spinner.css',
-  '/css/skeleton-screens.css',
-  '/css/mythology-ambiance.css',
-  '/css/entity-card-polish.css',
-  '/css/buttons.css',
-  '/css/home-page.css',
+  // No stylesheets here any more: all 70 are inside /css/bundle.css, which is
+  // precached above. The six that used to be listed included /css/buttons.css,
+  // which index.html never linked at all — it was downloaded on every install
+  // and never used.
   '/js/views/landing-page-view.js',
   '/js/views/browse-category-view.js',
   '/js/views/home-view.js',

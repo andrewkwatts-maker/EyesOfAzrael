@@ -2251,10 +2251,20 @@
     color: var(--color-text-primary, #e5e7eb);
 }
 
+/* The selected chip is filled, not tinted.
+ *
+ * It used to draw the theme's primary colour as text on a 20% tint of that same
+ * colour. Two colours that close can never reach 4.5:1 — in the light theme it
+ * measured 3.78:1 for the label and 2.6:1 for the count, and no adjustment to
+ * either value fixes it while both come from the same hue.
+ *
+ * Filling with the primary and using its designated contrast colour clears AA in
+ * both themes with one rule, which a per-theme text tweak would not: darkening
+ * the text enough for the light tint makes it disappear on the dark one. */
 .region-chip.active {
-    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.2);
+    background: var(--color-primary, #8b7fff);
     border-color: var(--color-primary, #8b7fff);
-    color: var(--color-primary, #8b7fff);
+    color: var(--color-primary-contrast, #ffffff);
     font-weight: 600;
 }
 
@@ -2265,8 +2275,11 @@
     border-radius: var(--radius-full, 9999px);
 }
 
+/* Inherits the filled chip's contrast colour; the badge is darkened against the
+ * fill rather than tinted, so it stays legible on either theme's primary. */
 .region-chip.active .region-chip-count {
-    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.3);
+    background: rgba(0, 0, 0, 0.25);
+    color: var(--color-primary-contrast, #ffffff);
 }
 
 /* Mythology Grid */

@@ -186,7 +186,17 @@ class NavigationEnhancements {
         indicator.setAttribute('role', 'progressbar');
         indicator.setAttribute('aria-label', 'Page loading');
 
-        document.body.prepend(indicator);
+        // Into the banner landmark rather than straight onto <body>. As a direct
+        // child of body it was page content belonging to no region, which a
+        // screen reader reaches only by walking outside the landmark structure.
+        // The rule is position:fixed at the top of the viewport, so its parent
+        // does not affect where it draws.
+        const banner = document.querySelector('header[role="banner"], .site-header, header');
+        if (banner) {
+            banner.prepend(indicator);
+        } else {
+            document.body.prepend(indicator);
+        }
         this.navLoadingIndicator = indicator;
 
         // Listen for navigation events

@@ -37,6 +37,13 @@ jobs:
             exit 1
           fi
 
+      # css/bundle.css is committed, because GitHub Pages serves the repo as-is
+      # and there is no build step in front of it. That makes a stale bundle
+      # invisible: the source stylesheet changes, the site keeps shipping the old
+      # CSS, and nothing fails. This is the thing that fails.
+      - name: Check CSS bundle is up to date
+        run: npm run build:css:check
+
       - name: Run unit tests with coverage
         run: npm run test:ci
 

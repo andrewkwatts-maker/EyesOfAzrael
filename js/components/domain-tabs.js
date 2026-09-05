@@ -192,6 +192,13 @@ class DomainTabs {
 
         const html = await this.render();
         container.innerHTML = html;
+
+        // The container reserves the tab strip's height from first paint so that
+        // mounting does not push the page down (see css/domain-tabs.css). Give
+        // that space back only once we know there is nothing to show, which is
+        // the one case where a shift is unavoidable and is also the rare one.
+        container.classList.toggle('domain-tabs-absent', !html);
+
         if (!html) return false;
 
         this._bindKeyboard(container);

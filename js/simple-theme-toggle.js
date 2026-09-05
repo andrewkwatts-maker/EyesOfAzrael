@@ -115,8 +115,17 @@ class SimpleThemeToggle {
         root.style.setProperty('--color-text-primary-rgb', '15, 23, 42');
         root.style.setProperty('--color-text-secondary', '#475569');
         root.style.setProperty('--color-text-secondary-rgb', '71, 85, 105');
-        root.style.setProperty('--color-text-muted', '#94a3b8');
-        root.style.setProperty('--color-text-muted-rgb', '148, 163, 184');
+        // #94a3b8 was only 2.35:1 against this theme's near-white card background,
+        // failing WCAG AA — axe caught it on the "Press ? for shortcuts" hint, but
+        // it applied to every muted string in the light theme.
+        //
+        // #5d6b7f is the lightest value that clears 4.5:1 against ALL THREE light
+        // backgrounds (4.95:1 on the darkest, --color-bg-card #f1f5f9). The obvious
+        // pick, slate-500 #64748b, clears white and --color-bg-secondary but lands
+        // at 4.34:1 on the card — which is why the sibling test checks every
+        // foreground against every background rather than pinning a hex.
+        root.style.setProperty('--color-text-muted', '#5d6b7f');
+        root.style.setProperty('--color-text-muted-rgb', '93, 107, 127');
 
         root.style.setProperty('--color-border-primary', '#e2e8f0');
         root.style.setProperty('--color-border-primary-rgb', '226, 232, 240');
@@ -129,6 +138,27 @@ class SimpleThemeToggle {
         root.style.setProperty('--color-surface-hover', 'rgba(241, 245, 249, 0.95)');
         root.style.setProperty('--color-border', 'rgba(226, 232, 240, 0.5)');
         root.style.setProperty('--color-shadow', 'rgba(0, 0, 0, 0.1)');
+
+        // The -rgb companions, which this theme used to omit entirely.
+        //
+        // Stylesheets compose their own alpha with rgba(var(--color-surface-rgb), a)
+        // — css/dynamic-views.css and the browse view's injected styles both do. With
+        // no day value, those kept themes/theme-base.css's DARK :root default of
+        // 26, 31, 58 while --color-text-primary flipped to near-black #0f172a. The
+        // Load More button rendered #0f172a on #484c61: 2.1:1, unreadable, and a
+        // real defect for anyone using the light theme rather than a test artifact.
+        //
+        // Every --color-surface* value above is paired with its -rgb form here so
+        // the two cannot drift apart again.
+        root.style.setProperty('--color-surface-rgb', '241, 245, 249');
+        root.style.setProperty('--color-surface-solid', '#f1f5f9');
+        root.style.setProperty('--color-surface-solid-rgb', '241, 245, 249');
+        root.style.setProperty('--color-surface-hover-rgb', '226, 232, 240');
+        root.style.setProperty('--color-surface-elevated', 'rgba(255, 255, 255, 0.9)');
+        root.style.setProperty('--color-surface-elevated-rgb', '255, 255, 255');
+        root.style.setProperty('--color-surface-elevated-solid', '#ffffff');
+        root.style.setProperty('--color-background-rgb', '255, 255, 255');
+        root.style.setProperty('--color-border-rgb', '226, 232, 240');
     }
 
     /**
@@ -167,6 +197,20 @@ class SimpleThemeToggle {
         root.style.setProperty('--color-surface-hover', 'rgba(26, 31, 58, 0.95)');
         root.style.setProperty('--color-border', 'rgba(139, 127, 255, 0.3)');
         root.style.setProperty('--color-shadow', 'rgba(0, 0, 0, 0.5)');
+
+        // Mirrors the day theme's -rgb companions. These match themes/theme-base.css's
+        // :root, so omitting them here was survivable — but only by accident, and only
+        // until someone changed the default. Set explicitly so switching themes always
+        // writes a complete set rather than leaving the previous theme's values behind.
+        root.style.setProperty('--color-surface-rgb', '26, 31, 58');
+        root.style.setProperty('--color-surface-solid', '#1a1f3a');
+        root.style.setProperty('--color-surface-solid-rgb', '26, 31, 58');
+        root.style.setProperty('--color-surface-hover-rgb', '42, 47, 74');
+        root.style.setProperty('--color-surface-elevated', 'rgba(42, 47, 74, 0.9)');
+        root.style.setProperty('--color-surface-elevated-rgb', '42, 47, 74');
+        root.style.setProperty('--color-surface-elevated-solid', '#2a2f4a');
+        root.style.setProperty('--color-background-rgb', '10, 14, 39');
+        root.style.setProperty('--color-border-rgb', '139, 127, 255');
     }
 
     /**

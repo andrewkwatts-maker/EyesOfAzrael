@@ -891,6 +891,12 @@
             desc.id = 'protected-feature-desc';
             desc.className = 'sr-only';
             desc.textContent = 'This feature requires you to sign in.';
+            // hidden, not just visually hidden. This exists only as an
+            // aria-describedby target, and that lookup still resolves against a
+            // hidden element — so the description reaches the controls that
+            // reference it without the text also sitting loose in the page as
+            // content outside every landmark.
+            desc.hidden = true;
             document.body.appendChild(desc);
         }
     }

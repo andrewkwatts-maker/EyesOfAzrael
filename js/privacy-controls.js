@@ -52,6 +52,12 @@
       const banner = document.createElement('div');
       banner.id = 'consent-banner';
       banner.className = 'consent-banner';
+      // A labelled landmark, so its text is reachable by landmark navigation
+      // rather than being page content that belongs to no region at all. This is
+      // a persistent complementary notice, not a modal — it does not trap focus
+      // and the page stays usable behind it, so role="dialog" would misdescribe it.
+      banner.setAttribute('role', 'region');
+      banner.setAttribute('aria-label', 'Privacy and analytics notice');
       banner.innerHTML = `
         <div class="consent-content">
           <div class="consent-text">

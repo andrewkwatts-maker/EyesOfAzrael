@@ -75,7 +75,29 @@ const NAVIGATION_TIMEOUT = 30000;
  */
 async function waitForPageLoad(page) {
     await page.waitForLoadState('domcontentloaded');
-    await page.waitForTimeout(2000); // Allow for SPA content to render
+
+    // Wait for the view to actually be there, rather than sleeping for two
+    // seconds and hoping.
+    //
+    // The fixed sleep was the single largest source of flake in this file. It
+    // raced the SPA's first render, so on a loaded machine the assertions ran
+    // against an empty #main-content and reported things the page does have as
+    // missing — "Browse page should have an h1" failed while the rendered page
+    // showed "Deities & Gods". Polling for the rendered view is both faster when
+    // the render is quick and reliable when it is not.
+    await page.waitForFunction(() => {
+        const main = document.getElementById('main-content');
+        if (!main) return false;
+        const hasView = main.querySelector('h1, h2, .entity-card, .mythology-card');
+        return !!hasView && (main.innerText || '').trim().length > 100;
+    }, { timeout: 20000 }).catch(() => {
+        // Deliberately not a failure: some routes legitimately render an empty
+        // or error state, and it is the individual assertions' job to say what
+        // is wrong with the page — not this helper's.
+    });
+
+    // Short settle for chrome that mounts after the view (theme, shaders).
+    await page.waitForTimeout(300);
 }
 
 /**
