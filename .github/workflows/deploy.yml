@@ -54,7 +54,13 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
-          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          # Literal, not a secret. The project ID is not confidential — it is
+          # served publicly in firebase-config.js and is the web.app hostname —
+          # and putting it in a secret only adds a way for the deploy to fail:
+          # an unset or misspelled secret expands to an empty string, and the
+          # action then fails with no indication that the project was the
+          # problem. One less thing that can be silently missing.
+          projectId: eyesofazrael
 
   preview:
     name: Deploy Preview
@@ -79,5 +85,11 @@ jobs:
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+          # Literal, not a secret. The project ID is not confidential — it is
+          # served publicly in firebase-config.js and is the web.app hostname —
+          # and putting it in a secret only adds a way for the deploy to fail:
+          # an unset or misspelled secret expands to an empty string, and the
+          # action then fails with no indication that the project was the
+          # problem. One less thing that can be silently missing.
+          projectId: eyesofazrael
           expires: 7d
