@@ -18110,6 +18110,20 @@ textarea[aria-invalid="true"] {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+        /* The delays matter as much as the durations, and they were missing.
+         *
+         * Zeroing only the duration leaves staggered entrances intact: the
+         * landing stat cards use `animation-delay: calc(var(--stat-index) * 0.1s)`
+         * with a starting `opacity: 0`, so the sixth card still sat invisible for
+         * 500ms before its 0.01ms animation ran. Content appearing in sequence
+         * over half a second is precisely the motion the user asked not to have,
+         * and it is a flash of unreadable text on the way — axe measured the
+         * sixth card's description below the AA contrast minimum for that reason.
+         *
+         * -1ms rather than 0s so the animation is already past its start when it
+         * begins, landing directly on the filled end state. */
+        animation-delay: -1ms !important;
+        transition-delay: 0s !important;
         scroll-behavior: auto !important;
     }
 
@@ -80962,10 +80976,26 @@ body.modal-open {
     box-shadow: 0 4px 12px rgba(147, 112, 219, 0.4);
 }
 
+/* NOTE: this rule is unscoped and therefore styles EVERY .btn-secondary on the
+ * site, not just the submission workflow — it is the last of eleven competing
+ * .btn-secondary definitions in the bundle, so it is the one that wins
+ * everywhere. That is why the privacy consent banner's Customize button was
+ * drawing this file's purple.
+ *
+ * The label was var(--submission-primary) — #9370DB — on a 20% wash of that same
+ * purple, which resolves to #dfdbf3 over a light surface: 2.78:1, below the AA
+ * minimum of 4.5. Two shades of one hue cannot be pulled apart far enough by
+ * changing either one.
+ *
+ * Body text colour on the tint fixes it in every theme at once, and the purple
+ * stays in the border where it still identifies the button. Scoping this whole
+ * file under .submission-page is the real repair — see the note in
+ * docs/ or the review report — but that is a wider change than a contrast fix
+ * and would silently restyle the submission screens if done carelessly. */
 .btn-secondary {
     background: rgba(147, 112, 219, 0.2);
     border: 2px solid rgba(147, 112, 219, 0.4);
-    color: var(--submission-primary);
+    color: var(--color-text-primary, #f8f9fa);
 }
 
 .btn-secondary:hover:not(:disabled) {

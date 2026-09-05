@@ -1,23 +1,34 @@
 /**
  * Theme palette contrast guard.
  *
- * js/shader-theme-picker.js is the theme system the site actually loads — the
- * THEMES table there is what paints the page. Eight of its seventeen palettes
- * shipped text below the WCAG AA 4.5:1 minimum against their own backgrounds,
- * including the default `night`, and nothing caught it: the palettes are plain
- * data, and no test read them.
+ * TWO SOURCES, and the distinction matters more than it looks.
  *
- * Pinning hex values would not have helped. The previous values were stable and
- * wrong. This asserts the property instead, so any future palette edit has to
- * stay readable to pass.
+ * themes/theme-config.json is what the site actually paints with:
+ * shader-theme-picker.js fetches it at runtime. The DEFAULT_THEME_CONFIG object
+ * inside that JS file is only the fallback used when the fetch fails.
  *
- * Static analysis of the source — no browser, no DOM.
+ * The first version of this test read only the JS constant. It passed while the
+ * JSON — the live one — still had every original value, so eight of seventeen
+ * palettes were shipping text below the WCAG AA 4.5:1 minimum against their own
+ * backgrounds, including the default `night`, with a green test on top. A guard
+ * pointed at the wrong file is worse than no guard, because it answers the
+ * question you meant to ask with a result about something else.
+ *
+ * So both are checked, and they are checked against each other: a fallback that
+ * has drifted from the live config will render differently the day the fetch
+ * fails, which is exactly when nobody is watching.
+ *
+ * Pinning hex values would not have helped either — the wrong values were
+ * stable. This asserts the property.
+ *
+ * Static analysis only — no browser, no DOM.
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const SOURCE = path.join(__dirname, '..', 'js', 'shader-theme-picker.js');
+const LIVE_CONFIG = path.join(__dirname, '..', 'themes', 'theme-config.json');
 
 // ---------------------------------------------------------------------------
 // WCAG 2.1 relative luminance and contrast ratio
@@ -76,17 +87,78 @@ const FOREGROUNDS = ['text-primary', 'text-secondary', 'text-muted'];
 const BACKGROUNDS = ['bg-primary', 'bg-secondary', 'bg-card'];
 const AA_NORMAL_TEXT = 4.5;
 
+/**
+ * The two palette sources, keyed by how they reach the browser.
+ *
+ * "live" is authoritative — it is fetched at runtime. "fallback" only applies
+ * when that fetch fails, which makes it the copy most likely to rot unnoticed.
+ */
+function loadSources() {
+    const liveRaw = JSON.parse(fs.readFileSync(LIVE_CONFIG, 'utf8'));
+    const live = {};
+    for (const [name, theme] of Object.entries(liveRaw.themes || {})) {
+        if (theme && theme.colors) live[name] = theme.colors;
+    }
+    return {
+        live,
+        fallback: parseThemes(fs.readFileSync(SOURCE, 'utf8'))
+    };
+}
+
 describe('Theme palette contrast', () => {
+    let sources;
     let themes;
 
     beforeAll(() => {
-        themes = parseThemes(fs.readFileSync(SOURCE, 'utf8'));
+        sources = loadSources();
+        themes = sources.fallback;
     });
 
     test('the THEMES table is parseable and non-trivial', () => {
         // Guards the parser itself: if the table's shape changes and this stops
         // finding themes, every contrast assertion below would vacuously pass.
         expect(Object.keys(themes).length).toBeGreaterThanOrEqual(10);
+    });
+
+    test('the live theme config is parseable and non-trivial', () => {
+        expect(Object.keys(sources.live).length).toBeGreaterThanOrEqual(10);
+    });
+
+    test('LIVE config: every text colour meets WCAG AA against its own backgrounds', () => {
+        // This is the one that matters — themes/theme-config.json is fetched at
+        // runtime and is what actually paints the page.
+        const failures = [];
+        for (const [name, colors] of Object.entries(sources.live)) {
+            for (const fg of FOREGROUNDS) {
+                for (const bg of BACKGROUNDS) {
+                    if (!HEX.test(colors[fg] || '') || !HEX.test(colors[bg] || '')) continue;
+                    const ratio = contrastRatio(colors[fg], colors[bg]);
+                    if (ratio < AA_NORMAL_TEXT) {
+                        failures.push(
+                            `${name}: ${fg} (${colors[fg]}) on ${bg} (${colors[bg]}) ` +
+                            `= ${ratio.toFixed(2)}:1`
+                        );
+                    }
+                }
+            }
+        }
+        expect(failures).toEqual([]);
+    });
+
+    test('the fallback palettes match the live config', () => {
+        // Drift here is silent until the config fetch fails, at which point the
+        // site renders a different palette than the one that was reviewed.
+        const drift = [];
+        for (const [name, liveColors] of Object.entries(sources.live)) {
+            const fb = sources.fallback[name];
+            if (!fb) { drift.push(`${name}: present in live config, missing from the JS fallback`); continue; }
+            for (const token of [...FOREGROUNDS, ...BACKGROUNDS]) {
+                if (liveColors[token] && fb[token] && liveColors[token] !== fb[token]) {
+                    drift.push(`${name}.${token}: live ${liveColors[token]} vs fallback ${fb[token]}`);
+                }
+            }
+        }
+        expect(drift).toEqual([]);
     });
 
     test('every theme defines the text and background tokens', () => {

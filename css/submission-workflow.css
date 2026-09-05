@@ -202,10 +202,26 @@
     box-shadow: 0 4px 12px rgba(147, 112, 219, 0.4);
 }
 
+/* NOTE: this rule is unscoped and therefore styles EVERY .btn-secondary on the
+ * site, not just the submission workflow — it is the last of eleven competing
+ * .btn-secondary definitions in the bundle, so it is the one that wins
+ * everywhere. That is why the privacy consent banner's Customize button was
+ * drawing this file's purple.
+ *
+ * The label was var(--submission-primary) — #9370DB — on a 20% wash of that same
+ * purple, which resolves to #dfdbf3 over a light surface: 2.78:1, below the AA
+ * minimum of 4.5. Two shades of one hue cannot be pulled apart far enough by
+ * changing either one.
+ *
+ * Body text colour on the tint fixes it in every theme at once, and the purple
+ * stays in the border where it still identifies the button. Scoping this whole
+ * file under .submission-page is the real repair — see the note in
+ * docs/ or the review report — but that is a wider change than a contrast fix
+ * and would silently restyle the submission screens if done carelessly. */
 .btn-secondary {
     background: rgba(147, 112, 219, 0.2);
     border: 2px solid rgba(147, 112, 219, 0.4);
-    color: var(--submission-primary);
+    color: var(--color-text-primary, #f8f9fa);
 }
 
 .btn-secondary:hover:not(:disabled) {

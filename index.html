@@ -109,6 +109,26 @@
             opacity: 1;
             visibility: visible;
             flex: 1;
+            /* width: 100% is load-bearing, and not obviously so.
+             *
+             * body is display:flex/column, so #main-content is a flex item and its
+             * WIDTH is the cross size. styles.css sets `main { margin: 2rem auto }`,
+             * and per Flexbox 9.4 an auto cross-axis margin makes the browser skip
+             * align-items:stretch — the auto margins win, the item is sized to
+             * fit-content, and it is centred.
+             *
+             * So the main box was exactly as wide as whatever happened to be inside
+             * it. Across the first second it went 216px -> 776px -> 1280px as the
+             * loading container gave way to the skeleton and then the view, and
+             * because it stays centred, each resize MOVED it horizontally: x=532 ->
+             * x=252 -> x=0. That 280px sideways jump was the entire remaining
+             * layout shift (0.108 of 0.109) — the 8px vertical wobble everyone
+             * looks for first contributes about 0.003.
+             *
+             * A definite cross size leaves the auto margins nothing to distribute,
+             * so the box is full width from the first paint and never moves.
+             * box-sizing is border-box here, so the 2rem side padding is included. */
+            width: 100%;
         }
 
         /* Safety: Landing page must always be visible once rendered */

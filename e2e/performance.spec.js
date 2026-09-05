@@ -172,14 +172,36 @@ test.describe('Navigation Performance', () => {
     await page.waitForTimeout(1000);
 
     // Measure SPA navigation time
+    // Measure until the destination view is actually on screen.
+    //
+    // This used to trigger the hash change and then `await setTimeout(1500)`,
+    // returning the elapsed time — so it measured its own sleep. It reported
+    // ~1517ms against a 2000ms budget on every run, which means it could only
+    // fail if the main thread stalled for more than 483ms, and it could never
+    // detect a genuinely slow SPA route: a navigation taking 1400ms and one
+    // taking 10ms both returned about 1500.
+    //
+    // Resolving on the rendered view makes the number mean what the test name
+    // says. The 8s cap is a guard, not the budget — the assertion below is.
     const spaNavTime = await page.evaluate(async () => {
       const start = performance.now();
+      const main = document.getElementById('main-content');
+      const before = main ? main.innerHTML.length : 0;
 
-      // Trigger SPA navigation
       window.location.hash = '#/mythologies';
 
-      // Wait for content update
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => {
+        const deadline = start + 8000;
+        (function poll() {
+          const m = document.getElementById('main-content');
+          const rendered = m &&
+            m.innerHTML.length !== before &&
+            m.querySelector('h1, .mythology-card') &&
+            !m.querySelector('.entity-loading-state');
+          if (rendered || performance.now() > deadline) return resolve();
+          requestAnimationFrame(poll);
+        })();
+      });
 
       return performance.now() - start;
     });
@@ -347,7 +369,7 @@ test.describe('Image Lazy Loading', () => {
     await page.waitForTimeout(2000); // let the view mount
 
     const belowFold = await page.evaluate(() => {
-      const out = { total: 0, loaded: [] };
+      const out = { totalImages: document.querySelectorAll('img').length, total: 0, loaded: [] };
       document.querySelectorAll('img').forEach(img => {
         const rect = img.getBoundingClientRect();
         // A comfortable margin below the viewport: browsers deliberately start
@@ -362,7 +384,27 @@ test.describe('Image Lazy Loading', () => {
       return out;
     });
 
-    console.log('Below-fold images:', belowFold.total, 'of which already loaded:', belowFold.loaded.length);
+    console.log(
+      'Images on page:', belowFold.totalImages,
+      '| below fold:', belowFold.total,
+      '| of those already loaded:', belowFold.loaded.length
+    );
+
+    // Skip rather than pass when there is nothing to measure.
+    //
+    // This route currently renders ZERO <img> elements — the category icons are
+    // inlined as <svg> so they can inherit currentColor, and entity cards without
+    // artwork fall back to a letter tile. So the filter below matched nothing and
+    // `expect([]).toEqual([])` was vacuously true: a green test asserting nothing.
+    //
+    // That is worse than the assertion it replaced, which at least failed
+    // honestly. Skipping states the situation out loud, and the moment any real
+    // <img> appears on this route the test starts running for real.
+    test.skip(
+      belowFold.total === 0,
+      `No images below the fold to check (page has ${belowFold.totalImages} <img> elements ` +
+      `in total). Nothing to lazy-load, so there is nothing to assert.`
+    );
 
     expect(
       belowFold.loaded,
@@ -880,27 +922,54 @@ test.describe('Resource Optimization', () => {
   test('HTTP/2 or HTTP/3 should be used for multiplexing', async ({ page }) => {
     await page.goto('/', { waitUntil: 'load' });
 
-    const protocolInfo = await page.evaluate(() => {
+    // Same-origin only. Third-party CDNs (Google Fonts) serve h2 regardless of
+    // how this site is hosted, so counting them measures Google's infrastructure
+    // rather than ours — and it is exactly enough to stop a naive "is there any
+    // h2?" check from noticing that all 134 of our own requests are HTTP/1.1.
+    const { protocolInfo, sameOrigin } = await page.evaluate(() => {
       const resources = performance.getEntriesByType('resource');
       const protocols = {};
+      const own = {};
 
       for (const r of resources) {
         const protocol = r.nextHopProtocol || 'unknown';
         protocols[protocol] = (protocols[protocol] || 0) + 1;
+        if (r.name.startsWith(location.origin)) {
+          own[protocol] = (own[protocol] || 0) + 1;
+        }
       }
 
-      return protocols;
+      return { protocolInfo: protocols, sameOrigin: own };
     });
 
-    console.log('HTTP Protocols Used:', protocolInfo);
+    console.log('HTTP Protocols Used (all):', protocolInfo);
+    console.log('HTTP Protocols Used (same-origin):', sameOrigin);
 
-    // Most resources should use HTTP/2 or HTTP/3
-    const modernProtocols = (protocolInfo['h2'] || 0) + (protocolInfo['h3'] || 0);
-    const totalResources = Object.values(protocolInfo).reduce((a, b) => a + b, 0);
+    const modernProtocols = (sameOrigin['h2'] || 0) + (sameOrigin['h3'] || 0);
+    const totalResources = Object.values(sameOrigin).reduce((a, b) => a + b, 0);
+    const modernRatio = totalResources > 0 ? modernProtocols / totalResources : 0;
+    console.log('Modern Protocol Ratio (same-origin):', (modernRatio * 100).toFixed(1), '%');
 
-    if (totalResources > 0) {
-      const modernRatio = modernProtocols / totalResources;
-      console.log('Modern Protocol Ratio:', (modernRatio * 100).toFixed(1), '%');
-    }
+    // This test had no assertion at all — it computed the ratio, logged it, and
+    // ended. It could not fail, and it was reporting 98.5% HTTP/1.1 while
+    // appearing green.
+    //
+    // It also cannot be given a real assertion here. Protocol negotiation is a
+    // property of the HOST, and these tests run against dev-server.js, a plain
+    // Node http server that speaks HTTP/1.1 by construction. Asserting h2 would
+    // fail permanently while telling us nothing about the deployed site — both
+    // GitHub Pages and Firebase Hosting serve h2, which is verifiable against
+    // the live origin but not from here.
+    //
+    // So: skip with the reason stated, rather than stay green on nothing. If the
+    // local server ever speaks h2, the assertion below starts applying.
+    test.skip(
+      modernProtocols === 0,
+      `Local test server speaks HTTP/1.1 for all ${totalResources} same-origin ` +
+      `requests (${JSON.stringify(sameOrigin)}). Protocol multiplexing is a hosting ` +
+      `property and has to be checked against the deployed origin, not this server.`
+    );
+
+    expect(modernRatio).toBeGreaterThan(0.5);
   });
 });

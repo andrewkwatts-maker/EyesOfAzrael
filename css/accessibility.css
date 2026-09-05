@@ -336,6 +336,20 @@ textarea[aria-invalid="true"] {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+        /* The delays matter as much as the durations, and they were missing.
+         *
+         * Zeroing only the duration leaves staggered entrances intact: the
+         * landing stat cards use `animation-delay: calc(var(--stat-index) * 0.1s)`
+         * with a starting `opacity: 0`, so the sixth card still sat invisible for
+         * 500ms before its 0.01ms animation ran. Content appearing in sequence
+         * over half a second is precisely the motion the user asked not to have,
+         * and it is a flash of unreadable text on the way — axe measured the
+         * sixth card's description below the AA contrast minimum for that reason.
+         *
+         * -1ms rather than 0s so the animation is already past its start when it
+         * begins, landing directly on the filled end state. */
+        animation-delay: -1ms !important;
+        transition-delay: 0s !important;
         scroll-behavior: auto !important;
     }
 

@@ -184,22 +184,39 @@ test.describe('Landing Page Accessibility', () => {
     });
 
     test('1. All images have alt text', async ({ page }) => {
-        const images = await page.locator('img').all();
+        // Read every image in ONE evaluate, rather than a locator round-trip per
+        // attribute.
+        //
+        // The old loop resolved `page.locator('img').all()` and then made four
+        // getAttribute calls per image. The landing page replaces its category
+        // <img> elements with inline <svg> as soon as inlineSVGIcons() runs, so
+        // handles captured a moment earlier point at detached nodes — and
+        // getAttribute on a detached handle does not fail fast, it waits out the
+        // full 10s actionTimeout and then reports a timeout that looks nothing
+        // like "the element went away". A single snapshot cannot be raced by a
+        // DOM mutation partway through, and it is one round trip instead of 4N.
+        const images = await page.evaluate(() =>
+            Array.from(document.querySelectorAll('img')).map(img => ({
+                src: img.getAttribute('src'),
+                alt: img.getAttribute('alt'),
+                role: img.getAttribute('role'),
+                ariaHidden: img.getAttribute('aria-hidden')
+            }))
+        );
 
-        for (const img of images) {
-            const src = await img.getAttribute('src');
-            const alt = await img.getAttribute('alt');
-            const role = await img.getAttribute('role');
-            const ariaHidden = await img.getAttribute('aria-hidden');
+        console.log('Images checked:', images.length);
 
-            // Images should have alt text, be marked as decorative, or be hidden from AT
-            const isAccessible = alt !== null ||
-                                 role === 'presentation' ||
-                                 role === 'none' ||
-                                 ariaHidden === 'true';
+        const inaccessible = images.filter(img => !(
+            img.alt !== null ||
+            img.role === 'presentation' ||
+            img.role === 'none' ||
+            img.ariaHidden === 'true'
+        ));
 
-            expect(isAccessible, `Image ${src} missing alt text`).toBeTruthy();
-        }
+        expect(
+            inaccessible.map(i => i.src || '(no src)'),
+            'images missing alt text, role="presentation"/"none", or aria-hidden'
+        ).toEqual([]);
     });
 
     test('2. Heading hierarchy is correct', async ({ page }) => {
