@@ -99,7 +99,7 @@
         themes: {
             night: {
                 name: 'Night', icon: '\uD83C\uDF19', description: 'Dark and mysterious, like ancient tomes', category: 'featured',
-                colors: { 'primary': '#8b7fff', 'primary-rgb': '139, 127, 255', 'secondary': '#ff7eb6', 'secondary-rgb': '255, 126, 182', 'accent': '#ffd93d', 'accent-rgb': '255, 217, 61', 'bg-primary': '#0a0e27', 'bg-primary-rgb': '10, 14, 39', 'bg-secondary': '#151a35', 'bg-secondary-rgb': '21, 26, 53', 'bg-card': '#1a1f3a', 'bg-card-rgb': '26, 31, 58', 'text-primary': '#f8f9fa', 'text-primary-rgb': '248, 249, 250', 'text-secondary': '#adb5bd', 'text-secondary-rgb': '173, 181, 189', 'text-muted': '#6c757d', 'text-muted-rgb': '108, 117, 125', 'border-primary': '#2a2f4a', 'border-primary-rgb': '42, 47, 74', 'border-accent': '#4a4f6a', 'border-accent-rgb': '74, 79, 106' }
+                colors: { 'primary': '#8b7fff', 'primary-rgb': '139, 127, 255', 'secondary': '#ff7eb6', 'secondary-rgb': '255, 126, 182', 'accent': '#ffd93d', 'accent-rgb': '255, 217, 61', 'bg-primary': '#0a0e27', 'bg-primary-rgb': '10, 14, 39', 'bg-secondary': '#151a35', 'bg-secondary-rgb': '21, 26, 53', 'bg-card': '#1a1f3a', 'bg-card-rgb': '26, 31, 58', 'text-primary': '#f8f9fa', 'text-primary-rgb': '248, 249, 250', 'text-secondary': '#adb5bd', 'text-secondary-rgb': '173, 181, 189', 'text-muted': '#808992', 'text-muted-rgb': '128, 137, 146', 'border-primary': '#2a2f4a', 'border-primary-rgb': '42, 47, 74', 'border-accent': '#4a4f6a', 'border-accent-rgb': '74, 79, 106' }
             },
             cosmic: {
                 name: 'Cosmic', icon: '\uD83C\uDF0C', description: 'Deep space nebula and stars', category: 'featured',
@@ -111,7 +111,7 @@
             },
             golden: {
                 name: 'Golden', icon: '\uD83C\uDF1F', description: 'Radiant warmth of divine gold', category: 'featured',
-                colors: { 'primary': '#f59e0b', 'primary-rgb': '245, 158, 11', 'secondary': '#d97706', 'secondary-rgb': '217, 119, 6', 'accent': '#fbbf24', 'accent-rgb': '251, 191, 36', 'bg-primary': '#1a1408', 'bg-primary-rgb': '26, 20, 8', 'bg-secondary': '#2a2010', 'bg-secondary-rgb': '42, 32, 16', 'bg-card': '#3a2c18', 'bg-card-rgb': '58, 44, 24', 'text-primary': '#fef3c7', 'text-primary-rgb': '254, 243, 199', 'text-secondary': '#fcd34d', 'text-secondary-rgb': '252, 211, 77', 'text-muted': '#d97706', 'text-muted-rgb': '217, 119, 6', 'border-primary': '#78350f', 'border-primary-rgb': '120, 53, 15', 'border-accent': '#92400e', 'border-accent-rgb': '146, 64, 14' }
+                colors: { 'primary': '#f59e0b', 'primary-rgb': '245, 158, 11', 'secondary': '#d97706', 'secondary-rgb': '217, 119, 6', 'accent': '#fbbf24', 'accent-rgb': '251, 191, 36', 'bg-primary': '#1a1408', 'bg-primary-rgb': '26, 20, 8', 'bg-secondary': '#2a2010', 'bg-secondary-rgb': '42, 32, 16', 'bg-card': '#3a2c18', 'bg-card-rgb': '58, 44, 24', 'text-primary': '#fef3c7', 'text-primary-rgb': '254, 243, 199', 'text-secondary': '#fcd34d', 'text-secondary-rgb': '252, 211, 77', 'text-muted': '#e07b06', 'text-muted-rgb': '224, 123, 6', 'border-primary': '#78350f', 'border-primary-rgb': '120, 53, 15', 'border-accent': '#92400e', 'border-accent-rgb': '146, 64, 14' }
             },
             ocean: {
                 name: 'Ocean', icon: '\uD83C\uDF0A', description: 'Deep mysteries of the abyssal waters', category: 'featured',
@@ -123,7 +123,7 @@
             },
             day: {
                 name: 'Day', icon: '\u2600\uFE0F', description: 'Bright and clear, like sunlit scrolls', category: 'light',
-                colors: { 'primary': '#2563eb', 'primary-rgb': '37, 99, 235', 'secondary': '#7c3aed', 'secondary-rgb': '124, 58, 237', 'accent': '#f59e0b', 'accent-rgb': '245, 158, 11', 'bg-primary': '#ffffff', 'bg-primary-rgb': '255, 255, 255', 'bg-secondary': '#f8fafc', 'bg-secondary-rgb': '248, 250, 252', 'bg-card': '#f1f5f9', 'bg-card-rgb': '241, 245, 249', 'text-primary': '#0f172a', 'text-primary-rgb': '15, 23, 42', 'text-secondary': '#475569', 'text-secondary-rgb': '71, 85, 105', 'text-muted': '#94a3b8', 'text-muted-rgb': '148, 163, 184', 'border-primary': '#e2e8f0', 'border-primary-rgb': '226, 232, 240', 'border-accent': '#cbd5e1', 'border-accent-rgb': '203, 213, 225' }
+                colors: { 'primary': '#2563eb', 'primary-rgb': '37, 99, 235', 'secondary': '#7c3aed', 'secondary-rgb': '124, 58, 237', 'accent': '#f59e0b', 'accent-rgb': '245, 158, 11', 'bg-primary': '#ffffff', 'bg-primary-rgb': '255, 255, 255', 'bg-secondary': '#f8fafc', 'bg-secondary-rgb': '248, 250, 252', 'bg-card': '#f1f5f9', 'bg-card-rgb': '241, 245, 249', 'text-primary': '#0f172a', 'text-primary-rgb': '15, 23, 42', 'text-secondary': '#475569', 'text-secondary-rgb': '71, 85, 105', 'text-muted': '#5d708c', 'text-muted-rgb': '93, 112, 140', 'border-primary': '#e2e8f0', 'border-primary-rgb': '226, 232, 240', 'border-accent': '#cbd5e1', 'border-accent-rgb': '203, 213, 225' }
             },
             earth: {
                 name: 'Earth', icon: '\uD83C\uDF3F', description: 'Grounded strength of living nature', category: 'element',
@@ -139,15 +139,15 @@
             },
             abyssal: {
                 name: 'Abyssal', icon: '\uD83C\uDF11', description: "Void's endless depths and shadows", category: 'cosmic',
-                colors: { 'primary': '#6366f1', 'primary-rgb': '99, 102, 241', 'secondary': '#8b5cf6', 'secondary-rgb': '139, 92, 246', 'accent': '#ec4899', 'accent-rgb': '236, 72, 153', 'bg-primary': '#000000', 'bg-primary-rgb': '0, 0, 0', 'bg-secondary': '#0d0d0d', 'bg-secondary-rgb': '13, 13, 13', 'bg-card': '#1a1a1a', 'bg-card-rgb': '26, 26, 26', 'text-primary': '#e5e7eb', 'text-primary-rgb': '229, 231, 235', 'text-secondary': '#9ca3af', 'text-secondary-rgb': '156, 163, 175', 'text-muted': '#6b7280', 'text-muted-rgb': '107, 114, 128', 'border-primary': '#27272a', 'border-primary-rgb': '39, 39, 42', 'border-accent': '#3f3f46', 'border-accent-rgb': '63, 63, 70' }
+                colors: { 'primary': '#6366f1', 'primary-rgb': '99, 102, 241', 'secondary': '#8b5cf6', 'secondary-rgb': '139, 92, 246', 'accent': '#ec4899', 'accent-rgb': '236, 72, 153', 'bg-primary': '#000000', 'bg-primary-rgb': '0, 0, 0', 'bg-secondary': '#0d0d0d', 'bg-secondary-rgb': '13, 13, 13', 'bg-card': '#1a1a1a', 'bg-card-rgb': '26, 26, 26', 'text-primary': '#e5e7eb', 'text-primary-rgb': '229, 231, 235', 'text-secondary': '#9ca3af', 'text-secondary-rgb': '156, 163, 175', 'text-muted': '#7b8291', 'text-muted-rgb': '123, 130, 145', 'border-primary': '#27272a', 'border-primary-rgb': '39, 39, 42', 'border-accent': '#3f3f46', 'border-accent-rgb': '63, 63, 70' }
             },
             chaos: {
                 name: 'Chaos', icon: '\uD83C\uDF00', description: 'Wild entropy and primordial disorder', category: 'cosmic',
-                colors: { 'primary': '#e11d48', 'primary-rgb': '225, 29, 72', 'secondary': '#a855f7', 'secondary-rgb': '168, 85, 247', 'accent': '#f59e0b', 'accent-rgb': '245, 158, 11', 'bg-primary': '#18181b', 'bg-primary-rgb': '24, 24, 27', 'bg-secondary': '#27272a', 'bg-secondary-rgb': '39, 39, 42', 'bg-card': '#3f3f46', 'bg-card-rgb': '63, 63, 70', 'text-primary': '#fef2f2', 'text-primary-rgb': '254, 242, 242', 'text-secondary': '#fca5a5', 'text-secondary-rgb': '252, 165, 165', 'text-muted': '#f87171', 'text-muted-rgb': '248, 113, 113', 'border-primary': '#7f1d1d', 'border-primary-rgb': '127, 29, 29', 'border-accent': '#991b1b', 'border-accent-rgb': '153, 27, 27' }
+                colors: { 'primary': '#e11d48', 'primary-rgb': '225, 29, 72', 'secondary': '#a855f7', 'secondary-rgb': '168, 85, 247', 'accent': '#f59e0b', 'accent-rgb': '245, 158, 11', 'bg-primary': '#18181b', 'bg-primary-rgb': '24, 24, 27', 'bg-secondary': '#27272a', 'bg-secondary-rgb': '39, 39, 42', 'bg-card': '#3f3f46', 'bg-card-rgb': '63, 63, 70', 'text-primary': '#fef2f2', 'text-primary-rgb': '254, 242, 242', 'text-secondary': '#fca5a5', 'text-secondary-rgb': '252, 165, 165', 'text-muted': '#f98c8c', 'text-muted-rgb': '249, 140, 140', 'border-primary': '#7f1d1d', 'border-primary-rgb': '127, 29, 29', 'border-accent': '#991b1b', 'border-accent-rgb': '153, 27, 27' }
             },
             order: {
                 name: 'Order', icon: '\u2696\uFE0F', description: 'Structured harmony and cosmic law', category: 'cosmic',
-                colors: { 'primary': '#1e40af', 'primary-rgb': '30, 64, 175', 'secondary': '#0891b2', 'secondary-rgb': '8, 145, 178', 'accent': '#facc15', 'accent-rgb': '250, 204, 21', 'bg-primary': '#f8fafc', 'bg-primary-rgb': '248, 250, 252', 'bg-secondary': '#f1f5f9', 'bg-secondary-rgb': '241, 245, 249', 'bg-card': '#e2e8f0', 'bg-card-rgb': '226, 232, 240', 'text-primary': '#0f172a', 'text-primary-rgb': '15, 23, 42', 'text-secondary': '#334155', 'text-secondary-rgb': '51, 65, 85', 'text-muted': '#64748b', 'text-muted-rgb': '100, 116, 139', 'border-primary': '#cbd5e1', 'border-primary-rgb': '203, 213, 225', 'border-accent': '#94a3b8', 'border-accent-rgb': '148, 163, 184' }
+                colors: { 'primary': '#1e40af', 'primary-rgb': '30, 64, 175', 'secondary': '#0891b2', 'secondary-rgb': '8, 145, 178', 'accent': '#facc15', 'accent-rgb': '250, 204, 21', 'bg-primary': '#f8fafc', 'bg-primary-rgb': '248, 250, 252', 'bg-secondary': '#f1f5f9', 'bg-secondary-rgb': '241, 245, 249', 'bg-card': '#e2e8f0', 'bg-card-rgb': '226, 232, 240', 'text-primary': '#0f172a', 'text-primary-rgb': '15, 23, 42', 'text-secondary': '#334155', 'text-secondary-rgb': '51, 65, 85', 'text-muted': '#5a697e', 'text-muted-rgb': '90, 105, 126', 'border-primary': '#cbd5e1', 'border-primary-rgb': '203, 213, 225', 'border-accent': '#94a3b8', 'border-accent-rgb': '148, 163, 184' }
             },
             aurora: {
                 name: 'Aurora', icon: '\uD83C\uDF08', description: 'Northern lights dancing across the sky', category: 'cosmic',
@@ -159,11 +159,11 @@
             },
             void: {
                 name: 'Void', icon: '\u26AB', description: 'Absolute darkness and nothingness', category: 'cosmic',
-                colors: { 'primary': '#6366f1', 'primary-rgb': '99, 102, 241', 'secondary': '#8b5cf6', 'secondary-rgb': '139, 92, 246', 'accent': '#ec4899', 'accent-rgb': '236, 72, 153', 'bg-primary': '#000000', 'bg-primary-rgb': '0, 0, 0', 'bg-secondary': '#0a0a0a', 'bg-secondary-rgb': '10, 10, 10', 'bg-card': '#141414', 'bg-card-rgb': '20, 20, 20', 'text-primary': '#e5e7eb', 'text-primary-rgb': '229, 231, 235', 'text-secondary': '#9ca3af', 'text-secondary-rgb': '156, 163, 175', 'text-muted': '#6b7280', 'text-muted-rgb': '107, 114, 128', 'border-primary': '#1f1f1f', 'border-primary-rgb': '31, 31, 31', 'border-accent': '#2f2f2f', 'border-accent-rgb': '47, 47, 47' }
+                colors: { 'primary': '#6366f1', 'primary-rgb': '99, 102, 241', 'secondary': '#8b5cf6', 'secondary-rgb': '139, 92, 246', 'accent': '#ec4899', 'accent-rgb': '236, 72, 153', 'bg-primary': '#000000', 'bg-primary-rgb': '0, 0, 0', 'bg-secondary': '#0a0a0a', 'bg-secondary-rgb': '10, 10, 10', 'bg-card': '#141414', 'bg-card-rgb': '20, 20, 20', 'text-primary': '#e5e7eb', 'text-primary-rgb': '229, 231, 235', 'text-secondary': '#9ca3af', 'text-secondary-rgb': '156, 163, 175', 'text-muted': '#777f8d', 'text-muted-rgb': '119, 127, 141', 'border-primary': '#1f1f1f', 'border-primary-rgb': '31, 31, 31', 'border-accent': '#2f2f2f', 'border-accent-rgb': '47, 47, 47' }
             },
             light: {
                 name: 'Light', icon: '\uD83D\uDCA1', description: 'Warm and radiant illumination', category: 'light',
-                colors: { 'primary': '#f59e0b', 'primary-rgb': '245, 158, 11', 'secondary': '#fbbf24', 'secondary-rgb': '251, 191, 36', 'accent': '#facc15', 'accent-rgb': '250, 204, 21', 'bg-primary': '#fffbeb', 'bg-primary-rgb': '255, 251, 235', 'bg-secondary': '#fef3c7', 'bg-secondary-rgb': '254, 243, 199', 'bg-card': '#fde68a', 'bg-card-rgb': '253, 230, 138', 'text-primary': '#78350f', 'text-primary-rgb': '120, 53, 15', 'text-secondary': '#92400e', 'text-secondary-rgb': '146, 64, 14', 'text-muted': '#b45309', 'text-muted-rgb': '180, 83, 9', 'border-primary': '#fcd34d', 'border-primary-rgb': '252, 211, 77', 'border-accent': '#fbbf24', 'border-accent-rgb': '251, 191, 36' }
+                colors: { 'primary': '#f59e0b', 'primary-rgb': '245, 158, 11', 'secondary': '#fbbf24', 'secondary-rgb': '251, 191, 36', 'accent': '#facc15', 'accent-rgb': '250, 204, 21', 'bg-primary': '#fffbeb', 'bg-primary-rgb': '255, 251, 235', 'bg-secondary': '#fef3c7', 'bg-secondary-rgb': '254, 243, 199', 'bg-card': '#fde68a', 'bg-card-rgb': '253, 230, 138', 'text-primary': '#78350f', 'text-primary-rgb': '120, 53, 15', 'text-secondary': '#92400e', 'text-secondary-rgb': '146, 64, 14', 'text-muted': '#a84d08', 'text-muted-rgb': '168, 77, 8', 'border-primary': '#fcd34d', 'border-primary-rgb': '252, 211, 77', 'border-accent': '#fbbf24', 'border-accent-rgb': '251, 191, 36' }
             }
         }
     };
@@ -540,6 +540,74 @@
      * @param {string} themeName - Theme to apply
      * @param {boolean} withTransition - Whether to animate transition
      */
+    /**
+     * Derive the --color-surface* / --color-background / --color-border families
+     * from the theme's own palette.
+     *
+     * No theme in THEMES defines any of them. They are declared once in
+     * themes/theme-base.css :root with the NIGHT theme's values, so switching
+     * theme left every one of them pointing at night's dark navy — regardless of
+     * which theme was selected.
+     *
+     * On the dark themes that was invisible, because the leftovers matched. On
+     * the light ones it was severe: css/dynamic-views.css and the browse view
+     * compose their own alpha with rgba(var(--color-surface-rgb), a), so in the
+     * Day theme the Load More button painted the light theme's near-black
+     * --color-text-primary on night's #1a1f3a. Measured contrast 2.1:1.
+     *
+     * The mappings are not guesses. theme-base.css's :root defaults are exactly
+     * the night palette's values, which is what each token is meant to track:
+     *   --color-surface          rgba(26,31,58,.8)   = night bg-card      #1a1f3a
+     *   --color-surface-hover    rgba(42,47,74,.95)  = night border-primary #2a2f4a
+     *   --color-surface-elevated rgba(42,47,74,.9)   = night border-primary #2a2f4a
+     *   --color-background       #0a0e27             = night bg-primary   #0a0e27
+     *   --color-border           rgba(139,127,255,.3)= night primary       #8b7fff
+     */
+    function applyDerivedSurfaceTokens(root, colors) {
+        const set = (name, value) => {
+            if (value) root.style.setProperty(name, value);
+        };
+
+        const card = colors['bg-card'];
+        const cardRgb = colors['bg-card-rgb'];
+        const raised = colors['border-primary'];
+        const raisedRgb = colors['border-primary-rgb'];
+        const base = colors['bg-primary'];
+        const baseRgb = colors['bg-primary-rgb'];
+        const accent = colors['primary'];
+        const accentRgb = colors['primary-rgb'];
+
+        if (cardRgb) {
+            set('--color-surface', `rgba(${cardRgb}, 0.8)`);
+            set('--color-surface-rgb', cardRgb);
+            set('--color-surface-solid-rgb', cardRgb);
+        }
+        set('--color-surface-solid', card);
+
+        if (raisedRgb) {
+            set('--color-surface-hover', `rgba(${raisedRgb}, 0.95)`);
+            set('--color-surface-hover-rgb', raisedRgb);
+            set('--color-surface-elevated', `rgba(${raisedRgb}, 0.9)`);
+            set('--color-surface-elevated-rgb', raisedRgb);
+            set('--color-surface-active', `rgba(${raisedRgb}, 1)`);
+            set('--color-surface-active-rgb', raisedRgb);
+        }
+        set('--color-surface-elevated-solid', raised);
+
+        set('--color-background', base);
+        set('--color-background-rgb', baseRgb);
+
+        if (accentRgb) {
+            set('--color-border', `rgba(${accentRgb}, 0.3)`);
+            set('--color-border-rgb', accentRgb);
+        }
+
+        // --color-text is theme-base's alias for --color-text-primary; without it
+        // the alias keeps the previous theme's value.
+        set('--color-text', colors['text-primary']);
+        set('--color-text-rgb', colors['text-primary-rgb']);
+    }
+
     async function applyTheme(themeName, withTransition = true) {
         if (!themeConfig || !themeConfig.themes || !themeConfig.themes[themeName]) {
             console.warn(`[Theme Picker] Theme "${themeName}" not found`);
@@ -565,6 +633,7 @@
             Object.entries(theme.colors).forEach(([key, value]) => {
                 root.style.setProperty(`--color-${key}`, value);
             });
+            applyDerivedSurfaceTokens(root, theme.colors);
         }
 
         // Set data attributes for CSS hooks
@@ -707,6 +776,10 @@
                 Object.entries(theme.colors).forEach(([key, value]) => {
                     root.style.setProperty(`--color-${key}`, value);
                 });
+                // Preview has to derive the same tokens as applyTheme, or hovering
+                // a light theme would preview its text on the previous theme's
+                // surface colour — which is the same defect, just briefer.
+                applyDerivedSurfaceTokens(root, theme.colors);
             }
 
             // Set preview data attribute
@@ -739,6 +812,9 @@
                 Object.entries(theme.colors).forEach(([key, value]) => {
                     root.style.setProperty(`--color-${key}`, value);
                 });
+                // Restoring must derive too, otherwise cancelling a preview leaves
+                // the previewed theme's surfaces behind under the restored palette.
+                applyDerivedSurfaceTokens(root, theme.colors);
             }
         }
 

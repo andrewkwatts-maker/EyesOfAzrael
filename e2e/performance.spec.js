@@ -332,8 +332,42 @@ test.describe('Image Lazy Loading', () => {
 
     console.log('Lazy Loading Info:', lazyLoadingInfo);
 
-    // Not all images should load immediately
-    expect(initialImageCount).toBeLessThan(THRESHOLDS.INITIAL_IMAGES_LOADED);
+    // Assert what lazy loading actually means: images BELOW the fold have not
+    // been fetched yet.
+    //
+    // This used to assert `initialImageCount < 10` — every image-ish request in
+    // the first second, against a flat budget. The landing page shows twelve
+    // category cards above the fold, each with an icon, so that count could
+    // never come in under ten however correctly the page deferred anything. It
+    // was measuring how many icons the design has, not whether loading is lazy.
+    //
+    // (Those twelve were being fetched twice, 24 requests for 12 files, which
+    // was a real bug and is fixed in js/views/landing-page-view.js. Halving it
+    // still leaves twelve, so the old assertion would have stayed red.)
+    await page.waitForTimeout(2000); // let the view mount
+
+    const belowFold = await page.evaluate(() => {
+      const out = { total: 0, loaded: [] };
+      document.querySelectorAll('img').forEach(img => {
+        const rect = img.getBoundingClientRect();
+        // A comfortable margin below the viewport: browsers deliberately start
+        // lazy images somewhat early, and counting those as failures would make
+        // this assert something no browser does.
+        if (rect.top <= window.innerHeight * 2) return;
+        out.total++;
+        if (img.complete && img.naturalWidth > 0) {
+          out.loaded.push(img.currentSrc || img.src);
+        }
+      });
+      return out;
+    });
+
+    console.log('Below-fold images:', belowFold.total, 'of which already loaded:', belowFold.loaded.length);
+
+    expect(
+      belowFold.loaded,
+      'images well below the fold were fetched before any scroll'
+    ).toEqual([]);
   });
 
   test('Below-fold images should load on scroll', async ({ page }) => {

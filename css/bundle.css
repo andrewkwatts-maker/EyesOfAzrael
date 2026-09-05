@@ -37115,10 +37115,26 @@ body.keyboard-navigation *:focus {
     position: relative;
 }
 
+/* Ambient background wash.
+ *
+ * Sized to the viewport explicitly rather than with inset: 0, because position:
+ * fixed does not reliably mean "viewport-sized" here. The view transitions below
+ * apply `filter: blur(...)`, and a filtered ancestor becomes the containing
+ * block for its fixed descendants — so this pseudo-element was being sized to
+ * #main-content instead, measured at 4157px tall on the landing page.
+ *
+ * That made a purely decorative layer resize every time the content's height
+ * changed, and the browser reported it as a layout shift: 0.2835 of a measured
+ * 0.392 CLS against a 0.25 budget, from a gradient nobody interacts with.
+ *
+ * 100vw/100vh are viewport units and stay constant whatever contains this. */
 .view-container::before {
     content: '';
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
     background:
         radial-gradient(
             ellipse at 20% 10%,
@@ -81297,7 +81313,12 @@ body.modal-open {
  */
 
 .domain-tabs-container {
-    --domain-tabs-height: 44px;
+    /* Must equal the strip's real rendered height, or reserving space just trades
+       a big shift for a small one — the tabs measured 45.23px against a 44px
+       reservation, so the page still moved when they mounted. The tabs below are
+       pinned to this same value with box-sizing: border-box so the two cannot
+       disagree by a fraction of a pixel again. */
+    --domain-tabs-height: 45px;
     min-height: var(--domain-tabs-height);
 }
 
@@ -81311,7 +81332,7 @@ body.modal-open {
     display: flex;
     gap: 0.25rem;
     align-items: stretch;
-    min-height: var(--domain-tabs-height, 44px);
+    min-height: var(--domain-tabs-height, 45px);
     box-sizing: border-box;
     padding: 0 1rem;
     border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
@@ -81329,7 +81350,13 @@ body.modal-open {
 .domain-tab {
     display: inline-flex;
     align-items: center;
-    padding: 0.6rem 1rem;
+    /* Height pinned to the container's reservation rather than left to derive
+       from padding and the font's line box — that derivation produced 45.23px,
+       which no whole-pixel reservation can match. Minus the strip's 1px bottom
+       border, so tab + border adds up to exactly the reserved height. */
+    height: calc(var(--domain-tabs-height, 45px) - 1px);
+    box-sizing: border-box;
+    padding: 0 1rem;
     white-space: nowrap;
     text-decoration: none;
     color: var(--text-secondary, #8a8a8a);

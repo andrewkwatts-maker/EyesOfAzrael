@@ -39,6 +39,25 @@ const { injectAxe, checkA11y, getViolations } = require('axe-playwright');
 // service-init.spec.js, which need it and must keep it.
 test.use({ serviceWorkers: 'block' });
 
+// Audit the settled page, with entrance animations reduced.
+//
+// The landing stat cards start at opacity 0 and fade in on a staggered delay
+// (js/views/landing-page-view.js), so the last of them is still part-transparent
+// about a second after render. axe factors opacity into contrast, so scanning
+// mid-fade measured half-faded text and reported colour-contrast failures on
+// whichever cards happened to be animating — a different set each run: cards
+// 3 and 4 in one, card 6 in the next.
+//
+// Reducing motion is the right lens rather than a convenient one. The site
+// already honours prefers-reduced-motion (css/accessibility.css), which settles
+// the animation immediately, and a user who asks for reduced motion is exactly
+// the user an accessibility audit should be measuring. The settled colours are
+// what everyone eventually sees either way.
+//
+// Deliberately NOT applied to performance.spec.js: layout shift has to be
+// measured with the animations users actually get.
+test.use({ reducedMotion: 'reduce' });
+
 // Run against the baked static base only, with the live delta layer cut.
 //
 // These tests assert markup, heading order and keyboard semantics. None of that
@@ -540,7 +559,16 @@ test.describe('Browse Category Page Accessibility', () => {
         // Find filter elements
         const filterChips = await page.locator('.filter-chip, [data-filter-type]').all();
         const sortSelect = page.locator('#sortOrder, select[id*="sort"]').first();
-        const searchInput = page.locator('#searchFilter, input[type="search"], input[type="text"]').first();
+        // :visible matters. Without it, .first() resolves in DOM order and picks
+        // #headerSearchInput — which lives inside #headerSearchDropdown, a div
+        // with an inline display:none (index.html). locator.focus() runs no
+        // visibility check, so it no-opped silently, the keystrokes went to
+        // whatever had focus (the browse view's h1), and inputValue() on the
+        // still-hidden header input returned "". That read as a broken filter
+        // input; the real #searchFilter is visible, enabled, labelled and works.
+        const searchInput = page.locator(
+            '#searchFilter:visible, input[type="search"]:visible, input[type="text"]:visible'
+        ).first();
 
         // Test search input keyboard access
         if (await searchInput.count() > 0) {
@@ -649,7 +677,26 @@ test.describe('Entity Detail Page Accessibility', () => {
         const firstEntity = page.locator('.entity-card, [data-entity-id]').first();
         if (await firstEntity.count() > 0) {
             await firstEntity.click();
-            await page.waitForTimeout(2000);
+
+            // Wait for the DESTINATION view, not merely for time to pass.
+            //
+            // Clicking changes the hash immediately but leaves .browse-view in
+            // #main-content for a moment, so any condition phrased as an absence
+            // — "no loading skeleton", or a flat two-second sleep — is already
+            // satisfied by the page being navigated away from. The assertions
+            // then ran against whatever happened to be mounted, and the heading
+            // check reported no h1 on a page that renders one.
+            //
+            // Both terminal states are named here: the entity renders, or (as in
+            // this suite, which aborts firestore.googleapis.com) the error state
+            // does. Waiting for .browse-view to be gone as well means a slow
+            // transition cannot satisfy this with the previous view's markup.
+            await page.waitForFunction(() => {
+                const main = document.getElementById('main-content');
+                if (!main || main.querySelector('.browse-view')) return false;
+                if (main.querySelector('.entity-loading-state')) return false;
+                return !!main.querySelector('h1, .error-state-container');
+            }, { timeout: 20000 }).catch(() => {});
         } else {
             // Direct navigation fallback - try common entity paths
             await page.goto('#/entity/deities/greek/zeus', { timeout: NAVIGATION_TIMEOUT });

@@ -24,7 +24,12 @@
  */
 
 .domain-tabs-container {
-    --domain-tabs-height: 44px;
+    /* Must equal the strip's real rendered height, or reserving space just trades
+       a big shift for a small one — the tabs measured 45.23px against a 44px
+       reservation, so the page still moved when they mounted. The tabs below are
+       pinned to this same value with box-sizing: border-box so the two cannot
+       disagree by a fraction of a pixel again. */
+    --domain-tabs-height: 45px;
     min-height: var(--domain-tabs-height);
 }
 
@@ -38,7 +43,7 @@
     display: flex;
     gap: 0.25rem;
     align-items: stretch;
-    min-height: var(--domain-tabs-height, 44px);
+    min-height: var(--domain-tabs-height, 45px);
     box-sizing: border-box;
     padding: 0 1rem;
     border-bottom: 1px solid var(--border-color, rgba(128, 128, 128, 0.25));
@@ -56,7 +61,13 @@
 .domain-tab {
     display: inline-flex;
     align-items: center;
-    padding: 0.6rem 1rem;
+    /* Height pinned to the container's reservation rather than left to derive
+       from padding and the font's line box — that derivation produced 45.23px,
+       which no whole-pixel reservation can match. Minus the strip's 1px bottom
+       border, so tab + border adds up to exactly the reserved height. */
+    height: calc(var(--domain-tabs-height, 45px) - 1px);
+    box-sizing: border-box;
+    padding: 0 1rem;
     white-space: nowrap;
     text-decoration: none;
     color: var(--text-secondary, #8a8a8a);

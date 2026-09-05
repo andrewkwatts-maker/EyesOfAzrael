@@ -218,19 +218,26 @@ class LandingPageView {
             }
             console.log('[Landing Page] Container valid:', container.tagName, container.id);
 
-            // STEP 1: Show skeleton loading state first for smooth UX
-            container.innerHTML = this.getSkeletonHTML();
-            container.classList.add('landing-loading');
-            console.log('[Landing Page] Skeleton loading state displayed');
-
-            // STEP 2: Brief delay to show skeleton (simulates async data fetch)
-            // This ensures users see the loading state for at least 100ms
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-            // STEP 3: Render final content with fade-in animation
+            // Render the content directly. There is no skeleton and no delay.
+            //
+            // This used to paint getSkeletonHTML(), wait 100ms to "simulate an
+            // async data fetch", then replace it with getLandingHTML(). Both are
+            // synchronous and neither fetches anything — the categories come from
+            // this.assetTypes, already in memory above. So the skeleton stood in
+            // for a wait that does not exist.
+            //
+            // It was not free. The skeleton's layout does not match the rendered
+            // grid, so swapping them moved everything inside #main-content: the
+            // browser measured that single swap at 0.284 layout shift against a
+            // 0.25 budget for the whole page, the largest on the site. Rendering
+            // once removes the shift entirely and shows the content 100ms sooner.
+            //
+            // getSkeletonHTML() is deliberately kept: if the landing data ever
+            // does become async, a skeleton is the right answer — but then it
+            // needs to match the final layout's dimensions, which this one does
+            // not.
             console.log('[Landing Page] Setting final HTML...');
             container.innerHTML = this.getLandingHTML();
-            container.classList.remove('landing-loading');
             container.classList.add('landing-loaded');
 
             // CRITICAL: Remove ALL classes that could hide content
@@ -1210,7 +1217,20 @@ Discover & Explore
                 .landing-stat-card {
                     text-align: center;
                     padding: 28px 20px;
-                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.5);
+                    /* 0.92, not 0.5.
+                     *
+                     * When a shader theme is rendering, css/shader-backgrounds.css
+                     * makes body's background transparent so the WebGL canvas
+                     * becomes the page's ground. A card at half opacity therefore
+                     * composites its label text over whatever the shader happens to
+                     * be drawing at that moment, so the contrast of "Deities" and
+                     * "Divine beings" changes frame to frame — axe measured these
+                     * below the 4.5:1 AA minimum, and that is a genuine readability
+                     * risk rather than a quirk of the checker.
+                     *
+                     * 0.92 keeps the frosted look against the shader while making
+                     * the text's background effectively the card colour. */
+                    background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.92);
                     backdrop-filter: blur(12px);
                     border: 1px solid rgba(var(--color-border-primary-rgb, 42, 47, 74), 0.3);
                     border-radius: 16px;
@@ -1947,14 +1967,28 @@ Discover & Explore
 
         // Default: treat as URL path with img tag and fallback
         // Note: onerror handled via event delegation in attachEventListeners()
+        //
+        // The path is held in data-icon-src, not src, so this <img> issues no
+        // request of its own. inlineSVGIcons() replaces every one of these with an
+        // inline <svg> anyway (the icons use fill="currentColor", which an <img>
+        // cannot inherit), and it fetches the same file to do so — so with a real
+        // src the landing page downloaded all 12 category icons twice, 24 requests
+        // for 12 assets.
+        //
+        // The emoji fallback starts VISIBLE and inlineSVGIcons() hides it on
+        // success. That is deliberate: a src-less <img> fires no error event, so
+        // leaving the fallback hidden would mean any failure to inline — a JS
+        // error, a network failure — shows no icon at all. Starting visible makes
+        // the emoji the graceful default. Both occupy the same 48x48 box, so the
+        // swap does not reflow.
         return `
-            <img src="${icon}"
-                 alt=""
+            <img alt=""
                  class="${cssClass}"
-                 loading="lazy"
+                 data-icon-src="${icon}"
                  decoding="async"
+                 style="display: none;"
                  data-icon-fallback />
-            <span class="landing-category-icon-fallback" style="display: none;">${emojiFallback}</span>
+            <span class="landing-category-icon-fallback">${emojiFallback}</span>
         `;
     }
 
@@ -2042,8 +2076,13 @@ Discover & Explore
     async inlineSVGIcons() {
         const imgs = document.querySelectorAll('.landing-category-grid img[data-icon-fallback]');
         for (const img of imgs) {
+            // The path lives in data-icon-src so the <img> never requested it
+            // itself — see getIconHtml. This is the only fetch of the file.
+            const src = img.dataset.iconSrc;
+            if (!src) continue;
+
             try {
-                const resp = await fetch(img.src);
+                const resp = await fetch(src);
                 if (!resp.ok) continue;
                 const svgText = await resp.text();
                 if (!svgText.trim().startsWith('<svg')) continue;
@@ -2053,14 +2092,17 @@ Discover & Explore
                 wrapper.setAttribute('aria-hidden', 'true');
                 wrapper.innerHTML = svgText;
 
-                // Also hide the emoji fallback sibling since the inline SVG is working
+                // Hide the emoji fallback, which renders by default, now that the
+                // inline SVG has taken its place.
                 const fallback = img.nextElementSibling;
                 img.replaceWith(wrapper);
                 if (fallback && fallback.classList.contains('landing-category-icon-fallback')) {
                     fallback.style.display = 'none';
                 }
             } catch (e) {
-                // Leave the <img> in place; the error handler will show emoji fallback
+                // Inlining failed. The visible emoji fallback already covers this,
+                // so there is nothing to restore — deliberately not assigning
+                // img.src here, which would spend the request this change avoids.
             }
         }
     }

@@ -181,12 +181,30 @@ describe('LandingPageView', () => {
     // ──────────────────────────────────────────────
 
     describe('render()', () => {
-        test('should show skeleton loading state initially', async () => {
+        test('should render content directly, without a skeleton swap', async () => {
+            // Was: "should show skeleton loading state initially", asserting that
+            // getSkeletonHTML() painted first and was replaced 100ms later.
+            //
+            // That skeleton stood in for an async fetch that does not exist —
+            // getLandingHTML() is synchronous and reads this.assetTypes, already in
+            // memory. The swap was not free: the skeleton's layout does not match
+            // the rendered grid, so replacing it moved everything inside
+            // #main-content and measured 0.284 cumulative layout shift on its own,
+            // against a 0.25 budget for the entire page.
+            //
+            // The guarantee worth holding is the opposite of the old one: the first
+            // thing written to the container is the real content.
             const renderPromise = view.render(container);
-            // Before the 100ms delay, skeleton should be visible
-            expect(container.innerHTML).toContain('landing-skeleton');
+
+            expect(container.innerHTML).toContain('landing-page-view');
+            expect(container.innerHTML).not.toContain('landing-skeleton');
+
             jest.advanceTimersByTime(200);
             await renderPromise;
+
+            // Still the real content after everything settles — no later swap.
+            expect(container.innerHTML).toContain('landing-page-view');
+            expect(container.innerHTML).not.toContain('landing-skeleton');
         });
 
         test('should render landing page HTML after loading', async () => {
