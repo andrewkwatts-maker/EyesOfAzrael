@@ -2,6 +2,33 @@ const { test, expect } = require('@playwright/test');
 const { mockAuth } = require('./helpers/auth-helper');
 const { waitForPageLoad, waitForFirebaseReady } = require('./helpers/test-data');
 
+/**
+ * Is ANY element matching `selector` visible?
+ *
+ * Two traps this exists to avoid, both of which made these tests report a
+ * healthy page as broken:
+ *
+ * 1. locator.isVisible() throws a strict-mode violation when the selector
+ *    resolves to more than one element, and the usual `.catch(() => false)`
+ *    turns that throw into a plain false — a TEST bug reported as a SITE bug.
+ *
+ * 2. Adding .first() fixes the throw but introduces a subtler error on a UNION
+ *    selector like `.error-page, .error-container, text=/not found/i`: .first()
+ *    takes the first match in DOCUMENT order, which may be a hidden element,
+ *    while a perfectly visible match sits later. The check then answers "not
+ *    visible" about a page that plainly shows the thing.
+ *
+ * Asking "is any match visible" is what these assertions actually mean.
+ */
+async function anyVisible(page, selector) {
+    const loc = page.locator(selector);
+    const n = await loc.count().catch(() => 0);
+    for (let i = 0; i < n; i++) {
+        if (await loc.nth(i).isVisible().catch(() => false)) return true;
+    }
+    return false;
+}
+
 test.describe('Error Handling', () => {
   test.beforeEach(async ({ page }) => {
     // Mock authentication for tests that need it
@@ -14,22 +41,18 @@ test.describe('Error Handling', () => {
       await page.goto('/#/this-route-does-not-exist-at-all');
       await waitForPageLoad(page);
 
-      // Check for 404 page or error indication
-      // .first() on every multi-match locator.
+      // Check for 404 page or error indication.
       //
-      // locator.isVisible() throws a strict-mode violation when its selector
-      // resolves to more than one element, and `.catch(() => false)` turns that
-      // throw into a plain false — so a TEST bug is reported as a SITE failure
-      // with nothing to say which it was.
-      //
-      // 'a[href="#/"], a[href="#"]' matches 6 elements on this page (the footer
-      // carries home links too), so hasHomeLink was always false and this test
-      // failed on a 404 page that renders correctly: "404 Page Not Found", an
-      // .error-page container, and a working Go Home button.
-      const has404 = await page.locator('text=404').first().isVisible().catch(() => false);
-      const hasNotFound = await page.locator('text=/not found/i').first().isVisible().catch(() => false);
-      const hasError = await page.locator('.error-page, .error-container').first().isVisible().catch(() => false);
-      const hasHomeLink = await page.locator('a[href="#/"], a[href="#"]').first().isVisible().catch(() => false);
+      // anyVisible() rather than locator.isVisible() — see its definition above.
+      // 'a[href="#/"], a[href="#"]' matches 6 elements here (the footer carries
+      // home links too), which used to throw a strict-mode violation that was
+      // swallowed into `false`, failing this test on a 404 page that renders
+      // correctly: "404 Page Not Found", an .error-page container and a working
+      // Go Home button.
+      const has404 = await anyVisible(page, 'text=404');
+      const hasNotFound = await anyVisible(page, 'text=/not found/i');
+      const hasError = await anyVisible(page, '.error-page, .error-container');
+      const hasHomeLink = await anyVisible(page, 'a[href="#/"], a[href="#"]');
 
       // Should show some form of error/404 message
       expect(has404 || hasNotFound || hasError).toBeTruthy();
@@ -52,7 +75,7 @@ test.describe('Error Handling', () => {
       expect(hasContent.length).toBeGreaterThan(0);
 
       // Should show error message OR entity not found message
-      const hasError = await page.locator('.error-page, .error-container, text=/not found/i, text=/error/i').first().isVisible().catch(() => false);
+      const hasError = await anyVisible(page, '.error-page, .error-container, text=/not found/i, text=/error/i');
       expect(hasError).toBeTruthy();
     });
 
@@ -93,7 +116,7 @@ test.describe('Error Handling', () => {
       expect(hasNotFoundIndicator).toBeTruthy();
 
       // Should still have navigation options
-      const hasNavigation = await page.locator('a[href="#/"], a[href*="mythology"]').first().isVisible().catch(() => false);
+      const hasNavigation = await anyVisible(page, 'a[href="#/"], a[href*="mythology"]');
       expect(hasNavigation).toBeTruthy();
     });
   });
@@ -477,7 +500,7 @@ test.describe('Error Handling', () => {
       await expect(mainContent).toBeVisible();
 
       // Should show loading spinner OR timeout/error message
-      const hasLoadingOrError = await page.locator('.loading-container, .spinner, .error-page, .error-container, text=/loading/i, text=/timeout/i').first().isVisible().catch(() => false);
+      const hasLoadingOrError = await anyVisible(page, '.loading-container, .spinner, .error-page, .error-container, text=/loading/i, text=/timeout/i');
 
       // If nothing else, main content should at least be visible (app didn't crash)
       expect(await mainContent.isVisible()).toBeTruthy();
