@@ -107,6 +107,20 @@ const CATEGORY_BROWSE_PAGES = [
 const brokenNavigations = [];
 
 /**
+ * Wait for the SPA to actually settle on real content, instead of sleeping
+ * a fixed amount and hoping the render finished by then.
+ */
+async function waitForContentSettled(page, timeout = 8000) {
+  await page.waitForFunction(() => {
+    const main = document.getElementById('main-content');
+    return !!main && (main.textContent || '').trim().length > 20;
+  }, { timeout }).catch(() => {
+    // Deliberately not a failure: the caller's own assertions say what's
+    // wrong with the page, not this wait.
+  });
+}
+
+/**
  * Helper function to test page navigation and collect errors
  */
 async function testNavigation(page, url, expectedNameOrPattern, entityInfo = {}) {
@@ -158,7 +172,7 @@ async function testNavigation(page, url, expectedNameOrPattern, entityInfo = {})
     }
 
     // Additional wait for SPA content
-    await page.waitForTimeout(2000);
+    await waitForContentSettled(page);
 
     // Check for entity name on page
     if (expectedNameOrPattern) {
@@ -532,7 +546,7 @@ test.describe('Deep Navigation - Mythology Filter Routes', () => {
       await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
 
       // Wait for network
-      await page.waitForTimeout(3000);
+      await waitForContentSettled(page);
 
       // Should show mythology content
       const pageContent = await page.textContent('body');
@@ -587,7 +601,7 @@ test.describe('Navigation Error Handling', () => {
     });
 
     // Wait for content to load
-    await page.waitForTimeout(5000);
+    await waitForContentSettled(page);
 
     // Should show main content (even if error)
     await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
@@ -605,7 +619,7 @@ test.describe('Navigation Error Handling', () => {
       timeout: NAVIGATION_TIMEOUT
     });
 
-    await page.waitForTimeout(5000);
+    await waitForContentSettled(page);
     await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
 
     console.log('[PASS] Invalid category handled gracefully');
@@ -650,7 +664,7 @@ test.describe('Bulk Navigation Stress Test', () => {
     for (const route of routes) {
       try {
         await page.goto(route, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForContentSettled(page);
 
         const mainVisible = await page.locator('#main-content').isVisible();
         if (mainVisible) {
