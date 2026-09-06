@@ -1414,13 +1414,17 @@ class SPANavigation {
                     // the overview renders. An aggregation bills roughly one read
                     // per thousand index entries instead, so the same number costs
                     // about a thousandth as much.
+                    // .get().size, not .count(). The compat SDK exposes no count()
+                    // on a Query at any version — verified against 9.22 (loaded
+                    // here), 9.23, 10.x and 11.x. Aggregation is modular-only, via
+                    // getCountFromServer. Calling .count() here threw and took the
+                    // page down with it.
                     const snapshot = await this._retryWithBackoff(async () => {
                         return await this.db.collection(collection)
                             .where('mythology', '==', myth.id)
-                            .count()
                             .get();
                     });
-                    totalCount += snapshot.data().count;
+                    totalCount += snapshot.size;
                 } catch (error) {
                     spaError(`Error loading count for ${myth.id} after retries:`, error);
                 }
@@ -1671,11 +1675,12 @@ class SPANavigation {
                 // only use of the result is a heading that says "Explore N
                 // entities". An aggregation bills about one read per thousand
                 // index entries instead.
+                // .get().size, not .count() — see the note on the sibling call
+                // above. Compat has no Query.count() at any version.
                 const exact = await this.db.collection(type)
                     .where('mythology', '==', mythologyId)
-                    .count()
                     .get();
-                counts[type] = exact.data().count;
+                counts[type] = exact.size;
 
                 // The fallback asks the same narrow question of the lowercased
                 // value, rather than widening to the whole collection and
@@ -1684,9 +1689,8 @@ class SPANavigation {
                 if (counts[type] === 0 && mythLower !== mythologyId) {
                     const lowered = await this.db.collection(type)
                         .where('mythology', '==', mythLower)
-                        .count()
                         .get();
-                    counts[type] = lowered.data().count;
+                    counts[type] = lowered.size;
                 }
 
                 totalCount += counts[type];

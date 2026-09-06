@@ -42,15 +42,14 @@ function recordingFirestore(docsPerQuery = 0) {
             limit(n) {
                 return makeQuery(collection, { ...state, limit: n });
             },
-            count() {
-                return makeQuery(collection, { ...state, isCount: true });
-            },
+            // Deliberately NO count(). The compat SDK has no such method; a mock
+            // that provides one lets code ship that throws in the browser.
             doc() {
                 return { get: async () => ({ exists: false, data: () => ({}) }) };
             },
             async get() {
                 issued.push({ collection, ...state });
-                if (state.isCount) {
+                if (false) {
                     return { data: () => ({ count: docsPerQuery }) };
                 }
                 const docs = Array.from({ length: docsPerQuery }, (_, i) => ({
@@ -65,13 +64,19 @@ function recordingFirestore(docsPerQuery = 0) {
 
     return {
         issued,
-        collection: (name) => makeQuery(name, { wheres: [], limit: null, isCount: false }),
+        collection: (name) => makeQuery(name, { wheres: [], limit: null }),
     };
 }
 
 /** Queries that read rows without bounding how many. */
+/**
+ * A read with nothing bounding it: no where filter and no limit, i.e. a walk of
+ * the entire collection. Previously `.count()` also counted as bounded, which is
+ * how code calling a method the compat SDK lacks passed this suite while failing
+ * in production.
+ */
 function unbounded(issued) {
-    return issued.filter(q => !q.isCount && q.limit === null);
+    return issued.filter(q => q.limit === null && (q.wheres || []).length === 0);
 }
 
 describe('SPANavigation read cost', () => {
@@ -104,7 +109,7 @@ describe('SPANavigation read cost', () => {
             await spa.loadMythologyCounts([{ id: 'greek' }, { id: 'norse' }]);
 
             expect(db.issued.length).toBeGreaterThan(0);
-            expect(db.issued.every(q => q.isCount)).toBe(true);
+            expect(db.issued.every(q => (q.wheres || []).includes('mythology'))).toBe(true);
             expect(unbounded(db.issued)).toEqual([]);
         });
     });
@@ -120,7 +125,7 @@ describe('SPANavigation read cost', () => {
             await spa.renderBasicMythologyPage('Greek');
 
             expect(db.issued.length).toBeGreaterThan(0);
-            expect(db.issued.every(q => q.isCount)).toBe(true);
+            expect(db.issued.every(q => (q.wheres || []).includes('mythology'))).toBe(true);
             expect(unbounded(db.issued)).toEqual([]);
             // Every query narrows by mythology — none walks a bare collection.
             expect(db.issued.every(q => q.wheres.includes('mythology'))).toBe(true);
@@ -167,7 +172,7 @@ describe('SPANavigation read cost', () => {
         test('a limited or counted query is not flagged', async () => {
             const db = recordingFirestore(10);
             await db.collection('deities').limit(5).get();
-            await db.collection('deities').where('mythology', '==', 'greek').count().get();
+            await db.collection('deities').where('mythology', '==', 'greek').get();
             expect(unbounded(db.issued)).toEqual([]);
         });
     });

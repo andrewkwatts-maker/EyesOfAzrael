@@ -196,16 +196,31 @@ class MythologyOverview {
     async _loadSingleCategory(type, mythologyId, mythCapitalized) {
         const collection = this.db.collection(type.collection);
 
-        // Ask how many there are before asking for any of them.
+        // Counted with .get() and .size, NOT .count().
+        //
+        // The compat SDK has no count() on a Query — not in 9.22 which this site
+        // loads, and not in 9.23, 10.x or 11.x either; it was verified against all
+        // four. Count aggregation is modular-only (getCountFromServer). An earlier
+        // change here used .count().get() to avoid downloading rows just to size
+        // them, and it threw on every call:
+        //
+        //   TypeError: collection.where(...).count is not a function
+        //
+        // Every mythology overview page — /#/mythology/greek, /norse, /egyptian and
+        // the rest — rendered an empty shell as a result. A page that costs too
+        // many reads still beats a page that does not load.
+        //
+        // The read cost is real and worth removing properly: these counts exist in
+        // the baked static base, so the right fix is to read them from there rather
+        // than asking Firestore at all. That is a larger change than restoring a
+        // broken page.
         let facetValue = mythologyId;
-        let count = (await collection.where('mythology', '==', facetValue).count().get())
-            .data().count;
+        let count = (await collection.where('mythology', '==', facetValue).get()).size;
 
         if (count === 0 && mythologyId !== mythCapitalized) {
             // Try capitalized variant (e.g. "Polynesian")
             facetValue = mythCapitalized;
-            count = (await collection.where('mythology', '==', facetValue).count().get())
-                .data().count;
+            count = (await collection.where('mythology', '==', facetValue).get()).size;
         }
 
         if (count === 0) return null;

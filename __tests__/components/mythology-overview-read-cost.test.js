@@ -43,9 +43,9 @@ function recordingFirestore(docsPerFacet = {}) {
             limit(n) {
                 return makeQuery(collection, { ...state, limit: n });
             },
-            count() {
-                return makeQuery(collection, { ...state, isCount: true });
-            },
+            // Deliberately NO count(). The compat SDK does not have it, and a mock
+            // that invents methods the real client lacks is how .count().get()
+            // reached production and threw on every mythology page.
             doc(id) {
                 return {
                     get: async () => {
@@ -57,9 +57,6 @@ function recordingFirestore(docsPerFacet = {}) {
             async get() {
                 issued.push({ collection, ...state });
                 const total = docsPerFacet[state.facet] || 0;
-                if (state.isCount) {
-                    return { data: () => ({ count: total }) };
-                }
                 const n = state.limit === null ? total : Math.min(total, state.limit);
                 const docs = Array.from({ length: n }, (_, i) => ({
                     id: `d${i}`,
@@ -78,14 +75,21 @@ function recordingFirestore(docsPerFacet = {}) {
     return {
         issued,
         collection: (name) => makeQuery(name, {
-            wheres: [], limit: null, isCount: false, facet: null
+            wheres: [], limit: null, facet: null
         })
     };
 }
 
-/** Queries that read rows without bounding how many. */
+/**
+ * Queries that read a collection with nothing to bound how much comes back.
+ *
+ * Bounded means narrowed by a where filter, capped by a limit, or a single doc
+ * fetch. This used to also count `.count()` as bounded, which was the whole
+ * problem: compat has no count(), so the code that satisfied it could not run.
+ * The invariant worth holding is that no query walks a bare collection.
+ */
 function unbounded(issued) {
-    return issued.filter(q => !q.isCount && !q.isDoc && q.limit === null);
+    return issued.filter(q => !q.isDoc && q.limit === null && (q.wheres || []).length === 0);
 }
 
 describe('MythologyOverview read cost', () => {
@@ -109,16 +113,49 @@ describe('MythologyOverview read cost', () => {
         expect(unbounded(db.issued)).toEqual([]);
     });
 
-    test('reads at most PREVIEW_LIMIT rows per category', async () => {
+    test('the preview grid reads at most PREVIEW_LIMIT rows per category', async () => {
         const db = recordingFirestore({ greek: 400 });
         const view = new MythologyOverview({ db });
 
         await view.loadCategorySections('greek');
 
-        const rowReads = db.issued.filter(q => !q.isCount && !q.isDoc);
-        expect(rowReads.length).toBeGreaterThan(0);
-        for (const q of rowReads) {
+        // Only the queries that actually populate the grid are capped. The
+        // counting queries are separated out below, because they genuinely
+        // cannot be.
+        const previewReads = db.issued.filter(q => !q.isDoc && q.limit !== null);
+        expect(previewReads.length).toBeGreaterThan(0);
+        for (const q of previewReads) {
             expect(q.limit).toBe(view.PREVIEW_LIMIT);
+        }
+    });
+
+    test('counting a category costs a full filtered read — the known price of compat', async () => {
+        // This documents a real, deliberate cost rather than asserting it away.
+        //
+        // The counts here drive "Entries 967" and the "View all N" link. Firestore
+        // can answer that with an aggregation for about one read per thousand index
+        // entries — but only through the MODULAR sdk. This site loads the compat
+        // build, which has no Query.count() in any version (checked against 9.22,
+        // 9.23, 10.x, 11.x), so the only way to size a category is to read it.
+        //
+        // An earlier attempt to use .count().get() anyway threw at runtime and left
+        // every mythology overview page blank. The cost is the price of the page
+        // working. The proper fix is to serve these counts from the baked static
+        // base and stop asking Firestore — when that lands, this test should start
+        // failing, and its replacement should assert that no unlimited read happens
+        // at all.
+        const db = recordingFirestore({ greek: 400 });
+        const view = new MythologyOverview({ db });
+
+        await view.loadCategorySections('greek');
+
+        const countingReads = db.issued.filter(q => !q.isDoc && q.limit === null);
+        expect(countingReads.length).toBeGreaterThan(0);
+
+        // Narrowed by mythology, so it is one category's rows and never the whole
+        // collection — that distinction is what unbounded() enforces elsewhere.
+        for (const q of countingReads) {
+            expect(q.wheres).toContain('mythology');
         }
     });
 
@@ -142,7 +179,7 @@ describe('MythologyOverview read cost', () => {
         const sections = await view.loadCategorySections('greek');
 
         expect(sections).toEqual([]);
-        expect(db.issued.every(q => q.isCount)).toBe(true);
+        expect(db.issued.every(q => q.wheres.includes('mythology'))).toBe(true);
     });
 
     test('the casing fallback asks a second narrow question, not a wider one', async () => {
@@ -177,14 +214,14 @@ describe('MythologyOverview read cost', () => {
     describe('the guard itself', () => {
         test('the recorder would notice an unbounded read', async () => {
             const db = recordingFirestore({ greek: 10 });
-            await db.collection('deities').where('mythology', '==', 'greek').get();
+            await db.collection('deities').get();   // no filter, no limit
             expect(unbounded(db.issued)).toHaveLength(1);
         });
 
         test('a limited or counted query is not flagged', async () => {
             const db = recordingFirestore({ greek: 10 });
             await db.collection('deities').where('mythology', '==', 'greek').limit(5).get();
-            await db.collection('deities').where('mythology', '==', 'greek').count().get();
+            await db.collection('deities').where('mythology', '==', 'greek').get();
             expect(unbounded(db.issued)).toEqual([]);
         });
     });
