@@ -203,11 +203,34 @@ migration-report-*.html
 # ============================================================================
 
 # Firebase service account keys
+#
+# These were all EXACT filenames, which only protects the names someone thought
+# of in advance. A key downloaded from the Google Cloud console is named
+# <project>-<keyid>.json — eyesofazrael-c36b51f577e8.json — and matched none of
+# them. A copy of it sat untracked and unignored in FIREBASE/, one `git add -A`
+# away from a public repo and, because GitHub Pages serves this repo verbatim,
+# from being downloadable at eyesofazrael.com. Nothing was committed, but only
+# by luck.
+#
+# The wildcards below are deliberately broad. A false positive costs one
+# `git add -f`; a false negative publishes a private key.
 *-firebase-adminsdk-*.json
 service-account-key.json
 serviceAccountKey.json
 firebase-service-account.json
 FIREBASE/firebase-service-account.json
+# Console-download shape: <project-id>-<hex key id>.json
+eyesofazrael-*.json
+# Anything that names itself a service account or credential, anywhere
+*service-account*.json
+*service_account*.json
+*serviceaccount*.json
+*-credentials.json
+*credentials*.json
+# Belt and braces: private key material by extension
+*.pem
+*.p12
+*.pfx
 
 # Google Cloud credentials
 gcloud-credentials.json
