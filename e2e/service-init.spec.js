@@ -53,6 +53,21 @@ function isCriticalError(message) {
   return CRITICAL_ERROR_PATTERNS.some(pattern => pattern.test(message));
 }
 
+/**
+ * Wait for the app's init chain to actually settle, instead of sleeping a
+ * fixed amount and hoping every script has run and every console error it
+ * might throw has already fired.
+ */
+async function waitForAppSettled(page) {
+  await page.waitForFunction(() => {
+    const main = document.getElementById('main-content');
+    return !!main && (main.textContent || '').trim().length > 20;
+  }, { timeout: 10000 }).catch(() => {
+    // Deliberately not a failure: it is this helper's callers' job to say
+    // what's wrong with the page, not this wait.
+  });
+}
+
 test.describe('Service Initialization Tests', () => {
   test.beforeEach(async ({ page }) => {
     test.setTimeout(60000);
@@ -73,7 +88,7 @@ test.describe('Service Initialization Tests', () => {
     });
 
     await page.goto('/', { waitUntil: 'load' });
-    await page.waitForTimeout(3000);
+    await waitForAppSettled(page);
 
     console.log('All console errors:', consoleErrors);
     console.log('"X is not defined" errors:', undefinedErrors);
@@ -146,7 +161,7 @@ test.describe('Service Initialization Tests', () => {
     await page.goto('/', { waitUntil: 'load' });
 
     // Wait for SPA to initialize
-    await page.waitForTimeout(2000);
+    await page.waitForFunction(() => typeof window.SPANavigation !== 'undefined', { timeout: 10000 }).catch(() => {});
 
     const spaStatus = await page.evaluate(() => {
       return {
@@ -168,7 +183,7 @@ test.describe('Service Initialization Tests', () => {
 
   test('4. Theme system initializes', async ({ page }) => {
     await page.goto('/', { waitUntil: 'load' });
-    await page.waitForTimeout(2000);
+    await page.waitForFunction(() => window.ShaderThemePicker && window.ShaderThemePicker.isInitialized(), { timeout: 10000 }).catch(() => {});
 
     // Check if theme picker container exists
     const themePickerVisible = await page.locator('#themePickerContainer, .theme-picker, .theme-toggle').first().isVisible().catch(() => false);
@@ -222,7 +237,7 @@ test.describe('Service Initialization Tests', () => {
 
     // Navigate fresh without auth
     await page.goto('/', { waitUntil: 'load' });
-    await page.waitForTimeout(3000);
+    await waitForAppSettled(page);
 
     // Check that main content is visible (not blocked by login screen)
     const mainContentVisible = await page.locator('#main-content, main, .landing-page, .home-content').first().isVisible().catch(() => false);
@@ -316,7 +331,7 @@ test.describe('Service Initialization Tests', () => {
 
       console.log(`Testing route: ${route}`);
       await page.goto(route, { waitUntil: 'load' });
-      await page.waitForTimeout(2000);
+      await waitForAppSettled(page);
 
       // Check page didn't crash
       const pageStillAlive = await page.evaluate(() => document.readyState).catch(() => null);
@@ -342,7 +357,7 @@ test.describe('Service Initialization Tests', () => {
     });
 
     await page.goto('/', { waitUntil: 'load' });
-    await page.waitForTimeout(3000);
+    await waitForAppSettled(page);
 
     console.log('Page errors:', pageErrors);
 
@@ -359,7 +374,13 @@ test.describe('Service Initialization Tests', () => {
 
   test('9. Service worker registers successfully', async ({ page }) => {
     await page.goto('/', { waitUntil: 'load' });
-    await page.waitForTimeout(3000);
+    // Give the service worker a chance to register, without assuming it
+    // will (some dev modes intentionally skip it -- see the check below).
+    await page.waitForFunction(async () => {
+      if (!('serviceWorker' in navigator)) return true;
+      const regs = await navigator.serviceWorker.getRegistrations();
+      return regs.length > 0;
+    }, { timeout: 8000 }).catch(() => {});
 
     const swStatus = await page.evaluate(async () => {
       if (!('serviceWorker' in navigator)) {
@@ -411,7 +432,7 @@ test.describe('Service Initialization Tests', () => {
 
   test('10. Diagnostic panel does NOT show (indicates no critical failures)', async ({ page }) => {
     await page.goto('/', { waitUntil: 'load' });
-    await page.waitForTimeout(3000);
+    await waitForAppSettled(page);
 
     // Check for diagnostic/error panels that indicate critical failures
     const diagnosticPanelVisible = await page.evaluate(() => {

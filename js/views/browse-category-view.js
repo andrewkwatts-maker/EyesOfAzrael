@@ -1208,7 +1208,7 @@ class BrowseCategoryView {
                data-facet-field="${this.facetField}"
                data-entity-type="${this.category.replace(/s$/, '')}"
                data-collection="${this.category}"
-               data-name="${entity.name.toLowerCase()}"
+               data-name="${(entity.name || '').toLowerCase()}"
                aria-label="${this.escapeHtml(entity.name)} — ${this.escapeHtml(this.categoryNoun(this.category))}${facet ? `, ${this.escapeHtml(this.facetLabel)}: ${this.escapeHtml(this.capitalize(facet))}` : ''}">
                 ${badgeHTML}
 
