@@ -16,16 +16,20 @@
 
 class SearchEnhancements {
     constructor() {
-        // State
-        this.recentSearches = this.loadRecentSearches();
-        this.searchPreferences = this.loadSearchPreferences();
-        this.isCommandPaletteOpen = false;
-        this.activeAutocompleteIndex = -1;
-        this.autocompleteResults = [];
-        this.debounceTimer = null;
-        this.lastQuery = '';
-
-        // Configuration
+        // Configuration FIRST — it is a dependency of the two loads below.
+        //
+        // These were previously assigned after them, so loadRecentSearches() and
+        // loadSearchPreferences() both read this.config.storageKeys while
+        // this.config was still undefined. Each threw:
+        //
+        //   [SearchEnhancements] Failed to load recent searches:
+        //   TypeError: Cannot read properties of undefined (reading 'storageKeys')
+        //
+        // Their catch blocks returned [] and {}, so nothing broke visibly and the
+        // console warning appeared on EVERY page load of the site. The effect was
+        // that recent searches and saved search preferences never loaded — not
+        // "sometimes", never. Saving worked, because saveRecentSearches() runs
+        // later when config exists; the values were written and never read back.
         this.config = {
             maxRecentSearches: 10,
             autocompleteDebounce: 150,
@@ -36,6 +40,15 @@ class SearchEnhancements {
                 searchPreferences: 'eoa_search_preferences'
             }
         };
+
+        // State
+        this.recentSearches = this.loadRecentSearches();
+        this.searchPreferences = this.loadSearchPreferences();
+        this.isCommandPaletteOpen = false;
+        this.activeAutocompleteIndex = -1;
+        this.autocompleteResults = [];
+        this.debounceTimer = null;
+        this.lastQuery = '';
 
         // Entity types for quick filters
         this.entityTypes = [
