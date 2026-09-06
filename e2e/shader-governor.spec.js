@@ -99,7 +99,15 @@ test.describe('Black-hole shader governor', () => {
   });
 
   test('prefers-reduced-motion renders a single static frame', async ({ page, context }) => {
-    await context.close(); // replaced by emulated context below
+    // Superseded: this describe block doesn't set contextOptions.reducedMotion,
+    // so there was never a reduced-motion context here to assert against -- the
+    // real coverage is "Black-hole shader reduced motion > reduced motion:
+    // renders once, does not animate" below, which does apply
+    // `test.use({ contextOptions: { reducedMotion: 'reduce' } })` at the
+    // describe level (test.use can't be called from inside a test body, so it
+    // can't be fixed in place here). Keeping this as an explicit skip rather
+    // than deleting it or duplicating the real test under a second name.
+    test.skip(true, 'superseded by "Black-hole shader reduced motion > reduced motion: renders once, does not animate", which actually sets reducedMotion on its context');
   });
 });
 
