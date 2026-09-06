@@ -9,6 +9,17 @@ on:
     - cron: '0 0 * * *' # Daily at midnight UTC
   workflow_dispatch: # Allow manual triggering
 
+# Supersede an in-flight run when a newer commit lands on the same ref.
+#
+# Without this every push started a full parallel set while the previous one was
+# still going — this suite takes ~40 minutes, so pushing three times in an hour
+# meant three complete matrices running at once, and the results that came back
+# were for commits already overwritten. Nothing was cancelled because nothing
+# knew to cancel it.
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   e2e-tests:
     name: E2E Tests on ${{ matrix.browser }} (shard ${{ matrix.shard }}/2)
@@ -21,10 +32,20 @@ jobs:
     # even a list of what failed. Two shards halves each job's work so every
     # browser reports, and a red job you can read beats a cancelled one you
     # cannot.
+    # Chromium only on push; the full matrix nightly and on demand.
+    #
+    # Every push ran three browsers x two shards, and firefox and webkit have not
+    # once caught a defect that chromium missed — every failure this suite has
+    # reported was reproducible in chromium. Cross-browser coverage is worth
+    # having, but it is worth having once a day, not six times per commit while
+    # someone is iterating.
+    #
+    # The nightly schedule and workflow_dispatch both still run all three, so the
+    # coverage is kept; what changes is how often you wait for it.
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: ${{ github.event_name == 'push' && fromJSON('["chromium"]') || fromJSON('["chromium","firefox","webkit"]') }}
         shard: [1, 2]
 
     steps:
@@ -70,6 +91,12 @@ jobs:
     name: Mobile E2E Tests (shard ${{ matrix.shard }}/2)
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    # Not on push. Unlike the jobs below, this is NOT duplicated work — Mobile
+    # Chrome and Mobile Safari are distinct projects with their own viewports and
+    # touch behaviour, and nothing else covers them. It is gated off the push path
+    # purely on cost: at ~39 minutes per shard it was the single longest thing
+    # between a commit and a verdict. Nightly and on demand keep the coverage.
+    if: github.event_name != 'push'
 
     # test:e2e:mobile runs two projects, so it carries twice the work of a single
     # browser job — it was cancelled at the 60-minute wall for the same reason.
@@ -114,6 +141,10 @@ jobs:
     name: Accessibility Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Not on push. This job re-runs specs the chromium shards above already
+    # covered, so on every commit it was duplicated work; it still runs nightly
+    # and on demand, where a second focused report is useful rather than noise.
+    if: github.event_name != 'push'
 
     steps:
       - name: Checkout code
@@ -152,6 +183,10 @@ jobs:
     name: Visual Regression Tests
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    # Not on push. This job re-runs specs the chromium shards above already
+    # covered, so on every commit it was duplicated work; it still runs nightly
+    # and on demand, where a second focused report is useful rather than noise.
+    if: github.event_name != 'push'
 
     steps:
       - name: Checkout code
@@ -190,6 +225,10 @@ jobs:
     name: Performance Tests
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Not on push. This job re-runs specs the chromium shards above already
+    # covered, so on every commit it was duplicated work; it still runs nightly
+    # and on demand, where a second focused report is useful rather than noise.
+    if: github.event_name != 'push'
 
     steps:
       - name: Checkout code

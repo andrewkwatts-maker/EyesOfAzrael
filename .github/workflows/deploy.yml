@@ -7,6 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   # 20, not 18. The deploy step runs firebase-tools@latest, and from v15 that
   # requires Node >=20 — on 18 it installs, then refuses to run:
