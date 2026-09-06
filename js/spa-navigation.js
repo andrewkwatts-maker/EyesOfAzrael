@@ -2568,8 +2568,26 @@ class SPANavigation {
         if (pathParts[0] === 'entity' && pathParts[1]) {
             route.entityTypePlural = pathParts[1];
             route.entityType = pathParts[1].replace(/s$/, '');
-            route.mythology = pathParts[2];
-            route.entityId = pathParts[3];
+
+            // Two entity URL shapes are live and both render:
+            //   #/entity/:type/:mythology/:id   e.g. entity/deities/greek/zeus
+            //   #/entity/:type/:id              e.g. entity/deity/zeus
+            //
+            // This only handled the first. On the shorter form it read the ID as
+            // the mythology and left entityId undefined, so the breadcrumb came
+            // out "Home > Zeus > Deity" — the entity's own name sitting in the
+            // mythology slot, and the final crumb naming the type instead of the
+            // page you are on.
+            //
+            // A fourth segment is what distinguishes them: present means the
+            // third is a mythology, absent means the third is the entity.
+            if (pathParts[3]) {
+                route.mythology = pathParts[2];
+                route.entityId = pathParts[3];
+            } else {
+                route.entityId = pathParts[2];
+            }
+
             route.hash = path;
             return route;
         }

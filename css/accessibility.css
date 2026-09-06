@@ -817,6 +817,23 @@ nav[aria-label="Breadcrumb"] {
     transition: all 300ms ease;
 }
 
+/* Revealed by the OUTER container's .visible class, not its own.
+ *
+ * The breadcrumb has two nested navs: #breadcrumb-nav (the sticky bar in
+ * index.html) and, inside it, <nav class="breadcrumb-container"
+ * aria-label="Breadcrumb"> written by js/components/breadcrumb-nav.js. Both had
+ * their own opacity/visibility reveal keyed on a .visible class, but the JS only
+ * ever adds .visible to the OUTER one (breadcrumb-nav.js:62-71).
+ *
+ * So the inner nav sat at opacity 0 / visibility hidden forever. Breadcrumbs
+ * were being built correctly — full markup, schema.org itemtype, working links —
+ * and shown to nobody, on every route: browse, mythology, entity and search all
+ * measured visibility:hidden on the container.
+ *
+ * Keying the inner reveal off the outer's state leaves one source of truth, the
+ * class the JS already manages. The standalone .visible selector is kept below
+ * so anything that does set it directly still works. */
+#breadcrumb-nav.visible nav[aria-label="Breadcrumb"],
 nav[aria-label="Breadcrumb"].visible {
     opacity: 1;
     visibility: visible;

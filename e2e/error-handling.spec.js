@@ -15,10 +15,21 @@ test.describe('Error Handling', () => {
       await waitForPageLoad(page);
 
       // Check for 404 page or error indication
-      const has404 = await page.locator('text=404').isVisible().catch(() => false);
-      const hasNotFound = await page.locator('text=/not found/i').isVisible().catch(() => false);
-      const hasError = await page.locator('.error-page, .error-container').isVisible().catch(() => false);
-      const hasHomeLink = await page.locator('a[href="#/"], a[href="#"]').isVisible().catch(() => false);
+      // .first() on every multi-match locator.
+      //
+      // locator.isVisible() throws a strict-mode violation when its selector
+      // resolves to more than one element, and `.catch(() => false)` turns that
+      // throw into a plain false — so a TEST bug is reported as a SITE failure
+      // with nothing to say which it was.
+      //
+      // 'a[href="#/"], a[href="#"]' matches 6 elements on this page (the footer
+      // carries home links too), so hasHomeLink was always false and this test
+      // failed on a 404 page that renders correctly: "404 Page Not Found", an
+      // .error-page container, and a working Go Home button.
+      const has404 = await page.locator('text=404').first().isVisible().catch(() => false);
+      const hasNotFound = await page.locator('text=/not found/i').first().isVisible().catch(() => false);
+      const hasError = await page.locator('.error-page, .error-container').first().isVisible().catch(() => false);
+      const hasHomeLink = await page.locator('a[href="#/"], a[href="#"]').first().isVisible().catch(() => false);
 
       // Should show some form of error/404 message
       expect(has404 || hasNotFound || hasError).toBeTruthy();

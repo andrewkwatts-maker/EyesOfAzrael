@@ -386,10 +386,21 @@ class FirebaseEntityRenderer {
         const html = `
             ${this.renderEditIcon(entity)}
 
-            <!-- Hero Section with Large Icon -->
+            <!-- Hero Section with Large Icon
+
+                 The entity name is an h1, not an h2 (all six renderers in this
+                 file were changed together). It is the page's subject and its
+                 only top-level heading, so as an h2 every entity page — the most
+                 numerous page type on the site — had no level-one heading at all.
+                 That is how a screen-reader user identifies where they landed,
+                 and what search engines read as the page's title.
+
+                 Nothing moves visually: themes/theme-base.css and
+                 css/shader-backgrounds.css both style .hero-section h1 and
+                 .hero-section h2 in the same selector list. -->
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'deity', entity.name)}</div>
-                <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
+                <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
@@ -1102,7 +1113,7 @@ class FirebaseEntityRenderer {
             <!-- Hero Section with Large Icon -->
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'hero', entity.name)}</div>
-                <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
+                <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.7;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
@@ -1324,7 +1335,7 @@ class FirebaseEntityRenderer {
             <!-- Hero Section with Large Icon -->
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'item', entity.name)}</div>
-                <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
+                <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
                 ${entity.subtitle || entity.shortDescription ? `<p class="subtitle" style="font-size: 1.25rem; margin: 0.5rem 0; opacity: 0.9;">${this.escapeHtml(entity.subtitle || entity.shortDescription)}</p>` : ''}
                 ${badges.length > 0 ? `
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.75rem 0;">
@@ -1520,7 +1531,7 @@ class FirebaseEntityRenderer {
             <!-- Hero Section with Large Icon -->
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'place', entity.name)}</div>
-                <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
+                <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.7;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
@@ -1782,7 +1793,7 @@ class FirebaseEntityRenderer {
             <!-- Hero Section with Large Icon -->
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'creature', entity.name)}</div>
-                <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
+                <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${badges.length > 0 ? `
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.75rem 0;">
@@ -2043,7 +2054,7 @@ class FirebaseEntityRenderer {
             <!-- Hero Section with Large Icon -->
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, entityType, entity.name)}</div>
-                <h2>${this.escapeHtml(entity.name || entity.title)}</h2>
+                <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${classificationInfo.length > 0 ? `
                     <div class="entity-classification" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.75rem 0;">

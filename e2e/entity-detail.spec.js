@@ -840,13 +840,18 @@ test.describe('Entity Detail Page - Breadcrumb Navigation', () => {
     expect(breadcrumbText.toLowerCase()).toContain('home');
 
     // The current (non-link) crumb should be the actual page the user is on.
-    // NOTE: js/spa-navigation.js's _parseRouteForBreadcrumb() only has a
-    // 3-segment shape (`entity/:type/:mythology/:id`) for `#/entity/...`
-    // routes; for this test's 2-segment `#/entity/deity/zeus` URL it
-    // misreads "zeus" as the *mythology* and leaves entityId undefined, so
-    // the final/current crumb ends up labelled "Deity", not "Zeus". This
-    // assertion is written against what SHOULD happen (the current crumb
-    // names the entity) and is expected to fail, documenting that bug.
+    //
+    // This assertion was previously annotated as expected-to-fail:
+    // _parseRouteForBreadcrumb() in js/spa-navigation.js only handled the
+    // 3-segment `entity/:type/:mythology/:id` shape, so on this 2-segment URL it
+    // read "zeus" as the mythology, left entityId undefined, and produced
+    // "Home > Zeus > Deity" — the entity's name in the mythology slot and the
+    // type as the current crumb.
+    //
+    // Fixed: the parser now branches on whether a fourth segment exists.
+    // Both shapes give a correct trail, so this passes rather than documenting
+    // a defect —  entity/deity/zeus -> "Home > Deity > Zeus" and
+    // entity/deities/greek/zeus -> "Home > Greek > Deities > Zeus".
     const currentCrumb = page.locator('#breadcrumb-nav .breadcrumb-item--current .breadcrumb-label');
     await expect(currentCrumb).toHaveText(/zeus/i, { timeout: SPA_TIMEOUT });
   });
