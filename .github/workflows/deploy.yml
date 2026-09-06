@@ -8,7 +8,16 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '18'
+  # 20, not 18. The deploy step runs firebase-tools@latest, and from v15 that
+  # requires Node >=20 — on 18 it installs, then refuses to run:
+  #   "Firebase CLI v15.29.0 is incompatible with Node.js v18.20.8"
+  # which is why Deploy to Production failed after ~2 minutes on every push while
+  # the credentials themselves were fine (the log gets past "Setting up CLI
+  # credentials" before dying).
+  #
+  # Node 18 also went end-of-life in April 2025, so this was going to keep
+  # breaking as dependencies moved on.
+  NODE_VERSION: '20'
 
 jobs:
   test:
@@ -54,6 +63,13 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
           channelId: live
+          # Pin the major. By default this action installs firebase-tools@latest
+          # on every run, which means an upstream release can break deploys with
+          # no change on our side — and did: v15 raised its Node floor to 20 and
+          # every push failed until this workflow caught up. Pinning to 15 still
+          # takes minor and patch updates; it just stops a v16 with a new engine
+          # requirement landing unannounced in the middle of a deploy.
+          firebaseToolsVersion: '15'
           # Literal, not a secret. The project ID is not confidential — it is
           # served publicly in firebase-config.js and is the web.app hostname —
           # and putting it in a secret only adds a way for the deploy to fail:
