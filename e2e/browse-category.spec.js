@@ -8,8 +8,14 @@
 
 const { test, expect } = require('@playwright/test');
 
-// Base URL for the production site
-const BASE_URL = 'https://www.eyesofazrael.com';
+// Empty by default so `${BASE_URL}/#/...` resolves as a relative path
+// against playwright.config.js's `use.baseURL` (localhost:8080 in CI/dev).
+// Previously hardcoded to the live production site, so every test here
+// exercised whatever happened to be deployed instead of the code under
+// test. Still overridable for the documented "run against production" use
+// case via the same BASE_URL env var playwright.config.js's own baseURL
+// already reads.
+const BASE_URL = process.env.BASE_URL || '';
 
 // Test timeout configuration
 test.describe.configure({ timeout: 60000 });
