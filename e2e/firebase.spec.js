@@ -64,53 +64,61 @@ test.describe('Firebase Integration Tests', () => {
     await page.goto('/');
     await waitForFirebaseReady(page);
 
-    // Check if entity renderer is loaded
-    const hasRenderer = await page.evaluate(() => {
-      return typeof window.EntityRenderer !== 'undefined' ||
-             typeof window.renderEntity !== 'undefined';
+    // window.EntityRenderer / window.renderEntity never existed in this
+    // codebase -- the real globals (js/entity-renderer-firebase.js,
+    // js/page-asset-renderer.js, js/universal-asset-renderer.js) are
+    // FirebaseEntityRenderer, PageAssetRenderer and UniversalAssetRenderer.
+    // The old names meant this test's `if (hasRenderer)` guard was always
+    // false, so it always passed without checking anything.
+    const renderResult = await page.evaluate(() => {
+      const candidates = [
+        ['FirebaseEntityRenderer', window.FirebaseEntityRenderer],
+        ['PageAssetRenderer', window.PageAssetRenderer],
+        ['UniversalAssetRenderer', window.UniversalAssetRenderer],
+      ];
+      for (const [type, renderer] of candidates) {
+        if (renderer) {
+          return { hasRenderer: true, type };
+        }
+      }
+      return { hasRenderer: false };
     });
 
-    if (hasRenderer) {
-      // Try to render an entity
-      const renderResult = await page.evaluate(async () => {
-        try {
-          // Look for entity render function
-          if (window.EntityRenderer && typeof window.EntityRenderer.renderEntity === 'function') {
-            return { hasRenderer: true, type: 'EntityRenderer' };
-          } else if (typeof window.renderEntity === 'function') {
-            return { hasRenderer: true, type: 'renderEntity' };
-          }
-          return { hasRenderer: false };
-        } catch (error) {
-          return { hasRenderer: false, error: error.message };
-        }
-      });
-
-      expect(renderResult.hasRenderer).toBe(true);
-    }
+    expect(renderResult.hasRenderer, `expected one of FirebaseEntityRenderer/PageAssetRenderer/UniversalAssetRenderer on window, got: ${JSON.stringify(renderResult)}`).toBe(true);
   });
 
   test('Search integration with Firebase', async ({ page }) => {
     await page.goto('/');
     await waitForFirebaseReady(page);
 
-    const searchInput = page.locator('input[type="search"], #search-input, .search-input').first();
-    const hasSearch = await searchInput.isVisible().catch(() => false);
+    // The real header search markup (index.html) is #headerSearchInput,
+    // type="text" -- it never matched input[type="search"]/#search-input/
+    // .search-input, so `hasSearch` here was always false and this test
+    // never actually asserted anything. It's also hidden by default
+    // (js/header-nav.js's setupHeaderSearch toggles #headerSearchDropdown's
+    // display via #headerSearchBtn) so it has to be opened first.
+    await page.locator('#headerSearchBtn').click();
+    const searchInput = page.locator('#headerSearchInput');
+    await expect(searchInput).toBeVisible();
 
-    if (hasSearch) {
-      // Perform search
-      await searchInput.fill('zeus');
-      await searchInput.press('Enter');
-      await page.waitForTimeout(2000);
+    await searchInput.fill('zeus');
+    await searchInput.press('Enter');
 
-      // Check if Firebase was queried
-      const searchExecuted = await page.evaluate(() => {
-        // Check if search results container exists
-        return document.querySelector('.search-results, .results-container, .entity-card, .search-result') !== null;
-      });
+    // Enter navigates to #/search?q=zeus (js/header-nav.js), which
+    // SearchViewComplete auto-triggers on load per its documented query
+    // params -- wait for that view's actual results container (js/components/
+    // search-view-complete.js renders #results-container.search-results, or
+    // .no-results when the query has no matches), not a fixed sleep.
+    await page.waitForFunction(() => location.hash.startsWith('#/search'), { timeout: 5000 });
+    await page.waitForFunction(() => {
+      return !!document.querySelector('#results-container, .search-results, .no-results');
+    }, { timeout: 10000 });
 
-      expect(searchExecuted).toBeTruthy();
-    }
+    const searchExecuted = await page.evaluate(() => {
+      return document.querySelector('.search-results, .results-container, .entity-card, .search-result, .no-results, .empty-state') !== null;
+    });
+
+    expect(searchExecuted).toBeTruthy();
   });
 
   test('Authentication state management', async ({ page }) => {
@@ -209,6 +217,11 @@ test.describe('Firebase Integration Tests', () => {
     });
 
     console.log('First fetch:', firstFetch);
+    // Always assert something about the first fetch, regardless of whether
+    // Firestore happened to be reachable -- the timing comparison below is
+    // legitimately conditional on network state, but this outer shape check
+    // is not, so every run exercises a real expect().
+    expect(typeof firstFetch.success).toBe('boolean');
 
     if (firstFetch.success) {
       // Second fetch (might be from cache)
@@ -228,9 +241,10 @@ test.describe('Firebase Integration Tests', () => {
       });
 
       console.log('Second fetch:', secondFetch);
+      expect(typeof secondFetch.success).toBe('boolean');
 
       // Second fetch should be faster if cached
-      if (secondFetch.success && firstFetch.success) {
+      if (secondFetch.success) {
         expect(secondFetch.duration).toBeLessThanOrEqual(firstFetch.duration + 100);
       }
     }
