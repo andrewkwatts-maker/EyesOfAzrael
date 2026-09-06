@@ -21,7 +21,6 @@ const { test, expect } = require('@playwright/test');
 // Configuration
 const SPA_TIMEOUT = 15000;
 const NAVIGATION_TIMEOUT = 20000;
-const CONTENT_LOAD_WAIT = 3000;
 
 /**
  * Known test entities from the database
@@ -162,7 +161,7 @@ async function navigateToEntity(page, entity) {
 
       // Wait for main content
       await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
-      await page.waitForTimeout(CONTENT_LOAD_WAIT);
+      await waitForEntityLoaded(page);
 
       // Check if entity name appears on page
       const pageContent = await page.textContent('body');
@@ -201,6 +200,39 @@ function setupConsoleErrorCollection(page) {
   return errors;
 }
 
+/**
+ * Wait for the entity detail page to actually settle, instead of sleeping for
+ * a fixed duration and hoping the async Firestore fetch + render is done by
+ * then.
+ *
+ * The live renderer for every #/entity/... and #/mythology/.../:type/:id
+ * route is FirebaseEntityRenderer (js/entity-renderer-firebase.js): it shows
+ * `.entity-loading-state` while fetching, then replaces #main-content with
+ * either a `.hero-section` (success, every entity type) or
+ * `.error-state-container` (not-found/invalid/offline). Polling for that
+ * transition is both faster on a quick render and reliable on a slow one —
+ * the fixed sleep raced the fetch and could observe either state depending on
+ * machine load.
+ */
+async function waitForEntityLoaded(page) {
+  await page.waitForLoadState('domcontentloaded');
+
+  await page.waitForFunction(() => {
+    const main = document.getElementById('main-content');
+    if (!main) return false;
+    if (main.querySelector('.entity-loading-state')) return false;
+    return !!main.querySelector('.hero-section, .error-state-container, .entity-page');
+  }, { timeout: SPA_TIMEOUT }).catch(() => {
+    // Deliberately not a failure here: it is the individual test's job to
+    // assert what is (or is not) on the page - this helper only waits for
+    // the page to stop being in a "still loading" state.
+  });
+
+  // Short settle for chrome that mounts after the initial render pass
+  // (ShareToolbar, admin populate button, back-to-top button).
+  await page.waitForTimeout(150);
+}
+
 // ============================================================================
 // TEST SUITES
 // ============================================================================
@@ -217,7 +249,7 @@ test.describe('Entity Detail Page - Loading & Basic Display', () => {
     if (!success) {
       console.log(`[WARN] Could not navigate to ${entity.name} - trying direct route`);
       await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(CONTENT_LOAD_WAIT);
+      await waitForEntityLoaded(page);
     }
 
     // Check for entity name in heading
@@ -229,9 +261,10 @@ test.describe('Entity Detail Page - Loading & Basic Display', () => {
   });
 
   test('2. Entity page loads with name as heading (Fenrir - Creature)', async ({ page }) => {
-    const entity = TEST_ENTITIES.creature.fenrir;
-
-    // Try multiple possible routes for creatures
+    // Try multiple possible routes for creatures - this is route-format
+    // discovery (which URL shape resolves), not a feature guard, so it
+    // stays a loop. What must NOT be conditional is the assertion once a
+    // route has actually loaded content.
     const routes = [
       '/#/entity/creature/norse_fenrir',
       '/#/entity/creature/fenrir',
@@ -242,7 +275,7 @@ test.describe('Entity Detail Page - Loading & Basic Display', () => {
     for (const route of routes) {
       try {
         await page.goto(route, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await page.waitForTimeout(CONTENT_LOAD_WAIT);
+        await waitForEntityLoaded(page);
 
         const content = await page.textContent('body');
         if (content.toLowerCase().includes('fenrir')) {
@@ -254,20 +287,22 @@ test.describe('Entity Detail Page - Loading & Basic Display', () => {
       }
     }
 
-    if (loaded) {
-      const heading = page.locator('h1, .entity-title, .entity-name');
-      await expect(heading.first()).toBeVisible({ timeout: SPA_TIMEOUT });
+    // Fenrir is a known-good seeded entity (TEST_ENTITIES.creature.fenrir) -
+    // require that at least one route format actually rendered it, then
+    // check its real heading unconditionally. FirebaseEntityRenderer puts
+    // the entity name in an unclassed `<h2>` inside `.hero-section` (there
+    // is no `<h1>`/`.entity-title`/`.entity-name` on a successful render -
+    // only the 404/error state uses `<h1>`), so that's the real locator.
+    expect(loaded, 'Fenrir did not render on any known route format').toBeTruthy();
 
-      const headingText = await heading.first().textContent();
-      expect(headingText.toLowerCase()).toContain('fenrir');
-    } else {
-      console.log('[SKIP] Fenrir entity not found - may not exist in database');
-    }
+    const heading = page.locator('.hero-section h2, h1, .entity-title, .entity-name');
+    await expect(heading.first()).toBeVisible({ timeout: SPA_TIMEOUT });
+
+    const headingText = await heading.first().textContent();
+    expect(headingText.toLowerCase()).toContain('fenrir');
   });
 
   test('3. Entity page loads with name as heading (Ankh - Item)', async ({ page }) => {
-    const entity = TEST_ENTITIES.item.ankh;
-
     const routes = [
       '/#/entity/item/egyptian_ankh',
       '/#/entity/item/ankh',
@@ -278,7 +313,7 @@ test.describe('Entity Detail Page - Loading & Basic Display', () => {
     for (const route of routes) {
       try {
         await page.goto(route, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await page.waitForTimeout(CONTENT_LOAD_WAIT);
+        await waitForEntityLoaded(page);
 
         const content = await page.textContent('body');
         if (content.toLowerCase().includes('ankh')) {
@@ -290,15 +325,13 @@ test.describe('Entity Detail Page - Loading & Basic Display', () => {
       }
     }
 
-    if (loaded) {
-      const heading = page.locator('h1, .entity-title, .entity-name');
-      await expect(heading.first()).toBeVisible({ timeout: SPA_TIMEOUT });
+    expect(loaded, 'Ankh did not render on any known route format').toBeTruthy();
 
-      const headingText = await heading.first().textContent();
-      expect(headingText.toLowerCase()).toContain('ankh');
-    } else {
-      console.log('[SKIP] Ankh entity not found - may not exist in database');
-    }
+    const heading = page.locator('.hero-section h2, h1, .entity-title, .entity-name');
+    await expect(heading.first()).toBeVisible({ timeout: SPA_TIMEOUT });
+
+    const headingText = await heading.first().textContent();
+    expect(headingText.toLowerCase()).toContain('ankh');
   });
 });
 
@@ -309,44 +342,30 @@ test.describe('Entity Detail Page - Image/Icon Display', () => {
 
   test('4. Entity image or icon displays correctly', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Check for entity icon or image
+    // `.entity-icon-large` (inside `.hero-icon-display`) is rendered by every
+    // FirebaseEntityRenderer type branch (renderDeity/renderHero/renderItem/
+    // etc.) - it is a core, always-present element, not an optional one, so
+    // this no longer needs a count-guard.
     const iconOrImage = page.locator(
-      '.entity-icon, .entity-icon-large, .entity-image, ' +
+      '.entity-icon-large, .entity-icon, .entity-image, ' +
       '.entity-hero img, .entity-hero .icon-float, ' +
       'img[alt*="zeus" i], img[alt*="deity" i]'
     );
 
-    const hasVisualElement = await iconOrImage.count() > 0;
-
-    if (hasVisualElement) {
-      await expect(iconOrImage.first()).toBeVisible({ timeout: SPA_TIMEOUT });
-      console.log('[PASS] Entity has visible icon/image');
-    } else {
-      // Check for text-based icon (emoji)
-      const textIcon = await page.locator('.entity-icon-large, .entity-hero .icon-float').textContent().catch(() => '');
-      if (textIcon.length > 0) {
-        console.log('[PASS] Entity has text-based icon:', textIcon.substring(0, 10));
-      } else {
-        console.log('[INFO] No distinct icon found - entity may use default styling');
-      }
-    }
+    await expect(iconOrImage.first()).toBeVisible({ timeout: SPA_TIMEOUT });
   });
 
+  // Test 5 (deity type badge) is intentionally skipped - see below.
   test('5. Deity type badge icon displays', async ({ page }) => {
-    await page.goto('/#/entity/deity/athena', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-    // Check for type badge
-    const typeBadge = page.locator('.entity-type-badge, .type-badge, [class*="badge"]');
-    const hasBadge = await typeBadge.count() > 0;
-
-    if (hasBadge) {
-      await expect(typeBadge.first()).toBeVisible();
-      const badgeText = await typeBadge.first().textContent();
-      console.log('[PASS] Entity type badge found:', badgeText);
-    }
+    test.skip(true,
+      'No `.entity-type-badge`/`.type-badge`/`[class*="badge"]` element exists ' +
+      'anywhere in the live renderer (js/entity-renderer-firebase.js). Item and ' +
+      'archetype entities render classification "badges" as bare, unclassed ' +
+      '<span style="..."> tags, and deity/creature/hero/place pages render no ' +
+      'type indicator at all - there is no discrete, discoverable "type badge" ' +
+      'feature on this page for any entity type to assert against.');
   });
 });
 
@@ -357,57 +376,27 @@ test.describe('Entity Detail Page - Description Text', () => {
 
   test('6. Description text is visible', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Look for description in various possible locations
-    const descriptionSelectors = [
-      '.entity-description',
-      '.entity-hero-description',
-      '.description',
-      '.prose',
-      '.entity-section-description',
-      '[class*="description"]'
-    ];
-
-    let descriptionFound = false;
-    for (const selector of descriptionSelectors) {
-      const description = page.locator(selector);
-      const count = await description.count();
-
-      if (count > 0) {
-        const isVisible = await description.first().isVisible().catch(() => false);
-        if (isVisible) {
-          const text = await description.first().textContent();
-          if (text && text.length > 20) {
-            descriptionFound = true;
-            console.log('[PASS] Description found with length:', text.length);
-            expect(text.length).toBeGreaterThan(20);
-            break;
-          }
-        }
-      }
-    }
-
-    if (!descriptionFound) {
-      // Check if any substantial text content exists in main content area
-      const mainContent = await page.locator('#main-content, .entity-detail-viewer').textContent();
-      expect(mainContent.length).toBeGreaterThan(100);
-      console.log('[INFO] No explicit description section, but page has content');
-    }
+    // FirebaseEntityRenderer gives the description no dedicated class - it's
+    // a plain <p> inside `.hero-section` (see renderDeity in
+    // js/entity-renderer-firebase.js). Zeus's Firestore doc has a non-empty
+    // `description` field, so this is a real, unconditional check against
+    // the actual markup rather than a class name that doesn't exist.
+    const heroText = await page.locator('.hero-section').textContent();
+    expect(heroText.trim().length).toBeGreaterThan(20);
   });
 
+  // Test 7 is intentionally skipped - see below.
   test('7. Full description section renders markdown correctly', async ({ page }) => {
-    await page.goto('/#/entity/deity/odin', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-    // Check for prose/markdown rendered content
-    const proseContent = page.locator('.prose p, .entity-description p');
-    const hasProse = await proseContent.count() > 0;
-
-    if (hasProse) {
-      await expect(proseContent.first()).toBeVisible();
-      console.log('[PASS] Markdown content rendered with paragraph tags');
-    }
+    test.skip(true,
+      'The entity description is rendered via `this.escapeHtml(entity.description)` ' +
+      'into a plain <p> (see renderDeity in js/entity-renderer-firebase.js) - it is ' +
+      'never passed through a markdown renderer, and there is no `.prose`/' +
+      '`.entity-description` element anywhere in the live render output. Markdown ' +
+      'IS rendered elsewhere on the page (key myths / extended-content schema ' +
+      'sections), but that is a different feature already covered by other tests, ' +
+      'not "the description section".');
   });
 });
 
@@ -418,95 +407,65 @@ test.describe('Entity Detail Page - Metadata Panels', () => {
 
   test('8. Metadata panels show mythology information', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Check for mythology badge or label
-    const mythologyIndicator = page.locator(
-      '.mythology-badge, .mythology-label, ' +
-      '[class*="mythology"], [data-mythology]'
+    // FirebaseEntityRenderer.applyMythologyStyles() always sets
+    // data-mythology on <html>/<body> (and the container) for a resolved
+    // mythology - it is the real, always-present mythology signal on this
+    // page (there is no visible "mythology badge" text element).
+    const mythologyAttr = await page.evaluate(() =>
+      document.documentElement.getAttribute('data-mythology')
     );
-
-    const hasMythology = await mythologyIndicator.count() > 0;
-
-    if (hasMythology) {
-      const text = await mythologyIndicator.first().textContent();
-      expect(text.toLowerCase()).toMatch(/greek|norse|egyptian|hindu|celtic/i);
-      console.log('[PASS] Mythology indicator found:', text);
-    } else {
-      // Check breadcrumb for mythology
-      const breadcrumb = await page.locator('.entity-breadcrumb, .breadcrumb').textContent().catch(() => '');
-      expect(breadcrumb.toLowerCase()).toMatch(/greek|mythology/i);
-      console.log('[PASS] Mythology found in breadcrumb');
-    }
+    expect(mythologyAttr).toBe('greek');
   });
 
+  // Test 9 (entity type metadata) is intentionally skipped - see below.
   test('9. Metadata panels show entity type', async ({ page }) => {
-    await page.goto('/#/entity/deity/athena', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-    // Check for type badge
-    const typeBadge = page.locator('.entity-type-badge, [class*="type-badge"]');
-    const hasTypeBadge = await typeBadge.count() > 0;
-
-    if (hasTypeBadge) {
-      const text = await typeBadge.first().textContent();
-      expect(text.toLowerCase()).toMatch(/deity|god|goddess/i);
-      console.log('[PASS] Entity type badge found:', text);
-    }
+    test.skip(true,
+      'There is no discrete "entity type" metadata element on the page - no ' +
+      '`.entity-type-badge`/`[class*="type-badge"]`, and document.title only ' +
+      'includes the entity name and mythology (see FirebaseEntityRenderer\'s ' +
+      'updateSEOMetadata: `${name} - ${mythology} Mythology - ...`), never the ' +
+      'type. Whether the word "deity"/"god" appears in body copy is already ' +
+      'exercised by test 22 ("Deity entity renders with deity-specific ' +
+      'sections"); duplicating that heuristic here under a "metadata panel" ' +
+      'label would not be testing anything new or real.');
   });
 
   test('10. Metadata panels show domains (for deities)', async ({ page }) => {
+    const entity = TEST_ENTITIES.deity.zeus;
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Look for domains in attributes grid or metadata section
-    const domainsSection = page.locator(
-      '.attribute-label:has-text("Domains"), ' +
-      '.attribute-label:has-text("Domain"), ' +
-      '[class*="domain"], dt:has-text("Domain")'
-    );
+    // Real markup: renderDeityAttributes() emits a `.subsection-card` per
+    // attribute, each with an `.attribute-label` ("Domains") and sibling
+    // `.attribute-value` (comma-joined list). Zeus's Firestore doc has a
+    // non-empty `domains` array, so this section is guaranteed to render -
+    // no guard needed, and this actually executes an assertion (the
+    // original test only ever logged).
+    const domainsCard = page.locator('.subsection-card').filter({
+      has: page.locator('.attribute-label', { hasText: 'Domains' })
+    });
+    await expect(domainsCard).toHaveCount(1, { timeout: SPA_TIMEOUT });
 
-    const hasDomains = await domainsSection.count() > 0;
-
-    if (hasDomains) {
-      // Find the associated value
-      const domainsValue = page.locator(
-        '.attribute-value:near(.attribute-label:has-text("Domain")), ' +
-        '.domain-tag, .attribute-tag'
-      );
-
-      if (await domainsValue.count() > 0) {
-        const text = await domainsValue.first().textContent();
-        console.log('[PASS] Domains found:', text);
-      }
-    } else {
-      // Check if domains appear anywhere in key attributes section
-      const attributesSection = await page.locator('.entity-section-attributes, .entity-attributes-grid').textContent().catch(() => '');
-      console.log('[INFO] Attributes section content length:', attributesSection.length);
-    }
+    const domainsText = await domainsCard.locator('.attribute-value').textContent();
+    expect(domainsText.toLowerCase()).toMatch(entity.expectedContent.domains);
   });
 
   test('11. Key attributes section renders for deity', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Check for key attributes section
-    const attributesSection = page.locator(
-      '.entity-section-attributes, .entity-attributes-grid, ' +
-      '.key-attributes, [class*="attributes"]'
-    );
+    // Real markup: renderDeityAttributes() wraps its cards in `.attribute-grid`
+    // and each card is `.subsection-card` (not `.entity-attribute-card`/
+    // `.attribute-card`, which don't exist). Zeus has titles/epithets, domains
+    // and symbols, so at least one card is guaranteed.
+    const attributesSection = page.locator('.attribute-grid').first();
+    await expect(attributesSection).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    const hasAttributes = await attributesSection.count() > 0;
-
-    if (hasAttributes) {
-      await expect(attributesSection.first()).toBeVisible();
-
-      // Check for attribute cards
-      const attributeCards = page.locator('.entity-attribute-card, .entity-attribute, .attribute-card');
-      const cardCount = await attributeCards.count();
-      console.log('[PASS] Found', cardCount, 'attribute cards');
-      expect(cardCount).toBeGreaterThan(0);
-    }
+    const attributeCards = attributesSection.locator('.subsection-card');
+    const cardCount = await attributeCards.count();
+    expect(cardCount).toBeGreaterThan(0);
   });
 });
 
@@ -517,92 +476,68 @@ test.describe('Entity Detail Page - Related Entities Section', () => {
 
   test('12. Related entities section shows linked entities', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT + 2000); // Extra wait for async loading
+    await waitForEntityLoaded(page);
 
-    // Check for related entities section
-    const relatedSection = page.locator(
-      '.entity-section-related, .entity-section-schema-related, ' +
-      '.related-entities-container, [class*="related"]'
-    );
+    // Related entities are built into the same synchronous HTML string as
+    // the rest of renderDeity() - there is no separate async fetch/loading
+    // state for this section, so no extra wait is needed once
+    // waitForEntityLoaded() has resolved. Zeus's Firestore doc has a
+    // non-empty, multi-category `relatedEntities` object, which
+    // renderCategorizedRelatedEntities() turns into `.related-entities-grid`
+    // links - a real, guaranteed-present section for this entity.
+    const relatedSection = page.locator('.related-entities-section');
+    await expect(relatedSection.first()).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    const hasRelated = await relatedSection.count() > 0;
-
-    if (hasRelated) {
-      // Wait for loading to complete (related entities load async)
-      await page.waitForTimeout(2000);
-
-      const relatedCards = page.locator(
-        '.related-entity-card, .schema-related-card, ' +
-        '.related-entities-grid a, [class*="related"] a'
-      );
-
-      const cardCount = await relatedCards.count();
-      console.log('[PASS] Found', cardCount, 'related entity cards');
-
-      if (cardCount > 0) {
-        // Verify at least one has a name
-        const firstCard = relatedCards.first();
-        await expect(firstCard).toBeVisible();
-      }
-    } else {
-      console.log('[INFO] No related entities section found - entity may not have relationships');
-    }
+    const relatedCards = page.locator('.related-entities-grid a');
+    const cardCount = await relatedCards.count();
+    expect(cardCount).toBeGreaterThan(0);
+    await expect(relatedCards.first()).toBeVisible();
   });
 
   test('13. Clicking related entity navigates to that entity', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT + 2000);
+    await waitForEntityLoaded(page);
 
-    // Find a related entity link
-    const relatedLinks = page.locator(
-      '.related-entity-card, .schema-related-card a, ' +
-      '.related-entities-grid a'
-    );
+    const relatedLinks = page.locator('.related-entities-grid a');
+    await expect(relatedLinks.first()).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    const linkCount = await relatedLinks.count();
+    await relatedLinks.first().click();
+    await waitForEntityLoaded(page);
 
-    if (linkCount > 0) {
-      // Get the first link's text before clicking
-      const firstLink = relatedLinks.first();
-      const linkText = await firstLink.textContent();
-      const linkHref = await firstLink.getAttribute('href');
+    // Verify URL changed away from zeus
+    const currentUrl = page.url();
+    expect(currentUrl).not.toContain('zeus');
 
-      console.log('Clicking related entity:', linkText?.substring(0, 30));
-
-      // Click the link
-      await firstLink.click();
-
-      // Wait for navigation
-      await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-      // Verify URL changed
-      const currentUrl = page.url();
-      expect(currentUrl).not.toContain('zeus');
-
-      // Verify new content loaded
-      await expect(page.locator('#main-content')).toBeVisible();
-
-      console.log('[PASS] Successfully navigated to related entity');
-    } else {
-      console.log('[SKIP] No related entity links found to click');
-    }
+    // Verify new content loaded
+    await expect(page.locator('#main-content')).toBeVisible();
   });
 
   test('14. Schema-based related entities render correctly', async ({ page }) => {
     await page.goto('/#/entity/deity/athena', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Check for schema-related groups
-    const relatedGroups = page.locator('.schema-related-group, .related-entities-group');
-    const groupCount = await relatedGroups.count();
+    // Related-entities markup shape depends on the SHAPE of the Firestore
+    // data, not just its presence: a nested-object `relatedEntities`
+    // (category -> array) renders via renderCategorizedRelatedEntities() as
+    // `.related-entities-section .related-category` groups (real class:
+    // `.related-category`, NOT `.schema-related-group`); a flat array
+    // (the legacy format, which is what Athena's doc actually has) renders
+    // via renderRelatedEntities()/renderRelatedEntitiesGrid() as plain
+    // `.entity-grid .entity-card` divs with no grouping at all. Both are
+    // real, genuinely different rendering paths for the same feature, so
+    // both branches get a real assertion.
+    const groups = page.locator('.related-entities-section .related-category');
+    const groupCount = await groups.count();
 
     if (groupCount > 0) {
-      for (let i = 0; i < Math.min(groupCount, 3); i++) {
-        const group = relatedGroups.nth(i);
-        const title = await group.locator('.related-group-title, h3').textContent().catch(() => '');
-        console.log(`[INFO] Related group ${i + 1}:`, title);
-      }
-      console.log('[PASS] Found', groupCount, 'related entity groups');
+      const title = await groups.first().locator('h3').textContent();
+      expect(title.trim().length).toBeGreaterThan(0);
+    } else {
+      // Athena's relatedEntities is a flat array (legacy format) - grouped
+      // categories never render for her; the flat entity-card grid is the
+      // real output to check instead.
+      const flatCards = page.locator('.entity-grid .entity-card');
+      expect(await flatCards.count()).toBeGreaterThan(0);
     }
   });
 });
@@ -614,72 +549,42 @@ test.describe('Entity Detail Page - Share Button', () => {
 
   test('15. Share button is present and clickable', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Find share button
-    const shareButton = page.locator(
-      '[data-action="share"], button:has-text("Share"), ' +
-      '.quick-action-btn:has-text("Share"), [aria-label*="share" i]'
-    );
+    // Real markup (js/components/share-toolbar.js): ShareToolbar is
+    // unconditionally init()'d for every rendered entity
+    // (`if (this.currentEntity && window.ShareToolbar)` at the end of every
+    // render path), producing `.share-btn.share-btn-copy[data-action="copy"]`
+    // - there is no `[data-action="share"]`/"Share"-labelled button and no
+    // toast; clicking the copy button just adds a `.copied` class to itself.
+    await page.context().grantPermissions(['clipboard-write', 'clipboard-read']);
 
-    const hasShare = await shareButton.count() > 0;
+    const shareButton = page.locator('.share-btn-copy');
+    await expect(shareButton).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    if (hasShare) {
-      await expect(shareButton.first()).toBeVisible();
-
-      // Grant clipboard permissions before clicking
-      await page.context().grantPermissions(['clipboard-write', 'clipboard-read']);
-
-      // Click share button
-      await shareButton.first().click();
-
-      // Wait for potential toast/notification
-      await page.waitForTimeout(1000);
-
-      // Check for toast message
-      const toast = page.locator('.entity-toast, .toast, [role="status"]');
-      const toastVisible = await toast.isVisible().catch(() => false);
-
-      if (toastVisible) {
-        const toastText = await toast.textContent();
-        console.log('[PASS] Share button clicked, toast shown:', toastText);
-      } else {
-        console.log('[PASS] Share button clicked (may use native share dialog)');
-      }
-    } else {
-      console.log('[INFO] Share button not found - may not be implemented for this entity');
-    }
+    await shareButton.click();
+    await expect(shareButton).toHaveClass(/copied/);
   });
 
   test('16. Share copies URL to clipboard', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
     // Grant clipboard permissions
     await page.context().grantPermissions(['clipboard-write', 'clipboard-read']);
 
-    const shareButton = page.locator('[data-action="share"]');
+    const shareButton = page.locator('.share-btn-copy');
+    await expect(shareButton).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    if (await shareButton.count() > 0) {
-      await shareButton.first().click();
-      await page.waitForTimeout(500);
+    await shareButton.click();
 
-      // Try to read clipboard (may not work in all browsers)
-      const clipboardContent = await page.evaluate(async () => {
-        try {
-          return await navigator.clipboard.readText();
-        } catch (e) {
-          return null;
-        }
-      });
-
-      if (clipboardContent) {
-        expect(clipboardContent).toContain('zeus');
-        console.log('[PASS] URL copied to clipboard:', clipboardContent);
-      } else {
-        console.log('[INFO] Could not verify clipboard content - browser restriction');
-      }
-    }
+    // The button's own "copied" state (real, deterministic UI feedback) is
+    // asserted in test 15; here we verify the actual clipboard payload,
+    // which the click handler sets via navigator.clipboard.writeText(url).
+    await expect(async () => {
+      const clipboardContent = await page.evaluate(() => navigator.clipboard.readText());
+      expect(clipboardContent).toContain('zeus');
+    }).toPass({ timeout: SPA_TIMEOUT });
   });
 });
 
@@ -691,60 +596,62 @@ test.describe('Entity Detail Page - Back Navigation', () => {
   test('17. Back button returns to previous page', async ({ page }) => {
     // Start from browse page
     await page.goto('/#/browse/deities', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-    const initialUrl = page.url();
+    await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
 
     // Navigate to entity
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Find and click back button
+    // FirebaseEntityRenderer has no dedicated "Back" button (no
+    // `.quick-action-btn`/`button[aria-label*="back"]`/`button:has-text("Back")`
+    // anywhere in js/entity-renderer-firebase.js). There IS a real
+    // `#mobileBackBtn.mobile-back-btn[aria-label="Go back"]` (js/mobile-gestures.js),
+    // but it's mobile-viewport-only (gated by a `.has-back-button` ancestor +
+    // media query in css/bundle.css) - on this suite's desktop viewport it
+    // matches the selector but is never visible/clickable, so `count() > 0`
+    // alone is not enough to decide which branch to take; check visibility
+    // too, or the click hangs until timeout on a real desktop browser.
     const backButton = page.locator(
       '.quick-action-btn:has-text("Back"), ' +
       'button[aria-label*="back" i], button:has-text("Back")'
     );
 
-    const hasBackButton = await backButton.count() > 0;
-
-    if (hasBackButton) {
+    if (await backButton.first().isVisible().catch(() => false)) {
       await backButton.first().click();
-      await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-      // Should be back on previous page
+      await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
       const currentUrl = page.url();
       expect(currentUrl).not.toContain('zeus');
-      console.log('[PASS] Back button navigation works');
     } else {
-      // Use browser back
       await page.goBack();
-      await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
+      await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
       const currentUrl = page.url();
-      expect(currentUrl).toContain('browse') || expect(currentUrl).toContain('deities');
-      console.log('[PASS] Browser back navigation works');
+      expect(/browse|deities/.test(currentUrl)).toBeTruthy();
     }
   });
 
   test('18. Back navigation preserves history stack', async ({ page }) => {
     // Navigate through multiple pages
     await page.goto('/#/', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1000);
+    await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
 
     await page.goto('/#/browse/deities', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(1000);
+    await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
 
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
     // Go back twice
     await page.goBack();
-    await page.waitForTimeout(1000);
+    await page.waitForFunction(() => !location.hash.includes('entity/deity/zeus'), { timeout: SPA_TIMEOUT }).catch(() => {});
 
     let url1 = page.url();
 
     await page.goBack();
-    await page.waitForTimeout(1000);
+    await page.waitForFunction(
+      (prevUrl) => window.location.href !== prevUrl,
+      url1,
+      { timeout: SPA_TIMEOUT }
+    ).catch(() => {});
 
     let url2 = page.url();
 
@@ -763,7 +670,7 @@ test.describe('Entity Detail Page - 404/Error States', () => {
     await page.goto('/#/entity/deity/this-entity-does-not-exist-12345', {
       waitUntil: 'domcontentloaded'
     });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
     // Should still show main content (not crash)
     await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
@@ -794,34 +701,26 @@ test.describe('Entity Detail Page - 404/Error States', () => {
     await page.goto('/#/entity/deity/fake-entity-xyz', {
       waitUntil: 'domcontentloaded'
     });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Check for navigation options in error state
-    const errorActions = page.locator(
-      '.error-actions a, .error-actions button, ' +
-      '.error-container a, .error-container button'
-    );
+    // Real markup: FirebaseEntityRenderer.renderError() always renders
+    // `.error-state-container` with a "Try Again" button and a
+    // `<a href="#/">Go Home</a>` link (see js/entity-renderer-firebase.js) -
+    // there is no `.error-actions`/`.error-container` wrapper, but the Go
+    // Home link is a real, core, always-present part of the error state.
+    const errorState = page.locator('.error-state-container');
+    await expect(errorState).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    const actionCount = await errorActions.count();
-
-    if (actionCount > 0) {
-      // Should have at least a back or home link
-      const hasHome = await page.locator('a[href*="#/"], a[href="/"]').count() > 0;
-      expect(hasHome).toBeTruthy();
-      console.log('[PASS] Error state includes navigation options');
-    } else {
-      // Check for any clickable navigation
-      const anyNav = await page.locator('nav a, header a').count();
-      expect(anyNav).toBeGreaterThan(0);
-      console.log('[INFO] Navigation available via header/nav');
-    }
+    const homeLink = errorState.locator('a[href="#/"]');
+    await expect(homeLink).toBeVisible();
+    await expect(homeLink).toHaveText(/home/i);
   });
 
   test('21. Invalid entity type shows graceful error', async ({ page }) => {
     await page.goto('/#/entity/invalidtype/something', {
       waitUntil: 'domcontentloaded'
     });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
     // Should not crash
     await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
@@ -841,7 +740,7 @@ test.describe('Entity Detail Page - Different Entity Types', () => {
 
   test('22. Deity entity renders with deity-specific sections', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
     const pageContent = await page.textContent('body');
 
@@ -858,7 +757,7 @@ test.describe('Entity Detail Page - Different Entity Types', () => {
 
   test('23. Creature entity renders with creature-specific sections', async ({ page }) => {
     await page.goto('/#/entity/creature/greek_medusa', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
     // Check main content is visible
     await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
@@ -885,7 +784,7 @@ test.describe('Entity Detail Page - Different Entity Types', () => {
 
   test('24. Item entity renders with item-specific sections', async ({ page }) => {
     await page.goto('/#/entity/item/mjolnir', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
     await expect(page.locator('#main-content')).toBeVisible({ timeout: SPA_TIMEOUT });
 
@@ -909,25 +808,14 @@ test.describe('Entity Detail Page - Different Entity Types', () => {
   });
 
   test('25. Different entity types have appropriate type badges', async ({ page }) => {
-    const entities = [
-      { route: '/#/entity/deity/zeus', expectedType: /deity|god/i },
-      { route: '/#/entity/creature/greek_medusa', expectedType: /creature|monster/i },
-      { route: '/#/entity/item/mjolnir', expectedType: /item|artifact|weapon/i }
-    ];
-
-    for (const entity of entities) {
-      await page.goto(entity.route, { waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(2000);
-
-      const typeBadge = page.locator('.entity-type-badge');
-
-      if (await typeBadge.count() > 0) {
-        const badgeText = await typeBadge.first().textContent();
-        console.log(`[INFO] ${entity.route} has badge:`, badgeText);
-      }
-    }
-
-    console.log('[PASS] Entity type badges verified');
+    test.skip(true,
+      'Confirmed across deity/creature/item render paths in ' +
+      'js/entity-renderer-firebase.js: no entity type ever gets a ' +
+      '`.entity-type-badge` element - item/archetype classification "badges" ' +
+      'are bare unclassed <span style="..."> tags, and deity/creature pages ' +
+      'render no type indicator at all. There is nothing this selector can ' +
+      'ever find on any entity type, so there is no real per-type behavior ' +
+      'to assert.');
   });
 });
 
@@ -938,50 +826,46 @@ test.describe('Entity Detail Page - Breadcrumb Navigation', () => {
 
   test('26. Breadcrumb displays correct hierarchy', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    const breadcrumb = page.locator('.entity-breadcrumb, .breadcrumb, nav[aria-label="Breadcrumb"]');
+    // Real markup: the global #breadcrumb-nav element (index.html) is filled
+    // in by js/components/breadcrumb-nav.js's BreadcrumbNav for every
+    // non-home route - real classes are `.breadcrumb-list`/`.breadcrumb-item`
+    // (there is no `.entity-breadcrumb`/`.breadcrumb`). It is a core,
+    // always-rendered feature, not an optional one.
+    const breadcrumbList = page.locator('#breadcrumb-nav .breadcrumb-list');
+    await expect(breadcrumbList).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    if (await breadcrumb.count() > 0) {
-      await expect(breadcrumb.first()).toBeVisible();
+    const breadcrumbText = await breadcrumbList.textContent();
+    expect(breadcrumbText.toLowerCase()).toContain('home');
 
-      const breadcrumbText = await breadcrumb.first().textContent();
-
-      // Should contain hierarchy elements
-      const hasHome = breadcrumbText.toLowerCase().includes('home');
-      const hasMythology = breadcrumbText.toLowerCase().includes('greek');
-      const hasType = breadcrumbText.toLowerCase().includes('deit');
-      const hasEntity = breadcrumbText.toLowerCase().includes('zeus');
-
-      console.log('[INFO] Breadcrumb:', breadcrumbText);
-      expect(hasHome || hasMythology || hasEntity).toBeTruthy();
-      console.log('[PASS] Breadcrumb hierarchy present');
-    } else {
-      console.log('[INFO] No breadcrumb navigation found');
-    }
+    // The current (non-link) crumb should be the actual page the user is on.
+    // NOTE: js/spa-navigation.js's _parseRouteForBreadcrumb() only has a
+    // 3-segment shape (`entity/:type/:mythology/:id`) for `#/entity/...`
+    // routes; for this test's 2-segment `#/entity/deity/zeus` URL it
+    // misreads "zeus" as the *mythology* and leaves entityId undefined, so
+    // the final/current crumb ends up labelled "Deity", not "Zeus". This
+    // assertion is written against what SHOULD happen (the current crumb
+    // names the entity) and is expected to fail, documenting that bug.
+    const currentCrumb = page.locator('#breadcrumb-nav .breadcrumb-item--current .breadcrumb-label');
+    await expect(currentCrumb).toHaveText(/zeus/i, { timeout: SPA_TIMEOUT });
   });
 
   test('27. Breadcrumb links are clickable and navigate correctly', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    const breadcrumbLinks = page.locator('.breadcrumb-link, .entity-breadcrumb a');
-    const linkCount = await breadcrumbLinks.count();
+    // `.breadcrumb-link` (not `.entity-breadcrumb a`) is the real class for
+    // non-current breadcrumb items; "Home" is always the first one.
+    const breadcrumbLinks = page.locator('#breadcrumb-nav .breadcrumb-link');
+    await expect(breadcrumbLinks.first()).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    if (linkCount > 0) {
-      // Click home link
-      const homeLink = breadcrumbLinks.first();
-      const href = await homeLink.getAttribute('href');
+    await breadcrumbLinks.first().click();
+    await waitForEntityLoaded(page);
 
-      await homeLink.click();
-      await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-      // Should navigate away from entity
-      const currentUrl = page.url();
-      expect(currentUrl).not.toContain('entity/deity/zeus');
-
-      console.log('[PASS] Breadcrumb link navigation works');
-    }
+    // Should navigate away from entity
+    const currentUrl = page.url();
+    expect(currentUrl).not.toContain('entity/deity/zeus');
   });
 });
 
@@ -991,82 +875,26 @@ test.describe('Entity Detail Page - Quick Actions', () => {
   });
 
   test('28. Quick actions bar is visible', async ({ page }) => {
-    await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-    const quickActions = page.locator('.entity-quick-actions, .quick-actions');
-
-    if (await quickActions.count() > 0) {
-      await expect(quickActions.first()).toBeVisible();
-
-      const buttons = page.locator('.quick-action-btn');
-      const buttonCount = await buttons.count();
-
-      console.log('[PASS] Quick actions bar with', buttonCount, 'buttons');
-      expect(buttonCount).toBeGreaterThan(0);
-    }
+    test.skip(true,
+      'No `.entity-quick-actions`/`.quick-actions`/`.quick-action-btn` element ' +
+      'exists anywhere in js/entity-renderer-firebase.js\'s render output for ' +
+      'any entity type - there is no quick-actions bar feature on this page ' +
+      'to be visible or not.');
   });
 
   test('29. Bookmark button toggles state', async ({ page }) => {
-    await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-    const bookmarkButton = page.locator('[data-action="bookmark"]');
-
-    if (await bookmarkButton.count() > 0) {
-      // Get initial state
-      const initialClass = await bookmarkButton.getAttribute('class');
-      const wasBookmarked = initialClass?.includes('bookmarked');
-
-      // Click to toggle
-      await bookmarkButton.click();
-      await page.waitForTimeout(500);
-
-      // Check for toast
-      const toast = page.locator('.entity-toast');
-      const toastVisible = await toast.isVisible().catch(() => false);
-
-      if (toastVisible) {
-        const toastText = await toast.textContent();
-        console.log('[PASS] Bookmark toggled, toast:', toastText);
-      }
-
-      // Verify state changed
-      const newClass = await bookmarkButton.getAttribute('class');
-      const isNowBookmarked = newClass?.includes('bookmarked');
-
-      expect(isNowBookmarked).not.toBe(wasBookmarked);
-      console.log('[PASS] Bookmark state toggled');
-    }
+    test.skip(true,
+      'No `[data-action="bookmark"]` element (or any bookmark UI at all) ' +
+      'exists in js/entity-renderer-firebase.js\'s render output - there is no ' +
+      'bookmark feature on the entity detail page to toggle.');
   });
 
   test('30. Sources button scrolls to sources section', async ({ page }) => {
-    await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-    const sourcesButton = page.locator('[data-action="scroll-to"][data-section="corpus-section"]');
-
-    if (await sourcesButton.count() > 0) {
-      // Get initial scroll position
-      const initialScroll = await page.evaluate(() => window.scrollY);
-
-      await sourcesButton.click();
-      await page.waitForTimeout(1000);
-
-      // Check scroll changed
-      const newScroll = await page.evaluate(() => window.scrollY);
-
-      if (newScroll !== initialScroll) {
-        console.log('[PASS] Sources button scrolled to section');
-      } else {
-        // Section might already be visible
-        const corpusSection = page.locator('#corpus-section');
-        const isVisible = await corpusSection.isVisible().catch(() => false);
-        console.log('[INFO] Corpus section visibility:', isVisible);
-      }
-    } else {
-      console.log('[INFO] Sources button not present - entity may not have sources');
-    }
+    test.skip(true,
+      'No `[data-action="scroll-to"]` element exists anywhere in ' +
+      'js/entity-renderer-firebase.js - there is no dedicated "jump to ' +
+      'sources" button on the entity detail page (the corpus/sources ' +
+      'sections just render inline further down the page, per tests 38/39).');
   });
 });
 
@@ -1077,7 +905,7 @@ test.describe('Entity Detail Page - Accessibility', () => {
 
   test('31. Page has proper heading hierarchy', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
     const headings = await page.evaluate(() => {
       const hs = document.querySelectorAll('h1, h2, h3, h4');
@@ -1102,7 +930,7 @@ test.describe('Entity Detail Page - Accessibility', () => {
 
   test('32. Interactive elements have accessible labels', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
     // Check buttons have labels
     const buttons = await page.evaluate(() => {
@@ -1125,27 +953,23 @@ test.describe('Entity Detail Page - Accessibility', () => {
 
   test('33. Entity detail viewer has proper ARIA attributes', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    // Check for article landmark
-    const article = page.locator('article.entity-detail-viewer');
+    // `article.entity-detail-viewer` does not exist - js/entity-renderer-firebase.js
+    // renders straight into `#main-content` with no wrapping <article> and no
+    // data-entity-id/data-entity-type attributes on any container (those
+    // attributes only appear on the edit-icon button and the private-notes
+    // panel, neither of which is a page-level landmark). The real,
+    // always-present semantic signals on this page are the `data-mythology`
+    // attribute (set by applyMythologyStyles()) and the header + breadcrumb
+    // <nav> landmarks.
+    const mythologyAttr = await page.evaluate(() =>
+      document.documentElement.getAttribute('data-mythology')
+    );
+    expect(mythologyAttr).toBe('greek');
 
-    if (await article.count() > 0) {
-      const dataAttributes = await article.evaluate(el => ({
-        entityId: el.getAttribute('data-entity-id'),
-        entityType: el.getAttribute('data-entity-type'),
-        mythology: el.getAttribute('data-mythology')
-      }));
-
-      console.log('[INFO] Article data attributes:', dataAttributes);
-      expect(dataAttributes.entityId).toBeTruthy();
-    }
-
-    // Check for nav landmarks
     const navs = await page.locator('nav').count();
-    console.log('[INFO] Navigation landmarks:', navs);
-
-    console.log('[PASS] ARIA attributes present');
+    expect(navs).toBeGreaterThan(0);
   });
 });
 
@@ -1184,8 +1008,11 @@ test.describe('Entity Detail Page - Performance', () => {
       console.log('[INFO] Related entities loading indicator present');
     }
 
-    // Wait for related entities to load
-    await page.waitForTimeout(3000);
+    // Related entities are rendered synchronously as part of the initial
+    // HTML string (see renderDeity() in js/entity-renderer-firebase.js) -
+    // there is no separate async loading state for them to resolve, so just
+    // wait for the page to have finished its one render pass.
+    await waitForEntityLoaded(page);
 
     // Loading should complete
     const stillLoading = await loadingIndicator.isVisible().catch(() => false);
@@ -1201,86 +1028,68 @@ test.describe('Entity Detail Page - Content Sections', () => {
   });
 
   test('36. Linguistic information section renders when present', async ({ page }) => {
-    await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-    const linguisticSection = page.locator('.entity-section-linguistic');
-
-    if (await linguisticSection.count() > 0) {
-      await expect(linguisticSection.first()).toBeVisible();
-
-      const content = await linguisticSection.first().textContent();
-      console.log('[PASS] Linguistic section present with content:', content.substring(0, 100));
-    } else {
-      console.log('[INFO] No linguistic section - data may not be available');
-    }
+    test.skip(true,
+      'Linguistic data (entity.linguistic) is never rendered on the entity ' +
+      'detail page - `.entity-section-linguistic` only exists in components ' +
+      'that are not wired into index.html/spa-navigation.js\'s entity route ' +
+      '(entity-detail-viewer.js, comprehensive-metadata-renderer.js, etc; the ' +
+      'live renderer is FirebaseEntityRenderer, which has no linguistic ' +
+      'section at all). Zeus\'s Firestore doc also has no `linguistic` field, ' +
+      'so there is neither code nor data to exercise this "when present" case.');
   });
 
   test('37. Cultural context section renders when present', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    const culturalSection = page.locator('.entity-section-cultural');
-
-    if (await culturalSection.count() > 0) {
-      await expect(culturalSection.first()).toBeVisible();
-      console.log('[PASS] Cultural context section present');
-    } else {
-      console.log('[INFO] No cultural context section');
-    }
+    // Real class is `.cultural-section` (SchemaSectionRenderer.renderCulturalSection),
+    // not `.entity-section-cultural`. Zeus's Firestore doc has a non-empty
+    // `cultural` object, so this is guaranteed to render - no guard needed.
+    const culturalSection = page.locator('.cultural-section');
+    await expect(culturalSection.first()).toBeVisible({ timeout: SPA_TIMEOUT });
+    const text = await culturalSection.first().textContent();
+    expect(text.trim().length).toBeGreaterThan(0);
   });
 
   test('38. Primary sources/corpus queries section renders', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    const corpusSection = page.locator('.entity-section-corpus, #corpus-section');
+    // Real class is `.corpus-search-section` (SchemaSectionRenderer.renderCorpusSearch),
+    // not `.entity-section-corpus`/`#corpus-section`/`.corpus-query-card`.
+    // Zeus's Firestore doc has non-empty corpusSearch.canonical/variants
+    // terms, so this section and its `.corpus-term-link` pills are
+    // guaranteed to render.
+    const corpusSection = page.locator('.corpus-search-section');
+    await expect(corpusSection.first()).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    if (await corpusSection.count() > 0) {
-      await expect(corpusSection.first()).toBeVisible();
-
-      const cards = page.locator('.corpus-query-card');
-      const cardCount = await cards.count();
-
-      console.log('[PASS] Corpus queries section with', cardCount, 'source cards');
-    } else {
-      console.log('[INFO] No corpus queries section');
-    }
+    const termLinks = page.locator('.corpus-search-section .corpus-term-link');
+    expect(await termLinks.count()).toBeGreaterThan(0);
   });
 
   test('39. Sources/references section renders', async ({ page }) => {
     await page.goto('/#/entity/deity/zeus', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
+    await waitForEntityLoaded(page);
 
-    const sourcesSection = page.locator('.entity-section-sources');
+    // Real class is `.sources-section` with a `.sources-table`
+    // (SchemaSectionRenderer.renderSourcesTable), not `.entity-section-sources`/
+    // `.source-item`. Zeus's Firestore doc has 3 `sources` entries and no
+    // `texts` (which would otherwise take priority), so the table renders.
+    const sourcesSection = page.locator('.sources-section');
+    await expect(sourcesSection.first()).toBeVisible({ timeout: SPA_TIMEOUT });
 
-    if (await sourcesSection.count() > 0) {
-      await expect(sourcesSection.first()).toBeVisible();
-
-      const sourceItems = page.locator('.source-item');
-      const itemCount = await sourceItems.count();
-
-      console.log('[PASS] Sources section with', itemCount, 'references');
-    } else {
-      console.log('[INFO] No sources section');
-    }
+    const sourceRows = page.locator('.sources-section .sources-table tbody tr');
+    expect(await sourceRows.count()).toBeGreaterThan(0);
   });
 
   test('40. Archetypes section renders when present', async ({ page }) => {
-    await page.goto('/#/entity/deity/athena', { waitUntil: 'domcontentloaded' });
-    await page.waitForTimeout(CONTENT_LOAD_WAIT);
-
-    const archetypesSection = page.locator('.entity-section-archetypes');
-
-    if (await archetypesSection.count() > 0) {
-      await expect(archetypesSection.first()).toBeVisible();
-
-      const archetypeCards = page.locator('.archetype-card');
-      const cardCount = await archetypeCards.count();
-
-      console.log('[PASS] Archetypes section with', cardCount, 'archetype cards');
-    } else {
-      console.log('[INFO] No archetypes section');
-    }
+    test.skip(true,
+      'There is no "Archetypes" section for deity-type entities anywhere in ' +
+      'js/entity-renderer-firebase.js - `entity.archetypes` is read by no ' +
+      'render path for a deity (it only matters for entities whose own ' +
+      '`type` is "archetype"), so `.entity-section-archetypes`/`.archetype-card` ' +
+      'can never appear on Athena\'s page. Athena\'s Firestore doc also has an ' +
+      'empty `archetypes: []` array, so there is neither code nor data for ' +
+      'this "when present" case on a deity page.');
   });
 });
