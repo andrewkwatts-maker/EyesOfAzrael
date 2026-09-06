@@ -8,7 +8,7 @@
  * @param {string} email - User email for mock auth
  * @param {string} uid - User ID for mock auth
  */
-export async function mockAuth(page, email = 'test@example.com', uid = 'test-user-123') {
+async function mockAuth(page, email = 'test@example.com', uid = 'test-user-123') {
   // Inject mock Firebase auth before the page loads
   await page.addInitScript(({ userEmail, userId }) => {
     // Mock Firebase auth state
@@ -29,7 +29,7 @@ export async function mockAuth(page, email = 'test@example.com', uid = 'test-use
  * Wait for Firebase to initialize
  * @param {import('@playwright/test').Page} page - Playwright page object
  */
-export async function waitForFirebase(page) {
+async function waitForFirebase(page) {
   await page.waitForFunction(() => {
     return window.firebase && window.firebase.apps && window.firebase.apps.length > 0;
   }, { timeout: 10000 });
@@ -40,7 +40,7 @@ export async function waitForFirebase(page) {
  * @param {import('@playwright/test').Page} page - Playwright page object
  * @returns {Promise<boolean>} True if user is signed in
  */
-export async function isSignedIn(page) {
+async function isSignedIn(page) {
   return await page.evaluate(() => {
     return window.firebase &&
            window.firebase.auth() &&
@@ -53,7 +53,7 @@ export async function isSignedIn(page) {
  * @param {import('@playwright/test').Page} page - Playwright page object
  * @returns {Promise<Object|null>} User object or null
  */
-export async function getCurrentUser(page) {
+async function getCurrentUser(page) {
   return await page.evaluate(() => {
     const user = window.firebase?.auth()?.currentUser;
     if (!user) return null;
@@ -64,3 +64,5 @@ export async function getCurrentUser(page) {
     };
   });
 }
+
+module.exports = { mockAuth, waitForFirebase, isSignedIn, getCurrentUser };

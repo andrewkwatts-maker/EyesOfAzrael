@@ -2,7 +2,7 @@
  * Test data helpers for E2E tests
  */
 
-export const testEntities = {
+const testEntities = {
   zeus: {
     name: 'Zeus',
     type: 'deity',
@@ -29,7 +29,7 @@ export const testEntities = {
   }
 };
 
-export const testUsers = {
+const testUsers = {
   standard: {
     email: 'test@example.com',
     uid: 'test-user-123',
@@ -46,7 +46,7 @@ export const testUsers = {
  * Wait for page to be fully loaded
  * @param {import('@playwright/test').Page} page
  */
-export async function waitForPageLoad(page) {
+async function waitForPageLoad(page) {
   await page.waitForLoadState('domcontentloaded');
   await page.waitForLoadState('load', { timeout: 10000 }).catch(() => {
     // Network idle might not be reached, that's ok
@@ -57,7 +57,7 @@ export async function waitForPageLoad(page) {
  * Wait for Firebase to be ready
  * @param {import('@playwright/test').Page} page
  */
-export async function waitForFirebaseReady(page) {
+async function waitForFirebaseReady(page) {
   await page.waitForFunction(() => {
     return window.firebase &&
            window.firebase.apps &&
@@ -70,7 +70,7 @@ export async function waitForFirebaseReady(page) {
  * Clear all browser storage
  * @param {import('@playwright/test').Page} page
  */
-export async function clearStorage(page) {
+async function clearStorage(page) {
   try {
     await page.evaluate(() => {
       try {
@@ -88,3 +88,5 @@ export async function clearStorage(page) {
     // Ignore errors - storage might not be available yet
   }
 }
+
+module.exports = { testEntities, testUsers, waitForPageLoad, waitForFirebaseReady, clearStorage };
