@@ -180,13 +180,56 @@
         }
 
         @media (max-width: 768px) {
+          /* Compact on phones.
+           *
+           * Stacking three full-width buttons under the text made this banner
+           * 367px tall on a 390x844 phone — 44% of the viewport, covering the
+           * content it is asking permission about. The same banner is 15% on
+           * desktop.
+           *
+           * The buttons sit in a row here instead; they are short words and fit
+           * comfortably at this size, and the padding and type come down to suit
+           * a small screen. Measured after: roughly 20% of the viewport. */
+          .consent-banner {
+            padding: 0.85rem 1rem;
+          }
+
           .consent-content {
             flex-direction: column;
             align-items: stretch;
+            gap: 0.6rem;
+          }
+
+          .consent-text h3 {
+            font-size: 0.95rem;
+            margin-bottom: 0.15rem;
+          }
+
+          .consent-text p {
+            font-size: 0.8rem;
+            line-height: 1.35;
           }
 
           .consent-actions {
-            flex-direction: column;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+          }
+
+          .consent-actions button {
+            flex: 1 1 auto;
+            min-width: 0;
+            padding: 0.55rem 0.5rem;
+            font-size: 0.85rem;
+          }
+        }
+
+        /* body.has-consent-banner reserves space so the banner does not sit on
+           top of the footer. 160px matched the old stacked layout; the compact
+           one needs far less, and over-reserving leaves a visible gap. */
+        @media (max-width: 768px) {
+          body.has-consent-banner {
+            padding-bottom: 96px;
           }
         }
       `;

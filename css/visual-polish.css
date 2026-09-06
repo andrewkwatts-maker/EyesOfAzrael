@@ -2681,14 +2681,28 @@ body.keyboard-navigation *:focus {
     font-size: 0.7rem;
     font-weight: 600;
     background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
-    color: var(--card-color, var(--color-primary, #8b7fff));
+    /* Body text colour, not --card-color.
+     *
+     * --card-color is written as an inline style on each card and is a hardcoded
+     * accent (#8b7fff and friends) that does not follow the active theme. The
+     * background beside it DOES follow the theme, via --color-primary-rgb, so in
+     * the Day theme the badge drew the dark theme's purple on a light blue tint —
+     * two unrelated palettes meeting on a 10px label, and unreadable.
+     *
+     * --color-text-primary is guaranteed against every theme's surfaces by
+     * __tests__/theme-contrast.test.js, so this reads in all seventeen. */
+    color: var(--color-text-primary, #f8f9fa);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
 .landing-category-count.has-count {
     display: inline-block;
-    opacity: 0.7;
+    /* Full opacity. At 0.7 the label was dimmed on top of an already low-contrast
+     * colour pairing, and entity counts are information the reader is meant to be
+     * able to read at a glance — not decoration to fade back. The mobile
+     * stylesheet had already overridden this to 1 for the same reason. */
+    opacity: 1;
 }
 
 .landing-category-card:hover .landing-category-count.has-count {

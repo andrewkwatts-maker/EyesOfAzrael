@@ -64,8 +64,21 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps ${{ matrix.browser }}
 
+      # Visual regression is excluded here and runs in its own job below.
+      #
+      # Its screenshots cover a page whose content comes from Firestore: the
+      # "Featured" and "Recently Added" grids return a different number of items
+      # between runs, so a full-page baseline shifts everything below them and
+      # reports a visual regression when nothing regressed. Masking the regions
+      # hides their content but not their height, so it does not fix it — two
+      # consecutive local runs of identical code produced 2 then 3 failures.
+      #
+      # Making it meaningful needs the data stubbed, which is real work and is not
+      # done. Until then it belongs in the visual-regression job, which is marked
+      # continue-on-error precisely because these are advisory, rather than
+      # failing a shard that is otherwise reporting real results.
       - name: Run E2E tests
-        run: npm run test:e2e:${{ matrix.browser }} -- --shard=${{ matrix.shard }}/2
+        run: npm run test:e2e:${{ matrix.browser }} -- --shard=${{ matrix.shard }}/2 --grep-invert="Visual Regression"
         env:
           CI: true
 
@@ -125,7 +138,7 @@ jobs:
         run: npx playwright install --with-deps chromium webkit
 
       - name: Run Mobile E2E tests
-        run: npm run test:e2e:mobile -- --shard=${{ matrix.shard }}/2
+        run: npm run test:e2e:mobile -- --shard=${{ matrix.shard }}/2 --grep-invert="Visual Regression"
         env:
           CI: true
 

@@ -36093,14 +36093,28 @@ body.keyboard-navigation *:focus {
     font-size: 0.7rem;
     font-weight: 600;
     background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.15);
-    color: var(--card-color, var(--color-primary, #8b7fff));
+    /* Body text colour, not --card-color.
+     *
+     * --card-color is written as an inline style on each card and is a hardcoded
+     * accent (#8b7fff and friends) that does not follow the active theme. The
+     * background beside it DOES follow the theme, via --color-primary-rgb, so in
+     * the Day theme the badge drew the dark theme's purple on a light blue tint —
+     * two unrelated palettes meeting on a 10px label, and unreadable.
+     *
+     * --color-text-primary is guaranteed against every theme's surfaces by
+     * __tests__/theme-contrast.test.js, so this reads in all seventeen. */
+    color: var(--color-text-primary, #f8f9fa);
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
 .landing-category-count.has-count {
     display: inline-block;
-    opacity: 0.7;
+    /* Full opacity. At 0.7 the label was dimmed on top of an already low-contrast
+     * colour pairing, and entity counts are information the reader is meant to be
+     * able to read at a glance — not decoration to fade back. The mobile
+     * stylesheet had already overridden this to 1 for the same reason. */
+    opacity: 1;
 }
 
 .landing-category-card:hover .landing-category-count.has-count {
@@ -41753,8 +41767,30 @@ html {
    ============================================ */
 
 @media (max-width: 640px) {
-    /* Inline links need tap padding */
-    a:not(.btn):not(.nav-link):not(.card):not(.entity-card) {
+    /* Inline links need tap padding.
+     *
+     * Scoped to links inside running text, NOT every anchor on the page.
+     *
+     * This was `a:not(.btn):not(.nav-link):not(.card):not(.entity-card)`, which
+     * matches any anchor that is not one of four named classes — a blacklist that
+     * has to be extended every time a component uses an <a>. Worse, its
+     * specificity is (0,4,1) because of the four :not() clauses, so it beat any
+     * plain single-class component rule no matter which came later in the
+     * cascade.
+     *
+     * The domain tabs are the case that caught it: .domain-tab (0,1,0) sets
+     * display:inline-flex with 16px side padding, and on any screen under 640px
+     * this rule silently replaced that with inline-block and 4px/2px — turning a
+     * tab strip into cramped run-on text, on every phone, on every page.
+     *
+     * A whitelist of genuine prose contexts does what the comment says and cannot
+     * reach into a component. It matches the identical, correctly-scoped rule
+     * about 60 lines above this one. */
+    p a,
+    li a,
+    .content a,
+    .entity-description a,
+    .landing-section-subtitle a {
         padding: 0.25rem 0.125rem;
         margin: -0.25rem -0.125rem;
         display: inline-block;
@@ -81431,8 +81467,28 @@ body.modal-open {
     }
 
     .domain-tab {
-        padding: 0.55rem 0.75rem;
+        /* Horizontal padding only — the height comes from --domain-tabs-height so
+           the container's reservation matches what renders. Adding vertical
+           padding on top pushed the strip past the reservation and reintroduced
+           the layout shift that reservation exists to prevent. */
+        padding: 0 0.75rem;
         font-size: 0.85rem;
+    }
+}
+
+/* Touch devices get taller tabs, and the reservation has to follow.
+ *
+ * css/accessibility.css applies `min-height: 48px` to anchors under
+ * (pointer: coarse) — a WCAG target-size rule, and correct. It makes each tab
+ * 48px and the strip 49px with its border, while --domain-tabs-height still said
+ * 45px, so the container under-reserved by 4px and the page shifted when the
+ * tabs mounted on every phone.
+ *
+ * Matching the custom property to the touch height keeps the accessibility rule
+ * AND the zero-shift reservation, instead of trading one for the other. */
+@media (pointer: coarse) {
+    .domain-tabs-container {
+        --domain-tabs-height: 49px;
     }
 }
 

@@ -69,7 +69,11 @@ test.describe('Landing Page - Category Cards Display', () => {
         await waitForSPAContent(page);
 
         // Find all category cards
-        const categoryCards = page.locator('.landing-category-card');
+        // Scoped to the categories section. .landing-category-card is reused by the
+        // featured and recent grids too (12 + 8 + 8 = 28 on a populated page), so an
+        // unscoped count measures how much data happened to load. That is why this
+        // read 12 in CI, where those grids come back empty, and 28 locally.
+        const categoryCards = page.locator('.landing-categories-section .landing-category-card');
         const cardCount = await categoryCards.count();
 
         console.log(`Found ${cardCount} category cards`);
@@ -87,7 +91,11 @@ test.describe('Landing Page - Category Cards Display', () => {
         await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
-        const categoryCards = page.locator('.landing-category-card');
+        // Scoped to the categories section. .landing-category-card is reused by the
+        // featured and recent grids too (12 + 8 + 8 = 28 on a populated page), so an
+        // unscoped count measures how much data happened to load. That is why this
+        // read 12 in CI, where those grids come back empty, and 28 locally.
+        const categoryCards = page.locator('.landing-categories-section .landing-category-card');
         const cardCount = await categoryCards.count();
 
         for (let i = 0; i < cardCount; i++) {
@@ -179,7 +187,13 @@ test.describe('Landing Page - Hero Section', () => {
         test.setTimeout(60000);
     });
 
-    test('4. Hero section displays with title and subtitle', async ({ page }) => {
+    // SKIPPED: the landing hero was removed in f5e91fcd1 ("fix: remove hero
+    // section, fix header CSS, add mythologies fallback, tune cache"). These
+    // assert .landing-hero-section, which has not existed since — they are not
+    // detecting a regression, they are describing a feature that was deleted.
+    // Kept rather than removed so the intent is on record if a hero returns.
+    // Remove the skip when .landing-hero-section exists again.
+    test.skip('4. Hero section displays with title and subtitle', async ({ page }) => {
         await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
@@ -202,7 +216,13 @@ test.describe('Landing Page - Hero Section', () => {
         console.log(`Hero subtitle: ${subtitleText.trim()}`);
     });
 
-    test('Hero section has icon display', async ({ page }) => {
+    // SKIPPED: the landing hero was removed in f5e91fcd1 ("fix: remove hero
+    // section, fix header CSS, add mythologies fallback, tune cache"). These
+    // assert .landing-hero-section, which has not existed since — they are not
+    // detecting a regression, they are describing a feature that was deleted.
+    // Kept rather than removed so the intent is on record if a hero returns.
+    // Remove the skip when .landing-hero-section exists again.
+    test.skip('Hero section has icon display', async ({ page }) => {
         await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
@@ -239,7 +259,13 @@ test.describe('Landing Page - Hero Section', () => {
         }
     });
 
-    test('Hero section has description text', async ({ page }) => {
+    // SKIPPED: the landing hero was removed in f5e91fcd1 ("fix: remove hero
+    // section, fix header CSS, add mythologies fallback, tune cache"). These
+    // assert .landing-hero-section, which has not existed since — they are not
+    // detecting a regression, they are describing a feature that was deleted.
+    // Kept rather than removed so the intent is on record if a hero returns.
+    // Remove the skip when .landing-hero-section exists again.
+    test.skip('Hero section has description text', async ({ page }) => {
         await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
@@ -266,7 +292,13 @@ test.describe('Landing Page - Hero Section', () => {
         expect(descInfo.text.length).toBeGreaterThan(30);
     });
 
-    test('Hero section has action buttons', async ({ page }) => {
+    // SKIPPED: the landing hero was removed in f5e91fcd1 ("fix: remove hero
+    // section, fix header CSS, add mythologies fallback, tune cache"). These
+    // assert .landing-hero-section, which has not existed since — they are not
+    // detecting a regression, they are describing a feature that was deleted.
+    // Kept rather than removed so the intent is on record if a hero returns.
+    // Remove the skip when .landing-hero-section exists again.
+    test.skip('Hero section has action buttons', async ({ page }) => {
         await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
@@ -601,7 +633,11 @@ test.describe('Landing Page - Responsive Design', () => {
         expect(gridStyle.display).toBe('grid');
 
         // Verify cards exist
-        const categoryCards = page.locator('.landing-category-card');
+        // Scoped to the categories section. .landing-category-card is reused by the
+        // featured and recent grids too (12 + 8 + 8 = 28 on a populated page), so an
+        // unscoped count measures how much data happened to load. That is why this
+        // read 12 in CI, where those grids come back empty, and 28 locally.
+        const categoryCards = page.locator('.landing-categories-section .landing-category-card');
         const cardCount = await categoryCards.count();
         expect(cardCount).toBe(12);
 
@@ -624,7 +660,13 @@ test.describe('Landing Page - Responsive Design', () => {
         console.log(`Card width ${cardBox.width}px exceeds minimum ${minExpectedWidth}px for ${columnCount}-column layout`);
     });
 
-    test('Hero section adapts to mobile viewport', async ({ page }) => {
+    // SKIPPED: the landing hero was removed in f5e91fcd1 ("fix: remove hero
+    // section, fix header CSS, add mythologies fallback, tune cache"). These
+    // assert .landing-hero-section, which has not existed since — they are not
+    // detecting a regression, they are describing a feature that was deleted.
+    // Kept rather than removed so the intent is on record if a hero returns.
+    // Remove the skip when .landing-hero-section exists again.
+    test.skip('Hero section adapts to mobile viewport', async ({ page }) => {
         await page.setViewportSize({ width: 375, height: 667 });
 
         await page.goto(BASE_URL, { waitUntil: 'load' });
@@ -842,7 +884,11 @@ test.describe('Landing Page - Accessibility', () => {
         await page.goto(BASE_URL, { waitUntil: 'load' });
         await waitForSPAContent(page);
 
-        const categoryCards = page.locator('.landing-category-card');
+        // Scoped to the categories section. .landing-category-card is reused by the
+        // featured and recent grids too (12 + 8 + 8 = 28 on a populated page), so an
+        // unscoped count measures how much data happened to load. That is why this
+        // read 12 in CI, where those grids come back empty, and 28 locally.
+        const categoryCards = page.locator('.landing-categories-section .landing-category-card');
         const cardCount = await categoryCards.count();
 
         for (let i = 0; i < Math.min(cardCount, 5); i++) {
@@ -948,7 +994,7 @@ test.describe('Landing Page - Navigation', () => {
         console.log(`Initial hash: "${initialHash}"`);
 
         // Navigate to category
-        const anyCard = page.locator('.landing-category-card').first();
+        const anyCard = page.locator('.landing-categories-section .landing-category-card').first();
         await expect(anyCard).toBeVisible();
         await anyCard.click();
         await page.waitForTimeout(3000);
@@ -1008,8 +1054,15 @@ test.describe('Landing Page - Features Section', () => {
         const featuresHeader = page.locator('.landing-features-section .landing-section-header');
         await expect(featuresHeader).toBeVisible();
 
-        const headerText = await featuresHeader.textContent();
-        expect(headerText).toMatch(/features/i);
+        // The heading is asserted to be present and non-empty, not to contain the
+        // word "features". The section is headed "Discover & Explore" — the copy
+        // was rewritten and this assertion was not, so it failed on a section that
+        // renders correctly. Pinning marketing wording in an E2E test makes every
+        // future copy edit a test failure; that the section exists and is labelled
+        // is the part worth holding.
+        const headerText = (await featuresHeader.textContent()).trim();
+        expect(headerText.length).toBeGreaterThan(3);
+        console.log(`Features section header: "${headerText}"`);
     });
 
     test('Feature cards are displayed', async ({ page }) => {
@@ -1125,16 +1178,24 @@ test.describe('Landing Page - Error Handling', () => {
         await waitForSPAContent(page);
 
         // Check that category cards exist
-        const categoryCards = page.locator('.landing-category-card');
+        // Scoped to the categories section. .landing-category-card is reused by the
+        // featured and recent grids too (12 + 8 + 8 = 28 on a populated page), so an
+        // unscoped count measures how much data happened to load. That is why this
+        // read 12 in CI, where those grids come back empty, and 28 locally.
+        const categoryCards = page.locator('.landing-categories-section .landing-category-card');
         const cardCount = await categoryCards.count();
         expect(cardCount).toBe(12);
 
         // Check that page has proper structure for handling icon failures
         // Category cards should have fallback icons defined (even if hidden)
         const pageInfo = await page.evaluate(() => {
-            const cards = document.querySelectorAll('.landing-category-card');
-            const icons = document.querySelectorAll('.landing-category-icon');
-            const fallbacks = document.querySelectorAll('.landing-category-icon-fallback');
+            // Same scoping as above — the featured and recent grids reuse these
+            // classes, so an unscoped count here would depend on how much data
+            // loaded rather than on the category grid this test is about.
+            const section = document.querySelector('.landing-categories-section');
+            const cards = section.querySelectorAll('.landing-category-card');
+            const icons = section.querySelectorAll('.landing-category-icon');
+            const fallbacks = section.querySelectorAll('.landing-category-icon-fallback');
 
             return {
                 cardCount: cards.length,
@@ -1166,7 +1227,7 @@ test.describe('Landing Page - Error Handling', () => {
         expect(isInteractive).toBeTruthy();
 
         // Category cards should be clickable
-        const firstCard = page.locator('.landing-category-card').first();
+        const firstCard = page.locator('.landing-categories-section .landing-category-card').first();
         await expect(firstCard).toBeEnabled();
     });
 });

@@ -107,7 +107,27 @@
     }
 
     .domain-tab {
-        padding: 0.55rem 0.75rem;
+        /* Horizontal padding only — the height comes from --domain-tabs-height so
+           the container's reservation matches what renders. Adding vertical
+           padding on top pushed the strip past the reservation and reintroduced
+           the layout shift that reservation exists to prevent. */
+        padding: 0 0.75rem;
         font-size: 0.85rem;
+    }
+}
+
+/* Touch devices get taller tabs, and the reservation has to follow.
+ *
+ * css/accessibility.css applies `min-height: 48px` to anchors under
+ * (pointer: coarse) — a WCAG target-size rule, and correct. It makes each tab
+ * 48px and the strip 49px with its border, while --domain-tabs-height still said
+ * 45px, so the container under-reserved by 4px and the page shifted when the
+ * tabs mounted on every phone.
+ *
+ * Matching the custom property to the touch height keeps the accessibility rule
+ * AND the zero-shift reservation, instead of trading one for the other. */
+@media (pointer: coarse) {
+    .domain-tabs-container {
+        --domain-tabs-height: 49px;
     }
 }
