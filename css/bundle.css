@@ -6980,7 +6980,6 @@ body {
   font-family: var(--font-primary);
   line-height: 1.6;
   color: #333;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -45153,7 +45152,13 @@ body:not(.authenticated) [data-protected]:hover {
     font-weight: 500;
 }
 
-.theme-icon {
+/* Scoped to .theme-option: this class name is reused, unscoped, by the
+   header toggle button's sun/moon SVG icons (site-header.css). An unscoped
+   `.theme-icon { display: flex }` here has the same specificity as
+   site-header.css's `.theme-icon-sun { display: none }` /
+   `.theme-icon-moon { display: block }`, and came later in the bundle, so it
+   silently won and left both icons visible on every non-day/light theme. */
+.theme-option .theme-icon {
     font-size: 1.25rem;
     flex-shrink: 0;
     width: 1.5rem;
@@ -45257,7 +45262,7 @@ body.theme-transitioning * {
         gap: 0.5rem;
     }
 
-    .theme-icon {
+    .theme-option .theme-icon {
         font-size: 1.1rem;
         width: 1.25rem;
     }
