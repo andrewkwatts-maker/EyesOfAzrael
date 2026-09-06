@@ -1385,14 +1385,33 @@ body.authenticated .user-info {
    RESPONSIVE - VERY NARROW (320px)
    ============================================ */
 
-@media (max-width: 360px) {
+/* 430px, not 360px.
+ *
+ * This block existed but its breakpoint was set for 320px-era handsets, so it
+ * never fired on any phone people actually carry: iPhone 12/13 are 390 CSS px,
+ * 14/15 are 393, Plus/Pro Max are 414 and 430. Every one of them landed above
+ * the 360 cutoff with the full wordmark still showing.
+ *
+ * The cost was not cosmetic. .site-logo and .header-actions are both
+ * flex-shrink: 0, so nothing yields: at 390px the back button (48) + logo (147)
+ * + actions (182) came to 377 in a 358px container, and the actions overflowed
+ * to x=437. #signInBtn ended up at x=387..433 — entirely off-screen, and it is
+ * the ONLY sign-in control on the page. The hamburger menu has no sign-in
+ * either, so nobody on a modern phone could sign in at all, on a site whose
+ * point is user contributions. Nothing scrolled sideways to reveal it because
+ * the overflow was clipped.
+ *
+ * Hiding the 109px wordmark frees more than the ~63px overflow. The eye icon
+ * still marks the brand and the link keeps aria-label="Eyes of Azrael - Go to
+ * home page", so nothing is lost to assistive tech. */
+@media (max-width: 430px) {
     .header-container {
         padding: 0 0.5rem;
         gap: 0.25rem;
     }
 
     .site-logo .logo-text {
-        /* Hide text label at 320px; show icon only */
+        /* Icon only — see the note above. */
         display: none;
     }
 

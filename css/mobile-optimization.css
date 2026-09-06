@@ -417,6 +417,22 @@ picture source {
         padding: 0.5rem var(--mobile-padding-sm);
     }
 
+    /* The header's gap has to come down with the padding.
+     *
+     * css/site-header.css sets `gap: 0.25rem` for narrow screens, but this file
+     * sets `gap: 0.75rem` on .header-container and is bundled AFTER it, so this
+     * file wins and site-header's narrow-screen value never applied. Two
+     * stylesheets both owning the mobile header, and the later one silently
+     * taking it.
+     *
+     * At 320px that left the header needing 302px of children in a 288px
+     * container: back button 48, logo icon 48, actions 182, plus 2 x 12px of gap.
+     * The overflow pushed #signInBtn — the only sign-in control on the site —
+     * off-screen. 4px of gap recovers the 14px shortfall with room to spare. */
+    .header-container {
+        gap: 0.25rem;
+    }
+
     /* Breadcrumb improvements */
     #breadcrumb-nav {
         padding: 0.5rem var(--mobile-padding-md);
