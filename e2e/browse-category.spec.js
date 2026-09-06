@@ -20,6 +20,42 @@ const BASE_URL = process.env.BASE_URL || '';
 // Test timeout configuration
 test.describe.configure({ timeout: 60000 });
 
+/**
+ * Waits for BrowseCategoryView (js/views/browse-category-view.js) to reach a
+ * terminal render state instead of racing its async Firebase load with a
+ * fixed sleep: skeleton cards gone AND (real entity cards rendered, OR the
+ * empty state shown, OR the error state shown). Generalizes the
+ * skeleton-vs-cards waitForFunction already proven below in "shows deity
+ * cards with proper layout" to also recognize the empty/error terminal
+ * states, since several tests below deliberately drive the view into those
+ * states (a no-match search, a blocked network) rather than the happy path.
+ */
+async function waitForBrowsePageLoaded(page, { timeout = 20000 } = {}) {
+    await page.waitForFunction(() => {
+        const skeletons = document.querySelectorAll('.skeleton-card, .entity-card-loading');
+        if (skeletons.length > 0) return false;
+        const cards = document.querySelectorAll('.entity-card:not(.skeleton-card)');
+        const emptyState = document.querySelector('.empty-state');
+        const errorState = document.querySelector('.error-container, .error-state');
+        return cards.length > 0 || !!emptyState || !!errorState;
+    }, { timeout }).catch(() => {
+        // May legitimately time out (e.g. a genuinely stuck load) — callers
+        // that need the page loaded assert on the resulting DOM state next,
+        // which will fail with a clear message instead of this helper hanging.
+    });
+}
+
+/**
+ * Polls until the given predicate (evaluated in-page) is true, or the timeout
+ * elapses. Used in place of `waitForTimeout` for state changes driven by
+ * synchronous in-page logic (filtering, sorting, view-mode class swaps) that
+ * still need a tick for the DOM to reflect, and for CSS transitions/debounces
+ * where the exact settle time isn't worth hardcoding.
+ */
+async function waitForCondition(page, fn, arg, { timeout = 5000 } = {}) {
+    await page.waitForFunction(fn, arg, { timeout }).catch(() => {});
+}
+
 test.describe('Browse Deities View', () => {
     test.beforeEach(async ({ page }) => {
         // Set a longer timeout for production testing
@@ -63,9 +99,12 @@ test.describe('Browse Deities View', () => {
     test('deity cards display image/icon, name, and description snippet', async ({ page }) => {
         await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
-        // Wait for cards to load
+        // Wait for cards to load and finish rendering (card content is rendered
+        // synchronously from already-fetched entity data, so there's nothing to
+        // "populate" beyond the render BrowseCategoryView.getBrowseHTML() already
+        // performed by the time .entity-card exists).
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000); // Allow time for card content to populate
+        await waitForBrowsePageLoaded(page);
 
         // Get first card
         const firstCard = page.locator('.entity-card').first();
@@ -98,8 +137,8 @@ test.describe('Browse Heroes View', () => {
         // Wait for the browse view to render
         await page.waitForSelector('.browse-view, .entity-grid', { timeout: 15000 });
 
-        // Wait for content to load
-        await page.waitForTimeout(3000);
+        // Wait for content to reach a terminal state instead of a fixed sleep
+        await waitForBrowsePageLoaded(page);
 
         // Check for entity cards or empty state
         const entityCards = page.locator('.entity-card');
@@ -127,8 +166,8 @@ test.describe('Browse Creatures View', () => {
         // Wait for the browse view to render
         await page.waitForSelector('.browse-view, .entity-grid', { timeout: 15000 });
 
-        // Wait for content to load
-        await page.waitForTimeout(3000);
+        // Wait for content to reach a terminal state instead of a fixed sleep
+        await waitForBrowsePageLoaded(page);
 
         // Check for entity cards
         const entityCards = page.locator('.entity-card');
@@ -150,7 +189,7 @@ test.describe('Entity Card Interactions', () => {
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
         const firstCard = page.locator('.entity-card').first();
         await expect(firstCard).toBeVisible();
@@ -166,7 +205,13 @@ test.describe('Entity Card Interactions', () => {
 
         // Hover over the card
         await firstCard.hover();
-        await page.waitForTimeout(300); // Wait for transition
+
+        // Poll for the CSS transition to actually apply, instead of a fixed
+        // sleep tied to a guessed transition duration.
+        await waitForCondition(page, (initial) => {
+            const card = document.querySelector('.entity-card');
+            return !card || window.getComputedStyle(card).transform !== initial;
+        }, initialStyles.transform, { timeout: 1000 });
 
         // Get hover styles
         const hoverStyles = await firstCard.evaluate(el => {
@@ -195,7 +240,7 @@ test.describe('Entity Card Interactions', () => {
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
         const firstCard = page.locator('.entity-card').first();
         await expect(firstCard).toBeVisible();
@@ -214,7 +259,9 @@ test.describe('Entity Card Interactions', () => {
 
         // Click the card
         await firstCard.click();
-        await page.waitForTimeout(2000);
+
+        // Wait for the actual navigation instead of a fixed sleep
+        await page.waitForFunction((prev) => window.location.href !== prev, currentUrl, { timeout: 10000 }).catch(() => {});
 
         // Check URL changed (navigated to entity detail)
         const newUrl = page.url();
@@ -234,7 +281,7 @@ test.describe('Responsive Grid Layout', () => {
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
         const grid = page.locator('.entity-grid, #entityGrid').first();
         await expect(grid).toBeVisible();
@@ -248,7 +295,14 @@ test.describe('Responsive Grid Layout', () => {
 
         // Switch to mobile viewport
         await page.setViewportSize({ width: 375, height: 667 });
-        await page.waitForTimeout(500); // Allow CSS to recalculate
+
+        // Poll for the layout to actually recompute rather than a fixed sleep —
+        // viewport-driven reflow is synchronous in Chromium, but guard against
+        // any animation frame delay.
+        await waitForCondition(page, (prevColumns) => {
+            const el = document.querySelector('.entity-grid, #entityGrid');
+            return !el || window.getComputedStyle(el).gridTemplateColumns !== prevColumns;
+        }, desktopColumns, { timeout: 1000 });
 
         // Get mobile grid columns
         const mobileColumns = await grid.evaluate(el => {
@@ -276,7 +330,7 @@ test.describe('Responsive Grid Layout', () => {
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
         // Cards should be visible
         const firstCard = page.locator('.entity-card').first();
@@ -316,216 +370,181 @@ test.describe('Loading and Empty States', () => {
 
         // After load, loading indicators should be gone
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(1000);
+
+        // Poll for skeletons to actually be gone instead of a fixed sleep
+        await waitForCondition(page, () => {
+            return document.querySelectorAll('.skeleton-card, .grid-loading').length === 0;
+        }, null, { timeout: 3000 });
 
         const hasLoadingAfterLoad = await page.locator('.skeleton-card, .grid-loading').isVisible().catch(() => false);
         expect(hasLoadingAfterLoad).toBeFalsy();
     });
 
-    test('empty state shown if no results (simulated via filter)', async ({ page }) => {
+    test('empty state shown when a search matches nothing', async ({ page }) => {
         await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
-        // Find search filter input if available
-        const searchFilter = page.locator('#searchFilter, input[type="text"][placeholder*="Search"], input[type="search"]');
-        const hasSearchFilter = await searchFilter.isVisible().catch(() => false);
+        // The search filter is rendered unconditionally in
+        // BrowseCategoryView.getFiltersHTML() (js/views/browse-category-view.js),
+        // so it is always present — this is a real feature, not something the
+        // test needs to guard with an `if`.
+        const searchFilter = page.locator('#searchFilter');
+        await expect(searchFilter).toBeVisible({ timeout: 5000 });
 
-        if (hasSearchFilter) {
-            // Type a search term that likely won't match anything
-            await searchFilter.fill('zzzzxxxxxxxnotarealentity12345');
-            await page.waitForTimeout(500); // Wait for debounce
+        const initialCardCount = await page.locator('.entity-card').count();
+        expect(initialCardCount).toBeGreaterThan(0);
 
-            // Check for empty state
-            const emptyState = page.locator('.empty-state');
-            const hasEmptyState = await emptyState.isVisible({ timeout: 5000 }).catch(() => false);
+        // Type a search term that cannot match any entity
+        await searchFilter.fill('zzzzxxxxxxxnotarealentity12345');
 
-            console.log('Empty state shown for no-match search:', hasEmptyState);
+        // BrowseCategoryView debounces search input by 300ms (attachEventListeners)
+        // then calls applyFilters() -> updateGrid(), which renders
+        // getEmptyStateHTML() synchronously when filteredEntities is empty.
+        // Poll for that real state instead of guessing the debounce + render time.
+        await page.waitForFunction(() => !!document.querySelector('.empty-state'), { timeout: 5000 });
 
-            if (hasEmptyState) {
-                // Verify empty state has helpful content
-                const emptyStateText = await emptyState.textContent();
-                console.log('Empty state content:', emptyStateText?.substring(0, 100));
-                expect(emptyStateText?.length).toBeGreaterThan(0);
-            }
+        const emptyState = page.locator('.empty-state');
+        await expect(emptyState).toBeVisible();
 
-            // Clear the filter
-            await searchFilter.clear();
-            await page.waitForTimeout(500);
+        // Verify empty state has helpful content
+        const emptyStateText = await emptyState.textContent();
+        console.log('Empty state content:', emptyStateText?.substring(0, 100));
+        expect(emptyStateText?.length).toBeGreaterThan(0);
 
-            // Cards should reappear
-            const cardsReappear = await page.locator('.entity-card').first().isVisible({ timeout: 5000 }).catch(() => false);
-            console.log('Cards reappear after clearing filter:', cardsReappear);
-        }
+        // No cards should remain visible while the empty state is shown
+        expect(await page.locator('.entity-card').count()).toBe(0);
+
+        // Clear the filter
+        await searchFilter.clear();
+
+        // Cards should reappear once the debounce fires and filters re-apply
+        await page.waitForFunction(() => document.querySelectorAll('.entity-card').length > 0, { timeout: 5000 });
+
+        const cardsReappear = await page.locator('.entity-card').first().isVisible().catch(() => false);
+        expect(cardsReappear).toBeTruthy();
     });
 });
 
 test.describe('Content Filter Toggle', () => {
-    test('content filter toggle works (if visible)', async ({ page }) => {
-        await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
-
-        // Wait for page to load
-        await page.waitForSelector('.browse-view', { timeout: 15000 });
-        await page.waitForTimeout(2000);
-
-        // Look for content filter toggle
-        const contentFilterContainer = page.locator('#contentFilterContainer, .content-filter, [data-content-filter]');
-        const hasContentFilter = await contentFilterContainer.isVisible().catch(() => false);
-
-        console.log('Content filter visible:', hasContentFilter);
-
-        if (hasContentFilter) {
-            // Find toggle button or checkbox
-            const toggle = contentFilterContainer.locator('button, input[type="checkbox"], .toggle-switch');
-            const hasToggle = await toggle.first().isVisible().catch(() => false);
-
-            if (hasToggle) {
-                // Get initial card count
-                const initialCardCount = await page.locator('.entity-card').count();
-                console.log('Initial card count:', initialCardCount);
-
-                // Click the toggle
-                await toggle.first().click();
-                await page.waitForTimeout(1000);
-
-                // Get new card count
-                const newCardCount = await page.locator('.entity-card').count();
-                console.log('Card count after toggle:', newCardCount);
-
-                // Card count may change (or not, depending on data)
-                // The important thing is that no error occurred
-            }
-        }
+    test('content filter toggle is disabled by design (no toggle control renders)', async ({ page }) => {
+        // Resolved from "(if visible)" by reading js/components/content-filter.js:
+        // ContentFilter.render() only has a real toggle switch (#show-community-content)
+        // when a <template id="content-filter-toggle-template"> exists in the DOM
+        // (see components/content-filter-toggle.html). That template file is never
+        // referenced by index.html or fetched by any script — grep confirms no
+        // occurrence of "content-filter-toggle" anywhere outside the component and
+        // the orphaned template file itself — so render() always falls through to
+        // the inline fallback (content-filter.js lines ~180-206), which renders
+        // `<div class="content-filter-bar" ... style="display: none;">` with only a
+        // static label, a count badge, and an info button — no checkbox, no button
+        // that toggles anything, and the bar itself is hidden. The inline comment
+        // there says it outright: "Community content toggle removed — always show
+        // standard content." There is nothing left to click, so there is nothing
+        // this test can exercise; skipping documents that precisely rather than
+        // silently no-op'ing inside an `if (hasToggle)` as before.
+        test.skip(true,
+            'js/components/content-filter.js has no working toggle: its inline ' +
+            'fallback markup (used because content-filter-toggle-template is never ' +
+            'loaded anywhere in the app) renders the filter bar with ' +
+            'style="display:none" and omits the toggle control entirely.'
+        );
     });
 });
 
 test.describe('Pagination and Infinite Scroll', () => {
-    test('pagination or infinite scroll works (if implemented)', async ({ page }) => {
+    test('Load More button loads additional deity cards', async ({ page }) => {
+        // Resolved from "(if implemented)" by reading
+        // js/views/browse-category-view.js: updatePagination() deliberately
+        // renders no numbered page buttons once filteredEntities.length > 100
+        // (`if (totalPages <= 1 || this.filteredEntities.length > 100) { controls.innerHTML = ''; return; }`),
+        // leaving the Load More button + IntersectionObserver
+        // (updateLoadMoreButton/setupInfiniteScroll) as the only reachable paging
+        // mechanism for a category this large. Deities is exactly that category
+        // (thousands of entities per CLAUDE.md), so on this page numbered
+        // pagination (.page-btn) is a real "no controls" state by design, and
+        // Load More is the feature to assert on unconditionally.
         await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
-
-        // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
-        // Check for pagination controls
-        const paginationControls = page.locator('.pagination-controls, #paginationControls, .page-btn');
-        const hasPagination = await paginationControls.isVisible().catch(() => false);
+        const loadMoreBtn = page.locator('#loadMoreBtn');
+        await expect(loadMoreBtn).toBeVisible({ timeout: 10000 });
 
-        console.log('Pagination controls visible:', hasPagination);
+        const initialCardCount = await page.locator('.entity-card').count();
+        expect(initialCardCount).toBeGreaterThan(0);
 
-        if (hasPagination) {
-            // Get current page indicator
-            const activePageBtn = page.locator('.page-btn.active');
-            const hasActivePage = await activePageBtn.isVisible().catch(() => false);
+        // A raw DOM click, not Playwright's actionability-checked .click(): the
+        // IntersectionObserver set up by setupInfiniteScroll() (same file) also
+        // watches this button and calls loadMoreEntities() itself the moment it
+        // scrolls into view (rootMargin: '200px') — which Playwright's own
+        // auto-scroll-before-click causes. The two triggers race, the button
+        // toggles visible/spinner/moved-in-viewport while cards are appended, and
+        // Playwright's real .click() times out retrying against a moving target.
+        // The behavior under test is "activating Load More loads more cards",
+        // which a dispatched click event verifies exactly as well without
+        // fighting that observer.
+        await loadMoreBtn.dispatchEvent('click');
 
-            if (hasActivePage) {
-                const currentPage = await activePageBtn.textContent();
-                console.log('Current page:', currentPage);
+        // loadMoreEntities() appends new cards after a 300ms staggered-animation
+        // delay (js/views/browse-category-view.js) — poll for the real DOM change.
+        await page.waitForFunction((prevCount) => {
+            return document.querySelectorAll('.entity-card').length > prevCount;
+        }, initialCardCount, { timeout: 5000 });
 
-                // Find next page button
-                const nextBtn = page.locator('.page-btn:has-text("Next"), .page-btn:has-text(">")');
-                const hasNextBtn = await nextBtn.isVisible().catch(() => false);
-
-                if (hasNextBtn) {
-                    const isDisabled = await nextBtn.isDisabled().catch(() => false);
-
-                    if (!isDisabled) {
-                        // Get initial cards
-                        const initialFirstCardTitle = await page.locator('.entity-card').first().locator('.entity-card-title, .card-title').textContent();
-
-                        // Click next
-                        await nextBtn.click();
-                        await page.waitForTimeout(1000);
-
-                        // Verify page changed
-                        const newActivePageBtn = page.locator('.page-btn.active');
-                        const newPage = await newActivePageBtn.textContent();
-                        console.log('New page after next:', newPage);
-
-                        // Get new first card
-                        const newFirstCardTitle = await page.locator('.entity-card').first().locator('.entity-card-title, .card-title').textContent();
-
-                        // Content should have changed (different cards shown)
-                        if (initialFirstCardTitle !== newFirstCardTitle) {
-                            console.log('Pagination working: content changed');
-                        }
-                    }
-                }
-            }
-        } else {
-            // Check for infinite scroll by scrolling down
-            const entityContainer = page.locator('#entityContainer, .entity-container');
-            const hasContainer = await entityContainer.isVisible().catch(() => false);
-
-            if (hasContainer) {
-                // Get initial card count
-                const initialCardCount = await page.locator('.entity-card').count();
-                console.log('Initial card count:', initialCardCount);
-
-                // Scroll down
-                await entityContainer.evaluate(el => {
-                    el.scrollTop = el.scrollHeight;
-                });
-                await page.waitForTimeout(2000);
-
-                // Check if more cards loaded (for infinite scroll)
-                const newCardCount = await page.locator('.entity-card').count();
-                console.log('Card count after scroll:', newCardCount);
-
-                // If more cards loaded, infinite scroll is working
-                if (newCardCount > initialCardCount) {
-                    console.log('Infinite scroll working: more cards loaded');
-                }
-            }
-        }
+        const newCardCount = await page.locator('.entity-card').count();
+        expect(newCardCount).toBeGreaterThan(initialCardCount);
     });
 });
 
 test.describe('Browse View Filters', () => {
-    test('quick filter chips work', async ({ page }) => {
+    test('quick filter chips filter the entity grid by mythology', async ({ page }) => {
         await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
-
-        // Wait for page to load
         await page.waitForSelector('.browse-view', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
-        // Look for filter chips
-        const filterChips = page.locator('.filter-chip');
-        const chipCount = await filterChips.count();
+        // Quick filter chips are rendered whenever more than one mythology group
+        // exists (BrowseCategoryView.getQuickFiltersHTML: `facetFilterIsUseful`),
+        // which is always true for the deities category — a real, unconditional
+        // feature on this page, not something to guard with `if (chipCount > 0)`.
+        const filterChips = page.locator('.filter-chip[data-filter-type="mythology"]');
+        await expect(filterChips.first()).toBeVisible({ timeout: 10000 });
 
-        console.log('Filter chips found:', chipCount);
+        const firstChip = filterChips.first();
+        const chipValue = await firstChip.getAttribute('data-filter-value');
+        expect(chipValue).toBeTruthy();
 
-        if (chipCount > 0) {
-            // Get initial card count
-            const initialCardCount = await page.locator('.entity-card').count();
-            console.log('Initial card count:', initialCardCount);
+        await expect(firstChip).toHaveAttribute('aria-pressed', 'false');
 
-            // Click first filter chip
-            const firstChip = filterChips.first();
-            await firstChip.click();
-            await page.waitForTimeout(500);
+        // Click first filter chip
+        await firstChip.click();
 
-            // Check chip is now active
-            const chipAriaPressed = await firstChip.getAttribute('aria-pressed');
-            const chipHasActiveClass = await firstChip.evaluate(el => el.classList.contains('active'));
+        // Confirm the chip's own active state changed
+        await expect(firstChip).toHaveAttribute('aria-pressed', 'true');
+        await expect(firstChip).toHaveClass(/active/);
 
-            console.log('Chip aria-pressed:', chipAriaPressed);
-            console.log('Chip has active class:', chipHasActiveClass);
+        // Confirm filtering actually took effect: handleChipClick ->
+        // applyFilters() -> updateGrid() is synchronous, so poll for the grid to
+        // contain only cards matching the selected mythology (data-mythology is
+        // set from the same facetValueOf() the chip's own value came from).
+        await page.waitForFunction((val) => {
+            const cards = Array.from(document.querySelectorAll('.entity-card[data-mythology]'));
+            return cards.length > 0 && cards.every(c => c.dataset.mythology === val);
+        }, chipValue, { timeout: 5000 });
 
-            // Get new card count (may be different after filtering)
-            const newCardCount = await page.locator('.entity-card').count();
-            console.log('Card count after filter:', newCardCount);
+        const filteredCards = page.locator('.entity-card[data-mythology]');
+        const filteredCount = await filteredCards.count();
+        expect(filteredCount).toBeGreaterThan(0);
 
-            // Click the chip again to deactivate
-            await firstChip.click();
-            await page.waitForTimeout(500);
+        // Click the chip again to deactivate
+        await firstChip.click();
 
-            // Verify it deactivated
-            const chipAriaAfterDeactivate = await firstChip.getAttribute('aria-pressed');
-            console.log('Chip aria-pressed after deactivate:', chipAriaAfterDeactivate);
-        }
+        // Verify it deactivated and the grid is no longer restricted to one mythology
+        await expect(firstChip).toHaveAttribute('aria-pressed', 'false');
+        await page.waitForFunction(() => document.querySelectorAll('.entity-card').length > 0, { timeout: 5000 });
+        expect(await page.locator('.entity-card').count()).toBeGreaterThan(0);
     });
 
     test('sort order changes card order', async ({ page }) => {
@@ -533,123 +552,132 @@ test.describe('Browse View Filters', () => {
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
-        // Find sort dropdown
-        const sortOrder = page.locator('#sortOrder, select[id*="sort"]');
-        const hasSortDropdown = await sortOrder.isVisible().catch(() => false);
+        // The sort dropdown is rendered unconditionally in
+        // BrowseCategoryView.getFiltersHTML() — a real, always-present feature.
+        const sortOrder = page.locator('#sortOrder');
+        await expect(sortOrder).toBeVisible({ timeout: 5000 });
 
-        console.log('Sort dropdown visible:', hasSortDropdown);
-
-        if (hasSortDropdown) {
-            // Get first card title with current sort
-            const getFirstCardTitle = async () => {
-                return await page.locator('.entity-card').first().locator('.entity-card-title, .card-title, h3').textContent();
-            };
-
-            const initialFirstTitle = await getFirstCardTitle();
-            console.log('Initial first card:', initialFirstTitle);
-
-            // Get available options
-            const options = await sortOrder.locator('option').allTextContents();
-            console.log('Sort options:', options);
-
-            // Change to a different sort option (e.g., mythology or popularity)
-            if (options.length > 1) {
-                // Select a different option
-                await sortOrder.selectOption({ index: 1 });
-                await page.waitForTimeout(500);
-
-                const newFirstTitle = await getFirstCardTitle();
-                console.log('First card after sort change:', newFirstTitle);
-
-                // Titles might be different (but not always, depends on data)
-                console.log('Sort affected order:', initialFirstTitle !== newFirstTitle);
+        // Default sort is "name" (A-Z) — verify the initial order is genuinely
+        // non-decreasing before changing anything, so the later "changed order"
+        // assertion has a real baseline rather than an assumed one.
+        //
+        // Scoped to `.entity-card[data-entity-id] h3` rather than plain
+        // `.entity-card h3`: getAddNewCardHTML() (browse-category-view.js) always
+        // appends one more `.entity-card` at the end ("Submit New Deity" / "Sign
+        // in to Contribute") which is also an h3 but carries no data-entity-id and
+        // is never part of the sort — including it broke both the ascending and
+        // descending order checks against its unsorted title.
+        const isNonDecreasing = await page.evaluate(() => {
+            const names = Array.from(document.querySelectorAll('.entity-card[data-entity-id] h3')).map(el => el.textContent.trim());
+            for (let i = 1; i < names.length; i++) {
+                if (names[i - 1].localeCompare(names[i]) > 0) return false;
             }
-        }
+            return names.length > 1;
+        });
+        expect(isNonDecreasing).toBeTruthy();
+
+        // Switch to Z-A order
+        await sortOrder.selectOption('name-desc');
+
+        // applyFilters() re-sorts and re-renders the grid synchronously on the
+        // 'change' event — poll for the real DOM order rather than a fixed sleep.
+        await page.waitForFunction(() => {
+            const names = Array.from(document.querySelectorAll('.entity-card[data-entity-id] h3')).map(el => el.textContent.trim());
+            if (names.length < 2) return false;
+            for (let i = 1; i < names.length; i++) {
+                if (names[i - 1].localeCompare(names[i]) < 0) return false;
+            }
+            return true;
+        }, { timeout: 5000 });
+
+        const isNonIncreasing = await page.evaluate(() => {
+            const names = Array.from(document.querySelectorAll('.entity-card[data-entity-id] h3')).map(el => el.textContent.trim());
+            for (let i = 1; i < names.length; i++) {
+                if (names[i - 1].localeCompare(names[i]) < 0) return false;
+            }
+            return names.length > 1;
+        });
+        expect(isNonIncreasing).toBeTruthy();
     });
 });
 
 test.describe('View Mode Toggle', () => {
-    test('grid and list view toggle works', async ({ page }) => {
+    test('grid and list view toggle changes the layout', async ({ page }) => {
         await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
-        // Find view toggle buttons
-        const gridBtn = page.locator('.view-btn[data-view="grid"], button:has-text("Grid")');
-        const listBtn = page.locator('.view-btn[data-view="list"], button:has-text("List")');
+        // Both view buttons are rendered unconditionally in
+        // BrowseCategoryView.getFiltersHTML() — a real, always-present feature.
+        const gridBtn = page.locator('.view-btn[data-view="grid"]');
+        const listBtn = page.locator('.view-btn[data-view="list"]');
+        await expect(gridBtn).toBeVisible({ timeout: 5000 });
+        await expect(listBtn).toBeVisible({ timeout: 5000 });
 
-        const hasGridBtn = await gridBtn.isVisible().catch(() => false);
-        const hasListBtn = await listBtn.isVisible().catch(() => false);
+        const grid = page.locator('.entity-grid, #entityGrid').first();
 
-        console.log('Grid button visible:', hasGridBtn);
-        console.log('List button visible:', hasListBtn);
+        // Verify grid view is active (default)
+        await expect(grid).toHaveClass(/grid-view/);
+        const gridColumns = await grid.evaluate(el => window.getComputedStyle(el).gridTemplateColumns);
 
-        if (hasGridBtn && hasListBtn) {
-            // Get the grid element
-            const grid = page.locator('.entity-grid, #entityGrid').first();
+        // Switch to list view
+        await listBtn.click();
 
-            // Verify grid view is active (default)
-            const hasGridClass = await grid.evaluate(el => el.classList.contains('grid-view'));
-            console.log('Has grid-view class:', hasGridClass);
+        // Verify list view class applied and the layout genuinely changed:
+        // .entity-grid.list-view sets grid-template-columns: 1fr
+        // (js/views/browse-category-view.js getStyles()), a real, checkable
+        // difference from grid view's multi-column auto-fill layout.
+        await expect(grid).toHaveClass(/list-view/);
+        await page.waitForFunction((prevColumns) => {
+            const el = document.querySelector('.entity-grid, #entityGrid');
+            return !!el && window.getComputedStyle(el).gridTemplateColumns !== prevColumns;
+        }, gridColumns, { timeout: 2000 });
 
-            // Switch to list view
-            await listBtn.click();
-            await page.waitForTimeout(300);
+        const listColumns = await grid.evaluate(el => window.getComputedStyle(el).gridTemplateColumns);
+        expect(listColumns).not.toBe(gridColumns);
 
-            // Verify list view class applied
-            const hasListClass = await grid.evaluate(el => el.classList.contains('list-view'));
-            console.log('Has list-view class after toggle:', hasListClass);
-
-            // Cards should have different layout in list view
-            const firstCard = page.locator('.entity-card').first();
-            const cardFlexDirection = await firstCard.evaluate(el => {
-                return window.getComputedStyle(el).flexDirection;
-            });
-            console.log('Card flex-direction in list view:', cardFlexDirection);
-
-            // Switch back to grid view
-            await gridBtn.click();
-            await page.waitForTimeout(300);
-
-            const hasGridClassAgain = await grid.evaluate(el => el.classList.contains('grid-view'));
-            console.log('Back to grid-view:', hasGridClassAgain);
-        }
+        // Switch back to grid view
+        await gridBtn.click();
+        await expect(grid).toHaveClass(/grid-view/);
+        await expect(grid).not.toHaveClass(/list-view/);
     });
 });
 
 test.describe('Browse Header and Statistics', () => {
     test('browse header displays category info', async ({ page }) => {
         await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
-
-        // Wait for page to load
         await page.waitForSelector('.browse-view', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
-        // Check for header
-        const header = page.locator('.browse-header');
-        const hasHeader = await header.isVisible().catch(() => false);
+        // The real header markup is `.browse-hero` (js/views/browse-category-view.js
+        // getHeaderHTML()) — `.browse-header`/`.browse-title` used by the old
+        // version of this test don't exist anywhere in the rendered page; they
+        // only survive as dead CSS rules further down the same file's getStyles(),
+        // left over from before the header was renamed. This is always rendered,
+        // so assert on it unconditionally rather than behind `if (hasHeader)`.
+        const header = page.locator('.browse-hero');
+        await expect(header).toBeVisible({ timeout: 5000 });
 
-        if (hasHeader) {
-            // Check for title
-            const title = header.locator('.browse-title, h1');
-            const titleText = await title.textContent();
-            console.log('Browse title:', titleText);
-            expect(titleText?.toLowerCase()).toContain('deit');
+        const title = header.locator('.browse-hero-title');
+        await expect(title).toBeVisible();
+        const titleText = await title.textContent();
+        console.log('Browse title:', titleText);
+        expect(titleText?.toLowerCase()).toContain('deit');
 
-            // Check for description
-            const description = header.locator('.browse-description');
-            const hasDescription = await description.isVisible().catch(() => false);
-            console.log('Has description:', hasDescription);
+        // Description is always rendered (getCategoryLongDescription is never empty)
+        const description = header.locator('.browse-hero-description');
+        await expect(description).toBeVisible();
+        const descriptionText = await description.textContent();
+        expect(descriptionText?.length).toBeGreaterThan(0);
 
-            // Check for stats
-            const stats = header.locator('.browse-stats, .stat-badge');
-            const hasStats = await stats.isVisible().catch(() => false);
-            console.log('Has stats:', hasStats);
-        }
+        // Stats are always rendered (#browseStats inside the hero, at least the
+        // total-entity-count stat)
+        const stats = header.locator('.browse-hero-stats .browse-hero-stat');
+        expect(await stats.count()).toBeGreaterThan(0);
     });
 
     test('statistics show count of entities', async ({ page }) => {
@@ -657,30 +685,25 @@ test.describe('Browse Header and Statistics', () => {
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
-        // Find stats display
-        const statsContainer = page.locator('#browseStats, .browse-stats');
-        const hasStats = await statsContainer.isVisible().catch(() => false);
+        // #browseStats is rendered unconditionally inside the hero header
+        // (getHeaderHTML) — real, always-present feature.
+        const statsContainer = page.locator('#browseStats');
+        await expect(statsContainer).toBeVisible({ timeout: 5000 });
 
-        if (hasStats) {
-            const statsText = await statsContainer.textContent();
-            console.log('Stats content:', statsText);
+        const statsText = await statsContainer.textContent();
+        console.log('Stats content:', statsText);
+        expect(/\d+/.test(statsText || '')).toBeTruthy();
 
-            // Should contain some numeric values
-            const hasNumbers = /\d+/.test(statsText || '');
-            expect(hasNumbers).toBeTruthy();
-        }
-
-        // Check results info
-        const resultsInfo = page.locator('#resultsInfo, .filter-results-info');
-        const hasResultsInfo = await resultsInfo.isVisible().catch(() => false);
-
-        if (hasResultsInfo) {
-            const resultsText = await resultsInfo.textContent();
-            console.log('Results info:', resultsText);
-            // Should show something like "Showing X of Y"
-        }
+        // #resultsInfo is rendered unconditionally inside the filter controls
+        // (getFiltersHTML) — real, always-present feature.
+        const resultsInfo = page.locator('#resultsInfo');
+        await expect(resultsInfo).toBeVisible({ timeout: 5000 });
+        const resultsText = await resultsInfo.textContent();
+        console.log('Results info:', resultsText);
+        expect(/\d+/.test(resultsText || '')).toBeTruthy();
+        expect(resultsText?.toLowerCase()).toContain('showing');
     });
 });
 
@@ -690,54 +713,56 @@ test.describe('Accessibility', () => {
 
         // Wait for cards to load
         await page.waitForSelector('.entity-card', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await waitForBrowsePageLoaded(page);
 
-        // Tab through the page to reach cards
-        for (let i = 0; i < 20; i++) {
-            await page.keyboard.press('Tab');
+        // Entity cards are rendered as <a href="..."> elements
+        // (getEntityCardHTML in js/views/browse-category-view.js) with no
+        // tabindex override, so they are natively focusable and operable via
+        // the keyboard without depending on how many other focusable controls
+        // (filter chips, search, sort, view buttons) precede them in tab order.
+        // Assert that directly and unconditionally instead of tabbing a fixed
+        // number of times and only checking inside an `if` when one happened to
+        // be found.
+        const firstCard = page.locator('.entity-card').first();
+        await expect(firstCard).toBeVisible();
 
-            const focusedElement = await page.evaluate(() => {
-                const el = document.activeElement;
-                return {
-                    tag: el?.tagName,
-                    className: el?.className,
-                    hasHref: !!el?.getAttribute('href'),
-                    role: el?.getAttribute('role')
-                };
-            });
+        const tagName = await firstCard.evaluate(el => el.tagName);
+        const hasHref = await firstCard.getAttribute('href');
+        expect(tagName).toBe('A');
+        expect(hasHref).toBeTruthy();
 
-            // Check if we focused on an entity card
-            if (focusedElement.className?.includes('entity-card') || focusedElement.hasHref) {
-                console.log('Focused on card or link:', focusedElement);
+        // Focus it and confirm it actually becomes the active element
+        await firstCard.focus();
+        const isFocused = await firstCard.evaluate(el => el === document.activeElement);
+        expect(isFocused).toBeTruthy();
 
-                // Cards should be focusable (have tabindex or be links)
-                expect(focusedElement.hasHref || focusedElement.role === 'article').toBeTruthy();
-                break;
-            }
-        }
+        // Activate it via keyboard (Enter) and confirm real navigation occurs —
+        // the actual behavior a keyboard user relies on, not just focusability.
+        const currentUrl = page.url();
+        await page.keyboard.press('Enter');
+        await page.waitForFunction((prev) => window.location.href !== prev, currentUrl, { timeout: 10000 }).catch(() => {});
+        expect(page.url()).not.toBe(currentUrl);
     });
 
     test('filter chips have proper ARIA attributes', async ({ page }) => {
         await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
+        await page.waitForSelector('.browse-view', { timeout: 15000 });
+        await waitForBrowsePageLoaded(page);
 
-        // Wait for page to load
-        await page.waitForSelector('.filter-chip', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
-
+        // Mythology filter chips are rendered unconditionally for the deities
+        // category (getQuickFiltersHTML: facetFilterIsUseful is always true
+        // there) with aria-pressed and aria-label set on every chip
+        // (js/views/browse-category-view.js) — real, always-present feature.
         const filterChips = page.locator('.filter-chip');
+        await expect(filterChips.first()).toBeVisible({ timeout: 10000 });
+
         const chipCount = await filterChips.count();
+        expect(chipCount).toBeGreaterThan(0);
 
-        if (chipCount > 0) {
-            const firstChip = filterChips.first();
-
-            // Check for aria-pressed attribute
-            const ariaPressed = await firstChip.getAttribute('aria-pressed');
-            console.log('Filter chip aria-pressed:', ariaPressed);
+        for (const chip of await filterChips.all()) {
+            const ariaPressed = await chip.getAttribute('aria-pressed');
+            const ariaLabel = await chip.getAttribute('aria-label');
             expect(['true', 'false']).toContain(ariaPressed);
-
-            // Check for aria-label
-            const ariaLabel = await firstChip.getAttribute('aria-label');
-            console.log('Filter chip aria-label:', ariaLabel);
             expect(ariaLabel).toBeTruthy();
         }
     });
@@ -749,39 +774,62 @@ test.describe('Cross-Category Navigation', () => {
         await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
         await page.waitForSelector('.entity-card, .empty-state', { timeout: 15000 });
 
-        // Navigate to creatures
+        // Navigate to creatures. Because these routes only differ by hash
+        // fragment, `page.goto()` is a same-document navigation — the previous
+        // route's DOM is not torn down by the browser, only by the SPA router
+        // re-rendering the mount point. `waitForBrowsePageLoaded` alone is not
+        // enough here: it just checks "some cards/empty/error state exists",
+        // which the *previous* route's leftover content already satisfies the
+        // instant goto() resolves, before BrowseCategoryView.render() for the
+        // new route has replaced it. Wait for the header text itself to become
+        // the new category's before reading it, so this can't read stale content.
         await page.goto(`${BASE_URL}/#/browse/creatures`, { waitUntil: 'load' });
-        await page.waitForSelector('.browse-view', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await page.waitForFunction(() => {
+            const el = document.querySelector('.browse-hero-title');
+            return !!el && el.textContent.toLowerCase().includes('creature');
+        }, { timeout: 20000 });
 
-        // Verify we're on creatures page
-        const header = page.locator('.browse-header .browse-title, h1');
-        const headerText = await header.textContent();
+        const headerText = await page.locator('.browse-hero-title').first().textContent();
         console.log('Creatures page header:', headerText);
         expect(headerText?.toLowerCase()).toMatch(/creature/i);
 
-        // Navigate to heroes
+        // Navigate to heroes — same reasoning as above.
         await page.goto(`${BASE_URL}/#/browse/heroes`, { waitUntil: 'load' });
-        await page.waitForSelector('.browse-view', { timeout: 15000 });
-        await page.waitForTimeout(2000);
+        await page.waitForFunction(() => {
+            const el = document.querySelector('.browse-hero-title');
+            return !!el && el.textContent.toLowerCase().includes('hero');
+        }, { timeout: 20000 });
 
-        // Verify we're on heroes page
-        const heroHeader = page.locator('.browse-header .browse-title, h1');
-        const heroHeaderText = await heroHeader.textContent();
+        const heroHeaderText = await page.locator('.browse-hero-title').first().textContent();
         console.log('Heroes page header:', heroHeaderText);
         expect(heroHeaderText?.toLowerCase()).toMatch(/hero/i);
     });
 });
 
 test.describe('Error Handling', () => {
+    // This app's data layer is deliberately resilient: AssetService's
+    // static+delta path (js/services/asset-service.js) serves
+    // /static/entities/*.json first and treats a failed Firestore query as
+    // non-fatal (see "handles network errors gracefully" below, which proves
+    // exactly that). A Service Worker also fronts these origins, so simply
+    // aborting a route can be silently served from its cache instead of
+    // reaching the page's own network stack at all. `serviceWorkers: 'block'`
+    // keeps this describe block's forced-error test honest: the only test here
+    // that actually needs an error is "error state shows retry option", and it
+    // needs one it can trust actually came from the network condition it set up.
+    test.use({ serviceWorkers: 'block' });
+
     test('handles network errors gracefully', async ({ page }) => {
         // Block Firebase requests to simulate network error
         await page.route('**/firestore.googleapis.com/**', route => route.abort());
 
         await page.goto(`${BASE_URL}/#/browse/deities`);
 
-        // Wait for page to handle the error
-        await page.waitForTimeout(5000);
+        // Wait for the page to reach a terminal state (content, empty state, or
+        // error state) instead of a fixed sleep — BrowseCategoryView.render()
+        // races its load against a 25s timeout (LOAD_TIMEOUT) before falling
+        // back to showError(), so give this enough headroom to actually resolve.
+        await waitForBrowsePageLoaded(page, { timeout: 30000 });
 
         // Page should not crash - main content should still be visible
         const mainContent = page.locator('#main-content, main, .browse-view');
@@ -793,24 +841,42 @@ test.describe('Error Handling', () => {
     });
 
     test('error state shows retry option', async ({ page }) => {
-        // This test checks if error handling includes recovery options
+        // Force a real, deterministic error. Aborting requests isn't enough —
+        // AssetService falls back through several layers (static base ->
+        // Firestore -> cache) and an abort/empty-result at any one of them is
+        // treated as "no data" rather than a fatal error (proven by "handles
+        // network errors gracefully" above still rendering successfully with
+        // Firestore blocked). What genuinely reaches showError() is a request
+        // that never resolves at all: AssetService has its own 20s internal
+        // timeout (js/services/asset-service.js), and BrowseCategoryView.render()
+        // races the whole load against a 25s LOAD_TIMEOUT
+        // (js/views/browse-category-view.js) — both are real production
+        // safety nets against a hung connection, not test-only behavior.
+        await page.route('**/static/entities/**', () => {});
+        await page.route('**/firestore.googleapis.com/**', () => {});
+
         await page.goto(`${BASE_URL}/#/browse/deities`, { waitUntil: 'load' });
 
-        // Wait for page to load
-        await page.waitForSelector('.browse-view', { timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
+        // showError() always renders `.error-container` with a
+        // `button[data-action="retry"]` unconditionally — no `if` in the
+        // component. Give this enough headroom for AssetService's 20s timeout
+        // plus BrowseCategoryView's 25s LOAD_TIMEOUT to actually fire.
+        const errorContainer = page.locator('.error-container');
+        await expect(errorContainer).toBeVisible({ timeout: 35000 });
 
-        // Check if error container exists (may not be visible if no error)
-        const errorContainer = page.locator('.error-container, .error-state');
-        const hasError = await errorContainer.isVisible().catch(() => false);
+        const retryBtn = errorContainer.locator('button[data-action="retry"]');
+        await expect(retryBtn).toBeVisible();
+        const retryText = await retryBtn.textContent();
+        expect(retryText?.toLowerCase()).toContain('retry');
 
-        if (hasError) {
-            // Should have retry button
-            const retryBtn = errorContainer.locator('button');
-            const hasRetryBtn = await retryBtn.isVisible().catch(() => false);
-            console.log('Error has retry button:', hasRetryBtn);
-        } else {
-            console.log('No error state visible (page loaded successfully)');
-        }
+        // Clicking retry re-invokes render(), which synchronously replaces
+        // .error-container with the loading skeleton before re-fetching. Unroute
+        // first so this attempt can actually succeed — a genuine recovery, not
+        // just "the button does something".
+        await page.unroute('**/static/entities/**');
+        await page.unroute('**/firestore.googleapis.com/**');
+        await retryBtn.click();
+        await page.waitForFunction(() => !document.querySelector('.error-container'), { timeout: 30000 });
+        await page.waitForFunction(() => document.querySelectorAll('.entity-card').length > 0, { timeout: 15000 });
     });
 });
