@@ -21,6 +21,7 @@
 
 const { test, expect } = require('@playwright/test');
 const { injectAxe, checkA11y, getViolations } = require('axe-playwright');
+const { waitForAnimationsToSettle } = require('./helpers/test-data');
 
 // Run these without a service worker.
 //
@@ -235,6 +236,8 @@ test.describe('Landing Page Accessibility', () => {
     });
 
     test('3. Color contrast meets AA standard', async ({ page }) => {
+        // Let fade-ins finish before sampling computed styles (see helper).
+        await waitForAnimationsToSettle(page);
         await injectAxe(page);
 
         const violations = await getViolations(page, null, {
@@ -484,6 +487,8 @@ test.describe('Landing Page Accessibility', () => {
     });
 
     test('10. No critical ARIA violations (axe-core)', async ({ page }) => {
+        // Let fade-ins finish before sampling computed styles (see helper).
+        await waitForAnimationsToSettle(page);
         await injectAxe(page);
 
         // Run full axe audit
@@ -550,6 +555,8 @@ test.describe('Browse Category Page Accessibility', () => {
     });
 
     test('3. Color contrast meets AA standard', async ({ page }) => {
+        // Let fade-ins finish before sampling computed styles (see helper).
+        await waitForAnimationsToSettle(page);
         await injectAxe(page);
 
         const violations = await getViolations(page, null, {
@@ -667,6 +674,8 @@ test.describe('Browse Category Page Accessibility', () => {
     });
 
     test('10. No critical ARIA violations (axe-core)', async ({ page }) => {
+        // Let fade-ins finish before sampling computed styles (see helper).
+        await waitForAnimationsToSettle(page);
         await injectAxe(page);
 
         await checkA11y(page, null, {
@@ -756,6 +765,8 @@ test.describe('Entity Detail Page Accessibility', () => {
     });
 
     test('3. Color contrast meets AA standard', async ({ page }) => {
+        // Let fade-ins finish before sampling computed styles (see helper).
+        await waitForAnimationsToSettle(page);
         await injectAxe(page);
 
         const violations = await getViolations(page, null, {
@@ -836,6 +847,8 @@ test.describe('Entity Detail Page Accessibility', () => {
     });
 
     test('10. No critical ARIA violations (axe-core)', async ({ page }) => {
+        // Let fade-ins finish before sampling computed styles (see helper).
+        await waitForAnimationsToSettle(page);
         await injectAxe(page);
 
         await checkA11y(page, null, {
@@ -976,6 +989,8 @@ test.describe('Comprehensive axe-core Accessibility Audit', () => {
         await page.goto('/', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
 
+        // Let fade-ins finish before sampling computed styles (see helper).
+        await waitForAnimationsToSettle(page);
         await injectAxe(page);
 
         const violations = await getViolations(page);
@@ -1011,6 +1026,8 @@ test.describe('Comprehensive axe-core Accessibility Audit', () => {
         await page.goto('#/browse/deities', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
 
+        // Let fade-ins finish before sampling computed styles (see helper).
+        await waitForAnimationsToSettle(page);
         await injectAxe(page);
 
         const violations = await getViolations(page);
@@ -1031,6 +1048,8 @@ test.describe('Comprehensive axe-core Accessibility Audit', () => {
         await page.goto('#/mythologies', { waitUntil: 'load', timeout: NAVIGATION_TIMEOUT });
         await waitForPageLoad(page);
 
+        // Let fade-ins finish before sampling computed styles (see helper).
+        await waitForAnimationsToSettle(page);
         await injectAxe(page);
 
         const violations = await getViolations(page);

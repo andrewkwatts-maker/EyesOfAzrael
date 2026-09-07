@@ -176,6 +176,7 @@ module.exports = [
   {
     // ES module files (use import/export)
     files: [
+      'js/entity-display.js',
       'js/entity-loader.js',
       'js/constants/**/*.js',
       'js/svg-icons.js',

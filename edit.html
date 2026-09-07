@@ -8,6 +8,20 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="themes/theme-base.css">
+    <!-- Theme boot — must run before first paint.
+         themes/theme-base.css hides <html> until data-theme is set, so without
+         this the whole page renders blank. Mirrors the boot script in index.html. -->
+    <script>
+        (function () {
+            var STORAGE_KEY = 'eoaplot-selected-theme';
+            var theme = null;
+            try { theme = localStorage.getItem(STORAGE_KEY); }
+            catch (e) { try { theme = sessionStorage.getItem(STORAGE_KEY); } catch (e2) {} }
+            theme = theme || 'night';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.add('theme-' + theme);
+        })();
+    </script>
     <link rel="stylesheet" href="css/entity-editor.css">
     <link rel="stylesheet" href="css/entity-display.css">
     <link rel="stylesheet" href="css/loading-states.css">
@@ -308,8 +322,11 @@
     </footer>
 
     <!-- Load Dependencies -->
-    <script src="js/entity-display.js"></script>
-    <script src="js/entity-loader.js"></script>
+    <!-- type="module" — both files `import` from js/constants/entity-types.js and
+         threw "Cannot use import statement outside a module" as classic scripts,
+         taking the rest of page startup down with them. See create-wizard.html. -->
+    <script type="module" src="js/entity-display.js"></script>
+    <script type="module" src="js/entity-loader.js"></script>
     <script src="js/entity-editor.js"></script>
 
     <!-- Page Script -->

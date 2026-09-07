@@ -119,4 +119,47 @@ async function clearStorage(page) {
   }
 }
 
-module.exports = { testEntities, testUsers, waitForPageLoad, waitForFirebaseReady, clearStorage };
+/**
+ * Wait until every finite animation on the page has finished.
+ *
+ * axe-core reads computed styles at the instant it runs. The landing page's
+ * stat cards fade in via the `statCardFadeIn` keyframes (opacity 0 -> 1), so an
+ * audit that starts while they are still animating measures the text against
+ * whatever shows through a nearly transparent card and reports a serious
+ * colour-contrast violation. Settled, those same cards measure 6.92:1 in the
+ * day theme and 7.78:1 at night — both comfortably past the 4.5:1 AA
+ * threshold. The finding was an artefact of when the snapshot was taken, and it
+ * moved between runs, which is exactly what made it read as a flaky test.
+ *
+ * Infinite animations (spinners, ambient background loops) are excluded — they
+ * never finish, so waiting on them would guarantee a timeout.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {number} timeout
+ */
+async function waitForAnimationsToSettle(page, timeout = 10000) {
+  try {
+    await page.waitForFunction(() => {
+      if (typeof document.getAnimations !== 'function') return true;
+      return document.getAnimations().every((animation) => {
+        if (animation.playState !== 'running') return true;
+        const timing = animation.effect && animation.effect.getTiming
+          ? animation.effect.getTiming()
+          : null;
+        // Treat endless animations as already settled.
+        return !!timing && timing.iterations === Infinity;
+      });
+    }, null, { timeout });
+  } catch (error) {
+    // A stubborn animation must not fail the audit it was only meant to steady.
+  }
+}
+
+module.exports = {
+  testEntities,
+  testUsers,
+  waitForPageLoad,
+  waitForFirebaseReady,
+  clearStorage,
+  waitForAnimationsToSettle
+};

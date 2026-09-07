@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms of Service - Eyes of Azrael</title>
     <link rel="stylesheet" href="themes/theme-base.css">
+    <!-- Theme boot — must run before first paint.
+         themes/theme-base.css hides <html> until data-theme is set, so without
+         this the whole page renders blank. Mirrors the boot script in index.html. -->
+    <script>
+        (function () {
+            var STORAGE_KEY = 'eoaplot-selected-theme';
+            var theme = null;
+            try { theme = localStorage.getItem(STORAGE_KEY); }
+            catch (e) { try { theme = sessionStorage.getItem(STORAGE_KEY); } catch (e2) {} }
+            theme = theme || 'night';
+            document.documentElement.setAttribute('data-theme', theme);
+            document.documentElement.classList.add('theme-' + theme);
+        })();
+    </script>
     <link rel="stylesheet" href="css/login-page.css">
     <style>
         .terms-container {
