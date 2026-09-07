@@ -51,6 +51,36 @@ async function waitForPageLoad(page) {
   await page.waitForLoadState('load', { timeout: 10000 }).catch(() => {
     // Network idle might not be reached, that's ok
   });
+
+  // Wait for the SPA to actually render something, not just for the document
+  // to finish loading.
+  //
+  // This is a hash-routed SPA: `load` fires while #main-content is still empty
+  // or showing a skeleton, and the view arrives a second or two later. Every
+  // assertion made straight after this helper was therefore racing the render,
+  // which is why tests reported missing headings, missing error states and
+  // missing links on pages that render all three — the classic symptom being a
+  // "friendly error" assertion failing against a page that clearly shows
+  // "Not Found".
+  //
+  // The condition is deliberately broad: any rendered view, any error state, or
+  // simply enough text to mean the page has committed to something. Waiting for
+  // one specific view would make this helper wrong for the many callers that
+  // navigate somewhere else.
+  await page.waitForFunction(() => {
+    const main = document.getElementById('main-content');
+    if (!main) return false;
+    if (main.querySelector('.entity-loading-state, .spa-loading')) return false;
+    const settled = main.querySelector(
+      'h1, h2, .entity-card, .landing-category-card, .mythology-card, ' +
+      '.error-state-container, .error-page, .browse-view, .landing-page-view'
+    );
+    return !!settled || (main.innerText || '').trim().length > 80;
+  }, { timeout: 20000 }).catch(() => {
+    // Not a failure. Some routes legitimately settle on an empty or error state,
+    // and it is each test's job to assert what is wrong with the page — this
+    // helper only waits for it to stop being mid-render.
+  });
 }
 
 /**

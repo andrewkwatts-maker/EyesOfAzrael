@@ -17969,8 +17969,26 @@ textarea:focus-visible {
     overflow: hidden;
 }
 
-/* Live regions for dynamic content updates */
-[aria-live="polite"]:not(main):not(section):not(#main-content):not(.view-container):not(.loading-container):not(.entity-grid):not(.results-container) {
+/* Live regions for dynamic content updates.
+ *
+ * :not(nav) matters, and the whole shape of this selector is the lesson.
+ *
+ * The intent is to park screen-reader ANNOUNCER regions off-screen. It is
+ * written as a blacklist — hide every aria-live="polite" element except these
+ * seven — so any new visible element that needs a live region gets silently
+ * dragged off-screen the moment someone adds the attribute.
+ *
+ * That is exactly what happened to the breadcrumb. index.html:646 is
+ * <nav id="breadcrumb-nav" aria-live="polite">, a VISIBLE landmark that
+ * announces route changes. It matched here and was positioned at left:-10000px
+ * with a 1x1 box, so breadcrumbs were built on every page, computed as
+ * "visible", and sat ten thousand pixels off the left edge where nobody could
+ * see or click them.
+ *
+ * A <nav> is a landmark meant to be looked at; it is never an announcer. The
+ * specificity here is (0,8,1) from the :not() chain, so no ordinary component
+ * rule could have overridden it — which is why this survived so long. */
+[aria-live="polite"]:not(nav):not(main):not(section):not(#main-content):not(.view-container):not(.loading-container):not(.entity-grid):not(.results-container) {
     position: absolute;
     left: -10000px;
     width: 1px;

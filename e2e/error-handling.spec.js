@@ -74,9 +74,24 @@ test.describe('Error Handling', () => {
       const hasContent = await mainContent.textContent();
       expect(hasContent.length).toBeGreaterThan(0);
 
-      // Should show error message OR entity not found message
-      const hasError = await anyVisible(page, '.error-page, .error-container, text=/not found/i, text=/error/i');
-      expect(hasError).toBeTruthy();
+      // Should show error message OR entity not found message.
+      //
+      // Checked as separate locators rather than one comma list. Playwright does
+      // not treat '.error-page, text=/not found/i' as a union of a CSS selector
+      // and a text-engine selector — mixing engines in one list does not resolve
+      // the way it reads, so the text arms never matched.
+      //
+      // .error-state-container is included because that is the class this app
+      // actually renders for a missing entity; .error-page/.error-container are
+      // used by other error paths and were the only ones listed.
+      const errorMarkup = await anyVisible(page, '.error-page, .error-container, .error-state-container');
+      const errorText = await anyVisible(page, 'text=/not found/i')
+        || await anyVisible(page, 'text=/error/i');
+
+      expect(
+        errorMarkup || errorText,
+        `expected an error state; #main-content was: ${(await page.locator('#main-content').textContent() || '').trim().slice(0, 120)}`
+      ).toBeTruthy();
     });
 
     test('Invalid browse category shows appropriate message', async ({ page }) => {
@@ -290,14 +305,24 @@ test.describe('Error Handling', () => {
       const errorPage = page.locator('.error-page');
       await expect(errorPage).toBeVisible();
 
-      // Click Return Home link
-      const homeLink = page.locator('a[href="#/"]').first();
+      // Click the Return Home link INSIDE the injected error page.
+      //
+      // 'a[href="#/"]' matches 5 elements — the header logo comes first in
+      // document order, so .first() clicked the logo, not the link this test
+      // injected and claims to be exercising. Scoping to .error-page tests the
+      // thing named in the test title.
+      const homeLink = page.locator('.error-page a[href="#/"]');
       await homeLink.click();
       await waitForPageLoad(page);
 
-      // Should navigate to home
+      // Should navigate to home.
+      //
+      // Accepts a bare "/" as well as "/#/": the router normalises the empty
+      // hash away at the root, so landing on home genuinely leaves
+      // http://host/ with no fragment. The previous /#\/?$/ required a literal
+      // "#" and so could never match the app's real behaviour.
       const url = page.url();
-      expect(url).toMatch(/#\/?$/);
+      expect(url).toMatch(/(#\/?|\/)$/);
     });
   });
 
@@ -405,8 +430,15 @@ test.describe('Error Handling', () => {
       await page.goto('/#/invalid-route-12345');
       await waitForPageLoad(page);
 
-      // Look for any navigation link
-      const navLinks = page.locator('nav a, header a, a[href^="#"]').first();
+      // Look for a real navigation link.
+      //
+      // :not(.sr-only) matters. The union above matches 48 elements and the
+      // first in document order is the skip-to-main link — an accessibility
+      // affordance parked at x=-1 with href="#main-content". Playwright reports
+      // it visible (it has a 44x44 box) but clicking it times out, and it is not
+      // navigation in any case. The site logo is the first genuinely clickable
+      // link on the page.
+      const navLinks = page.locator('header a:not(.sr-only), nav a:not(.sr-only)').first();
       const hasNavLinks = await navLinks.isVisible().catch(() => false);
 
       if (hasNavLinks) {

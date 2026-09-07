@@ -26,11 +26,41 @@
     return;
   }
 
-  // Check if Firebase config is loaded
+  // Initialise the app from the config, rather than requiring someone else to
+  // have done it.
+  //
+  // This used to bail when window.firebaseApp was undefined — but NOTHING in the
+  // codebase ever set window.firebaseApp. firebase-config.js publishes
+  // window.firebaseConfig; only this file and js/header-filters.js:753 read
+  // window.firebaseApp, and neither assigns it.
+  //
+  // So this branch was taken on every single load, and every page including this
+  // script showed users "Firebase configuration not found. Please contact the
+  // administrator." — dashboard.html and preferences.html among them. The error
+  // message compounded it by naming firebase-config.js, which was present and
+  // correct the whole time.
   if (typeof window.firebaseApp === 'undefined') {
-    console.error('Firebase config not loaded. Make sure firebase-config.js is included before this file.');
-    showFirebaseError('Firebase configuration not found. Please contact the administrator.');
-    return;
+    if (!window.firebaseConfig) {
+      console.error('Firebase config not loaded. Make sure firebase-config.js is included before this file.');
+      showFirebaseError('Firebase configuration not found. Please contact the administrator.');
+      return;
+    }
+
+    try {
+      // Reuse an existing app when one is already initialised (index.html sets
+      // one up itself); initializeApp twice on the same name throws.
+      window.firebaseApp = firebase.apps && firebase.apps.length
+        ? firebase.app()
+        : firebase.initializeApp(window.firebaseConfig);
+
+      if (!window.firebaseAuth && firebase.auth) window.firebaseAuth = firebase.auth();
+      if (!window.firebaseDb && firebase.firestore) window.firebaseDb = firebase.firestore();
+      if (!window.firebaseStorage && firebase.storage) window.firebaseStorage = firebase.storage();
+    } catch (err) {
+      console.error('Firebase initialisation failed:', err && err.message);
+      showFirebaseError('Firebase could not start. Please reload the page.');
+      return;
+    }
   }
 
   /**
@@ -65,9 +95,19 @@
       this.initializing = true;
 
       try {
-        // Verify all services are available
-        if (!this.app || !this.auth || !this.db || !this.storage) {
-          throw new Error('One or more Firebase services failed to initialize');
+        // Storage is optional; app, auth and db are not.
+        //
+        // Requiring storage here meant this threw on every page that does not
+        // load firebase-storage-compat.js — dashboard.html and preferences.html
+        // include app, firestore and auth only, because a dashboard has no use
+        // for object storage. The result was "One or more Firebase services
+        // failed to initialize" and no working Firebase at all, on pages that
+        // had everything they actually needed.
+        if (!this.app || !this.auth || !this.db) {
+          const missing = [
+            !this.app && 'app', !this.auth && 'auth', !this.db && 'firestore'
+          ].filter(Boolean).join(', ');
+          throw new Error(`Firebase services failed to initialize: ${missing}`);
         }
 
         // Set up auth state listener
