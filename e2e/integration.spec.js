@@ -349,7 +349,7 @@ test.describe('Journey 3: Theme Customization', () => {
       await page.waitForTimeout(500);
 
       // Find and click a different theme option
-      const themeOptions = page.locator('.theme-option, [data-theme], button[data-theme]');
+      const themeOptions = page.locator('.theme-option');
       const optionCount = await themeOptions.count();
 
       if (optionCount > 1) {
@@ -400,7 +400,7 @@ test.describe('Journey 3: Theme Customization', () => {
       await themeToggle.click();
       await page.waitForTimeout(500);
 
-      const themeOptions = page.locator('.theme-option, [data-theme]');
+      const themeOptions = page.locator('.theme-option');
       const optionCount = await themeOptions.count();
 
       if (optionCount > 1) {
@@ -452,7 +452,19 @@ test.describe('Journey 3: Theme Customization', () => {
       await themeToggle.click();
       await page.waitForTimeout(500);
 
-      const themeOptions = page.locator('.theme-option, [data-theme]');
+      // '.theme-option' only — this used to be '.theme-option, [data-theme]'.
+      //
+      // <html> carries data-theme, so that union also matched the document
+      // element. Since .first() resolves in DOM order, the "is the picker still
+      // open?" guard below always inspected <html> — permanently visible — rather
+      // than a menu item, so it never re-opened the picker and the third click
+      // timed out against a menu that had closed after the second pick.
+      //
+      // Every option button carries both the class and the attribute, so the
+      // class alone matches exactly the same buttons and nothing else. Four other
+      // theme tests shared the union; one of them clicked .first(), meaning it was
+      // clicking <html> and asserting nothing about the picker at all.
+      const themeOptions = page.locator('.theme-option');
       const optionCount = await themeOptions.count();
 
       if (optionCount > 1) {
@@ -685,6 +697,19 @@ test.describe('Journey 5: Mobile User Flow', () => {
     }
   });
 
+  // These two drive page.touchscreen, which throws "hasTouch must be enabled on
+  // the browser context" unless the context was created with touch support.
+  // Both tests only called setViewportSize(), which makes the window phone-sized
+  // but leaves the context a desktop one with no touch input at all — so they
+  // failed on the first tap every run, having verified nothing about mobile.
+  //
+  // hasTouch has to be set when the context is built, so it cannot be toggled
+  // inside a test; a nested describe with test.use() is the way to scope it to
+  // just these two. isMobile is deliberately not set — Firefox rejects it, and
+  // this file runs on all three browser projects.
+  test.describe('Touch input', () => {
+    test.use({ hasTouch: true });
+
   test('Mobile: Touch interactions work correctly', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 390, height: 844 });
@@ -748,6 +773,8 @@ test.describe('Journey 5: Mobile User Flow', () => {
     }
   });
 
+  }); // end 'Touch input' — restores the default no-touch context below
+
   test('Mobile: Theme picker works on small screens', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
 
@@ -762,7 +789,7 @@ test.describe('Journey 5: Mobile User Flow', () => {
       await page.waitForTimeout(500);
 
       // Verify dropdown/modal is visible and not cut off
-      const themeOptions = page.locator('.theme-option, [data-theme]');
+      const themeOptions = page.locator('.theme-option');
       const optionCount = await themeOptions.count();
 
       if (optionCount > 0) {
@@ -953,7 +980,7 @@ test.describe('Integration: Session Continuity', () => {
       await themeToggle.click();
       await page.waitForTimeout(300);
 
-      const themeOption = page.locator('.theme-option, [data-theme]').first();
+      const themeOption = page.locator('.theme-option').first();
       if (await themeOption.isVisible()) {
         await themeOption.click();
         await page.waitForTimeout(300);
