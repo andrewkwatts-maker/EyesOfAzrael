@@ -107,7 +107,25 @@ const CATEGORY_TO_COLLECTION = {
     tarot: 'tarot',
     pilgrimage: 'places',
     temples: 'places',
-    sacred: 'places'
+    sacred: 'places',
+
+    // Categories the first pass had no entry for, so 26 files were dropped and
+    // every mythology's path/ article was invisible. Checked against the pages
+    // themselves rather than guessed from the folder name:
+    //   realms/   Helheim, Valhalla            -> places (Valhalla is already a live place)
+    //   sefirot/  Binah, Chesed, Chokmah, ...  -> concepts (divine emanations)
+    //   gnostic/  Sophia, Christ-Redeemer, ... -> concepts
+    //   path/     "Egyptian Path" and 14 more  -> concepts (one practice guide per tradition)
+    realms: 'places',
+    kabbalah: 'concepts',
+    sefirot: 'concepts',
+    qlippot: 'concepts',
+    sparks: 'concepts',
+    names: 'concepts',
+    gnostic: 'concepts',
+    theories: 'concepts',
+    path: 'concepts',
+    worlds: 'cosmology'
 };
 
 /**
@@ -128,9 +146,16 @@ const TOP_LEVEL_TREES = {
     magic: { default: 'magic', sub: { texts: 'texts' } }
 };
 
-/** Pages that are navigation or tooling, never entities. */
+/**
+ * Pages that are navigation or tooling, never entities.
+ *
+ * index.html is NOT on this list, deliberately. Excluding it by name discarded
+ * 140 pages carrying real prose — mythos/christian/gnostic/jesus-teachings/index.html
+ * alone is 46,711 characters across 94 paragraphs with 6 links. In this corpus a
+ * folder's index is often the article about that subject, not a menu pointing at
+ * one. Navigation is detected by shape instead; see looksLikeNavigation().
+ */
 const NOT_AN_ENTITY = [
-    /(^|\/)index\.html$/i,
     /index_old\.html$/i,
     /_corpus-search-template\.html$/i,
     /corpus-search\.html$/i,
@@ -228,6 +253,28 @@ function stripEmoji(text) {
         .trim();
 }
 
+/**
+ * Decide whether a page is a menu or an article, by shape rather than filename.
+ *
+ * Excluding every index.html by name threw away 140 pages holding real prose.
+ * In this corpus a folder's index is frequently the article about that subject:
+ * mythos/christian/gnostic/jesus-teachings/index.html runs to 94 paragraphs and
+ * 6 links, while a true category index is the mirror image — a wall of anchors
+ * with a sentence of preamble.
+ *
+ * Paragraph count separates them far more reliably than length does, because a
+ * long menu and a long essay have similar character counts. A page needs real
+ * prose in real paragraphs to qualify as an entity.
+ */
+function looksLikeNavigation(mainHtml, textLength) {
+    const paragraphs = (mainHtml.match(/<p\b/gi) || []).length;
+    const anchors = (mainHtml.match(/<a\b/gi) || []).length;
+    if (paragraphs >= 5 && textLength >= 2000) return false;
+    // Short pages that are mostly links are menus.
+    if (anchors > paragraphs * 3) return true;
+    return textLength < 2000;
+}
+
 function walkHtml(dir, out = []) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
         if (entry.name === '.svn' || entry.name === '.claude' || entry.name === 'node_modules') continue;
@@ -248,11 +295,22 @@ function walkHtml(dir, out = []) {
 function classifyPath(relPath) {
     const parts = relPath.split('/').filter(Boolean);
     if (parts[0] === 'mythos' || parts[0] === 'mythos2') {
-        return {
-            mythology: parts[1] || null,
-            collection: CATEGORY_TO_COLLECTION[parts[2]] || null,
-            legacyCategory: parts[2] || null
-        };
+        // Categories are not always at a fixed depth:
+        //   mythos/greek/creatures/hydra.html          -> creatures
+        //   mythos/jewish/kabbalah/sefirot/binah.html  -> sefirot
+        //   mythos/christian/gnostic/texts/index.html  -> texts, not gnostic
+        // Looking only at parts[2] missed the deeper ones entirely. Scanning
+        // deepest-first takes the most specific category that maps, so
+        // gnostic/texts resolves as texts while gnostic/sophia falls back to
+        // gnostic.
+        const middle = parts.slice(2, -1);
+        let collection = null;
+        let legacyCategory = parts[2] || null;
+        for (let i = middle.length - 1; i >= 0; i--) {
+            const mapped = CATEGORY_TO_COLLECTION[middle[i]];
+            if (mapped) { collection = mapped; legacyCategory = middle[i]; break; }
+        }
+        return { mythology: parts[1] || null, collection, legacyCategory };
     }
     const tree = TOP_LEVEL_TREES[parts[0]];
     if (tree) {
@@ -299,8 +357,12 @@ function extractEntity(file, relPath, knownMythologies) {
     // produced the ~184 misleading records already in the database.
     //
     // The filename is canonical in both conventions, so it decides which segment
-    // is the name and the rest becomes the subtitle.
-    const fileSlug = path.basename(relPath, '.html');
+    // is the name and the rest becomes the subtitle. For a folder's index page
+    // the folder is the subject — gnostic/sophia/index.html is Sophia — so the
+    // parent directory stands in; "index" would match nothing and leave the
+    // heading unarbitrated.
+    const base = path.basename(relPath, '.html');
+    const fileSlug = base === 'index' ? path.basename(path.dirname(relPath)) : base;
     const segments = rawHeading
         .split(/\s+[-–—:|]\s+/)
         .map((s) => stripEmoji(s).trim())
@@ -356,7 +418,14 @@ function extractEntity(file, relPath, knownMythologies) {
     });
 
     const bodyText = $main.text().replace(/\s+/g, ' ').trim();
-    const isStub = STUB_MARKER.test(bodyText);
+
+    // A stub is a page that is *mostly* the placeholder notice, not any page
+    // that happens to contain the words. Matching the marker alone threw away 26
+    // substantial pages — gnostic/sophia/index.html is 30,806 characters with one
+    // stray "coming soon" line, and the four Kabbalistic worlds (Assiah,
+    // Yetzirah, Beriah) went the same way. Real stubs here are a sentence or two.
+    const isStub = STUB_MARKER.test(bodyText) && bodyText.length < 1500;
+    const isNavigation = looksLikeNavigation($main.html() || '', bodyText.length);
 
     // Internal links to sibling entity pages become relationship candidates.
     const related = [];
@@ -380,6 +449,7 @@ function extractEntity(file, relPath, knownMythologies) {
         collection,
         legacyCategory,
         isStub,
+        isNavigation,
         subtitle,
         // The epithet from the heading ("Thor's Hammer") is a better one-line
         // summary than the opening paragraph, when the page carries one.
@@ -489,6 +559,7 @@ function main() {
         }
         if (!entity) { stats.skippedNav++; continue; }
         if (entity.isStub) { stats.skippedStub++; continue; }
+        if (entity.isNavigation) { stats.skippedNav++; continue; }
         if (entity.textLength < 400) { stats.skippedThin++; continue; }
         if (!entity.collection) { stats.unmapped++; unmapped.push(rel); continue; }
         if (ONLY.length && !ONLY.includes(entity.collection)) continue;
