@@ -185,10 +185,38 @@ class SearchViewComplete {
             { id: 'japanese', name: 'Japanese' },
             { id: 'chinese', name: 'Chinese' }
         ];
+        // Cached for the session.
+        //
+        // This populates the mythology filter dropdown — an id and a name per
+        // option — and read all 181 mythology documents to do it, every time the
+        // search view was opened. The list changes when a tradition is added,
+        // which is roughly never, so re-reading it per visit is 181 reads for
+        // information that was already on the page a moment ago.
+        //
+        // sessionStorage rather than localStorage: one read per browser session
+        // keeps a newly added tradition at most one session stale, instead of
+        // indefinitely.
+        const CACHE_KEY = 'eoa:mythology-filter-options';
+        try {
+            const cached = sessionStorage.getItem(CACHE_KEY);
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (Array.isArray(parsed) && parsed.length) {
+                    this.mythologies = parsed;
+                    return;
+                }
+            }
+        } catch (error) {
+            // Private mode, quota, or corrupt entry — fall through and fetch.
+        }
+
         try {
             const timeoutMs = 5000;
             const snapshot = await Promise.race([
-                this.db.collection('mythologies').get(),
+                // select() fetches only the field this needs. Firestore still
+                // bills a read per document, but the payload drops from full
+                // entity records to two fields.
+                this.db.collection('mythologies').select('name').limit(300).get(),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), timeoutMs))
             ]);
             this.mythologies = [];
@@ -199,6 +227,12 @@ class SearchViewComplete {
                 });
             });
             this.mythologies.sort((a, b) => a.name.localeCompare(b.name));
+
+            try {
+                sessionStorage.setItem(CACHE_KEY, JSON.stringify(this.mythologies));
+            } catch (error) {
+                // Caching is an optimisation; failing to cache is not an error.
+            }
         } catch (error) {
             console.warn('[SearchView] Could not load mythologies:', error);
             this.mythologies = fallback;
