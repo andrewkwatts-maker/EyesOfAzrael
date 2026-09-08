@@ -444,6 +444,25 @@ service cloud.firestore {
       allow create, update, delete: if isSiteAdmin();
     }
 
+    // ===== MYTHOLOGY CATEGORIES COLLECTION =====
+    // Path: /mythology_categories/{mythology}_{category}
+    // The tier between a tradition and its entities — "Greek Deities" sits
+    // between Greek mythology and Zeus — holding the hand-written overview shown
+    // on #/mythology/{mythology}/{category}.
+    //
+    // Rules here are deny-by-default with an explicit match per collection, so
+    // omitting this block would not fail loudly: the read is rejected, the view
+    // catches it, and every one of these pages silently falls back to the
+    // generated one-line template. The content would be live in Firestore and
+    // invisible on the site.
+
+    match /mythology_categories/{overviewId} {
+      // Public, like the mythologies and entity collections it sits between.
+      allow read: if true;
+
+      allow create, update, delete: if isSiteAdmin();
+    }
+
     // ===== DEITIES COLLECTION =====
     // Path: /deities/{deityId}
     // Full deity information with domains, symbols, relationships

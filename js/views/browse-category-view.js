@@ -142,7 +142,7 @@ class BrowseCategoryView {
             // Load entities from Firebase (with timeout to prevent stuck skeletons)
             const LOAD_TIMEOUT = 25000;
             await Promise.race([
-                this.loadEntities(),
+                Promise.all([this.loadEntities(), this.loadCategoryOverview()]),
                 new Promise((_, reject) =>
                     setTimeout(() => reject(new Error('Loading timed out. Please check your connection and try again.')), LOAD_TIMEOUT)
                 )
@@ -785,10 +785,14 @@ class BrowseCategoryView {
             <div class="browse-hero">
                 <div class="browse-hero-background"></div>
                 <div class="browse-hero-content">
-                    <div class="browse-hero-icon">${categoryInfo.icon}</div>
-                    <h1 class="browse-hero-title">${categoryInfo.name}</h1>
+                    <div class="browse-hero-icon">${this.categoryOverview?.icon || categoryInfo.icon}</div>
+                    <h1 class="browse-hero-title">${this.categoryOverview?.name
+                        ? this.escapeHtml(this.categoryOverview.name)
+                        : categoryInfo.name}</h1>
                     ${mythLabel ? `<p class="browse-hero-mythology">${mythLabel} ${this.facetLabel}</p>` : ''}
-                    <p class="browse-hero-description">${this.getCategoryLongDescription(this.category, mythLabel)}</p>
+                    <p class="browse-hero-description">${this.categoryOverview?.description
+                        ? this.escapeHtml(this.categoryOverview.description)
+                        : this.getCategoryLongDescription(this.category, mythLabel)}</p>
                     <div class="browse-hero-stats" id="browseStats">
                         <div class="browse-hero-stat">
                             <span class="browse-hero-stat-value">${this.entities.length}</span>
@@ -802,13 +806,85 @@ class BrowseCategoryView {
                         ` : ''}
                         ${domainCount > 0 ? `
                             <div class="browse-hero-stat">
-                                <span class="browse-hero-stat-value">${domainCount}</span>
+                                <span class="browse-hero-stat-value" data-domain-count>${domainCount}</span>
                                 <span class="browse-hero-stat-label">Domains</span>
                             </div>
                         ` : ''}
                     </div>
+                    ${this.getSiblingCategoriesHTML()}
                 </div>
             </div>
+        `;
+    }
+
+    /**
+     * Load the hand-written overview for this tradition-and-category, if one exists.
+     *
+     * This page sits between a tradition and its entities — "Greek Deities"
+     * between Greek mythology and Zeus — and until now its prose came from a
+     * template in getCategoryLongDescription(): one sentence per category with
+     * the tradition's name substituted in, identical across all 181 traditions.
+     * The legacy site wrote 67 of these by hand, several to 10,000 characters.
+     *
+     * Keyed <mythology>_<category> so it is a single document read, and only
+     * attempted when a mythology is in the route — the unfiltered "all deities"
+     * page has no tradition to describe. A miss is expected and silent: most
+     * pairs have no overview and fall back to the template.
+     */
+    async loadCategoryOverview() {
+        this.categoryOverview = null;
+        this.siblingCategories = [];
+        if (!this.mythology || !this.category) return;
+
+        const myth = this.mythology.toLowerCase();
+        try {
+            const db = window.firebaseDb || (window.firebase && window.firebase.firestore());
+            if (!db) return;
+
+            // One query serves both the overview and its siblings: fetching every
+            // overview for this tradition costs the same round trip as fetching
+            // one, and the rest become the cross-links below.
+            const snap = await db.collection('mythology_categories')
+                .where('mythology', '==', myth)
+                .limit(30)
+                .get();
+
+            for (const doc of snap.docs) {
+                const data = doc.data();
+                if (data.category === this.category) this.categoryOverview = data;
+                else this.siblingCategories.push(data);
+            }
+            this.siblingCategories.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+        } catch (error) {
+            // An overview is an enhancement; the page is complete without it.
+            console.warn('[Browse View] Category overview unavailable:', error.message);
+        }
+    }
+
+    /**
+     * Cross-links to the other categories of the same tradition.
+     *
+     * Moving from Greek Deities to Greek Heroes previously meant going back up to
+     * the tradition hub and down again, because a category page linked only
+     * downwards to its entities. These make the middle tier navigable sideways,
+     * which is the direction people actually browse in.
+     *
+     * Only categories with an overview are linked, so every link lands on a page
+     * with something written on it rather than an empty grid.
+     */
+    getSiblingCategoriesHTML() {
+        if (!this.siblingCategories || this.siblingCategories.length === 0) return '';
+        const label = this.capitalize(this.mythology);
+
+        return `
+            <nav class="category-siblings" aria-label="Other ${this.escapeHtml(label)} categories">
+                <span class="category-siblings-label">More in ${this.escapeHtml(label)}:</span>
+                ${this.siblingCategories.map((s) => `
+                    <a class="category-sibling-link" href="#/mythology/${encodeURIComponent(s.mythology)}/${encodeURIComponent(s.category)}">
+                        ${s.icon ? `<span aria-hidden="true">${s.icon}</span> ` : ''}${this.escapeHtml(this.capitalize(s.category))}
+                    </a>
+                `).join('')}
+            </nav>
         `;
     }
 
