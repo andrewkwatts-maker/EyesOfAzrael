@@ -193,34 +193,79 @@ class MythologyOverview {
      * on all eleven collections, and a missing one fails the query outright.
      * The full, ordered set is one click away behind "View all".
      */
+    /**
+     * The precomputed per-category counts for one tradition, fetched once.
+     *
+     * _loadSingleCategory runs for all eleven categories in parallel, so the
+     * promise is cached rather than the result — otherwise eleven simultaneous
+     * callers each start their own identical document read before the first
+     * resolves, and the fix costs eleven reads instead of one.
+     *
+     * Returns byType: null when the tradition has no stored counts, which sends
+     * the caller down its bounded fallback.
+     */
+    async _getStoredCounts(mythologyId, mythCapitalized) {
+        const key = String(mythologyId).toLowerCase();
+        if (!this._countsCache) this._countsCache = new Map();
+        if (this._countsCache.has(key)) return this._countsCache.get(key);
+
+        const promise = (async () => {
+            try {
+                const doc = await this.db.collection('mythologies').doc(key).get();
+                const data = doc.exists ? doc.data() : null;
+                const byType = data && data.entityCounts && typeof data.entityCounts === 'object'
+                    ? data.entityCounts
+                    : null;
+                // The stats script keys everything lowercase, so a hit means the
+                // lowercase facet value is the one the documents actually carry.
+                return { byType, facetValue: byType ? key : mythologyId };
+            } catch (error) {
+                console.warn('[MythologyOverview] Stored counts unavailable:', error.message);
+                return { byType: null, facetValue: mythologyId };
+            }
+        })();
+
+        this._countsCache.set(key, promise);
+        return promise;
+    }
+
     async _loadSingleCategory(type, mythologyId, mythCapitalized) {
         const collection = this.db.collection(type.collection);
 
-        // Counted with .get() and .size, NOT .count().
+        // Counts come from the mythology document, not from counting rows.
         //
-        // The compat SDK has no count() on a Query — not in 9.22 which this site
-        // loads, and not in 9.23, 10.x or 11.x either; it was verified against all
-        // four. Count aggregation is modular-only (getCountFromServer). An earlier
-        // change here used .count().get() to avoid downloading rows just to size
-        // them, and it threw on every call:
+        // This is the most expensive path on the site. Measured on
+        // #/mythology/greek: 2,329 document reads for one view, of which 1,934
+        // were these counts — eleven collections fully downloaded so that .size
+        // could produce eleven integers. Every other route on the site costs
+        // between 36 and 67.
         //
-        //   TypeError: collection.where(...).count is not a function
+        // The compat SDK has no count() on a Query at any version (9.22 which
+        // this site loads, 9.23, 10.x, 11.x — all checked); aggregation is
+        // modular-only via getCountFromServer. An earlier attempt to use
+        // .count().get() here threw on every call and left every mythology page
+        // an empty shell, so the page cannot count cheaply for itself.
         //
-        // Every mythology overview page — /#/mythology/greek, /norse, /egyptian and
-        // the rest — rendered an empty shell as a result. A page that costs too
-        // many reads still beats a page that does not load.
-        //
-        // The read cost is real and worth removing properly: these counts exist in
-        // the baked static base, so the right fix is to read them from there rather
-        // than asking Firestore at all. That is a larger change than restoring a
-        // broken page.
-        let facetValue = mythologyId;
-        let count = (await collection.where('mythology', '==', facetValue).get()).size;
+        // scripts/recompute-mythology-stats.js precomputes the numbers onto
+        // mythologies/{id}.entityCounts, which makes this one document read
+        // shared across all eleven categories instead of eleven scans. Re-run it
+        // after an import; entityCountsAt records when it last ran.
+        const counts = await this._getStoredCounts(mythologyId, mythCapitalized);
 
-        if (count === 0 && mythologyId !== mythCapitalized) {
-            // Try capitalized variant (e.g. "Polynesian")
-            facetValue = mythCapitalized;
-            count = (await collection.where('mythology', '==', facetValue).get()).size;
+        let facetValue = counts.facetValue || mythologyId;
+        let count = counts.byType ? (Number(counts.byType[type.collection]) || 0) : null;
+
+        if (count === null) {
+            // No stored counts for this tradition. Bounded, because the whole
+            // point is to stop unbounded reads: a card reading "500+" is worth
+            // far more than an exact number that costs a thousand reads.
+            const COUNT_CAP = 500;
+            count = (await collection.where('mythology', '==', facetValue).limit(COUNT_CAP).get()).size;
+
+            if (count === 0 && mythologyId !== mythCapitalized) {
+                facetValue = mythCapitalized;
+                count = (await collection.where('mythology', '==', facetValue).limit(COUNT_CAP).get()).size;
+            }
         }
 
         if (count === 0) return null;

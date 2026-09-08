@@ -1663,42 +1663,57 @@ class SPANavigation {
         let totalCount = 0;
 
         const mythLower = mythologyId.toLowerCase();
-        await Promise.all(entityTypes.map(async (type) => {
-            try {
-                // Counted by aggregation rather than by downloading the documents.
-                //
-                // Both branches here used to read rows to produce a number: the
-                // exact match fetched every matching document for its .size, and
-                // the casing fallback pulled up to 500 documents to filter and
-                // count them. Across eleven entity types that is several hundred
-                // document reads for a single mythology page view, on a page whose
-                // only use of the result is a heading that says "Explore N
-                // entities". An aggregation bills about one read per thousand
-                // index entries instead.
-                // .get().size, not .count() — see the note on the sibling call
-                // above. Compat has no Query.count() at any version.
-                const exact = await this.db.collection(type)
-                    .where('mythology', '==', mythologyId)
-                    .get();
-                counts[type] = exact.size;
 
-                // The fallback asks the same narrow question of the lowercased
-                // value, rather than widening to the whole collection and
-                // filtering. It covers the casing mismatch it was written for
-                // without reading anything it does not need.
-                if (counts[type] === 0 && mythLower !== mythologyId) {
-                    const lowered = await this.db.collection(type)
-                        .where('mythology', '==', mythLower)
-                        .get();
-                    counts[type] = lowered.size;
+        // Read the precomputed counts instead of counting rows.
+        //
+        // This page shows eleven integers. It used to obtain them by downloading
+        // every matching document and taking .size — measured at 2,329 document
+        // reads for one view of the Greek hub, the single most expensive route on
+        // the site by a factor of thirty-five. The comment that stood here
+        // claimed the numbers came from an aggregation; they did not, and could
+        // not, because the compat SDK has no Query.count() at any version. The
+        // code was reverted to .get().size when that was discovered and the
+        // comment was left behind, so the intent survived and the cost did not.
+        //
+        // scripts/recompute-mythology-stats.js writes entityCounts onto the
+        // mythology document, so eleven collection scans become one document
+        // read. Re-run it after an import; entityCountsAt records when it last
+        // ran.
+        let usedStoredCounts = false;
+        try {
+            const mythDoc = await this.db.collection('mythologies').doc(mythLower).get();
+            const stored = mythDoc.exists ? mythDoc.data().entityCounts : null;
+            if (stored && typeof stored === 'object') {
+                for (const type of entityTypes) {
+                    counts[type] = Number(stored[type]) || 0;
+                    totalCount += counts[type];
                 }
-
-                totalCount += counts[type];
-            } catch (error) {
-                spaError(`Error loading count for ${type}:`, error);
-                counts[type] = 0;
+                usedStoredCounts = true;
             }
-        }));
+        } catch (error) {
+            spaError('Stored entity counts unavailable, counting live:', error);
+        }
+
+        if (!usedStoredCounts) {
+            // Fallback for a tradition that has never been through the stats
+            // script. Bounded, because the point of this branch is to avoid the
+            // unbounded reads above: a hub that says "500+" is worth far more
+            // than one that bills a thousand reads to say "1,247".
+            const COUNT_CAP = 500;
+            await Promise.all(entityTypes.map(async (type) => {
+                try {
+                    const exact = await this.db.collection(type)
+                        .where('mythology', '==', mythLower)
+                        .limit(COUNT_CAP)
+                        .get();
+                    counts[type] = exact.size;
+                    totalCount += counts[type];
+                } catch (error) {
+                    spaError(`Error loading count for ${type}:`, error);
+                    counts[type] = 0;
+                }
+            }));
+        }
 
         return `
             <div class="mythology-page" style="--myth-color: ${myth.color};">

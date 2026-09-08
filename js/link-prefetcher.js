@@ -25,6 +25,28 @@ class LinkPrefetcher {
             maxCacheSize: 100,           // Increased from 20
             maxConcurrent: 3,            // Max parallel fetches
             intersectionThreshold: 0.1,  // Trigger at 10% visibility
+
+            // Viewport prefetching is OFF.
+            //
+            // It fetched every link that scrolled within 100px of the viewport,
+            // on the assumption a visible link is a likely one. On these pages
+            // that assumption is expensive and mostly wrong: a mythology hub
+            // carries over a hundred links, a browse link costs 30 document
+            // reads to prefetch, and the visitor follows one of them. Scrolling
+            // a single page to the bottom could bill more reads than the entire
+            // rest of the session.
+            //
+            // Hover and touchstart stay on. They are the same optimisation
+            // driven by an actual intent signal rather than a guess, they cost
+            // one read for the link the person is reaching for, and they buy
+            // nearly all of the perceived speed.
+            //
+            // Set viewportPrefetch: true to restore the old behaviour.
+            viewportPrefetch: false,
+
+            // See _scheduleIdlePrefetch — walks the whole document, not just
+            // what is on screen.
+            idlePrefetch: false,
             idlePrefetchBatch: 5,        // Links per idle callback
             priorityBoost: ['deities', 'heroes', 'creatures'], // High-priority categories
             ...options
@@ -62,6 +84,7 @@ class LinkPrefetcher {
      * IntersectionObserver for viewport-based prefetching
      */
     _setupIntersectionObserver() {
+        if (!this.config.viewportPrefetch) return;
         if (!('IntersectionObserver' in window)) return;
 
         this._observer = new IntersectionObserver(
@@ -165,8 +188,19 @@ class LinkPrefetcher {
 
     /**
      * Schedule prefetching during idle time
+     *
+     * Off by default, for the same reason as viewport prefetching and more so:
+     * this one does not stop at what is on screen. It takes every unfetched link
+     * in the document, prefetches five, then reschedules itself and repeats
+     * until the page is exhausted. On a mythology hub — over a hundred links,
+     * some costing 30 document reads each — an idle tab works steadily through
+     * all of them, and a tab left open on a second monitor bills reads for
+     * pages nobody is looking at.
+     *
+     * Set idlePrefetch: true to restore it.
      */
     _scheduleIdlePrefetch() {
+        if (!this.config.idlePrefetch) return;
         if (this._idleCallbackId) {
             cancelIdleCallback(this._idleCallbackId);
         }

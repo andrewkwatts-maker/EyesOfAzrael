@@ -1,20 +1,26 @@
 /**
  * MythologyOverview — Firestore read cost
  *
- * Companion to spa-navigation-read-cost.test.js, and the more important of the
- * two. That suite pinned the counters in `renderBasicMythologyPage`, which is
- * only the *fallback* renderer: spa-navigation.js routes every mythology page
- * to `MythologyOverview` first and reaches the basic page only when the
- * component throws. So the expensive path was the one still unguarded.
+ * `loadCategorySections` fans out across ENTITY_TYPES — eleven collections — on
+ * every mythology page view, and this is the primary renderer: spa-navigation.js
+ * routes every mythology page here first and reaches renderBasicMythologyPage
+ * only when this component throws.
  *
- * `loadCategorySections` fans out across ENTITY_TYPES — eleven collections —
- * on every mythology page view. Fetching each collection's full result set to
- * render twenty cards and a number is how a static+delta site with almost no
- * traffic still manages to spend 50,000 reads in an afternoon.
+ * It used to size each category by downloading it. Measured against the live
+ * database, one view of #/mythology/greek cost 2,329 document reads, of which
+ * 1,934 were counting — eleven collections pulled in full so that .size could
+ * produce eleven integers. Every other route on the site cost between 36 and 67.
  *
- * As in the sibling suite, these tests assert the *shape* of the queries
- * rather than the specific fix, so the next unbounded call site in this file
- * is caught by structure rather than by memory.
+ * The counts are now precomputed onto mythologies/{id}.entityCounts by
+ * scripts/recompute-mythology-stats.js, so all eleven categories share a single
+ * document read. The previous version of this suite asserted the old cost as a
+ * deliberate trade-off and said, in as many words, that when the fix landed the
+ * test should start failing and its replacement should assert that no unlimited
+ * read happens at all. This is that replacement.
+ *
+ * As before, these assert the *shape* of the queries rather than a specific
+ * implementation, so the next unbounded call site is caught by structure rather
+ * than by memory.
  */
 
 global.console = { ...console, log: jest.fn(), warn: jest.fn(), error: jest.fn() };
@@ -22,10 +28,12 @@ global.console = { ...console, log: jest.fn(), warn: jest.fn(), error: jest.fn()
 /**
  * A Firestore double that records the shape of each query rather than its data.
  *
- * `docsPerFacet` maps a `mythology` value to how many documents match it, so a
- * test can force the casing-fallback path by giving the lowercase value zero.
+ * `docsPerFacet` maps a `mythology` value to how many documents match it.
+ * `storedCounts`, when given, is served as mythologies/{id}.entityCounts — the
+ * precomputed path. Omitting it exercises the fallback for a tradition that has
+ * never been through the stats script.
  */
-function recordingFirestore(docsPerFacet = {}) {
+function recordingFirestore(docsPerFacet = {}, storedCounts = null) {
     const issued = [];
 
     function makeQuery(collection, state) {
@@ -50,6 +58,9 @@ function recordingFirestore(docsPerFacet = {}) {
                 return {
                     get: async () => {
                         issued.push({ collection, docId: id, isDoc: true, wheres: [], limit: 1 });
+                        if (collection === 'mythologies' && storedCounts) {
+                            return { exists: true, data: () => ({ entityCounts: storedCounts }) };
+                        }
                         return { exists: false, data: () => ({}) };
                     }
                 };
@@ -80,17 +91,17 @@ function recordingFirestore(docsPerFacet = {}) {
     };
 }
 
-/**
- * Queries that read a collection with nothing to bound how much comes back.
- *
- * Bounded means narrowed by a where filter, capped by a limit, or a single doc
- * fetch. This used to also count `.count()` as bounded, which was the whole
- * problem: compat has no count(), so the code that satisfied it could not run.
- * The invariant worth holding is that no query walks a bare collection.
- */
+/** Queries that read a collection with nothing to bound how much comes back. */
 function unbounded(issued) {
-    return issued.filter(q => !q.isDoc && q.limit === null && (q.wheres || []).length === 0);
+    return issued.filter(q => !q.isDoc && q.limit === null);
 }
+
+/** Every entity collection the component fans out across. */
+const ALL_TYPES = () => {
+    const counts = {};
+    for (const t of window.MythologyOverview.ENTITY_TYPES) counts[t.collection] = 400;
+    return counts;
+};
 
 describe('MythologyOverview read cost', () => {
     let MythologyOverview;
@@ -102,9 +113,11 @@ describe('MythologyOverview read cost', () => {
         MythologyOverview = window.MythologyOverview;
     });
 
-    test('never reads a category without a bound or a count', async () => {
-        // 400 Greek deities, and the page shows twenty of them.
-        const db = recordingFirestore({ greek: 400 });
+    test('no query reads a collection without a limit', async () => {
+        // The invariant that replaced the old "counting costs a full read"
+        // allowance. Nothing in this component may issue an unbounded read now,
+        // whether it is counting or fetching.
+        const db = recordingFirestore({ greek: 400 }, ALL_TYPES());
         const view = new MythologyOverview({ db });
 
         await view.loadCategorySections('greek');
@@ -113,54 +126,39 @@ describe('MythologyOverview read cost', () => {
         expect(unbounded(db.issued)).toEqual([]);
     });
 
-    test('the preview grid reads at most PREVIEW_LIMIT rows per category', async () => {
-        const db = recordingFirestore({ greek: 400 });
+    test('counts come from one document read, not from counting rows', async () => {
+        const db = recordingFirestore({ greek: 400 }, ALL_TYPES());
         const view = new MythologyOverview({ db });
 
         await view.loadCategorySections('greek');
 
-        // Only the queries that actually populate the grid are capped. The
-        // counting queries are separated out below, because they genuinely
-        // cannot be.
-        const previewReads = db.issued.filter(q => !q.isDoc && q.limit !== null);
+        const mythologyDocReads = db.issued.filter(q => q.isDoc && q.collection === 'mythologies');
+        // One read shared across all eleven categories. The component resolves
+        // them in parallel, so the promise — not the resolved value — has to be
+        // cached; caching the value alone would let eleven callers each start
+        // their own identical read before the first returned.
+        expect(mythologyDocReads).toHaveLength(1);
+
+        // And no collection was scanned to produce a number.
+        const countingScans = db.issued.filter(q => !q.isDoc && q.limit === null);
+        expect(countingScans).toEqual([]);
+    });
+
+    test('the preview grid reads at most PREVIEW_LIMIT rows per category', async () => {
+        const db = recordingFirestore({ greek: 400 }, ALL_TYPES());
+        const view = new MythologyOverview({ db });
+
+        await view.loadCategorySections('greek');
+
+        const previewReads = db.issued.filter(q => !q.isDoc);
         expect(previewReads.length).toBeGreaterThan(0);
         for (const q of previewReads) {
             expect(q.limit).toBe(view.PREVIEW_LIMIT);
         }
     });
 
-    test('counting a category costs a full filtered read — the known price of compat', async () => {
-        // This documents a real, deliberate cost rather than asserting it away.
-        //
-        // The counts here drive "Entries 967" and the "View all N" link. Firestore
-        // can answer that with an aggregation for about one read per thousand index
-        // entries — but only through the MODULAR sdk. This site loads the compat
-        // build, which has no Query.count() in any version (checked against 9.22,
-        // 9.23, 10.x, 11.x), so the only way to size a category is to read it.
-        //
-        // An earlier attempt to use .count().get() anyway threw at runtime and left
-        // every mythology overview page blank. The cost is the price of the page
-        // working. The proper fix is to serve these counts from the baked static
-        // base and stop asking Firestore — when that lands, this test should start
-        // failing, and its replacement should assert that no unlimited read happens
-        // at all.
-        const db = recordingFirestore({ greek: 400 });
-        const view = new MythologyOverview({ db });
-
-        await view.loadCategorySections('greek');
-
-        const countingReads = db.issued.filter(q => !q.isDoc && q.limit === null);
-        expect(countingReads.length).toBeGreaterThan(0);
-
-        // Narrowed by mythology, so it is one category's rows and never the whole
-        // collection — that distinction is what unbounded() enforces elsewhere.
-        for (const q of countingReads) {
-            expect(q.wheres).toContain('mythology');
-        }
-    });
-
-    test('reports the true total, not the number of rows fetched', async () => {
-        const db = recordingFirestore({ greek: 400 });
+    test('reports the stored total, not the number of rows fetched', async () => {
+        const db = recordingFirestore({ greek: 400 }, ALL_TYPES());
         const view = new MythologyOverview({ db });
 
         const sections = await view.loadCategorySections('greek');
@@ -172,33 +170,56 @@ describe('MythologyOverview read cost', () => {
         }
     });
 
-    test('an empty category costs a count, not a fetch', async () => {
-        const db = recordingFirestore({});
-        const view = new MythologyOverview({ db });
+    describe('without stored counts', () => {
+        test('falls back to a bounded read rather than an unbounded one', async () => {
+            // A tradition that has never been through the stats script must still
+            // render. The fallback is capped: a card reading "500+" is worth far
+            // more than an exact number that costs a thousand reads.
+            const db = recordingFirestore({ greek: 4000 });
+            const view = new MythologyOverview({ db });
 
-        const sections = await view.loadCategorySections('greek');
+            const sections = await view.loadCategorySections('greek');
 
-        expect(sections).toEqual([]);
-        expect(db.issued.every(q => q.wheres.includes('mythology'))).toBe(true);
-    });
+            expect(unbounded(db.issued)).toEqual([]);
+            expect(sections.length).toBeGreaterThan(0);
+            for (const q of db.issued.filter(x => !x.isDoc)) {
+                expect(q.limit).not.toBeNull();
+                expect(q.wheres).toContain('mythology');
+            }
+        });
 
-    test('the casing fallback asks a second narrow question, not a wider one', async () => {
-        // Only the capitalized value matches, which is the shape the fallback
-        // exists for. It must not widen to the whole collection to find it.
-        const db = recordingFirestore({ Polynesian: 30 });
-        const view = new MythologyOverview({ db });
+        test('an empty category issues no preview fetch', async () => {
+            const db = recordingFirestore({});
+            const view = new MythologyOverview({ db });
 
-        const sections = await view.loadCategorySections('polynesian');
+            const sections = await view.loadCategorySections('greek');
 
-        expect(sections.length).toBe(MythologyOverview.ENTITY_TYPES.length);
-        expect(unbounded(db.issued)).toEqual([]);
-        // Every query narrows by mythology — none walks a bare collection.
-        expect(db.issued.every(q => q.wheres.includes('mythology'))).toBe(true);
-        expect(sections[0].count).toBe(30);
+            expect(sections).toEqual([]);
+            expect(unbounded(db.issued)).toEqual([]);
+            // Every collection query narrows by mythology; the only unfiltered
+            // read is the single mythologies/{id} document lookup.
+            for (const q of db.issued.filter(x => !x.isDoc)) {
+                expect(q.wheres).toContain('mythology');
+            }
+        });
+
+        test('the casing fallback asks a second narrow question, not a wider one', async () => {
+            const db = recordingFirestore({ Polynesian: 30 });
+            const view = new MythologyOverview({ db });
+
+            const sections = await view.loadCategorySections('polynesian');
+
+            expect(sections.length).toBe(MythologyOverview.ENTITY_TYPES.length);
+            expect(unbounded(db.issued)).toEqual([]);
+            for (const q of db.issued.filter(x => !x.isDoc)) {
+                expect(q.wheres).toContain('mythology');
+            }
+            expect(sections[0].count).toBe(30);
+        });
     });
 
     test('"View all" is driven by the count, not by the rows fetched', async () => {
-        const db = recordingFirestore({ greek: 400 });
+        const db = recordingFirestore({ greek: 400 }, ALL_TYPES());
         const view = new MythologyOverview({ db });
         const [section] = await view.loadCategorySections('greek');
 
@@ -218,10 +239,9 @@ describe('MythologyOverview read cost', () => {
             expect(unbounded(db.issued)).toHaveLength(1);
         });
 
-        test('a limited or counted query is not flagged', async () => {
+        test('a limited query is not flagged', async () => {
             const db = recordingFirestore({ greek: 10 });
             await db.collection('deities').where('mythology', '==', 'greek').limit(5).get();
-            await db.collection('deities').where('mythology', '==', 'greek').get();
             expect(unbounded(db.issued)).toEqual([]);
         });
     });
