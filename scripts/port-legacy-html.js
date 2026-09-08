@@ -191,6 +191,40 @@ function nameKey(name) {
         .trim();
 }
 
+/** Meaningful words in a name, for comparing two names by their parts. */
+const STOPWORDS = new Set(['the', 'a', 'an', 'of', 'and', 'in', 'on', 'to', 'ha', 'al', 'de']);
+
+function tokenSet(name) {
+    return new Set(
+        String(name || '')
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .toLowerCase()
+            .split(/[^a-z0-9]+/)
+            .filter((t) => t.length > 2 && !STOPWORDS.has(t))
+    );
+}
+
+/**
+ * Is one name a more specific form of the other?
+ *
+ * Compares whole words. Substring comparison on squashed names produced
+ * catastrophic pairings, because it cannot see word boundaries: "Jesus Christ
+ * (Yeshua Ha-Mashiach)" squashes to jesuschristyeshuahamashiach, which contains
+ * "ashi", so it matched a live record named Ashi. Merging on that would have
+ * moved an article about Jesus into an unrelated entity. "Goetia" matched
+ * greek-theurgy the same way.
+ *
+ * Requiring every word of the shorter name to appear in the longer one keeps the
+ * true refinements — Cedar / Cedar of Lebanon, Theurgy / Greek Theurgy, Sophia /
+ * Pistis Sophia — and rejects the accidents.
+ */
+function isTokenSubset(a, b) {
+    if (!a.size || !b.size) return false;
+    const [small, large] = a.size <= b.size ? [a, b] : [b, a];
+    for (const t of small) if (!large.has(t)) return false;
+    return true;
+}
+
 function slugify(name) {
     return String(name || '')
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -597,10 +631,12 @@ function main() {
         // would publish a second copy. Anything where one name contains the other
         // is held back for a human rather than decided automatically.
         const near = [];
+        const myTokens = tokenSet(entity.name);
         if (index) {
             for (const [liveKey, row] of index) {
                 if (!liveKey || liveKey.length < 4) continue;
-                if (liveKey.includes(key) || key.includes(liveKey)) {
+                const theirTokens = tokenSet(row.name || String(row.id).replace(/^[a-z]+_/, ''));
+                if (isTokenSubset(myTokens, theirTokens)) {
                     near.push({ liveId: row.id, liveName: row.name || row.id });
                     if (near.length >= 3) break;
                 }
