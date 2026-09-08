@@ -417,6 +417,21 @@ function extractEntity(file, relPath, knownMythologies) {
         }
     });
 
+    // An index page whose own folder is a category is an overview of that
+    // category, not a member of it. mythos/greek/deities/index.html is the
+    // Greek deities listing; importing it would publish a deity named "Greek
+    // Deities" sitting alongside Zeus — the same misleading-name defect that
+    // already produced records like "Born from Brahma's mind".
+    //
+    // Where the parent folder names a subject rather than a category the page is
+    // a genuine entity, which is how gnostic/sophia/index.html stays in. These
+    // are reported separately rather than dropped: several carry real prose about
+    // a tradition's practice, and whether that belongs somewhere in the site is a
+    // content decision, not a parsing one.
+    const parentDir = path.basename(path.dirname(relPath));
+    const isCategoryHub = base === 'index'
+        && (Boolean(CATEGORY_TO_COLLECTION[parentDir]) || Boolean(TOP_LEVEL_TREES[parentDir]));
+
     const bodyText = $main.text().replace(/\s+/g, ' ').trim();
 
     // A stub is a page that is *mostly* the placeholder notice, not any page
@@ -450,6 +465,7 @@ function extractEntity(file, relPath, knownMythologies) {
         legacyCategory,
         isStub,
         isNavigation,
+        isCategoryHub,
         subtitle,
         // The epithet from the heading ("Thor's Hammer") is a better one-line
         // summary than the opening paragraph, when the page carries one.
@@ -539,10 +555,11 @@ function main() {
 
     const stats = {
         scanned: files.length, skippedNav: 0, skippedStub: 0, skippedThin: 0,
-        unmapped: 0, existing: 0, newEntities: 0, possibleDuplicates: 0
+        unmapped: 0, categoryHubs: 0, existing: 0, newEntities: 0, possibleDuplicates: 0
     };
     const newOnes = [];
     const possibleDuplicates = [];
+    const categoryHubs = [];
     const existing = [];
     const unmapped = [];
 
@@ -560,6 +577,7 @@ function main() {
         if (!entity) { stats.skippedNav++; continue; }
         if (entity.isStub) { stats.skippedStub++; continue; }
         if (entity.isNavigation) { stats.skippedNav++; continue; }
+        if (entity.isCategoryHub) { stats.categoryHubs++; categoryHubs.push({ name: entity.name, collection: entity.collection, sourceFile: entity.sourceFile, textLength: entity.textLength }); continue; }
         if (entity.textLength < 400) { stats.skippedThin++; continue; }
         if (!entity.collection) { stats.unmapped++; unmapped.push(rel); continue; }
         if (ONLY.length && !ONLY.includes(entity.collection)) continue;
@@ -627,6 +645,7 @@ function main() {
     console.log(`  skipped: stub pages     ${String(stats.skippedStub).padStart(5)}`);
     console.log(`  skipped: under 400 ch   ${String(stats.skippedThin).padStart(5)}`);
     console.log(`  skipped: unmapped dir   ${String(stats.unmapped).padStart(5)}`);
+    console.log(`  category overviews      ${String(stats.categoryHubs).padStart(5)}`);
     console.log(`  ALREADY in Firestore    ${String(stats.existing).padStart(5)}`);
     console.log(`  needs review (near dup) ${String(stats.possibleDuplicates).padStart(5)}`);
     console.log(`  NEW candidates          ${String(stats.newEntities).padStart(5)}`);
@@ -653,7 +672,7 @@ function main() {
     const reportPath = path.join(OUT_DIR, 'port-report.json');
     fs.writeFileSync(reportPath, JSON.stringify({
         generatedAt: new Date().toISOString(), source: SOURCE, stats,
-        newEntities: newOnes, possibleDuplicates, existingEntities: existing.map((e) => ({
+        newEntities: newOnes, possibleDuplicates, categoryHubs, existingEntities: existing.map((e) => ({
             name: e.name, collection: e.collection, liveId: e.liveId,
             sourceFile: e.sourceFile, textLength: e.textLength
         })),
