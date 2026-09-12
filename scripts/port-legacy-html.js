@@ -630,18 +630,28 @@ function main() {
         // "hoodoo" live, so a strict comparison calls it new and a blind import
         // would publish a second copy. Anything where one name contains the other
         // is held back for a human rather than decided automatically.
-        const near = [];
+        // Candidates are collected by live id, not appended blindly.
+        //
+        // The index holds two keys per document — its name and its id minus the
+        // tradition prefix — so a single record matched twice and arrived as two
+        // candidates. 37 of 53 near-duplicates looked ambiguous for that reason
+        // alone and were held back from merging when there was in fact only one
+        // target. "The Holy Trinity" was reported as a choice between
+        // christian_trinity and christian_trinity.
+        const seenCandidates = new Map();
         const myTokens = tokenSet(entity.name);
         if (index) {
             for (const [liveKey, row] of index) {
                 if (!liveKey || liveKey.length < 4) continue;
+                if (seenCandidates.has(row.id)) continue;
                 const theirTokens = tokenSet(row.name || String(row.id).replace(/^[a-z]+_/, ''));
                 if (isTokenSubset(myTokens, theirTokens)) {
-                    near.push({ liveId: row.id, liveName: row.name || row.id });
-                    if (near.length >= 3) break;
+                    seenCandidates.set(row.id, { liveId: row.id, liveName: row.name || row.id });
+                    if (seenCandidates.size >= 3) break;
                 }
             }
         }
+        const near = [...seenCandidates.values()];
 
         // The category boundary is not where the database drew it. "Astrology"
         // is filed under magic_systems, not magic, so a lookup confined to the

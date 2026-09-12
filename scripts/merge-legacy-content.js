@@ -54,6 +54,69 @@ const SOURCE = (() => {
 
 const MIN_RATIO = 1.5;
 
+const STOPWORDS = new Set([
+    'the', 'a', 'an', 'of', 'and', 'in', 'on', 'to', 'ha', 'al', 'de',
+    // Words that describe a record's kind rather than its subject. They matched
+    // across unrelated entities and produced the worst pairings in the set:
+    // "Ma'at (Concept)" was offered "Deep State Concept" and "Demiurge Concept"
+    // on the strength of the word "concept" alone, and "Prophet Ibrahim" was
+    // offered "Prophet Musa".
+    'concept', 'concepts', 'prophet', 'saint', 'god', 'goddess', 'deity',
+    'myth', 'mythology', 'legend', 'story', 'tradition', 'system'
+]);
+
+function tokens(name) {
+    return new Set(
+        String(name || '')
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .toLowerCase()
+            .split(/[^a-z0-9]+/)
+            .filter((t) => t.length > 2 && !STOPWORDS.has(t))
+    );
+}
+
+/**
+ * Choose which live record a legacy page should merge into.
+ *
+ * Multiple candidates is not the same as undecidable. Most of these have one
+ * obviously right answer and one or two that matched on a shared descriptive
+ * word: "Prophet Ibrahim (Abraham)" is offered both islamic_ibrahim, which
+ * shares two meaningful words, and islamic_musa, which shares only "prophet".
+ *
+ * Candidates are scored on how many meaningful words they share with the legacy
+ * title, with a point for agreeing on tradition. A candidate wins only by
+ * scoring strictly higher than every other — a tie is a real tie and goes back
+ * to the caller as ambiguous, because picking arbitrarily between two records
+ * that are equally good matches is how an article about Jesus ends up on a
+ * record about someone else.
+ *
+ * Returns the winning candidate, or null when there is no clear one.
+ */
+function pickBestCandidate(pair) {
+    const candidates = pair.candidates || [];
+    if (candidates.length === 0) return null;
+    if (candidates.length === 1) return candidates[0];
+
+    const sourceMythology = (pair.sourceFile.match(/^mythos2?\/([^/]+)\//) || [])[1] || null;
+    const nameTokens = tokens(pair.name);
+
+    const scored = candidates.map((candidate) => {
+        const candidateTokens = tokens(candidate.liveName || candidate.liveId);
+        let score = 0;
+        for (const t of nameTokens) if (candidateTokens.has(t)) score += 2;
+        // Agreeing on tradition breaks ties between otherwise equal matches and
+        // rejects cross-tradition accidents outright.
+        if (sourceMythology && String(candidate.liveId).toLowerCase().startsWith(`${sourceMythology}_`)) {
+            score += 1;
+        }
+        return { candidate, score };
+    }).sort((a, b) => b.score - a.score);
+
+    if (scored[0].score === 0) return null;
+    if (scored.length > 1 && scored[0].score === scored[1].score) return null;
+    return scored[0].candidate;
+}
+
 /** Re-read the legacy page for its full prose, which the report does not store. */
 function readLegacy(relPath) {
     const file = path.join(SOURCE, relPath);
@@ -103,11 +166,11 @@ async function main() {
     const notRicher = [];
 
     for (const pair of pairs) {
-        if (!pair.candidates || pair.candidates.length !== 1) {
+        const target = pickBestCandidate(pair);
+        if (!target) {
             ambiguous.push(pair);
             continue;
         }
-        const target = pair.candidates[0];
         const collection = (target.liveName.match(/\(in ([a-z_]+)\)/) || [])[1] || pair.collection;
 
         const snap = await db.collection(collection).doc(target.liveId).get();
