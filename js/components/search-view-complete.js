@@ -210,6 +210,29 @@ class SearchViewComplete {
             // Private mode, quota, or corrupt entry — fall through and fetch.
         }
 
+        // `mythologies` is published to the static base, so the dropdown can be
+        // filled from the CDN for nothing. Firestore is the fallback.
+        try {
+            const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
+            if (loader) {
+                const baseMap = await loader.load('mythologies', null);
+                if (baseMap && baseMap.size > 0) {
+                    this.mythologies = Array.from(baseMap.entries())
+                        .map(([id, data]) => ({
+                            id: data.id || id,
+                            name: data.name || data.displayName || this.formatMythologyName(data.id || id)
+                        }))
+                        .sort((a, b) => a.name.localeCompare(b.name));
+                    try {
+                        sessionStorage.setItem(CACHE_KEY, JSON.stringify(this.mythologies));
+                    } catch (error) { /* caching is optional */ }
+                    return;
+                }
+            }
+        } catch (error) {
+            console.warn('[SearchView] Static base unavailable for mythologies:', error.message);
+        }
+
         try {
             const timeoutMs = 5000;
             const snapshot = await Promise.race([
