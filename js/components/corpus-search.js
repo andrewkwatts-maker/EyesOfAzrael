@@ -80,6 +80,92 @@ class CorpusSearch {
     }
 
     /**
+     * Rows to score for one collection, from the static base where possible.
+     *
+     * This is scoring search: it needs every candidate document in memory to
+     * rank them, and it used to get them by reading up to 500 documents from
+     * each of eighteen collections, on every query. Measured against the live
+     * database, one search for "zeus" cost 3,513 document reads — more than the
+     * whole rest of the site put together, and repeated in full for every new
+     * search term.
+     *
+     * The same entities are already published as a static base and served from
+     * the CDN: that is why the browse pages read zero documents. The search had
+     * simply never been pointed at it. window.entityBaseLoader caches per
+     * collection and de-duplicates concurrent loads, so repeat searches cost
+     * nothing at all.
+     *
+     * Firestore remains the fallback for collections with no static base — the
+     * search must not silently return fewer results than it used to — and that
+     * path keeps the 500-document cap it always had.
+     */
+    async _loadSearchable(collection, mythology) {
+        const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
+
+        let published = null;
+        if (loader) {
+            try {
+                const manifest = await loader.getManifest();
+                published = manifest && manifest.collections
+                    ? Object.prototype.hasOwnProperty.call(manifest.collections, collection)
+                    : null;
+            } catch (error) {
+                published = null;
+            }
+
+            // Two attempts, because search fires the instant #/search?q=... opens
+            // and can beat the loader to its first fetch. Skipping on that first
+            // miss is what made an earlier version of this return no results at
+            // all: the base arrived a moment later, but the search had already
+            // given up on it. A short wait is invisible next to a search that
+            // silently finds nothing.
+            for (let attempt = 0; attempt < 2; attempt++) {
+                try {
+                    const baseMap = await loader.load(collection, mythology || null);
+                    if (baseMap && baseMap.size > 0) {
+                        return Array.from(baseMap.values());
+                    }
+                } catch (error) {
+                    if (attempt === 1) {
+                        console.warn(`[CorpusSearch] Static base unavailable for '${collection}':`, error.message);
+                    }
+                }
+                if (attempt === 0) {
+                    await new Promise((resolve) => setTimeout(resolve, 400));
+                }
+            }
+        }
+
+        // Firestore is used only on positive proof that the collection has no
+        // static base — the manifest loaded AND does not list it.
+        //
+        // Anything less than that is a startup race, not a missing base. Search
+        // runs the moment #/search?q=... is opened, often before the loader has
+        // its manifest, and treating "don't know yet" as "not published" made the
+        // cost swing between 1,000 and 2,150 reads across otherwise identical
+        // runs, depending purely on what had finished loading. Guessing wrong in
+        // that direction is expensive and self-inflicted; guessing wrong the
+        // other way costs one search a few results while the base arrives.
+        if (published !== false) {
+            console.warn(`[CorpusSearch] no static base yet for '${collection}'; skipping rather than reading Firestore.`);
+            return [];
+        }
+
+        // Genuinely unpublished collections still go to Firestore, so search
+        // coverage does not quietly shrink. The cap is deliberately well below
+        // the old 500: this path now serves a handful of small collections, and
+        // an unbounded-feeling number here is what made search the most
+        // expensive route on the site.
+        const FALLBACK_LIMIT = 200;
+        let queryRef = this.db.collection(collection);
+        if (mythology) {
+            queryRef = queryRef.where('mythology', '==', mythology);
+        }
+        const snapshot = await queryRef.limit(FALLBACK_LIMIT).get();
+        return snapshot.docs.map((doc) => ({ ...doc.data(), _docId: doc.id }));
+    }
+
+    /**
      * Generic full-text search across all metadata
      */
     async genericSearch(query, options = {}) {
@@ -92,29 +178,22 @@ class CorpusSearch {
             if (entityType && collection !== entityType) continue;
 
             try {
-                let queryRef = this.db.collection(collection);
+                const rows = await this._loadSearchable(collection, mythology);
 
-                if (mythology) {
-                    queryRef = queryRef.where('mythology', '==', mythology);
-                }
-
-                const snapshot = await queryRef.limit(500).get();
-
-                snapshot.forEach(doc => {
-                    const entity = doc.data();
+                for (const entity of rows) {
                     const score = this.calculateGenericScore(entity, searchTerms, rawQuery);
 
                     if (score > 0) {
                         results.push({
                             ...entity,
-                            id: entity.id || doc.id,
+                            id: entity.id || entity._docId,
                             type: entity.type || collection,
                             collection: collection,
                             _searchScore: score,
                             _matchedFields: this.getMatchedFields(entity, searchTerms)
                         });
                     }
-                });
+                }
             } catch (error) {
                 console.warn(`[CorpusSearch] Error searching collection '${collection}':`, error.message);
             }
@@ -131,18 +210,15 @@ class CorpusSearch {
 
         const perCollection = await Promise.all(this.collections.map(async collection => {
             try {
-                let q = this.db.collection(collection);
-                if (mythology) q = q.where('mythology', '==', mythology);
-                const snapshot = await q.limit(200).get();
+                const rows = await this._loadSearchable(collection, mythology);
                 const matches = [];
-                snapshot.forEach(doc => {
-                    const entity = doc.data();
+                rows.forEach(entity => {
                     const langData = entity.languages || {};
                     const score = this.calculateLanguageScore(langData, query, language);
                     if (score > 0) {
                         matches.push({
                             ...entity,
-                            id: entity.id || doc.id,
+                            id: entity.id || entity._docId,
                             type: entity.type || collection,
                             collection,
                             _searchScore: score,
@@ -169,18 +245,15 @@ class CorpusSearch {
 
         const perCollection = await Promise.all(this.collections.map(async collection => {
             try {
-                let q = this.db.collection(collection);
-                if (mythology) q = q.where('mythology', '==', mythology);
-                const snapshot = await q.limit(200).get();
+                const rows = await this._loadSearchable(collection, mythology);
                 const matches = [];
-                snapshot.forEach(doc => {
-                    const entity = doc.data();
+                rows.forEach(entity => {
                     const sources = entity.sources || {};
                     const score = this.calculateSourceScore(sources, searchTerms);
                     if (score > 0) {
                         matches.push({
                             ...entity,
-                            id: entity.id || doc.id,
+                            id: entity.id || entity._docId,
                             type: entity.type || collection,
                             collection,
                             _searchScore: score,
@@ -207,18 +280,15 @@ class CorpusSearch {
 
         const perCollection = await Promise.all(this.collections.map(async collection => {
             try {
-                let q = this.db.collection(collection);
-                if (mythology) q = q.where('mythology', '==', mythology);
-                const snapshot = await q.limit(200).get();
+                const rows = await this._loadSearchable(collection, mythology);
                 const matches = [];
-                snapshot.forEach(doc => {
-                    const entity = doc.data();
+                rows.forEach(entity => {
                     const corpus = entity.corpusSearch || {};
                     const score = this.calculateCorpusScore(corpus, searchTerm);
                     if (score > 0) {
                         matches.push({
                             ...entity,
-                            id: entity.id || doc.id,
+                            id: entity.id || entity._docId,
                             type: entity.type || collection,
                             collection,
                             _searchScore: score,
@@ -258,11 +328,11 @@ class CorpusSearch {
             // Get entities for filtering — bounded to 500 per collection
             const perCollection = await Promise.all(this.collections.map(async collection => {
                 try {
-                    const snapshot = await this.db.collection(collection).limit(500).get();
-                    return snapshot.docs.map(doc => ({
-                        ...doc.data(),
-                        id: doc.data().id || doc.id,
-                        type: doc.data().type || collection,
+                    const rows = await this._loadSearchable(collection, null);
+                    return rows.map(entity => ({
+                        ...entity,
+                        id: entity.id || entity._docId,
+                        type: entity.type || collection,
                         collection,
                         _searchScore: 50
                     }));
@@ -402,12 +472,9 @@ class CorpusSearch {
         for (const collection of this.collections) {
             if (entityType && collection !== entityType) continue;
             try {
-                let queryRef = this.db.collection(collection);
-                if (mythology) queryRef = queryRef.where('mythology', '==', mythology);
-                const snapshot = await queryRef.limit(500).get();
-                snapshot.forEach(doc => {
-                    const entity = doc.data();
-                    const id = entity.id || doc.id;
+                const rows = await this._loadSearchable(collection, mythology);
+                rows.forEach(entity => {
+                    const id = entity.id || entity._docId;
                     if (excludeIds.has(`${collection}:${id}`)) return;
                     const score = this.calculateFuzzyScore(entity, searchTerms, rawQuery);
                     if (score > 0) {
@@ -746,12 +813,9 @@ class CorpusSearch {
             if (suggestions.size >= limit) break;
 
             try {
-                const snapshot = await this.db.collection(collection)
-                    .limit(100)
-                    .get();
+                const rows = await this._loadSearchable(collection, null);
 
-                snapshot.forEach(doc => {
-                    const entity = doc.data();
+                rows.forEach(entity => {
 
                     // Name suggestions
                     if (entity.name?.toLowerCase().startsWith(p)) {
