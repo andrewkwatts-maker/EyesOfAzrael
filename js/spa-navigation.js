@@ -275,6 +275,96 @@ const RoutePreloader = window.RoutePreloader || {
 };
 
 class SPANavigation {
+    /**
+     * Every plural collection name that can appear as a category in a route.
+     *
+     * The router needs this to tell /mythology/greek/deities (a category) from
+     * /mythology/greek/greek_zeus (an entity), because both occupy the same
+     * position in the path. Kept as a static set rather than derived from the
+     * database: routing has to resolve synchronously, before any read.
+     */
+    static ENTITY_COLLECTIONS = new Set([
+        'deities', 'heroes', 'creatures', 'places', 'items', 'texts', 'concepts',
+        'symbols', 'rituals', 'herbs', 'archetypes', 'magic', 'magic_systems',
+        'cosmology', 'events', 'myths', 'beings', 'tarot', 'figures',
+        'hist_events', 'hist_figures', 'hist_periods', 'hist_cultures',
+        'hist_wars', 'hist_artifacts', 'con_theories', 'con_figures',
+        'con_organizations', 'con_events', 'con_documents'
+    ]);
+
+    static isEntityCollection(segment) {
+        return SPANavigation.ENTITY_COLLECTIONS.has(String(segment || '').toLowerCase());
+    }
+
+    /**
+     * Is this segment the id of a tradition?
+     *
+     * Read from the published `mythologies` base, so it costs no document reads
+     * and stays correct as traditions are added — a hardcoded list would quietly
+     * misroute every new one.
+     */
+    async isKnownMythology(segment) {
+        if (!segment) return false;
+        const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
+        if (!loader) return false;
+        try {
+            const baseMap = await loader.load('mythologies', null);
+            return !!(baseMap && baseMap.has(String(segment).toLowerCase()));
+        } catch (error) {
+            // Unknown beats wrong: falling through leaves the existing
+            // tradition-filter behaviour untouched.
+            return false;
+        }
+    }
+
+    /**
+     * Resolve a bare entity id to its collection and redirect to the canonical URL.
+     *
+     * Supports the shortcut shapes — /mythology/greek/greek_zeus and
+     * /browse/deities/greek_zeus — where the last segment names an entity rather
+     * than a category or a tradition. An id does not say which collection it
+     * belongs to, so it has to be looked up, and looking it up in Firestore would
+     * mean probing up to thirty collections to draw one page.
+     *
+     * The static base is already in memory for the collections the visitor has
+     * touched and is a CDN fetch otherwise, so this resolves for no document
+     * reads at all. A hint collection (from /browse/<category>/...) is checked
+     * first, which is the common case and usually the only lookup needed.
+     *
+     * Returns true when it has navigated, so the caller stops.
+     */
+    async redirectIfEntityShortcut(entityId, hintCollection) {
+        if (!entityId) return false;
+
+        const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
+        if (!loader) return false;
+
+        const order = [];
+        if (hintCollection && SPANavigation.isEntityCollection(hintCollection)) {
+            order.push(hintCollection);
+        }
+        for (const name of SPANavigation.ENTITY_COLLECTIONS) {
+            if (name !== hintCollection) order.push(name);
+        }
+
+        for (const collection of order) {
+            let baseMap;
+            try {
+                baseMap = await loader.load(collection, null);
+            } catch (error) {
+                continue;
+            }
+            if (baseMap && baseMap.has(entityId)) {
+                const target = `#/entity/${collection}/${encodeURIComponent(entityId)}`;
+                spaLog(`Entity shortcut resolved: ${entityId} -> ${collection}`);
+                window.location.hash = target;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     constructor(firestore, authManager, renderer) {
         const constructorStart = performance.now();
         spaLog('Constructor called at:', new Date().toISOString());
@@ -994,6 +1084,18 @@ class SPANavigation {
                 await this.renderMythologies();
             } else if (this.routes.browse_category_mythology.test(path)) {
                 const match = path.match(this.routes.browse_category_mythology);
+                // /browse/deities/greek filters by tradition; /browse/deities/greek_zeus
+                // names an entity. Both land here, so the second segment is
+                // resolved before deciding which page to draw.
+                //
+                // Tradition wins ties. The database contains a creatures document
+                // whose id is literally "greek", so an entity-first lookup sent
+                // /browse/deities/greek to that record instead of the Greek
+                // deities listing — a filter turning into an unrelated entity page.
+                if (!(await this.isKnownMythology(match[2]))) {
+                    const redirected = await this.redirectIfEntityShortcut(match[2], match[1]);
+                    if (redirected) return;
+                }
                 spaLog('Matched BROWSE CATEGORY+MYTHOLOGY route:', match[1], match[2]);
                 await this.renderBrowseCategory(match[1], match[2]);
             } else if (this.routes.browse_category.test(path)) {
@@ -1028,6 +1130,13 @@ class SPANavigation {
                 await this.renderEntity(match[1], collection, match[3], prefetched);
             } else if (this.routes.category.test(path)) {
                 const match = path.match(this.routes.category);
+                // /mythology/greek/deities is a category; /mythology/greek/greek_zeus
+                // is an entity. Without this check the second rendered a listing
+                // headed "Greek zeus" for a category that does not exist.
+                if (!SPANavigation.isEntityCollection(match[2])) {
+                    const redirected = await this.redirectIfEntityShortcut(match[2], null);
+                    if (redirected) return;
+                }
                 spaLog('Matched CATEGORY route:', match[2]);
                 await this.renderCategory(match[1], match[2]);
             } else if (this.routes.mythology.test(path)) {
@@ -2558,11 +2667,25 @@ class SPANavigation {
             route.mythology = pathParts[1];
 
             if (pathParts[2]) {
-                route.entityTypePlural = pathParts[2];
-                route.entityType = pathParts[2].replace(/s$/, '');
+                // The third segment is either a category or an entity, and the
+                // two are told apart by name rather than by position.
+                //
+                // /mythology/greek/deities lists the Greek deities;
+                // /mythology/greek/greek_zeus is Zeus. Treating the slot as a
+                // category unconditionally turned the second one into a listing
+                // titled "Greek zeus" for a category that does not exist — a page
+                // that rendered, looked deliberate, and showed nothing.
+                if (SPANavigation.isEntityCollection(pathParts[2])) {
+                    route.entityTypePlural = pathParts[2];
+                    route.entityType = pathParts[2].replace(/s$/, '');
 
-                if (pathParts[3]) {
-                    route.entityId = pathParts[3];
+                    if (pathParts[3]) {
+                        route.entityId = pathParts[3];
+                        route.hash = path;
+                    }
+                } else {
+                    // A tradition-scoped shortcut straight to an entity.
+                    route.entityId = pathParts[2];
                     route.hash = path;
                 }
             }
@@ -2574,7 +2697,19 @@ class SPANavigation {
             route.category = pathParts[1];
 
             if (pathParts[2]) {
-                route.mythology = pathParts[2];
+                // Same ambiguity the other way round: /browse/deities/greek
+                // filters by tradition, /browse/deities/greek_zeus is an entity.
+                // An entity id here used to be read as a mythology name, which
+                // filtered the grid to nothing and left the category page looking
+                // like the entity simply had no content.
+                if (pathParts[2].includes('_') || pathParts[3]) {
+                    route.entityId = pathParts[2];
+                    route.entityTypePlural = pathParts[1];
+                    route.entityType = pathParts[1].replace(/s$/, '');
+                    route.hash = path;
+                } else {
+                    route.mythology = pathParts[2];
+                }
             }
 
             return route;
