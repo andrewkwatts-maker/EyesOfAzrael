@@ -851,10 +851,23 @@ class BrowseCategoryView {
 
             for (const doc of snap.docs) {
                 const data = doc.data();
-                if (data.category === this.category) this.categoryOverview = data;
-                else this.siblingCategories.push(data);
+                if (data.category === this.category) {
+                    this.categoryOverview = data;
+                } else if (data.entityCount !== 0) {
+                    // entityCount === 0 marks a category page whose pair holds no
+                    // entities. Linking to it offers a route that dead-ends on an
+                    // empty grid, which reads as missing content rather than an
+                    // empty category. Undefined is allowed through: it means the
+                    // page predates the count being stamped, not that it is empty.
+                    this.siblingCategories.push(data);
+                }
             }
-            this.siblingCategories.sort((a, b) => (a.category || '').localeCompare(b.category || ''));
+            // Busiest categories first — a tradition's deities are almost always
+            // what someone arriving at its herbs page wants next, and
+            // alphabetical ordering buried them behind archetypes and cosmology.
+            this.siblingCategories.sort((a, b) =>
+                (b.entityCount || 0) - (a.entityCount || 0)
+                || (a.category || '').localeCompare(b.category || ''));
         } catch (error) {
             // An overview is an enhancement; the page is complete without it.
             console.warn('[Browse View] Category overview unavailable:', error.message);
