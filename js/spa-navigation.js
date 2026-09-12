@@ -412,6 +412,18 @@ class SPANavigation {
             entity_simple: /^#?\/entity\/([^\/]+)\/([^\/]+)\/?$/,  // 2-param: #/entity/collection/id
             category: /^#?\/mythology\/([^\/]+)\/([^\/]+)\/?$/,
             search: /^#?\/search\/?(\?.*)?$/,
+
+            // Routes the interface already links to but nothing served.
+            //
+            // #/signup is the landing page's primary call to action — "Get
+            // Started Free" — and it rendered "Page Not Found". #/profile is
+            // linked from the header and did the same. Sign-in works, through a
+            // button in the header, so the capability was there and only the
+            // addresses pointing at it were missing.
+            signin: /^#?\/(login|signin|sign-in|signup|sign-up|register)\/?(\?.*)?$/,
+            contribute: /^#?\/(contribute|submit|create|add)\/?(\?.*)?$/,
+            favorites: /^#?\/(favorites|favourites|bookmarks|saved)\/?$/,
+            profile_self: /^#?\/profile\/?$/,
             corpus_explorer: /^#?\/corpus-explorer\/?$/,
             settings: /^#?\/settings(?:\/[^\/]*)?\/?$/,
             compare: /^#?\/compare\/?$/,
@@ -1188,6 +1200,23 @@ class SPANavigation {
             } else if (this.routes.guidelines.test(path)) {
                 spaLog('Matched GUIDELINES route');
                 await this.renderGuidelines();
+            } else if (this.routes.signin.test(path)) {
+                spaLog('Matched SIGN IN route');
+                await this.renderSignIn(path);
+            } else if (this.routes.contribute.test(path)) {
+                spaLog('Matched CONTRIBUTE route');
+                await this.renderContribute(path);
+            } else if (this.routes.favorites.test(path)) {
+                // Favourites live on the dashboard; this is the address people
+                // and older links actually use.
+                spaLog('Matched FAVORITES route - redirecting to dashboard');
+                window.location.hash = '#/dashboard';
+                return;
+            } else if (this.routes.profile_self.test(path)) {
+                spaLog('Matched OWN PROFILE route');
+                const uid = this.auth?.currentUser?.uid || window.firebaseAuth?.currentUser?.uid;
+                window.location.hash = uid ? `#/user/${uid}` : '#/dashboard';
+                return;
             } else if (this.routes.user_profile.test(path)) {
                 const match = path.match(this.routes.user_profile);
                 spaLog('Matched USER PROFILE route:', match[1]);
@@ -2253,6 +2282,139 @@ class SPANavigation {
         } catch (error) {
             spaError('Dashboard page render failed:', error);
             throw error;
+        }
+    }
+
+    /**
+     * Sign-in page for #/login, #/signup and their variants.
+     *
+     * Signing in has always worked, through a button in the header. What did not
+     * exist was an address for it, so the landing page's own call to action —
+     * "Get Started Free", pointing at #/signup — rendered "Page Not Found". Any
+     * link anyone shared for signing up did the same.
+     *
+     * The button here calls the same auth manager the header does rather than
+     * opening its own popup, so there is one sign-in path to keep working. It is
+     * a click on a real button because browsers block popups opened from a
+     * navigation event, which is exactly what a route change is.
+     */
+    async renderSignIn(path) {
+        spaLog('renderSignIn() called');
+        const mainContent = document.getElementById('main-content');
+        if (!mainContent) return;
+
+        const user = this.auth?.currentUser || window.firebaseAuth?.currentUser;
+        if (user) {
+            window.location.hash = '#/dashboard';
+            return;
+        }
+
+        // Where to return to afterwards, so signing in from a page does not
+        // dump the visitor back at the home page.
+        const returnTo = (path.match(/[?&]return=([^&]+)/) || [])[1];
+
+        mainContent.innerHTML = `
+            <div class="auth-page" style="max-width: 460px; margin: 0 auto; padding: 3rem 1.5rem; text-align: center;">
+                <h1>Sign in to Eyes of Azrael</h1>
+                <p style="opacity: 0.8; margin-bottom: 2rem;">
+                    Sign in to contribute entries, suggest corrections, save favourites
+                    and track what you have submitted.
+                </p>
+                <button id="route-signin-btn" class="btn-primary" style="padding: 0.85rem 2rem; font-size: 1rem; cursor: pointer;">
+                    Continue with Google
+                </button>
+                <p id="route-signin-error" role="alert" style="color: var(--color-error, #ff6b6b); margin-top: 1rem; min-height: 1.2em;"></p>
+                <p style="margin-top: 2rem; opacity: 0.7; font-size: 0.9rem;">
+                    Browsing does not require an account —
+                    <a href="#/mythologies">explore the traditions</a> instead.
+                </p>
+            </div>
+        `;
+
+        const button = document.getElementById('route-signin-btn');
+        const error = document.getElementById('route-signin-error');
+        button?.addEventListener('click', async () => {
+            button.disabled = true;
+            error.textContent = '';
+            try {
+                if (window.authManager?.signInWithGoogle) {
+                    await window.authManager.signInWithGoogle();
+                } else if (window.AuthGuard?.signInWithGoogle) {
+                    await window.AuthGuard.signInWithGoogle();
+                } else if (window.firebaseAuth && window.firebase?.auth) {
+                    await window.firebaseAuth.signInWithPopup(new window.firebase.auth.GoogleAuthProvider());
+                } else {
+                    throw new Error('Sign-in is unavailable right now.');
+                }
+                window.location.hash = returnTo ? decodeURIComponent(returnTo) : '#/dashboard';
+            } catch (err) {
+                button.disabled = false;
+                error.textContent = err?.message || 'Sign-in failed. Please try again.';
+            }
+        });
+    }
+
+    /**
+     * Contribution page for #/contribute, #/submit, #/create.
+     *
+     * Accepts context from the route it was reached by — ?type=deity&mythology=greek
+     * — so contributing from a category page starts with that category and
+     * tradition already chosen, which is the whole point of offering the link
+     * there rather than only on the entity pages.
+     */
+    async renderContribute(path) {
+        spaLog('renderContribute() called');
+        const mainContent = document.getElementById('main-content');
+        if (!mainContent) return;
+
+        const params = new URLSearchParams((path.split('?')[1] || ''));
+        const type = params.get('type') || '';
+        const mythology = params.get('mythology') || '';
+        const user = this.auth?.currentUser || window.firebaseAuth?.currentUser;
+
+        const context = [mythology, type].filter(Boolean).join(' · ');
+
+        mainContent.innerHTML = `
+            <div class="contribute-page" style="max-width: 760px; margin: 0 auto; padding: 2.5rem 1.5rem;">
+                <h1>Contribute</h1>
+                ${context ? `<p style="opacity: 0.8;">Adding to <strong>${this.escapeHtml(context)}</strong></p>` : ''}
+                <p style="opacity: 0.8;">
+                    Entries are reviewed before they appear. You can add something new,
+                    or suggest a correction on any entry from its own page.
+                </p>
+                ${user ? `
+                    <div id="contribute-form-host" style="margin-top: 2rem;"></div>
+                    <p style="opacity: 0.7; font-size: 0.9rem;">
+                        Prefer to correct something that already exists?
+                        <a href="#/mythologies">Find the entry</a> and use Contribute on its page.
+                    </p>
+                ` : `
+                    <div style="margin-top: 2rem; padding: 1.5rem; border: 1px solid rgba(255,255,255,0.15); border-radius: 8px;">
+                        <p>You need an account to submit a contribution.</p>
+                        <a class="btn-primary" style="display: inline-block; padding: 0.75rem 1.5rem; text-decoration: none; border-radius: 6px;"
+                           href="#/login?return=${encodeURIComponent(path)}">Sign in to contribute</a>
+                    </div>
+                `}
+            </div>
+        `;
+
+        if (user && typeof window.SubmissionWorkflow !== 'undefined') {
+            try {
+                const host = document.getElementById('contribute-form-host');
+                const workflow = new window.SubmissionWorkflow();
+                if (typeof workflow.renderInto === 'function') {
+                    await workflow.renderInto(host, { type, mythology });
+                } else if (typeof workflow.start === 'function') {
+                    await workflow.start({ type, mythology, container: host });
+                } else {
+                    // The workflow exists but exposes no mount point. Say so
+                    // rather than leaving an empty panel that looks like a
+                    // form that failed to load.
+                    host.innerHTML = `<p>Use the Contribute button on any entry to submit a change.</p>`;
+                }
+            } catch (err) {
+                spaError('Contribution form failed to mount:', err);
+            }
         }
     }
 

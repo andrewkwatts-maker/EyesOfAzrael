@@ -812,8 +812,39 @@ class BrowseCategoryView {
                         ` : ''}
                     </div>
                     ${this.getSiblingCategoriesHTML()}
+                    ${this.getContributeCtaHTML()}
                 </div>
             </div>
+        `;
+    }
+
+    /**
+     * Offer to contribute from the page the visitor is already on.
+     *
+     * Contributing was only reachable from an entity page, which means it was
+     * only offered to someone who had already found the thing they wanted to
+     * correct. Someone looking at Greek deities and noticing an absence had
+     * nowhere to say so.
+     *
+     * The link carries the category and tradition it was clicked from, so the
+     * contribution starts with both already chosen instead of asking again for
+     * something the route already established.
+     */
+    getContributeCtaHTML() {
+        const params = new URLSearchParams();
+        if (this.category) params.set('type', this.category);
+        if (this.mythology) params.set('mythology', this.mythology);
+        const query = params.toString();
+
+        const what = this.mythology
+            ? `${this.escapeHtml(this.capitalize(this.mythology))} ${this.escapeHtml(this.categoryNoun(this.category))}`
+            : this.escapeHtml(this.categoryNoun(this.category));
+
+        return `
+            <p class="category-contribute-cta">
+                Something missing from ${what}?
+                <a href="#/contribute${query ? '?' + query : ''}">Add an entry</a>
+            </p>
         `;
     }
 
