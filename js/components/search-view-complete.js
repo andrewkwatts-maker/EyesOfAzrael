@@ -213,10 +213,13 @@ class SearchViewComplete {
         try {
             const timeoutMs = 5000;
             const snapshot = await Promise.race([
-                // select() fetches only the field this needs. Firestore still
-                // bills a read per document, but the payload drops from full
-                // entity records to two fields.
-                this.db.collection('mythologies').select('name').limit(300).get(),
+                // No .select() here. The compat SDK does not implement it on a
+                // CollectionReference — "this.db.collection(...).select is not a
+                // function" — which is the same trap as .count(): a modular-only
+                // API that looks available because the chain reads naturally.
+                // Adding it silently broke this lookup, so the dropdown fell back
+                // to its nine hardcoded traditions and lost the other 172.
+                this.db.collection('mythologies').limit(300).get(),
                 new Promise((_, reject) => setTimeout(() => reject(new Error('Firestore timeout')), timeoutMs))
             ]);
             this.mythologies = [];
@@ -1047,12 +1050,51 @@ class SearchViewComplete {
     /**
      * Apply client-side filters
      */
+    /**
+     * The plural collection name for a singular entity type.
+     *
+     * Entity documents store `type` in the singular ("deity") while collections,
+     * routes and the filter chips are all plural ("deities"). The irregulars are
+     * spelled out because the -y rule would give "cosmologies" and "mythologies"
+     * for things this site keeps as "cosmology".
+     */
+    static pluralizeType(type) {
+        const IRREGULAR = {
+            deity: 'deities', mythology: 'mythologies', cosmology: 'cosmology',
+            magic: 'magic', herb: 'herbs', myth: 'myths', person: 'figures'
+        };
+        const t = String(type || '').toLowerCase();
+        if (IRREGULAR[t]) return IRREGULAR[t];
+        if (t.endsWith('s')) return t;
+        if (t.endsWith('y')) return t.slice(0, -1) + 'ies';
+        return t + 's';
+    }
+
     applyClientFilters(results) {
         return results.filter(entity => {
-            // Entity type filter
-            if (this.state.filters.entityTypes.length > 0 && this.state.filters.entityTypes.length < 8) {
-                const entityType = entity.type || entity.collection;
-                if (!this.state.filters.entityTypes.includes(entityType)) {
+            // Entity type filter.
+            //
+            // The filter list is plural — deities, heroes, creatures — and it was
+            // compared against `entity.type`, which is singular: "deity", "hero",
+            // "creature". "deity" is never in ["deities", ...], so this rejected
+            // every result of every search, and the default filter state has six
+            // entries, which is inside the 0 < n < 8 window that makes the check
+            // run at all. Search found its matches and then discarded all of them
+            // one line before rendering: 358 results for "zeus" became "No results
+            // found", with no error anywhere to suggest the query had worked.
+            //
+            // Both forms are accepted now. `entity.collection` already carries the
+            // plural collection name, so it is checked first, with the singular
+            // pluralised as a fallback for results that lack it.
+            const selected = this.state.filters.entityTypes;
+            if (selected.length > 0 && selected.length < 8) {
+                const candidates = [
+                    entity.collection,
+                    entity.type,
+                    entity.type ? SearchViewComplete.pluralizeType(entity.type) : null
+                ].filter(Boolean);
+
+                if (!candidates.some(candidate => selected.includes(candidate))) {
                     return false;
                 }
             }
