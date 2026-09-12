@@ -401,6 +401,7 @@ class FirebaseEntityRenderer {
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'deity', entity.name)}</div>
                 <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
+                ${this.renderFavoriteButton(entity, '')}
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
@@ -1114,6 +1115,7 @@ class FirebaseEntityRenderer {
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'hero', entity.name)}</div>
                 <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
+                ${this.renderFavoriteButton(entity, '')}
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.7;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
@@ -1336,6 +1338,7 @@ class FirebaseEntityRenderer {
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'item', entity.name)}</div>
                 <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
+                ${this.renderFavoriteButton(entity, '')}
                 ${entity.subtitle || entity.shortDescription ? `<p class="subtitle" style="font-size: 1.25rem; margin: 0.5rem 0; opacity: 0.9;">${this.escapeHtml(entity.subtitle || entity.shortDescription)}</p>` : ''}
                 ${badges.length > 0 ? `
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.75rem 0;">
@@ -1532,6 +1535,7 @@ class FirebaseEntityRenderer {
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'place', entity.name)}</div>
                 <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
+                ${this.renderFavoriteButton(entity, '')}
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${entity.description ? `<p style="font-size: 1.1rem; margin-top: 1rem; line-height: 1.7;">${this.escapeHtml(entity.description)}</p>` : ''}
             </section>
@@ -1794,6 +1798,7 @@ class FirebaseEntityRenderer {
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, 'creature', entity.name)}</div>
                 <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
+                ${this.renderFavoriteButton(entity, '')}
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${badges.length > 0 ? `
                     <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.75rem 0;">
@@ -2055,6 +2060,7 @@ class FirebaseEntityRenderer {
             <section class="hero-section">
                 <div class="hero-icon-display entity-icon-large">${this.renderIconWithFallback(entity.visual?.icon || entity.icon, entityType, entity.name)}</div>
                 <h1>${this.escapeHtml(entity.name || entity.title)}</h1>
+                ${this.renderFavoriteButton(entity, '')}
                 ${entity.subtitle ? `<p class="subtitle" style="font-size: 1.5rem; margin: 0.5rem 0;">${this.escapeHtml(entity.subtitle)}</p>` : ''}
                 ${classificationInfo.length > 0 ? `
                     <div class="entity-classification" style="display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; margin: 0.75rem 0;">
@@ -2342,6 +2348,41 @@ class FirebaseEntityRenderer {
      * @param {string} name - Entity name for fallback generation
      * @returns {string} HTML for icon display
      */
+    /**
+     * The save-to-favourites control for an entity hero.
+     *
+     * js/services/favorites-service.js is 2,000 lines, loaded on every page, and
+     * installs a global click handler for `.entity-favorite` — optimistic UI,
+     * offline queueing, auth prompt, Firestore write, toast. No page ever
+     * rendered a button carrying that class, so the whole service sat waiting
+     * for an event that could not happen, and the dashboard's favourites list
+     * had no way to be filled.
+     *
+     * The data attributes are the ones that handler reads. Anonymous visitors
+     * get the button too: the service prompts them to sign in, which is a better
+     * answer than hiding the feature from everyone who has not signed in yet.
+     */
+    renderFavoriteButton(entity, type) {
+        if (!entity || !entity.id) return '';
+        const attr = (v) => this.escapeAttr(v == null ? '' : String(v));
+
+        return `
+            <button class="entity-favorite"
+                    type="button"
+                    aria-pressed="false"
+                    aria-label="Save ${attr(entity.name || entity.title || 'this entry')} to favourites"
+                    title="Save to favourites"
+                    data-entity-id="${attr(entity.id)}"
+                    data-entity-type="${attr(entity.type || type || '')}"
+                    data-entity-name="${attr(entity.name || entity.title || '')}"
+                    data-entity-mythology="${attr(entity.mythology || this.mythology || '')}"
+                    data-entity-icon="${attr(entity.icon || '')}">
+                <span class="entity-favorite__icon" aria-hidden="true">♥</span>
+                <span class="entity-favorite__label">Save</span>
+            </button>
+        `;
+    }
+
     renderIconWithFallback(icon, type, name) {
         const fallbackIcon = this.getDefaultIcon(type);
 

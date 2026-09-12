@@ -1697,7 +1697,23 @@ service cloud.firestore {
     // together and `read: if true` here would override the restrictive read
     // rules written above. See isPrivateCollection().
     match /{collection}/{document=**} {
-      allow read: if !isPrivateCollection(collection);
+      // `users` is excluded rather than listed as private, because the two are
+      // different questions. A user's profile document is meant to be public and
+      // has its own `allow read: if true` above. What is not public is anything
+      // beneath it.
+      //
+      // {collection} binds to the TOP-LEVEL name, so this pattern also matches
+      // /users/{uid}/user_favorites/{id} with collection == 'users'. Firestore
+      // ORs every matching rule, so this granted read on every user's favourites
+      // and favourite folders, overriding the owner-only rules written for them.
+      // Verified against the live database with a second authenticated user:
+      // reading another account's saved favourites returned 200 before this, 403
+      // after.
+      //
+      // Adding 'users' to isPrivateCollection() would have closed the leak and
+      // taken public profiles down with it, since that list is consulted for the
+      // profile document too.
+      allow read: if !isPrivateCollection(collection) && collection != 'users';
       allow write: if isSiteAdmin();
     }
   }

@@ -38802,6 +38802,46 @@ body.keyboard-navigation *:focus {
     margin-top: var(--spacing-lg, 1.5rem);
 }
 
+/* Save-to-favourites on an entity hero. Styled from tokens so it follows the
+   active theme rather than assuming a dark ground. */
+.entity-favorite {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-top: 0.75rem;
+    padding: 0.45rem 1.1rem;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    cursor: pointer;
+    color: var(--color-text, inherit);
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.10);
+    border: 1px solid rgba(var(--color-primary-rgb, 139, 127, 255), 0.30);
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+}
+
+.entity-favorite:hover,
+.entity-favorite:focus-visible {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.22);
+    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.55);
+}
+
+.entity-favorite:active { transform: scale(0.97); }
+
+.entity-favorite__icon { opacity: 0.75; }
+
+/* Saved state, set by favorites-service via .favorited / aria-pressed. */
+.entity-favorite.favorited,
+.entity-favorite[aria-pressed="true"] {
+    background: rgba(var(--color-primary-rgb, 139, 127, 255), 0.28);
+    border-color: rgba(var(--color-primary-rgb, 139, 127, 255), 0.7);
+}
+
+.entity-favorite.favorited .entity-favorite__icon,
+.entity-favorite[aria-pressed="true"] .entity-favorite__icon {
+    opacity: 1;
+    color: var(--color-error, #ff6b6b);
+}
+
 /* Invitation to contribute from a listing page, not only from an entity page. */
 .category-contribute-cta {
     margin-top: var(--spacing-md, 1rem);
