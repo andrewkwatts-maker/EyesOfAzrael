@@ -75,6 +75,13 @@ const CARD_FIELDS = [
     'isStandard', 'userId',
     // Sorting inputs.
     'views', 'likes', 'shares', 'createdAt', 'dateAdded',
+    // Duplicate consolidation. The router reads `duplicateOf` to send an old id
+    // to the record it was merged into, and the browse grid reads it to keep the
+    // merged-away copies out of the listing. Both happen for every entity on
+    // every page, so they have to come from the base — resolving them against
+    // Firestore would put a document read back on the hot path the base exists
+    // to keep off it.
+    'duplicateOf', 'duplicateOfCollection', 'status',
 ];
 
 /** Project one entity down to the card fields it actually needs. */

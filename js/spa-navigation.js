@@ -1980,6 +1980,20 @@ class SPANavigation {
     async renderEntity(mythology, categoryType, entityId, prefetchedData = null) {
         spaLog('renderEntity() called');
 
+        // Send duplicates to the record they were merged into.
+        //
+        // The database holds the same subject several times over — Zeus four
+        // times, Jesus five — from separate imports that each minted their own
+        // id. scripts/merge-duplicate-entities.js consolidates the content onto
+        // one record and stamps `duplicateOf` on the others rather than deleting
+        // them, because relationships and shared links point at those ids and a
+        // deleted target renders as a link to nothing.
+        //
+        // Following the stamp here is what turns the mark into a merge from a
+        // visitor's point of view: every old id keeps working and lands on the
+        // full entry.
+        if (await this.followDuplicateRedirect(categoryType, entityId)) return;
+
         try {
             const mainContent = document.getElementById('main-content');
 
@@ -2283,6 +2297,45 @@ class SPANavigation {
             spaError('Dashboard page render failed:', error);
             throw error;
         }
+    }
+
+    /**
+     * If this entity was merged into another, navigate to the canonical one.
+     *
+     * Checked against the static base first, so the common case — the vast
+     * majority of entities, which are not duplicates — costs no document read.
+     * Only an id absent from the base falls through to Firestore, and a miss
+     * there is treated as "not a duplicate" rather than an error: a redirect
+     * that cannot be resolved should leave the visitor on the page they asked
+     * for, not on an error.
+     *
+     * Returns true when it has navigated, so the caller stops.
+     */
+    async followDuplicateRedirect(collectionName, entityId) {
+        if (!collectionName || !entityId) return false;
+        const collection = this.getCollectionName
+            ? this.getCollectionName(collectionName)
+            : collectionName;
+
+        let data = null;
+        try {
+            const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
+            if (loader) {
+                const baseMap = await loader.load(collection, null);
+                if (baseMap) data = baseMap.get(entityId) || null;
+            }
+        } catch (error) {
+            // Base unavailable; fall through.
+        }
+
+        if (!data) return false;
+        const canonical = data.duplicateOf;
+        if (!canonical || canonical === entityId) return false;
+
+        const targetCollection = data.duplicateOfCollection || collection;
+        spaLog(`Duplicate ${entityId} -> ${targetCollection}/${canonical}`);
+        window.location.hash = `#/entity/${targetCollection}/${encodeURIComponent(canonical)}`;
+        return true;
     }
 
     /**
