@@ -668,34 +668,49 @@ class FirebaseEntityRenderer {
         }
 
         const sections = [];
+        const row = (label, value) => {
+            const names = FirebaseEntityRenderer.familyNames(value);
+            if (names.length) sections.push(`<li><strong>${label}:</strong> ${names.join(', ')}</li>`);
+        };
 
-        if (family.parents?.length) {
-            sections.push(`
-                <li><strong>Parents:</strong> ${family.parents.join(', ')}</li>
-            `);
-        }
-
-        if (family.consorts?.length || family.spouses?.length) {
-            const consorts = family.consorts || family.spouses || [];
-            sections.push(`
-                <li><strong>Consort(s):</strong> ${consorts.join(', ')}</li>
-            `);
-        }
-
-        if (family.children?.length || family.offspring?.length) {
-            const children = family.children || family.offspring || [];
-            sections.push(`
-                <li><strong>Children:</strong> ${children.join(', ')}</li>
-            `);
-        }
-
-        if (family.siblings?.length) {
-            sections.push(`
-                <li><strong>Siblings:</strong> ${family.siblings.join(', ')}</li>
-            `);
-        }
+        row('Parents', family.parents);
+        row('Consort(s)', family.consorts || family.spouses);
+        row('Children', family.children || family.offspring);
+        row('Siblings', family.siblings);
 
         return sections.join('');
+    }
+
+    /**
+     * Family members as a list of names, whatever shape the record stores.
+     *
+     * These fields are not consistently typed across the database. Of 695
+     * entities with a family block, 311 store `parents` as an object —
+     * {mother: "Epione", father: "Asclepius"} — and others store a plain string.
+     * The renderer assumed an array and called .join() on it.
+     *
+     * The `?.length` guard in front of it hid the object case, since an object
+     * has no length, but a string does: "Saturn and Ops" passed the guard and
+     * then threw "family.parents.join is not a function". That exception escaped
+     * the whole entity render, so #/entity/deities/jupiter showed "Something Went
+     * Wrong" — a completely blank page for a record that was present and
+     * healthy, from one mistyped field.
+     */
+    static familyNames(value) {
+        if (!value) return [];
+        if (Array.isArray(value)) {
+            return value.map((v) => (v && typeof v === 'object' ? (v.name || v.id || '') : String(v)))
+                .map((s) => s.trim()).filter(Boolean);
+        }
+        if (typeof value === 'string') return value.trim() ? [value.trim()] : [];
+        if (typeof value === 'object') {
+            // {mother, father} and similar — label each so "Epione" is not
+            // presented without saying which parent it names.
+            return Object.entries(value)
+                .filter(([, v]) => v && String(v).trim() && !/^unknown$/i.test(String(v).trim()))
+                .map(([k, v]) => `${k.charAt(0).toUpperCase()}${k.slice(1)}: ${String(v).trim()}`);
+        }
+        return [];
     }
 
     /**
