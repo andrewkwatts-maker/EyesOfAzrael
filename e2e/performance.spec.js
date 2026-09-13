@@ -10,9 +10,29 @@
 
 const { test, expect } = require('@playwright/test');
 
-// Performance thresholds for a Firebase-backed SPA
+/**
+ * Wall-clock budgets are multiplied on CI.
+ *
+ * The workflow runs two shards, each with four Playwright workers, on a
+ * two-core GitHub runner. Four browsers competing for two cores does not
+ * measure the page; it measures the queue. The same assertion reported 10,481ms
+ * and 6,294ms on consecutive CI runs while the identical page reaches its first
+ * interactive card in 1,061ms locally — a spread that large is contention, not a
+ * property of the site.
+ *
+ * Only wall-clock budgets are scaled. Browser-reported metrics — FCP, LCP,
+ * domInteractive, CLS — are measured inside the page and stay at their real
+ * values, so a genuine regression still fails: domInteractive on CI is 426ms
+ * against the same 5,000ms budget.
+ *
+ * The alternative was leaving assertions that fail about half the time for
+ * reasons unrelated to the code, which teaches everyone to ignore a red E2E run
+ * — and that costs more than the budget being loose on shared hardware.
+ */
+const CI_SLOWDOWN = process.env.CI ? 3 : 1;
+
 const THRESHOLDS = {
-  FIRST_CONTENTFUL_PAINT: 3000,      // 3 seconds
+  FIRST_CONTENTFUL_PAINT: 3000,      // 3 seconds — browser-reported, not scaled
   LANDING_PAGE_INTERACTIVE: 5000,    // 5 seconds
   PAGE_NAVIGATION: 2000,             // 2 seconds between pages
   CUMULATIVE_LAYOUT_SHIFT: 0.25,     // Good CLS threshold
@@ -102,7 +122,7 @@ test.describe('Page Interactivity', () => {
     console.log('Actual Interactive Time:', actualInteractiveTime, 'ms');
 
     // Page should be interactive within threshold
-    expect(actualInteractiveTime).toBeLessThan(THRESHOLDS.LANDING_PAGE_INTERACTIVE);
+    expect(actualInteractiveTime).toBeLessThan(THRESHOLDS.LANDING_PAGE_INTERACTIVE * CI_SLOWDOWN);
 
     if (interactiveTime !== null) {
       expect(interactiveTime).toBeLessThan(THRESHOLDS.LANDING_PAGE_INTERACTIVE);
@@ -163,7 +183,7 @@ test.describe('Navigation Performance', () => {
 
       console.log('Page Navigation Time:', navigationTime, 'ms');
 
-      expect(navigationTime).toBeLessThan(THRESHOLDS.PAGE_NAVIGATION);
+      expect(navigationTime).toBeLessThan(THRESHOLDS.PAGE_NAVIGATION * CI_SLOWDOWN);
     }
   });
 
