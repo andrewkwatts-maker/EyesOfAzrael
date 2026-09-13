@@ -548,8 +548,25 @@ test.describe('No Horizontal Scrolling', () => {
       const elements = document.querySelectorAll('*');
       const overflowing = [];
 
-      elements.forEach((el, index) => {
+      elements.forEach((el) => {
+        // Only elements a reader can actually see.
+        //
+        // This counted every element extending past the viewport, visible or
+        // not, and the debug inspector is a fixed panel parked at
+        // translateX(100%) with visibility: hidden — off-screen by design, and
+        // ten elements deep. That alone exceeded the threshold on every mobile
+        // run while the sibling assertion confirmed there was no horizontal
+        // scrollbar, which is the thing overflow actually costs a reader.
+        //
+        // An element nobody can see cannot overflow anything. Measuring the
+        // hidden ones turned a real check into one that failed for a reason it
+        // was not written to catch.
+        const style = window.getComputedStyle(el);
+        if (style.visibility === 'hidden' || style.display === 'none' || style.opacity === '0') return;
+
         const rect = el.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
         if (rect.right > viewportWidth + 5) { // 5px tolerance
           overflowing.push({
             tag: el.tagName,
@@ -844,6 +861,17 @@ test.describe('Theme Toggle - Mobile Accessibility', () => {
 // Test Suite 10: Touch Navigation
 // ============================================
 test.describe('Navigation Works with Touch', () => {
+  // locator.tap() and page.touchscreen need a touch-capable context, and
+  // setViewportSize alone does not provide one: it makes the window phone-sized
+  // and leaves a desktop context behind it. Without this every test here failed
+  // on its first tap with "The page does not support tap", having verified
+  // nothing about touch.
+  //
+  // hasTouch is fixed when the context is created and cannot be set inside a
+  // test, so it is declared for the whole group. isMobile is deliberately left
+  // off — Firefox rejects it and this file runs on all three browser projects.
+  test.use({ hasTouch: true });
+
   test('Category cards are tappable on mobile', async ({ page }) => {
     await page.setViewportSize(VIEWPORTS.mobile);
     await page.goto('/', { waitUntil: 'load' });

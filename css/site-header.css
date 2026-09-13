@@ -64,7 +64,18 @@ body {
     left: 0;
     right: 0;
     width: 100%;
-    z-index: 9999;
+    /* Above the mobile navigation drawer, which is also 9999.
+     *
+     * The drawer's close control is the hamburger button, and it lives in this
+     * header. backdrop-filter below makes the header a stacking context, so that
+     * button's own z-index is confined to it — whatever number it carries, it
+     * cannot rise above the header itself. With both at 9999 the drawer won on
+     * DOM order and covered the only way to close it, so opening the menu on a
+     * phone trapped the reader inside it.
+     *
+     * The header has to outrank the drawer for its close button to be
+     * clickable. 10000 stays below the modal and toast layers above it. */
+    z-index: 10000;
     height: var(--header-height-desktop);
     background: rgba(var(--color-bg-card-rgb, 26, 31, 58), 0.85);
     backdrop-filter: blur(12px) saturate(150%);
@@ -944,6 +955,17 @@ body.authenticated .user-info {
 
 .mobile-menu-toggle {
     display: none;
+    /* z-index does nothing on a statically positioned element, and this button
+       had no position of its own. So the 10001 below was inert and the
+       navigation panel — position: fixed, z-index: 9999 — drew on top of the
+       button that closes it.
+
+       Opening the menu on a phone therefore trapped you in it: the toggle turns
+       into the close control, and the panel covered it, so the only way out was
+       the overlay or the back button. Playwright reported it precisely —
+       "<h3 class="mobile-nav-section-title">Explore</h3> intercepts pointer
+       events" — the panel's own contents receiving the click meant for close. */
+    position: relative;
     background: transparent;
     border: none;
     color: var(--color-text-primary, #f8f9fa);
