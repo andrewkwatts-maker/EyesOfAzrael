@@ -251,6 +251,25 @@ class BrowseCategoryView {
                 this.entities = await this.loadEntitiesDirect();
             }
 
+            // Drop records that were merged into another.
+            //
+            // 801 subjects were held more than once — Zeus four times, Jesus five
+            // — and consolidating them stamps `duplicateOf` on the copies rather
+            // than deleting them, so links and relationships pointing at those ids
+            // keep working. Listing them anyway would show the same subject four
+            // times in one grid, which is the symptom the consolidation exists to
+            // remove.
+            //
+            // Only an explicit mark is filtered. An entity without the field is
+            // kept, so a base exported before the marks existed lists everything
+            // rather than nothing.
+            const beforeDedupe = this.entities.length;
+            this.entities = this.entities.filter((entity) => !entity || !entity.duplicateOf);
+            const removed = beforeDedupe - this.entities.length;
+            if (removed > 0) {
+                console.log(`[Browse View] Hid ${removed} duplicate record(s) merged into other entries`);
+            }
+
             // Add metadata for sorting
             this.entities = this.entities.map((entity, index) => ({
                 ...entity,
