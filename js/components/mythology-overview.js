@@ -229,6 +229,44 @@ class MythologyOverview {
         return promise;
     }
 
+    /**
+     * Preview cards for one category from the published static base.
+     *
+     * Returns null when the base cannot answer — no loader, collection not
+     * published, or nothing for this tradition — so the caller falls back to
+     * Firestore rather than rendering an empty grid over a category that has
+     * entities.
+     *
+     * Entities merged into another record are filtered out, for the same reason
+     * the browse grid filters them: a duplicate should not occupy one of the
+     * handful of preview slots a category gets.
+     */
+    async _previewFromBase(collectionName, facetValue) {
+        const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
+        if (!loader) return null;
+
+        try {
+            const baseMap = await loader.load(collectionName, null);
+            if (!baseMap || baseMap.size === 0) return null;
+
+            const wanted = String(facetValue || '').toLowerCase();
+            const rows = [];
+            for (const [id, data] of baseMap) {
+                if (!data || data.duplicateOf) continue;
+                if (String(data.mythology || '').toLowerCase() !== wanted) continue;
+                rows.push({ id: data.id || id, ...data });
+                // Take more than the grid shows, so the alphabetical sort below
+                // picks from a real sample rather than whatever came first.
+                if (rows.length >= this.PREVIEW_LIMIT * 3) break;
+            }
+
+            return rows.length ? rows : null;
+        } catch (error) {
+            console.warn(`[MythologyOverview] Static base preview unavailable for '${collectionName}':`, error.message);
+            return null;
+        }
+    }
+
     async _loadSingleCategory(type, mythologyId, mythCapitalized) {
         const collection = this.db.collection(type.collection);
 
@@ -270,23 +308,40 @@ class MythologyOverview {
 
         if (count === 0) return null;
 
-        // Fetch only the rows the preview grid renders.
-        const snapshot = await collection
-            .where('mythology', '==', facetValue)
-            .limit(this.PREVIEW_LIMIT)
-            .get();
+        // Preview rows come from the static base where it has them.
+        //
+        // This page draws eleven preview grids, one per category, and fetching
+        // PREVIEW_LIMIT rows for each was the last significant read cost on the
+        // site: 353 of the 397 documents read across a fifteen-route sweep came
+        // from here. The same entities are already published to the CDN — that
+        // is why the browse pages read nothing — and the cards need only the
+        // fields the base carries.
+        //
+        // Firestore remains the fallback, so a tradition missing from the base
+        // still renders rather than showing an empty category.
+        let entities = await this._previewFromBase(type.collection, facetValue);
 
-        const entities = [];
-        snapshot.forEach(doc => {
-            entities.push({ id: doc.id, ...doc.data() });
-        });
+        if (!entities) {
+            const snapshot = await collection
+                .where('mythology', '==', facetValue)
+                .limit(this.PREVIEW_LIMIT)
+                .get();
 
-        // Sort alphabetically by name
+            entities = [];
+            snapshot.forEach(doc => {
+                entities.push({ id: doc.id, ...doc.data() });
+            });
+        }
+
+        // Sort alphabetically by name, then take what the grid shows.
+        // The base path deliberately gathers a wider sample than PREVIEW_LIMIT so
+        // this sort chooses from a real selection rather than document order.
         entities.sort((a, b) => {
             const nameA = (a.name || a.title || '').toLowerCase();
             const nameB = (b.name || b.title || '').toLowerCase();
             return nameA.localeCompare(nameB);
         });
+        entities = entities.slice(0, this.PREVIEW_LIMIT);
 
         return {
             ...type,
