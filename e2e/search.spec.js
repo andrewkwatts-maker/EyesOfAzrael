@@ -862,16 +862,30 @@ test.describe('Search Functionality', () => {
       await waitForPageLoad(page);
       await page.waitForTimeout(2000);
 
-      // Check for pagination controls
-      const pagination = page.locator('#paginationControls, .pagination-controls, .page-btn');
+      // The browse grid pages with a "Load More" button, not numbered controls.
+      //
+      // This looked for #paginationControls / .pagination-controls / .page-btn,
+      // none of which this view has ever rendered, and then for a scrollable
+      // #entityContainer — but the container grows with its content rather than
+      // scrolling internally, so scrollHeight never exceeds clientHeight. Both
+      // halves of the check were therefore always false, and the assertion could
+      // only ever fail.
+      //
+      // What the test is for is that a collection of 2,500 deities is not dumped
+      // into the page at once. #loadMoreBtn is how this view does that.
+      const pagination = page.locator('#loadMoreBtn, #loadMoreContainer, .load-more, #paginationControls, .pagination-controls, .page-btn');
       const hasPagination = await pagination.first().isVisible().catch(() => false);
 
-      // Or check for virtual scrolling (large container with scroll)
-      const entityContainer = page.locator('#entityContainer, .entity-container');
-      const hasScroll = await entityContainer.evaluate(el => el.scrollHeight > el.clientHeight).catch(() => false);
+      // Or virtual scrolling, which the search view uses for the same purpose.
+      const hasVirtualScroll = await page.locator('.virtual-scroll-content, .virtual-item').first()
+        .isVisible().catch(() => false);
 
-      // Either pagination or scrollable container should exist for large datasets
-      expect(hasPagination || hasScroll).toBeTruthy();
+      // And in either case the grid must be showing a page, not the collection.
+      const renderedCards = await page.locator('.entity-card').count();
+      expect(renderedCards).toBeGreaterThan(0);
+      expect(renderedCards).toBeLessThan(200);
+
+      expect(hasPagination || hasVirtualScroll).toBeTruthy();
     });
   });
 

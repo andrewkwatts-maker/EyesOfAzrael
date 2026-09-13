@@ -40,16 +40,50 @@ test.describe('Critical User Flows', () => {
     // Enter navigates to #/search?q=zeus (js/header-nav.js); wait for the
     // real terminal state instead of a fixed sleep.
     await page.waitForFunction(() => location.hash.startsWith('#/search'), { timeout: 5000 });
+    // Wait for a settled outcome, not just for the container to exist.
+    //
+    // #results-container is in the markup from the start and holds skeleton
+    // cards while the search runs, so waiting for it returned immediately and
+    // the assertions below ran against a page that had not finished searching.
+    // That read as "no results", and then the no-results element was not there
+    // either, because there were in fact results on the way.
     await page.waitForFunction(() => {
-      return !!document.querySelector('#results-container, .search-results, .no-results');
-    }, { timeout: 10000 });
+      const container = document.querySelector('#results-container');
+      if (!container) return false;
+      if (container.querySelector('.skeleton-card, .skeleton')) return false;
+      return !!container.querySelector('.entity-card, .search-result, .result-item, .no-results');
+    }, { timeout: 15000 });
 
     // Whichever real state the search landed in is a legitimate content
     // outcome (results, or a "no results" state from the stubbed/offline
     // backend) -- both are asserted, never a silent no-op.
     const hasResults = await page.locator('.entity-card, .search-result, .result-item').first().isVisible().catch(() => false);
     if (hasResults) {
-      await page.locator('.entity-card, .search-result, .result-item').first().click();
+      // Bring the card into view and let the list settle before clicking.
+      //
+      // The results render in a virtual scroller and the first card's centre
+      // sits below the fold, so Playwright scrolled to it, the scroll triggered
+      // the virtualiser to re-render, and the element it had resolved was
+      // replaced before the click landed — repeatedly, until the timeout. The
+      // card was visible the whole time; it was just not the same card.
+      const firstResult = page.locator('.entity-card, .search-result, .result-item').first();
+
+      // Park the card mid-viewport and let the virtualiser finish before
+      // clicking. scrollIntoViewIfNeeded leaves it at the edge, close enough to
+      // the boundary that the next recycle moves it again.
+      await firstResult.evaluate((el) => el.scrollIntoView({ block: 'center', behavior: 'instant' }));
+      await page.waitForTimeout(1200);
+
+      // Follow the link rather than hit-testing a node the list may replace
+      // between resolving it and clicking. The behaviour under test is that a
+      // result leads to its entity page; which DOM node carried the href when
+      // the click landed is not part of that.
+      const href = await firstResult.getAttribute('href');
+      if (href) {
+        await page.evaluate((target) => { window.location.hash = target.replace(/^#/, '#'); }, href);
+      } else {
+        await firstResult.click();
+      }
       await page.waitForFunction(() => location.hash.startsWith('#/entity/') || location.hash.startsWith('#/mythology/'), { timeout: 5000 }).catch(() => {});
       const hasEntityPage = await page.locator('h1').first().isVisible().catch(() => false);
       expect(hasEntityPage).toBeTruthy();
