@@ -991,6 +991,38 @@ class SPANavigation {
             return;
         }
 
+        // Ignore a repeat of the route just rendered.
+        //
+        // Every navigation was being handled twice and every page built twice.
+        // Instrumenting the renderer showed two calls 79ms apart with identical
+        // stacks — both through handleRoute — so an entity page constructed its
+        // entire DOM, discarded it, and constructed it again. The measured cost
+        // is a doubled render on every route change on the site.
+        //
+        // The _isNavigating lock above does not catch this because the two calls
+        // are not concurrent: the first finishes and releases before the second
+        // arrives. Several listeners can drive the router — hashchange,
+        // popstate, and the internal redirects that set location.hash — and
+        // trying to make exactly one of them fire per navigation is fragile,
+        // because each is legitimate on its own.
+        //
+        // Deduplicating on the outcome instead is robust whatever fires: if the
+        // path has not changed since the last completed render, and that render
+        // was moments ago, there is nothing new to draw.
+        //
+        // The window is deliberately short, and popstate is exempt. Back and
+        // forward to the same path must always re-render, and so must any
+        // deliberate refresh — this only collapses the duplicate burst.
+        const requestedPath = (window.location.hash || '#/').replace('#', '');
+        const REPEAT_WINDOW_MS = 400;
+        if (!isPopState
+            && this._lastRenderedPath === requestedPath
+            && this._lastRenderedAt
+            && (Date.now() - this._lastRenderedAt) < REPEAT_WINDOW_MS) {
+            spaLog(`Duplicate route within ${REPEAT_WINDOW_MS}ms, skipping: ${requestedPath}`);
+            return;
+        }
+
         // Acquire navigation lock
         this._isNavigating = true;
         const navigationId = Date.now() + Math.random();
@@ -1294,6 +1326,13 @@ class SPANavigation {
             if (this._currentNavigationId === navigationId) {
                 this._isNavigating = false;
                 this._activeNavigationId = null;
+            }
+            // Record what was drawn, so an immediate repeat of the same route is
+            // recognised as the duplicate it is. Set in `finally` so a failed
+            // render does not mark itself done and suppress the retry.
+            if (!this._renderFailed) {
+                this._lastRenderedPath = path;
+                this._lastRenderedAt = Date.now();
             }
         }
     }
