@@ -728,10 +728,26 @@ class SPANavigation {
 
                 if (!this._isNavigating) {
                     this.handleRoute();
-                } else {
-                    spaLog('Cancelling in-progress navigation for new hashchange');
+                } else if (this._navigatingPath && this._navigatingPath !== currentHash.replace('#', '')) {
+                    // Cancel only for a genuinely different destination.
+                    //
+                    // This used to clear the lock unconditionally, and so did the
+                    // popstate handler below. A fragment navigation fires BOTH
+                    // popstate and hashchange — that is what the spec requires,
+                    // since changing location.hash is a session history traversal
+                    // — so for every navigation two handlers each forced the lock
+                    // open and called handleRoute for the same path, 11ms apart.
+                    // The concurrency guard was defeated by the very code meant to
+                    // be coordinating with it, and every page on the site built
+                    // its DOM twice.
+                    //
+                    // Cancelling on a different path is still right: a reader who
+                    // clicks away mid-load should not wait for the page they left.
+                    spaLog('Cancelling in-progress navigation for a different route');
                     this._isNavigating = false;
                     this.handleRoute();
+                } else {
+                    spaLog('Same route already being handled, letting it finish');
                 }
             }, 10);
         };
@@ -753,8 +769,17 @@ class SPANavigation {
             }
 
             if (this._isNavigating) {
-                spaLog('Cancelling in-progress navigation for popstate');
-                this._isNavigating = false;
+                if (this._navigatingPath && this._navigatingPath !== path) {
+                    spaLog('Cancelling in-progress navigation for popstate to a different route');
+                    this._isNavigating = false;
+                } else {
+                    // The same path is already being drawn — almost always the
+                    // hashchange for this very navigation, since a fragment change
+                    // fires both events. Returning here is what stops the page
+                    // being built twice. See the note in the hashchange handler.
+                    spaLog('popstate for the route already in progress, letting it finish');
+                    return;
+                }
             }
             this.handleRoute(true); // true = isPopState
         };
@@ -1023,8 +1048,11 @@ class SPANavigation {
             return;
         }
 
-        // Acquire navigation lock
+        // Acquire navigation lock, recording which path holds it so the
+        // hashchange and popstate handlers can tell "another event for the same
+        // navigation" from "the reader has gone somewhere else".
         this._isNavigating = true;
+        this._navigatingPath = requestedPath;
         const navigationId = Date.now() + Math.random();
         this._currentNavigationId = navigationId;
         this._activeNavigationId = navigationId;
