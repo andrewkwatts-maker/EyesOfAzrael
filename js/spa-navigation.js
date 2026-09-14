@@ -318,6 +318,30 @@ class SPANavigation {
     }
 
     /**
+     * Send the visitor to `hash` without leaving the current address behind them.
+     *
+     * Assigning to location.hash pushes a history entry, which turns every
+     * redirect in this router into a trap. The address being redirected away
+     * from still redirects, so pressing Back returns to it and it immediately
+     * throws the visitor forward again — Back appears broken, and holding it
+     * never escapes.
+     *
+     * It bites hardest on the duplicate redirect, because the merged-away ids
+     * are exactly what old links and search results point at: a visitor arriving
+     * from outside could not press Back to leave. Replacing the entry instead
+     * leaves the page they came from as the previous address, which is what it
+     * was before the redirect ran.
+     *
+     * Use this for anything that resolves an address to a different one. Do not
+     * use it for a navigation the visitor asked for — those should push.
+     */
+    redirectTo(hash) {
+        // Resolved against the current URL so a bare fragment cannot be read as
+        // a path, which would leave the site.
+        window.location.replace(new URL(hash, window.location.href).href);
+    }
+
+    /**
      * Resolve a bare entity id to its collection and redirect to the canonical URL.
      *
      * Supports the shortcut shapes — /mythology/greek/greek_zeus and
@@ -357,7 +381,7 @@ class SPANavigation {
             if (baseMap && baseMap.has(entityId)) {
                 const target = `#/entity/${collection}/${encodeURIComponent(entityId)}`;
                 spaLog(`Entity shortcut resolved: ${entityId} -> ${collection}`);
-                window.location.hash = target;
+                this.redirectTo(target);
                 return true;
             }
         }
@@ -1244,7 +1268,7 @@ class SPANavigation {
                 return;
             } else if (this.routes.settings.test(path)) {
                 spaLog('Matched SETTINGS route - redirecting to dashboard');
-                window.location.hash = '#/dashboard';
+                this.redirectTo('#/dashboard');
                 return;
             } else if (this.routes.compare.test(path)) {
                 spaLog('Matched COMPARE route');
@@ -1274,12 +1298,12 @@ class SPANavigation {
                 // Favourites live on the dashboard; this is the address people
                 // and older links actually use.
                 spaLog('Matched FAVORITES route - redirecting to dashboard');
-                window.location.hash = '#/dashboard';
+                this.redirectTo('#/dashboard');
                 return;
             } else if (this.routes.profile_self.test(path)) {
                 spaLog('Matched OWN PROFILE route');
                 const uid = this.auth?.currentUser?.uid || window.firebaseAuth?.currentUser?.uid;
-                window.location.hash = uid ? `#/user/${uid}` : '#/dashboard';
+                this.redirectTo(uid ? `#/user/${uid}` : '#/dashboard');
                 return;
             } else if (this.routes.user_profile.test(path)) {
                 const match = path.match(this.routes.user_profile);
@@ -2419,7 +2443,7 @@ class SPANavigation {
 
         const targetCollection = data.duplicateOfCollection || collection;
         spaLog(`Duplicate ${entityId} -> ${targetCollection}/${canonical}`);
-        window.location.hash = `#/entity/${targetCollection}/${encodeURIComponent(canonical)}`;
+        this.redirectTo(`#/entity/${targetCollection}/${encodeURIComponent(canonical)}`);
         return true;
     }
 
@@ -2443,7 +2467,7 @@ class SPANavigation {
 
         const user = this.auth?.currentUser || window.firebaseAuth?.currentUser;
         if (user) {
-            window.location.hash = '#/dashboard';
+            this.redirectTo('#/dashboard');
             return;
         }
 
@@ -2484,7 +2508,7 @@ class SPANavigation {
                 } else {
                     throw new Error('Sign-in is unavailable right now.');
                 }
-                window.location.hash = returnTo ? decodeURIComponent(returnTo) : '#/dashboard';
+                this.redirectTo(returnTo ? decodeURIComponent(returnTo) : '#/dashboard');
             } catch (err) {
                 button.disabled = false;
                 error.textContent = err?.message || 'Sign-in failed. Please try again.';
