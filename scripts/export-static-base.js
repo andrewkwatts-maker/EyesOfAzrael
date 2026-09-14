@@ -82,6 +82,11 @@ const CARD_FIELDS = [
     // Firestore would put a document read back on the hot path the base exists
     // to keep off it.
     'duplicateOf', 'duplicateOfCollection', 'status',
+    // The mythologies index draws its cards from the base too, and needs the
+    // fields that make it a curated page rather than an alphabetical list:
+    // `order` is the sequence someone chose, and without it every tradition
+    // sorts by name and the page silently loses its arrangement.
+    'order', 'displayName', 'color', 'featured',
 ];
 
 /** Project one entity down to the card fields it actually needs. */

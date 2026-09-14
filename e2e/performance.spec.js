@@ -237,8 +237,11 @@ test.describe('Navigation Performance', () => {
     console.log('SPA Navigation Time:', spaNavTime, 'ms');
     console.log('Full Page Load Time:', fullLoadMetrics, 'ms');
 
-    // SPA navigation should be under threshold
-    expect(spaNavTime).toBeLessThan(THRESHOLDS.PAGE_NAVIGATION);
+    // SPA navigation should be under threshold.
+    //
+    // Scaled on CI like the other wall-clock budgets — this one was missed when
+    // the others were scaled, which is why it went on failing after they stopped.
+    expect(spaNavTime).toBeLessThan(THRESHOLDS.PAGE_NAVIGATION * CI_SLOWDOWN);
   });
 
   test('Back/forward navigation should be performant', async ({ page }) => {

@@ -103,6 +103,41 @@ class MythologiesView {
      * Load mythologies from Firebase
      * Uses a generation counter to discard stale async responses.
      */
+    /**
+     * Traditions from the published static base, ordered as the page expects.
+     *
+     * Returns null when the base cannot answer, so the caller falls through to
+     * Firestore rather than rendering an index with nothing in it.
+     */
+    async _mythologiesFromBase() {
+        const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
+        if (!loader) return null;
+
+        try {
+            const baseMap = await loader.load('mythologies', null);
+            if (!baseMap || baseMap.size === 0) return null;
+
+            const rows = Array.from(baseMap.entries())
+                .map(([id, data]) => ({ id: data.id || id, ...data }))
+                .filter((m) => !m.duplicateOf);
+
+            // `order` drives the curated sequence on this page; anything without
+            // one sorts after, alphabetically, rather than jumping to the front
+            // on an undefined comparison.
+            rows.sort((a, b) => {
+                const ao = Number.isFinite(a.order) ? a.order : Number.MAX_SAFE_INTEGER;
+                const bo = Number.isFinite(b.order) ? b.order : Number.MAX_SAFE_INTEGER;
+                if (ao !== bo) return ao - bo;
+                return String(a.name || a.id).localeCompare(String(b.name || b.id));
+            });
+
+            return rows.length ? rows : null;
+        } catch (error) {
+            console.warn('[Mythologies View] Static base unavailable:', error.message);
+            return null;
+        }
+    }
+
     async loadMythologies() {
         // Increment generation counter so stale async fetches are discarded
         const generation = ++this._loadGeneration || (this._loadGeneration = 1);
@@ -118,11 +153,25 @@ class MythologiesView {
                 }
             }
 
-            // Fetch from Firebase
-            const mythologies = await this.cache.getList('mythologies', {}, {
-                ttl: 3600000,
-                orderBy: 'order asc'
-            });
+            // Static base first, Firebase second.
+            //
+            // This index is the doorway to every tradition, and it was the last
+            // page still waiting on a live Firestore read to draw its links. On
+            // a slow or throttled connection that produced a page with a heading
+            // and no traditions on it — CI reported zero links on this route
+            // twice in a row while it renders twenty locally every time, which
+            // is what a read that does not arrive looks like from the outside.
+            //
+            // `mythologies` is published to the static base, so the links can
+            // come from the CDN with the database kept as the fallback.
+            let mythologies = await this._mythologiesFromBase();
+
+            if (!mythologies) {
+                mythologies = await this.cache.getList('mythologies', {}, {
+                    ttl: 3600000,
+                    orderBy: 'order asc'
+                });
+            }
 
             // Discard if a newer loadMythologies() call was initiated
             if (this._loadGeneration !== generation) {

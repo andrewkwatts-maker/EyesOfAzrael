@@ -860,7 +860,19 @@ test.describe('Search Functionality', () => {
     test('Large result sets load with pagination or virtual scrolling', async ({ page }) => {
       await page.goto('/#/browse/deities');
       await waitForPageLoad(page);
-      await page.waitForTimeout(2000);
+
+      // Wait for the grid to finish rather than for a fixed 2s.
+      //
+      // A flat timeout is a guess about how fast the machine is, and on CI it
+      // guessed wrong: the assertions ran while the grid was still skeletons, so
+      // there was no Load More button to find and no cards to count. The page was
+      // fine — the test simply looked too early.
+      await page.waitForFunction(() => {
+        const grid = document.querySelector('#entityGrid, .entity-grid, #entityContainer');
+        if (!grid) return false;
+        if (grid.querySelector('.skeleton-card, .skeleton')) return false;
+        return grid.querySelectorAll('.entity-card').length > 0;
+      }, { timeout: 20000 }).catch(() => {});
 
       // The browse grid pages with a "Load More" button, not numbered controls.
       //
