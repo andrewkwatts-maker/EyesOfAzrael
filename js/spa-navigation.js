@@ -428,6 +428,7 @@ class SPANavigation {
         this.routes = {
             home: /^#?\/?$/,
             mythologies: /^#?\/mythologies\/?$/,
+            browse_root: /^#?\/browse\/?$/,
             browse_category: /^#?\/browse\/([^\/]+)\/?$/,
             browse_category_mythology: /^#?\/browse\/([^\/]+)\/([^\/]+)\/?$/,
             mythology: /^#?\/mythology\/([^\/]+)\/?$/,
@@ -463,6 +464,7 @@ class SPANavigation {
         this._routeNames = {
             home: 'Home',
             mythologies: 'World Mythologies',
+            browse_root: 'Browse',
             browse_category: 'Browse',
             browse_category_mythology: 'Browse',
             mythology: 'Mythology',
@@ -1198,6 +1200,16 @@ class SPANavigation {
                 }
                 spaLog('Matched BROWSE CATEGORY+MYTHOLOGY route:', match[1], match[2]);
                 await this.renderBrowseCategory(match[1], match[2]);
+            } else if (this.routes.browse_root.test(path)) {
+                // /browse on its own named no category and rendered "Page Not
+                // Found". Nothing links there, but it is the address someone
+                // types or trims a URL back to, and lazy-loader.js already
+                // prefetches for it as though it were a real route. The bottom
+                // navigation treats browsing and the tradition index as one
+                // destination, so that is where it goes.
+                spaLog('Matched BROWSE ROOT route - redirecting to mythologies');
+                this.redirectTo('#/mythologies');
+                return;
             } else if (this.routes.browse_category.test(path)) {
                 const match = path.match(this.routes.browse_category);
                 spaLog('Matched BROWSE CATEGORY route:', match[1]);
