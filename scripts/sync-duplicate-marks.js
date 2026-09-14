@@ -68,11 +68,24 @@ async function main() {
 
         for (const doc of snap.docs) {
             const file = path.join(ASSETS, collection, `${doc.id}.json`);
+            const data = doc.data();
+
             if (!fs.existsSync(file)) {
+                // The snapshot predates this record, so there is nothing to
+                // patch. Writing it now is what makes the redirect work: without
+                // a file here the export cannot carry `duplicateOf`, the router
+                // never sees it, and the merged-away id goes on rendering its own
+                // copy — the merge is done in the database and invisible on the
+                // site. 79 records were in exactly that state.
+                if (CONFIRM) {
+                    fs.mkdirSync(path.dirname(file), { recursive: true });
+                    fs.writeFileSync(file, JSON.stringify({ id: doc.id, ...data }, null, 2));
+                }
                 missing++;
+                patched++;
                 continue;
             }
-            const data = doc.data();
+
             const local = JSON.parse(fs.readFileSync(file, 'utf8'));
 
             let changed = false;
@@ -90,7 +103,7 @@ async function main() {
         console.log(`  ${collection.padEnd(11)} ${String(snap.size).padStart(4)} marked`);
     }
 
-    console.log(`\n${found} marked documents in Firestore, ${patched} snapshot files ${CONFIRM ? 'updated' : 'to update'}, ${missing} absent from the snapshot.`);
+    console.log(`\n${found} marked documents in Firestore, ${patched} snapshot files ${CONFIRM ? 'updated' : 'to update'}, ${missing} were absent and have been added.`);
     if (!CONFIRM) console.log('Dry run — nothing written. Re-run with --confirm.');
     else console.log('Now run: npm run export-base');
 }
