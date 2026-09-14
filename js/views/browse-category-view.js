@@ -18,6 +18,32 @@
  */
 
 class BrowseCategoryView {
+    /**
+     * The published tradition/category tier, fetched once per page load.
+     *
+     * The promise is cached rather than the value: several category pages can
+     * ask during one navigation, and caching only the result would let each
+     * start its own identical fetch before the first returned — the same trap
+     * the mythology hub's count cache had to avoid.
+     *
+     * Returns null on any failure so the caller falls back to Firestore.
+     */
+    static async _categoryOverviewsFor(mythology) {
+        if (!BrowseCategoryView._overviewsPromise) {
+            BrowseCategoryView._overviewsPromise = fetch('/static/mythology-categories.json')
+                .then((r) => (r.ok ? r.json() : null))
+                .catch(() => null);
+        }
+
+        try {
+            const payload = await BrowseCategoryView._overviewsPromise;
+            const rows = payload && payload.byMythology && payload.byMythology[mythology];
+            return Array.isArray(rows) && rows.length ? rows : null;
+        } catch (error) {
+            return null;
+        }
+    }
+
     constructor(firestore) {
         this.db = firestore;
         this.cache = window.cacheManager || (typeof FirebaseCacheManager !== 'undefined' ? new FirebaseCacheManager({ db: firestore }) : { getList: async () => null, defaultTTL: {} });
@@ -887,6 +913,24 @@ class BrowseCategoryView {
         if (!this.mythology || !this.category) return;
 
         const myth = this.mythology.toLowerCase();
+
+        // Static file first. This was the last route still reading Firestore on
+        // an ordinary browse — 11 documents per category page, paid again for
+        // every tradition a reader moves through. The whole tier is 193 records
+        // of a heading, a sentence and a count, so scripts/export-category-overviews.js
+        // publishes it as one 62 KB file the browser caches for the session.
+        const fromFile = await BrowseCategoryView._categoryOverviewsFor(myth);
+        if (fromFile) {
+            for (const data of fromFile) {
+                if (data.category === this.category) this.categoryOverview = data;
+                else if (data.entityCount !== 0) this.siblingCategories.push(data);
+            }
+            this.siblingCategories.sort((a, b) =>
+                (b.entityCount || 0) - (a.entityCount || 0)
+                || (a.category || '').localeCompare(b.category || ''));
+            return;
+        }
+
         try {
             const db = window.firebaseDb || (window.firebase && window.firebase.firestore());
             if (!db) return;

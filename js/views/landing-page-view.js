@@ -2269,6 +2269,55 @@ Discover & Explore
     /**
      * Load featured entities from the database and display them
      */
+    /**
+     * Rows for a landing-page strip, from the published static base.
+     *
+     * The landing page is the first thing anyone loads and it was making
+     * sixteen document reads to fill two decorative strips — four deities and
+     * four creatures for "featured", two each from four collections for
+     * "recently added". Those entities are already on the CDN, which is why the
+     * browse pages read nothing.
+     *
+     * Returns null when the base cannot answer, so the caller falls back to
+     * Firestore and the strip still fills.
+     *
+     * @param {string} collectionName
+     * @param {{limit: number, newestFirst?: boolean}} options
+     */
+    async _stripFromBase(collectionName, { limit, newestFirst = false } = {}) {
+        const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
+        if (!loader) return null;
+
+        try {
+            const baseMap = await loader.load(collectionName, null);
+            if (!baseMap || baseMap.size === 0) return null;
+
+            let rows = [];
+            for (const [id, data] of baseMap) {
+                // Never surface a record that was merged into another; it would
+                // send a reader from the front page to a redirect.
+                if (!data || data.duplicateOf) continue;
+                rows.push({ id: data.id || id, type: collectionName, ...data });
+                // Sorting by date needs the whole set; "first four" does not.
+                if (!newestFirst && rows.length >= limit) break;
+            }
+
+            if (newestFirst) {
+                rows.sort((a, b) => {
+                    const at = Date.parse(a.createdAt || a.dateAdded || '') || 0;
+                    const bt = Date.parse(b.createdAt || b.dateAdded || '') || 0;
+                    return bt - at;
+                });
+                rows = rows.slice(0, limit);
+            }
+
+            return rows.length ? rows : null;
+        } catch (error) {
+            console.warn(`[Landing Page] Static base unavailable for '${collectionName}':`, error.message);
+            return null;
+        }
+    }
+
     async loadFeaturedEntities() {
         const featuredSection = document.getElementById('featured-entities-section');
         const featuredGrid = document.getElementById('featured-entities-grid');
@@ -2282,19 +2331,27 @@ Discover & Explore
             // Attempt to load featured deities and creatures
             const featuredEntities = [];
 
-            // Try to get some featured deities
-            const deitiesRef = this.db.collection('deities');
-            const deitiesSnapshot = await deitiesRef.limit(4).get();
-
-            deitiesSnapshot.forEach(doc => {
-                featuredEntities.push({
-                    id: doc.id,
-                    type: 'deities',
-                    ...doc.data()
+            // Featured deities — base first, Firestore only if it cannot answer.
+            const baseDeities = await this._stripFromBase('deities', { limit: 4 });
+            if (baseDeities) {
+                featuredEntities.push(...baseDeities);
+            } else {
+                const deitiesRef = this.db.collection('deities');
+                const deitiesSnapshot = await deitiesRef.limit(4).get();
+                deitiesSnapshot.forEach(doc => {
+                    featuredEntities.push({
+                        id: doc.id,
+                        type: 'deities',
+                        ...doc.data()
+                    });
                 });
-            });
+            }
 
-            // Try to get some featured creatures
+            // Featured creatures — same.
+            const baseCreatures = await this._stripFromBase('creatures', { limit: 4 });
+            if (baseCreatures) {
+                featuredEntities.push(...baseCreatures);
+            } else {
             const creaturesRef = this.db.collection('creatures');
             const creaturesSnapshot = await creaturesRef.limit(4).get();
 
@@ -2305,6 +2362,7 @@ Discover & Explore
                     ...doc.data()
                 });
             });
+            }
 
             if (featuredEntities.length > 0) {
                 // Render featured entities
@@ -2443,9 +2501,15 @@ Discover & Explore
             const recentEntities = [];
             const collections = ['deities', 'creatures', 'heroes', 'items'];
 
-            // Try to get recently added entities from various collections
+            // Recently added — base first, Firestore only where it cannot answer.
             for (const collectionName of collections) {
                 try {
+                    const fromBase = await this._stripFromBase(collectionName, { limit: 2, newestFirst: true });
+                    if (fromBase) {
+                        recentEntities.push(...fromBase);
+                        continue;
+                    }
+
                     const ref = this.db.collection(collectionName)
                         .orderBy('createdAt', 'desc')
                         .limit(2);

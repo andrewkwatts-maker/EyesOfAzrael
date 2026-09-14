@@ -1053,6 +1053,10 @@ class SPANavigation {
         // navigation" from "the reader has gone somewhere else".
         this._isNavigating = true;
         this._navigatingPath = requestedPath;
+
+        // Cleared in the catch below if this route fails to draw, so the dedupe
+        // record is only written for a page that actually reached the screen.
+        let renderSucceeded = true;
         const navigationId = Date.now() + Math.random();
         this._currentNavigationId = navigationId;
         this._activeNavigationId = navigationId;
@@ -1343,6 +1347,10 @@ class SPANavigation {
             this.renderError(error, path);
             this._announceLoading(false);
 
+            // This route did not draw. Leave the dedupe record alone so an
+            // immediate retry of the same path is allowed to run.
+            renderSucceeded = false;
+
             // Dispatch first-render-complete to prevent stuck loading states
             document.dispatchEvent(new CustomEvent('first-render-complete', {
                 detail: { route: 'error', path: path, error: error.message, timestamp: Date.now() }
@@ -1355,12 +1363,22 @@ class SPANavigation {
                 this._isNavigating = false;
                 this._activeNavigationId = null;
             }
+
             // Record what was drawn, so an immediate repeat of the same route is
-            // recognised as the duplicate it is. Set in `finally` so a failed
-            // render does not mark itself done and suppress the retry.
-            if (!this._renderFailed) {
+            // recognised as the duplicate it is.
+            //
+            // This used to test `this._renderFailed`, which nothing ever
+            // assigned — so it was always undefined, the condition was always
+            // true, and a route that had just thrown recorded itself as freshly
+            // rendered. Anything retrying within the dedupe window was then
+            // discarded as a duplicate of a page that is not on screen, which is
+            // the one case where the retry matters most.
+            if (renderSucceeded) {
                 this._lastRenderedPath = path;
                 this._lastRenderedAt = Date.now();
+            } else {
+                this._lastRenderedPath = null;
+                this._lastRenderedAt = 0;
             }
         }
     }
