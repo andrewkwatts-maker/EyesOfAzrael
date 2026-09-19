@@ -428,6 +428,12 @@ class SPANavigation {
         this.routes = {
             home: /^#?\/?$/,
             mythologies: /^#?\/mythologies\/?$/,
+            // The tier between a category and an entity. Declared before the
+            // browse routes because #/topic/... and #/browse/... are distinct
+            // shapes and the more specific one should be tested first.
+            explore: /^#?\/explore\/?$/,
+            topic: /^#?\/topic\/([^\/]+)\/([^\/]+)\/?$/,
+            region: /^#?\/region\/([^\/]+)\/?$/,
             browse_root: /^#?\/browse\/?$/,
             browse_category: /^#?\/browse\/([^\/]+)\/?$/,
             browse_category_mythology: /^#?\/browse\/([^\/]+)\/([^\/]+)\/?$/,
@@ -464,6 +470,9 @@ class SPANavigation {
         this._routeNames = {
             home: 'Home',
             mythologies: 'World Mythologies',
+            explore: 'Explore',
+            topic: 'Topic',
+            region: 'Region',
             browse_root: 'Browse',
             browse_category: 'Browse',
             browse_category_mythology: 'Browse',
@@ -1268,6 +1277,17 @@ class SPANavigation {
                     spaLog('Matched MYTHOLOGY route:', mythologyId);
                     await this.renderMythology(mythologyId);
                 }
+            } else if (this.routes.explore.test(path)) {
+                spaLog('Matched EXPLORE route');
+                await this.renderExplore();
+            } else if (this.routes.topic.test(path)) {
+                const match = path.match(this.routes.topic);
+                spaLog('Matched TOPIC route:', match[1], match[2]);
+                await this.renderTopic(match[1], match[2]);
+            } else if (this.routes.region.test(path)) {
+                const match = path.match(this.routes.region);
+                spaLog('Matched REGION route:', match[1]);
+                await this.renderRegion(match[1]);
             } else if (this.routes.search.test(path)) {
                 spaLog('Matched SEARCH route');
                 const queryStr = path.includes('?') ? path.split('?')[1] : '';
@@ -2312,6 +2332,46 @@ class SPANavigation {
             spaError('Search page render failed:', error);
             throw error;
         }
+    }
+
+    /**
+     * The topic and region tier.
+     *
+     * These render entirely from static/topics.json and the entity base, so
+     * they cost no document reads. They exist because the alphabetical listing
+     * they sit above could only show the visitor entries beginning with A.
+     */
+    async renderExplore() {
+        spaLog('renderExplore() called');
+        const mainContent = document.getElementById('main-content');
+        if (typeof ExploreView === 'undefined') {
+            spaError('ExploreView class not loaded');
+            mainContent.innerHTML = this.getErrorHTML('Error', 'Explore component not loaded. Please refresh the page.');
+            return;
+        }
+        await new ExploreView().render(mainContent);
+    }
+
+    async renderTopic(collection, slug) {
+        spaLog('renderTopic() called', collection, slug);
+        const mainContent = document.getElementById('main-content');
+        if (typeof TopicView === 'undefined') {
+            spaError('TopicView class not loaded');
+            mainContent.innerHTML = this.getErrorHTML('Error', 'Topic component not loaded. Please refresh the page.');
+            return;
+        }
+        await new TopicView().render(mainContent, this.getCollectionName(collection), slug);
+    }
+
+    async renderRegion(slug) {
+        spaLog('renderRegion() called', slug);
+        const mainContent = document.getElementById('main-content');
+        if (typeof RegionView === 'undefined') {
+            spaError('RegionView class not loaded');
+            mainContent.innerHTML = this.getErrorHTML('Error', 'Region component not loaded. Please refresh the page.');
+            return;
+        }
+        await new RegionView().render(mainContent, slug);
     }
 
     async renderCompare() {

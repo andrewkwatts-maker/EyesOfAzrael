@@ -84,6 +84,7 @@ const PRECACHE_ENHANCED = [
   // and never used.
   '/js/views/landing-page-view.js',
   '/js/views/browse-category-view.js',
+  '/js/views/topics-view.js',
   '/js/views/home-view.js',
   '/js/views/mythologies-view.js',
   '/js/views/user-profile-view.js',

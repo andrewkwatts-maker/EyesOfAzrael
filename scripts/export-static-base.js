@@ -105,7 +105,19 @@ function readCollection(name) {
     if (!fs.existsSync(dir)) return [];
 
     const files = fs.readdirSync(dir).filter(f => f.endsWith('.json') && !f.startsWith('_'));
-    const entities = [];
+
+    // Keyed by id, because the same entity reaches this function more than once:
+    // some snapshot files hold an array that repeats a record, and some records
+    // are present both in their own file and inside someone else's array. Pushing
+    // blindly put 442 repeated ids into the base — cosmology had 136 rows for 73
+    // entities. Every count the site displayed was inflated by that margin and
+    // listings rendered the same card twice.
+    const byId = new Map();
+
+    /** How much an entity actually carries, used to pick between two copies. */
+    const weight = (obj) => Object.values(obj).filter(
+        (v) => v !== null && v !== undefined && v !== '' && !(Array.isArray(v) && !v.length)
+    ).length;
 
     for (const file of files) {
         try {
@@ -118,14 +130,29 @@ function readCollection(name) {
             items.forEach((obj, i) => {
                 if (!obj || typeof obj !== 'object') return;
                 if (!obj.id) obj.id = items.length === 1 ? fileBase : `${fileBase}_${i}`;
-                entities.push(obj);
+
+                const held = byId.get(obj.id);
+                if (!held) {
+                    byId.set(obj.id, { obj, file: fileBase, weight: weight(obj) });
+                    return;
+                }
+                // Prefer the record in the file named after it — that is the
+                // canonical one the rest of the pipeline writes to — and
+                // otherwise the copy carrying more fields.
+                const incoming = { obj, file: fileBase, weight: weight(obj) };
+                const heldIsCanonical = held.file === obj.id;
+                const incomingIsCanonical = fileBase === obj.id;
+                if ((incomingIsCanonical && !heldIsCanonical) ||
+                    (incomingIsCanonical === heldIsCanonical && incoming.weight > held.weight)) {
+                    byId.set(obj.id, incoming);
+                }
             });
         } catch (e) {
             console.warn(`  ⚠  Skipping ${name}/${file}: ${e.message}`);
         }
     }
 
-    return entities;
+    return [...byId.values()].map((entry) => entry.obj);
 }
 
 function ensureDir(dir) {
