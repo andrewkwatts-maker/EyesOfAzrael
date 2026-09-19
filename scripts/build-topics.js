@@ -97,6 +97,26 @@ function isNotAName(name) {
 }
 
 /**
+ * A collection hub filed as one of its own members.
+ *
+ * `creatures/babylonian` is named "Babylonian", carries no tradition of its own
+ * and is described as "The creatures of Babylonian mythology represent…". It is
+ * the heading for a group, not a creature, and it was appearing in listings and
+ * topic pages beside actual monsters.
+ *
+ * Both halves of the test are needed. A missing `mythology` alone is too broad,
+ * and a name matching its id alone matches 2,448 perfectly good entities
+ * (`archetypes/death-god` is named "Death God"). Together they select 18
+ * records, all of them hubs.
+ */
+function isCollectionHub(row) {
+    if (row.mythology) return false;
+    const name = String(row.name || '').trim().toLowerCase();
+    if (!name) return false;
+    return name === String(row.id || '').replace(/[_-]+/g, ' ').toLowerCase();
+}
+
+/**
  * Collapse records that are plainly the same subject.
  *
  * Three separate "Ishtar" records under babylonian survive here because none is
@@ -323,7 +343,7 @@ function main() {
         // Duplicates redirect, so listing them would send a visitor to a page
         // they did not ask for. Mis-named records are held back for the reason
         // in isNotAName.
-        const live = rows.filter((r) => !r.duplicateOf && !isNotAName(r.name));
+        const live = rows.filter((r) => !r.duplicateOf && !isNotAName(r.name) && !isCollectionHub(r));
 
         const searchText = new Map(
             live.map((r) => [r.id, spec.fields.map((f) => textOf(r[f])).join(' ; ')])
@@ -385,7 +405,15 @@ function main() {
         const ranked = [...live].sort((a, b) => (score.get(b.id) || 0) - (score.get(a.id) || 0));
         const kept = new Set(dedupeBySubject(ranked.map((r) => refOf(r, score))).map((r) => r.id));
         out.shadowed = out.shadowed || {};
-        out.shadowed[collection] = live.filter((r) => !kept.has(r.id)).map((r) => r.id);
+        // Near-duplicates, plus the collection hubs. Deliberately NOT the
+        // badly-named records: "Lord of the Afterlife | Egyptian Mythology" is a
+        // real deity behind a broken name, and hiding it would lose content to
+        // fix a label. Those stay listed and stay in the repair queue. A hub is
+        // not an entity at all, so it goes.
+        out.shadowed[collection] = [
+            ...live.filter((r) => !kept.has(r.id)).map((r) => r.id),
+            ...rows.filter(isCollectionHub).map((r) => r.id)
+        ];
 
         out.collections[collection] = {
             label: spec.label,
@@ -399,6 +427,25 @@ function main() {
         console.log(`  ${collection.padEnd(10)} ${String(live.length).padStart(5)} live  ${String(topicRows.length).padStart(2)} topics  ${String(pct).padStart(3)}% in at least one`);
         console.log(`             top: ${topicRows.slice(0, 4).map((t) => `${t.name} (${t.total})`).join(', ')}`);
     }
+
+    // Hubs exist in collections with no topic taxonomy too - `rituals/greek` is
+    // one - and those listings deserve the same cleanup, so sweep everything
+    // rather than only the five collections above.
+    let hubTotal = 0;
+    for (const collection of fs.readdirSync(BASE)) {
+        const file = path.join(BASE, collection, '_all.json');
+        if (!fs.existsSync(file)) continue;
+        const raw = readJson(file);
+        const hubs = (Array.isArray(raw) ? raw : Object.values(raw))
+            .filter((r) => r && typeof r === 'object' && r.id && !r.duplicateOf && isCollectionHub(r))
+            .map((r) => r.id);
+        if (!hubs.length) continue;
+        out.shadowed = out.shadowed || {};
+        const existing = out.shadowed[collection] || [];
+        out.shadowed[collection] = [...new Set([...existing, ...hubs])];
+        hubTotal += hubs.length;
+    }
+    console.log(`  ${hubTotal} collection hubs hidden from listings (a heading filed as one of its own members)`);
 
     if (REPORT_ONLY) {
         console.log('\n--report: nothing written.');

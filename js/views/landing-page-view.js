@@ -495,6 +495,16 @@ class LandingPageView {
                     </div>
                 </section>
 
+                <!--
+                  Regions and themes, offered on the front page.
+
+                  "Explore by Category" above sends a reader to a list of 2,075
+                  deities; these send them to a group small enough to read. The
+                  section fills asynchronously and stays hidden if the topic file
+                  is unavailable, so nothing on the landing page depends on it.
+                -->
+                <section class="landing-topics-section" id="landing-topics-section" hidden></section>
+
                 <!-- Featured Entities Section - Dynamically loaded if data available -->
                 <section class="landing-featured-section" id="featured-entities-section" style="display: none;">
                     <h2 class="landing-section-header">
@@ -2175,7 +2185,8 @@ Discover & Explore
         Promise.allSettled([
             this.loadFeaturedEntities(),
             this.loadRecentAdditions(),
-            this.loadStats()
+            this.loadStats(),
+            this.loadTopicsSection()
         ]).then(results => {
             results.forEach((result, i) => {
                 if (result.status === 'rejected') {
@@ -2316,6 +2327,71 @@ Discover & Explore
             console.warn(`[Landing Page] Static base unavailable for '${collectionName}':`, error.message);
             return null;
         }
+    }
+
+    /**
+     * Fill the regions-and-themes section.
+     *
+     * Six of each: enough to show that the structure exists and what shape it
+     * takes, few enough that the landing page is still a landing page. Both
+     * rows lead on to #/explore for the rest.
+     */
+    async loadTopicsSection() {
+        const section = document.getElementById('landing-topics-section');
+        if (!section || typeof TopicsService === 'undefined') return;
+
+        let regions = [];
+        let topics = [];
+        try {
+            regions = await TopicsService.regions();
+            topics = await TopicsService.allTopics();
+        } catch (error) {
+            return;
+        }
+        if (!regions.length && !topics.length) return;
+
+        // Busiest first, so the examples on the front page are ones with
+        // something behind them.
+        const topRegions = [...regions].sort((a, b) => b.total - a.total).slice(0, 6);
+        const topTopics = [...topics].sort((a, b) => b.total - a.total).slice(0, 8);
+
+        const escape = (text) => String(text == null ? '' : text).replace(/[&<>"']/g, (c) => (
+            { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+        ));
+
+        section.innerHTML = `
+            <h2 class="landing-section-header">Start with a region</h2>
+            <p class="landing-section-subtitle">
+                Fourteen culture groups over the traditions, so you can begin somewhere
+                smaller than an alphabetical list.
+            </p>
+            <div class="landing-topic-row">
+                ${topRegions.map((r) => `
+                    <a class="landing-topic-card" href="#/region/${encodeURIComponent(r.slug)}">
+                        <span class="landing-topic-icon" aria-hidden="true">${escape(r.icon || '◆')}</span>
+                        <span class="landing-topic-name">${escape(r.name)}</span>
+                        <span class="landing-topic-count">${r.total} entries</span>
+                    </a>
+                `).join('')}
+            </div>
+
+            <h2 class="landing-section-header landing-topics-second">Or with a theme</h2>
+            <p class="landing-section-subtitle">
+                Themes cut across traditions — the war gods of Greece, Norway, Egypt and
+                India on one page.
+            </p>
+            <div class="landing-topic-row">
+                ${topTopics.map((t) => `
+                    <a class="landing-topic-card" href="#/topic/${encodeURIComponent(t.collection)}/${encodeURIComponent(t.slug)}">
+                        <span class="landing-topic-icon" aria-hidden="true">${escape(t.icon || '◆')}</span>
+                        <span class="landing-topic-name">${escape(t.name)}</span>
+                        <span class="landing-topic-count">${t.total} entries</span>
+                    </a>
+                `).join('')}
+            </div>
+
+            <p class="landing-topics-more"><a href="#/explore">See all regions and themes &rarr;</a></p>`;
+        section.hidden = false;
     }
 
     async loadFeaturedEntities() {

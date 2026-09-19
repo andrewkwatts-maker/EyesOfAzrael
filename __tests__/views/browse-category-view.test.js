@@ -136,7 +136,11 @@ describe('BrowseCategoryView', () => {
 
         test('should initialize view state defaults', () => {
             expect(view.viewMode).toBe('grid');
-            expect(view.sortBy).toBe('name');
+            // Prominence, not the alphabet. Ordering by name opened every
+            // listing on entries beginning with A — 24 of 257 Greek deities,
+            // none of them Zeus — which is what the topic tier was built to
+            // fix. A-Z is still offered in the sort control.
+            expect(view.sortBy).toBe('prominence');
             expect(view.searchTerm).toBe('');
         });
 

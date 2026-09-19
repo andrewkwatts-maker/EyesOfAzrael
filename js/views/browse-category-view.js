@@ -62,7 +62,11 @@ class BrowseCategoryView {
         // View state
         this.viewMode = localStorage.getItem('browse-view-mode') || 'grid'; // 'grid' or 'list'
         this.viewDensity = localStorage.getItem('browse-view-density') || 'comfortable'; // 'compact', 'comfortable', 'detailed'
-        this.sortBy = localStorage.getItem('browse-sort-by') || 'name'; // 'name', 'mythology', 'popularity', 'dateAdded'
+        // Defaults to prominence, not the alphabet. A-Z is still offered and is
+        // still the right tool when you know the name you want; it was simply
+        // the wrong thing to open on, because it showed a visitor 24 entries all
+        // beginning with A and nothing else.
+        this.sortBy = localStorage.getItem('browse-sort-by') || 'prominence';
 
         // Filter state
         this.searchTerm = '';
@@ -216,6 +220,11 @@ class BrowseCategoryView {
                 detail: { view: 'browse', category: this.category, timestamp: Date.now() }
             }));
 
+            // Not awaited: the grid is already on screen and the themes are an
+            // addition to it, so a slow or missing topic file must not hold up
+            // the page the visitor asked for.
+            this.fillTopicStrip();
+
             console.log(`[Browse View] Render complete for ${this.category}`);
 
         } catch (error) {
@@ -296,10 +305,42 @@ class BrowseCategoryView {
                 console.log(`[Browse View] Hid ${removed} duplicate record(s) merged into other entries`);
             }
 
+            // Hide records that another record already says better.
+            //
+            // Three "Ishtar" entries and three "Nergal" survive with distinct
+            // ids and no `duplicateOf` mark, so the merge filter above does not
+            // catch them and the grid showed the same god three times in a row.
+            // The list of ids to hold back is computed once by
+            // scripts/build-topics.js rather than re-derived here.
+            try {
+                const shadowed = await TopicsService.shadowed(this.category);
+                if (shadowed.size) {
+                    const before = this.entities.length;
+                    this.entities = this.entities.filter((e) => !e || !shadowed.has(e.id));
+                    const hidden = before - this.entities.length;
+                    if (hidden > 0) {
+                        console.log(`[Browse View] Hid ${hidden} record(s) duplicated under another name`);
+                    }
+                }
+            } catch (shadowError) {
+                console.warn('[Browse View] Shadow list unavailable:', shadowError.message);
+            }
+
+            // Prominence scores for the default ordering. Absent scores sort
+            // last and fall back to the alphabet, so a collection with no topic
+            // data behaves as it always did.
+            let prominence = {};
+            try {
+                prominence = await TopicsService.prominence(this.category);
+            } catch (prominenceError) {
+                console.warn('[Browse View] Prominence unavailable:', prominenceError.message);
+            }
+
             // Add metadata for sorting
             this.entities = this.entities.map((entity, index) => ({
                 ...entity,
                 _popularity: this.calculatePopularity(entity),
+                _prominence: prominence[entity.id] || 0,
                 _dateAdded: entity.dateAdded || entity.createdAt || Date.now() - (index * 1000)
             }));
 
@@ -554,6 +595,59 @@ class BrowseCategoryView {
     /**
      * Calculate popularity score for sorting
      */
+    /**
+     * Put this category's themes above the grid.
+     *
+     * When the page is scoped to one tradition the counts are scoped with it,
+     * because "Gods of War (231)" beside a Greek-only grid would be promising
+     * 231 Greek war gods and delivering 22. A topic with nothing in this
+     * tradition is dropped rather than shown as a zero.
+     */
+    async fillTopicStrip() {
+        const strip = document.getElementById('browseTopicStrip');
+        if (!strip || typeof TopicsService === 'undefined') return;
+
+        let topics;
+        try {
+            topics = await TopicsService.topicsFor(this.category);
+        } catch (error) {
+            return;
+        }
+        if (!topics || !topics.length) return;
+
+        const tradition = this.mythology ? String(this.mythology).toLowerCase() : null;
+        const scoped = topics.map((topic) => {
+            if (!tradition) return { topic, count: topic.total };
+            const count = (topic.members || []).filter((m) => m[1] === tradition).length;
+            return { topic, count };
+        }).filter((row) => row.count > 0);
+
+        if (scoped.length < 2) return;
+        scoped.sort((a, b) => b.count - a.count);
+
+        const href = (topic) => (tradition
+            ? `#/topic/${encodeURIComponent(this.category)}/${encodeURIComponent(topic.slug)}`
+            : `#/topic/${encodeURIComponent(this.category)}/${encodeURIComponent(topic.slug)}`);
+
+        const escape = (text) => this.escapeHtml(String(text == null ? '' : text));
+
+        strip.innerHTML = `
+            <h2 class="browse-topic-strip-head">
+                Browse by theme
+                <a class="browse-topic-strip-all" href="#/explore">All topics &rarr;</a>
+            </h2>
+            <div class="browse-topic-strip-row">
+                ${scoped.map(({ topic, count }) => `
+                    <a class="browse-topic-chip" href="${href(topic)}">
+                        <span aria-hidden="true">${escape(topic.icon || '◆')}</span>
+                        <span class="browse-topic-chip-name">${escape(topic.name)}</span>
+                        <span class="browse-topic-chip-count">${count}</span>
+                    </a>
+                `).join('')}
+            </div>`;
+        strip.hidden = false;
+    }
+
     calculatePopularity(entity) {
         let score = 0;
 
@@ -763,6 +857,19 @@ class BrowseCategoryView {
 
                 <!-- Early-collection notice, shown only when one is warranted -->
                 ${this.getEarlyCollectionNoticeHTML()}
+
+                <!--
+                  Themes, offered before the grid.
+
+                  A reader arriving here has no idea what 2,075 deities contain,
+                  and scrolling an ordered list will not tell them. These are the
+                  shapes in the collection, and picking one is a smaller question
+                  than picking a name. Filled asynchronously because the topic
+                  file is a separate fetch; the container stays empty and
+                  collapsed if it is unavailable, so the grid below is never
+                  blocked on it.
+                -->
+                <div class="browse-topic-strip" id="browseTopicStrip" hidden></div>
 
                 <!-- Quick Filters & Statistics -->
                 ${this.getQuickFiltersHTML()}
@@ -1248,6 +1355,7 @@ class BrowseCategoryView {
                         </label>
                         <div class="sort-select-wrapper">
                             <select id="sortOrder" class="filter-select filter-select--sort">
+                                <option value="prominence" ${this.sortBy === 'prominence' ? 'selected' : ''}>Most referenced</option>
                                 <option value="name" ${this.sortBy === 'name' ? 'selected' : ''}>A-Z (Name)</option>
                                 <option value="name-desc" ${this.sortBy === 'name-desc' ? 'selected' : ''}>Z-A (Name)</option>
                                 <option value="dateAdded" ${this.sortBy === 'dateAdded' ? 'selected' : ''}>Recently Added</option>
@@ -2645,8 +2753,20 @@ class BrowseCategoryView {
                     return (b._dateAdded || 0) - (a._dateAdded || 0);
 
                 case 'name':
-                default:
                     return (a.name || '').localeCompare(b.name || '');
+
+                case 'prominence':
+                default:
+                    // The default, replacing A-Z. `_prominence` is the folded
+                    // backlink count from static/topics.json: how often the rest
+                    // of the collection refers to this entity. It is what puts
+                    // Zeus, Odin and Poseidon at the top of a list that used to
+                    // open on Aceso, Achelous and Aeolus.
+                    //
+                    // Ties fall back to the alphabet, so a collection with no
+                    // prominence data behaves exactly as it did before.
+                    return ((b._prominence || 0) - (a._prominence || 0))
+                        || (a.name || '').localeCompare(b.name || '');
             }
         });
 

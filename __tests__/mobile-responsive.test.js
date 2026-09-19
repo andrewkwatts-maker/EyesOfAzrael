@@ -63,6 +63,7 @@ describe('Mobile Responsive & Footer', () => {
 
         // Named routes: check by looking for the route regex definitions
         const routeMap = {
+            '/explore': 'explore',
             '/mythologies': 'mythologies',
             '/search': 'search',
             '/compare': 'compare',

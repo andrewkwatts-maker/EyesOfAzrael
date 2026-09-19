@@ -58,8 +58,12 @@ class BottomNavigation {
                     <rect x="14" y="14" width="7" height="7"/>
                     <rect x="3" y="14" width="7" height="7"/>
                 </svg>`,
-                route: '#/mythologies',
-                matchRoutes: ['#/mythologies', '#/browse']
+                // Points at #/explore rather than #/mythologies: explore offers
+                // both ways through the collection (region and theme) and links
+                // on to the full tradition list, where the tradition list alone
+                // was 181 entries with no structure over them.
+                route: '#/explore',
+                matchRoutes: ['#/explore', '#/mythologies', '#/browse', '#/topic', '#/region']
             },
             {
                 id: 'search',
