@@ -393,6 +393,18 @@ class ExploreView {
  * one page is the thing a flat alphabetical grid could never show.
  */
 class TopicView {
+    /**
+     * Cards rendered per tradition before a reader asks for the rest.
+     *
+     * Twelve fills two or three rows at common widths, which is enough to show
+     * what a tradition contributes to the theme without any group running off
+     * the screen.
+     */
+    static GROUP_PREVIEW = 12;
+
+    /** Added per press of "Show more" — a screenful, not the remainder. */
+    static GROUP_BATCH = 36;
+
     async render(container, collection, slug) {
         container.innerHTML = '<div class="topic-loading">Loading…</div>';
 
@@ -459,12 +471,28 @@ class TopicView {
         const MAJOR_GROUPS = 10;
         const MIN_FOR_OWN_GROUP = 3;
 
-        const major = ranked.filter((g, i) => i < MAJOR_GROUPS && g[1].length >= MIN_FOR_OWN_GROUP);
-        const tail = ranked.filter((g) => !major.includes(g));
-        const ordered = [...major];
-        if (tail.length) {
-            const pooled = tail.flatMap(([, list]) => list);
-            ordered.push([`${tail.length} more traditions`, pooled, true]);
+        // Do not group by something the records do not record.
+        //
+        // 4,904 of the 5,199 concepts carry no tradition at all — the
+        // conspiracy and mystery material is not attached to one — so every
+        // member of Conspiracy Theories landed in a single bucket and the page
+        // grew a heading reading "Other 700" above a jump bar with one entry in
+        // it. A heading that tells the reader nothing is worse than no heading.
+        const untraditioned = (groups.get('other') || []).length;
+        const grouped = untraditioned / entities.length < 0.7;
+
+        const ordered = [];
+        if (grouped) {
+            const major = ranked.filter((g, i) => i < MAJOR_GROUPS && g[1].length >= MIN_FOR_OWN_GROUP);
+            const tail = ranked.filter((g) => !major.includes(g));
+            ordered.push(...major);
+            if (tail.length) {
+                const pooled = tail.flatMap(([, list]) => list);
+                ordered.push([`${tail.length} more traditions`, pooled, true]);
+            }
+        } else {
+            // One list, in prominence order, with the same cap and reveal.
+            ordered.push(['', entities, true]);
         }
 
         const siblings = (await TopicsService.topicsFor(collection))
@@ -489,32 +517,59 @@ class TopicView {
                             // member list is capped, and a header promising 522
                             // above a grid of 400 is the page telling the reader
                             // something they can check and find untrue.
-                            entities.length < topic.total
-                                ? `Showing ${entities.length} of ${topic.total} entries across ${groups.size} traditions`
-                                : `${topic.total} entries across ${groups.size} traditions`
+                            // Say what is on the page, and only mention
+                            // traditions when the page is actually grouped by
+                            // them.
+                            [
+                                entities.length < topic.total
+                                    ? `Showing ${entities.length} of ${topic.total} entries`
+                                    : `${topic.total} entries`,
+                                grouped ? ` across ${groups.size} traditions` : ''
+                            ].join('')
                         }</p>
                     </div>
                 </header>
 
+                ${grouped ? `
                 <div class="topic-tradition-jump">
                     ${ordered.map(([key, list, pooled], i) => `
                         <a href="#topic-group-${i}">${TopicsUI.escape(pooled ? key : TopicsUI.titleCase(key))} <span>${list.length}</span></a>
                     `).join('')}
-                </div>
+                </div>` : ''}
 
-                ${ordered.map(([key, list, pooled], i) => `
+                ${ordered.map(([key, list, pooled], i) => {
+                    // Only the first slice is written into the page.
+                    //
+                    // Conspiracy Theories has 700 members, and rendering them
+                    // all put 4,559 nodes and 557 KB of markup on screen before
+                    // a reader had decided anything — about two seconds, and
+                    // several hundred tab stops for anyone using a keyboard.
+                    //
+                    // The cap is per group rather than overall so every
+                    // tradition still appears: the cross-tradition comparison is
+                    // the reason this page is grouped at all, and a global limit
+                    // would cut the smaller traditions off the bottom entirely.
+                    const shown = list.slice(0, TopicView.GROUP_PREVIEW);
+                    const rest = list.length - shown.length;
+                    return `
                     <section class="topic-group" id="topic-group-${i}">
+                        ${key ? `
                         <h2 class="topic-group-head">
                             ${TopicsUI.escape(pooled ? key : TopicsUI.titleCase(key))}
                             ${pooled
                                 ? ''
                                 : `<a class="topic-group-all" href="#/mythology/${encodeURIComponent(key)}">Tradition →</a>`}
-                        </h2>
-                        <div class="topic-entity-grid">
-                            ${list.map((e) => TopicsUI.entityCard(e, collection)).join('')}
+                        </h2>` : ''}
+                        <div class="topic-entity-grid" data-group="${i}">
+                            ${shown.map((e) => TopicsUI.entityCard(e, collection)).join('')}
                         </div>
-                    </section>
-                `).join('')}
+                        ${rest > 0 ? `
+                            <button type="button" class="topic-group-more" data-group="${i}"
+                                    aria-label="Show the remaining ${rest} in ${TopicsUI.escape(pooled ? key : TopicsUI.titleCase(key))}">
+                                Show ${rest} more
+                            </button>` : ''}
+                    </section>`;
+                }).join('')}
 
                 ${siblings.length ? `
                     <section class="topic-section topic-siblings">
@@ -522,6 +577,47 @@ class TopicView {
                         <div class="topic-tile-grid">${siblings.map(TopicsUI.topicTile).join('')}</div>
                     </section>` : ''}
             </div>`;
+
+        // One delegated listener rather than one per button: a topic can have
+        // seventy groups, and the container is replaced wholesale on every
+        // navigation, so per-button handlers would be attached and discarded
+        // seventy at a time.
+        container.addEventListener('click', (event) => {
+            const button = event.target.closest('.topic-group-more');
+            if (!button) return;
+            const index = Number(button.dataset.group);
+            const group = ordered[index];
+            if (!group) return;
+
+            const grid = container.querySelector(`.topic-entity-grid[data-group="${index}"]`);
+            if (!grid) return;
+
+            // A batch at a time, not the remainder. One tradition can hold
+            // several hundred entries, and revealing all of them restores the
+            // wall this cap exists to prevent — the reader asked for more, not
+            // for everything.
+            const alreadyShown = grid.children.length;
+            const batch = group[1].slice(alreadyShown, alreadyShown + TopicView.GROUP_BATCH);
+            grid.insertAdjacentHTML('beforeend', batch.map((e) => TopicsUI.entityCard(e, collection)).join(''));
+
+            const left = group[1].length - grid.children.length;
+            if (left > 0) {
+                button.textContent = `Show ${left} more`;
+                button.setAttribute('aria-label', `Show ${left} more entries`);
+            } else {
+                button.remove();
+            }
+
+            // Move focus to the first card revealed. Without this a keyboard
+            // user presses the button and, when it is the last batch and the
+            // button disappears, focus falls back to the body at the top of the
+            // document.
+            const firstNew = grid.children[alreadyShown];
+            if (firstNew) {
+                firstNew.setAttribute('tabindex', '-1');
+                firstNew.focus({ preventScroll: true });
+            }
+        });
     }
 }
 
