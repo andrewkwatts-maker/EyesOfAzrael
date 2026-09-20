@@ -1181,6 +1181,32 @@ class BrowseCategoryView {
      * project is an implementation detail, and showing a reader "hist_figures"
      * leaks it into the page.
      */
+    /**
+     * The singular of a collection name, for a sentence about one of them.
+     *
+     * Stripping a trailing "s" gets most of these right and the most common one
+     * wrong: the button on the biggest collection on the site read "Add a new
+     * deitie". "-ies" and "-es" endings need the real rule, and a few words are
+     * simply irregular.
+     */
+    static singularNoun(collection) {
+        const raw = String(collection || '').toLowerCase().replace(/_/g, ' ');
+        if (!raw) return 'entry';
+
+        const IRREGULAR = {
+            deities: 'deity', heroes: 'hero', people: 'person', myths: 'myth',
+            texts: 'text', cosmology: 'cosmology', magic: 'magic', herbs: 'herb'
+        };
+        if (IRREGULAR[raw]) return IRREGULAR[raw];
+
+        if (/ies$/.test(raw)) return raw.replace(/ies$/, 'y');
+        if (/(ch|sh|ss|x|z)es$/.test(raw)) return raw.replace(/es$/, '');
+        // Words that are already singular, or uncountable, keep their shape
+        // rather than losing a letter they need.
+        if (!/s$/.test(raw)) return raw;
+        return raw.replace(/s$/, '');
+    }
+
     categoryNoun(category) {
         const raw = String(category || '');
         const r = this.registry;
@@ -1596,7 +1622,10 @@ class BrowseCategoryView {
      */
     getAddNewCardHTML() {
         const isAuth = typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser;
-        const categoryLabel = this.category ? this.category.replace(/s$/, '') : 'entity';
+        // categoryNoun() first, so the domain prefix is resolved before the word
+        // is singularised: hist_artifacts becomes "history artifacts" and then
+        // "history artifact", rather than the raw "hist artifact".
+        const categoryLabel = BrowseCategoryView.singularNoun(this.categoryNoun(this.category));
 
         if (!isAuth) {
             // Auth may not be resolved yet; listen for auth state change and re-render add card
