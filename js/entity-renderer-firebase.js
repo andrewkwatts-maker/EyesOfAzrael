@@ -482,6 +482,9 @@ class FirebaseEntityRenderer {
             <!-- Related Deities (simple array format) -->
             ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
 
+            <!-- Topics this entity belongs to, filled after render -->
+            ${FirebaseEntityRenderer.renderTopicSlot(entity)}
+
             <!-- Associations -->
             ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
 
@@ -696,6 +699,77 @@ class FirebaseEntityRenderer {
      * Wrong" — a completely blank page for a record that was present and
      * healthy, from one mistyped field.
      */
+    /**
+     * A slot for the themes this entity belongs to.
+     *
+     * Empty at render time and filled by fillTopicSlots() once the topic file
+     * is available, so an entity page never waits on it and never breaks if it
+     * is missing.
+     *
+     * The tier was one-directional before this: a reader could go from a theme
+     * to an entity but not back out sideways. Mjolnir's page carried two links
+     * in total, so arriving there ended the journey.
+     */
+    static renderTopicSlot(entity) {
+        if (!entity || !entity.id) return '';
+        const collection = String(entity.collection || entity.type || '')
+            .toLowerCase()
+            .replace(/[^a-z_-]/g, '');
+        return `<div class="entity-topic-slot" data-entity-id="${String(entity.id).replace(/"/g, '&quot;')}" data-collection="${collection}" hidden></div>`;
+    }
+
+    /**
+     * Fill every topic slot on the page.
+     *
+     * `entity.type` is singular ("deity") where the topic file is keyed by
+     * collection ("deities"), so the singular is pluralised as a fallback -
+     * the same mismatch that once made the search filter reject every result.
+     */
+    static async fillTopicSlots() {
+        if (typeof TopicsService === 'undefined') return;
+        const slots = document.querySelectorAll('.entity-topic-slot:not([data-filled])');
+        if (!slots.length) return;
+
+        const plural = (word) => {
+            const map = { deity: 'deities', hero: 'heroes', creature: 'creatures', item: 'items', place: 'places', text: 'texts', symbol: 'symbols', ritual: 'rituals', concept: 'concepts', herb: 'herbs', archetype: 'archetypes' };
+            const w = String(word || '').toLowerCase();
+            return map[w] || (w.endsWith('s') ? w : `${w}s`);
+        };
+
+        for (const slot of slots) {
+            slot.dataset.filled = '1';
+            const id = slot.dataset.entityId;
+            const raw = slot.dataset.collection;
+            if (!id || !raw) continue;
+
+            let topics = [];
+            try {
+                topics = await TopicsService.topicsForEntity(raw, id);
+                if (!topics.length) topics = await TopicsService.topicsForEntity(plural(raw), id);
+            } catch (error) {
+                continue;
+            }
+            if (!topics.length) continue;
+
+            const escape = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (c) => (
+                { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+            ));
+
+            slot.innerHTML = `
+                <h2 class="entity-topic-head">Also filed under</h2>
+                <div class="entity-topic-row">
+                    ${topics.slice(0, 6).map((t) => `
+                        <a class="entity-topic-chip" href="#/topic/${encodeURIComponent(t.collection)}/${encodeURIComponent(t.slug)}">
+                            <span aria-hidden="true">${escape(t.icon || '◆')}</span>
+                            <span>${escape(t.name)}</span>
+                            <span class="entity-topic-chip-count">${t.total}</span>
+                        </a>
+                    `).join('')}
+                </div>`;
+            slot.hidden = false;
+        }
+    }
+
     static familyNames(value) {
         if (!value) return [];
         if (Array.isArray(value)) {
@@ -1216,6 +1290,9 @@ class FirebaseEntityRenderer {
             <!-- Related Deities (simple array format) -->
             ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
 
+            <!-- Topics this entity belongs to, filled after render -->
+            ${FirebaseEntityRenderer.renderTopicSlot(entity)}
+
             <!-- Associations -->
             ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
 
@@ -1422,6 +1499,9 @@ class FirebaseEntityRenderer {
             <!-- Related Deities -->
             ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
 
+            <!-- Topics this entity belongs to, filled after render -->
+            ${FirebaseEntityRenderer.renderTopicSlot(entity)}
+
             <!-- Associations -->
             ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
 
@@ -1606,6 +1686,9 @@ class FirebaseEntityRenderer {
 
             <!-- Related Deities -->
             ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
+
+            <!-- Topics this entity belongs to, filled after render -->
+            ${FirebaseEntityRenderer.renderTopicSlot(entity)}
 
             <!-- Associations -->
             ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
@@ -1950,6 +2033,9 @@ class FirebaseEntityRenderer {
             <!-- Related Deities -->
             ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
 
+            <!-- Topics this entity belongs to, filled after render -->
+            ${FirebaseEntityRenderer.renderTopicSlot(entity)}
+
             <!-- Associations -->
             ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
 
@@ -2114,6 +2200,9 @@ class FirebaseEntityRenderer {
 
             <!-- Related Deities (simple array format) -->
             ${Array.isArray(entity.relatedDeities) && entity.relatedDeities.length ? ssr.renderRelatedDeities(entity.relatedDeities, entity.mythology) : ''}
+
+            <!-- Topics this entity belongs to, filled after render -->
+            ${FirebaseEntityRenderer.renderTopicSlot(entity)}
 
             <!-- Associations -->
             ${entity.associations?.length ? ssr.renderAssociations(entity.associations) : ''}
@@ -3125,4 +3214,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = FirebaseEntityRenderer;
+}
+// Fill the topic slots whenever anything finishes rendering.
+//
+// Hooked to the event every render path already fires rather than to one
+// call site, because entity pages are reached through several renderers and
+// tying this to one of them would leave the others without lateral links.
+// A no-op when the page has no slots.
+if (typeof document !== 'undefined') {
+    document.addEventListener('first-render-complete', () => {
+        if (typeof FirebaseEntityRenderer.fillTopicSlots === 'function') {
+            FirebaseEntityRenderer.fillTopicSlots().catch(() => { /* lateral links are an addition */ });
+        }
+    });
 }

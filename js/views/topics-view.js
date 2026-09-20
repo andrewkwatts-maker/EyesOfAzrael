@@ -94,6 +94,43 @@ class TopicsService {
         return new Set(list);
     }
 
+    /**
+     * The topics one entity belongs to.
+     *
+     * The reverse of the members lists, built once on first use: 10,700
+     * assignments is a single pass, and doing it per entity page would be a
+     * scan of every topic for every visit.
+     *
+     * This is what makes the tier two-directional. Without it a reader can go
+     * topic -> entity and no further sideways: Mjolnir's page carried two links
+     * in total, so arriving there ended the journey.
+     */
+    static async topicsForEntity(collection, entityId) {
+        const data = await TopicsService.load();
+        if (!data || !data.topics) return [];
+
+        if (!TopicsService._reverseIndex) {
+            const index = new Map();
+            for (const [coll, topics] of Object.entries(data.topics)) {
+                for (const topic of topics) {
+                    for (const member of topic.members || []) {
+                        const key = `${coll}:${member[0]}`;
+                        if (!index.has(key)) index.set(key, []);
+                        index.get(key).push({
+                            slug: topic.slug, name: topic.name, icon: topic.icon, collection: coll, total: topic.total
+                        });
+                    }
+                }
+            }
+            TopicsService._reverseIndex = index;
+        }
+
+        const hits = TopicsService._reverseIndex.get(`${collection}:${entityId}`) || [];
+        // Smallest topic first: "Dragons & Serpents" says more about a creature
+        // than "Shapeshifters", which half the bestiary belongs to.
+        return [...hits].sort((a, b) => a.total - b.total);
+    }
+
     static async collections() {
         const data = await TopicsService.load();
         return (data && data.collections) || {};
