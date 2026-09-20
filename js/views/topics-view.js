@@ -42,11 +42,32 @@ class TopicsService {
      */
     static _loadPromise = null;
 
+    /**
+     * Fetch the topic file once per page load.
+     *
+     * A promise that did not produce data is not kept. Caching the promise is
+     * what stops two panels fetching the file twice in the same frame, but
+     * caching a failed one poisons every later call for the life of the page:
+     * any retry would await the same dead promise and fail identically, which
+     * makes one bad fetch permanent rather than transient.
+     *
+     * The timeout bounds the wait so a stalled request surfaces as a page that
+     * says so, with a retry, rather than one that sits on "Loading…". This is
+     * precaution, not a fix for an observed hang — measured cold loads of every
+     * topic page complete between 60ms and 1.7s.
+     */
     static load() {
         if (!TopicsService._loadPromise) {
-            TopicsService._loadPromise = fetch('/static/topics.json')
-                .then((r) => (r.ok ? r.json() : null))
-                .catch(() => null);
+            const attempt = Promise.race([
+                fetch('/static/topics.json').then((r) => (r.ok ? r.json() : null)),
+                new Promise((resolve) => setTimeout(() => resolve(null), 8000))
+            ])
+                .catch(() => null)
+                .then((data) => {
+                    if (!data) TopicsService._loadPromise = null;
+                    return data;
+                });
+            TopicsService._loadPromise = attempt;
         }
         return TopicsService._loadPromise;
     }
@@ -162,15 +183,50 @@ class TopicsService {
      * member becomes something renderable. Ids with no record in the base are
      * dropped rather than rendered blank.
      */
+    /**
+     * Wait for the entity base loader to exist.
+     *
+     * A topic page opened directly can render before entity-base-loader.js has
+     * run, and window.entityBaseLoader is simply absent at that moment. Giving
+     * up immediately produced a page that said "no entries resolved" for a
+     * topic with 400 of them.
+     */
+    static async _waitForLoader(timeoutMs = 6000) {
+        if (typeof window === 'undefined') return null;
+        const started = Date.now();
+        while (!window.entityBaseLoader) {
+            if (Date.now() - started > timeoutMs) return null;
+            await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        return window.entityBaseLoader;
+    }
+
+    /**
+     * Resolve member ids against the static entity base.
+     *
+     * topics.json deliberately stores no record fields, so this is where a
+     * member becomes something renderable. Ids with no record in the base are
+     * dropped rather than rendered blank.
+     *
+     * Returns null — not an empty array — when the base could not be consulted,
+     * so the caller can tell "this topic has nothing" apart from "we could not
+     * find out" and offer a retry instead of a wrong answer. An empty array is
+     * a real answer and is not retried.
+     */
     static async resolve(collection, members) {
-        const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
-        if (!loader) return [];
+        const loader = await TopicsService._waitForLoader();
+        if (!loader) return null;
+
         let baseMap;
         try {
-            baseMap = await loader.load(collection, null);
+            baseMap = await Promise.race([
+                loader.load(collection, null),
+                new Promise((resolve) => setTimeout(() => resolve(undefined), 8000))
+            ]);
         } catch (error) {
-            return [];
+            return null;
         }
+        if (baseMap === undefined) return null;
         if (!baseMap) return [];
 
         const out = [];
@@ -263,10 +319,11 @@ class ExploreView {
     async render(container) {
         container.innerHTML = '<div class="topic-loading">Loading…</div>';
 
-        const [regions, collections, data] = await Promise.all([
+        const [regions, collections, data, others] = await Promise.all([
             TopicsService.regions(),
             TopicsService.collections(),
-            TopicsService.load()
+            TopicsService.load(),
+            TopicsService.otherTraditions()
         ]);
 
         if (!regions.length && !data) {
@@ -305,6 +362,24 @@ class ExploreView {
                     <div class="region-tile-grid">${regions.map(TopicsUI.regionTile).join('')}</div>
                 </section>
 
+                ${others.length ? `
+                    <section class="topic-section">
+                        <h3 class="topic-section-head">Smaller traditions</h3>
+                        <p class="topic-section-note">
+                            ${others.length} traditions that belong to no region above — some
+                            recorded here under only a handful of entries, some named in ways
+                            the grouping does not yet recognise. Listed rather than dropped.
+                        </p>
+                        <div class="other-tradition-row">
+                            ${others.slice(0, 60).map((t) => `
+                                <a class="other-tradition" href="#/mythology/${encodeURIComponent(t.id)}">
+                                    ${TopicsUI.escape(TopicsUI.titleCase(t.name))}
+                                    <span>${t.total}</span>
+                                </a>
+                            `).join('')}
+                        </div>
+                    </section>` : ''}
+
                 ${sections}
             </div>`;
     }
@@ -321,13 +396,45 @@ class TopicView {
     async render(container, collection, slug) {
         container.innerHTML = '<div class="topic-loading">Loading…</div>';
 
-        const topic = await TopicsService.topic(collection, slug);
+        // One retry, because a null here means the topic file did not arrive
+        // rather than that the topic is unknown, and load() has already dropped
+        // the failed promise so this attempt really does try again.
+        let topic = await TopicsService.topic(collection, slug);
         if (!topic) {
-            container.innerHTML = TopicsUI.empty('That topic does not exist.');
+            await new Promise((resolve) => setTimeout(resolve, 700));
+            topic = await TopicsService.topic(collection, slug);
+        }
+        if (!topic) {
+            container.innerHTML = `
+                <div class="topic-empty">
+                    <p>That topic could not be loaded.</p>
+                    <p><button type="button" class="topic-retry" onclick="location.reload()">Try again</button></p>
+                    <p><a href="#/explore">Back to Explore</a></p>
+                </div>`;
             return;
         }
 
-        const entities = await TopicsService.resolve(collection, topic.members || []);
+        let entities = await TopicsService.resolve(collection, topic.members || []);
+
+        // null means the base could not be consulted, which is worth one more
+        // attempt — the usual cause is arriving before the loader is ready.
+        // An empty array means the base answered and had nothing, which
+        // retrying cannot improve.
+        if (entities === null) {
+            await new Promise((resolve) => setTimeout(resolve, 900));
+            entities = await TopicsService.resolve(collection, topic.members || []);
+        }
+
+        if (entities === null) {
+            container.innerHTML = `
+                <div class="topic-empty">
+                    <p>${TopicsUI.escape(topic.name)} could not be loaded just now.</p>
+                    <p><button type="button" class="topic-retry" onclick="location.reload()">Try again</button></p>
+                    <p><a href="#/explore">Back to Explore</a></p>
+                </div>`;
+            return;
+        }
+
         if (!entities.length) {
             container.innerHTML = TopicsUI.empty(`No entries resolved for ${topic.name}.`);
             return;
