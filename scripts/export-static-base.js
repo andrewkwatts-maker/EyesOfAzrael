@@ -360,6 +360,39 @@ function main() {
         const cardsJson = JSON.stringify(cards);
         writeJson(path.join(collDir, '_cards.json'), cards);
 
+        // Inbound links, as their own file.
+        //
+        // The graph is built above and attached to `_all.json`, but the card
+        // projection drops it — deliberately, since `_cards.json` is already
+        // 3.9 MB for deities and is fetched to draw any listing. So the site
+        // computed 26,000 backlinks across 10,628 entities and then had no way
+        // to show a single one: an entity page reads cards, and cards have no
+        // `_backlinks`.
+        //
+        // A separate per-collection file is the compromise. An entity page
+        // fetches only its own collection's index (320 KB for deities, 126 KB
+        // for creatures) and only when something asks for it, while listings
+        // keep paying nothing for a field they never render.
+        //
+        // Shape is [name, collection, id] or [name, collection, id,
+        // relationship] — positional to keep the file small, since the
+        // property names would otherwise outweigh the values.
+        const backlinkIndex = {};
+        for (const entity of entities) {
+            const inbound = entity._backlinks;
+            if (!Array.isArray(inbound) || !inbound.length) continue;
+            backlinkIndex[entity.id] = inbound.slice(0, 40).map((b) => {
+                const id = String(b.ref || '').split('/').pop();
+                return b.relationship
+                    ? [b.name, b.collection, id, b.relationship]
+                    : [b.name, b.collection, id];
+            });
+        }
+        if (Object.keys(backlinkIndex).length) {
+            ensureDir(path.join(OUT_DIR, '_backlinks'));
+            writeJson(path.join(OUT_DIR, '_backlinks', `${collection}.json`), backlinkIndex);
+        }
+
         const facetCounts = {};
         for (const facet of facets) facetCounts[facet] = byFacet[facet].length;
 

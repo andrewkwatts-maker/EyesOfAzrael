@@ -100,9 +100,27 @@ class FirebaseEntityRenderer {
     async loadAndRender(type, id, mythology, container, prefetchedData = null) {
         await this.init();
 
-        // Input validation - prevent path traversal and injection
-        const validTypes = ['deity', 'hero', 'creature', 'item', 'place', 'concept', 'magic', 'theory', 'ritual', 'text', 'archetype', 'symbol', 'herb', 'mythology', 'being', 'event', 'cosmology'];
-        const sanitizedType = String(type || '').toLowerCase().replace(/[^a-z-]/g, '');
+        // Input validation - prevent path traversal and injection.
+        //
+        // The underscore matters. This stripped every character outside [a-z-],
+        // so `con_theories` arrived here and left as `contheories`, a
+        // collection that does not exist — and every entity page in the
+        // history and conspiracy domains rendered "Not Found". Roughly two
+        // hundred records across ten collections: con_theories, con_figures,
+        // con_events, con_documents, con_organizations, hist_figures,
+        // hist_events, hist_periods, hist_cultures, hist_artifacts, hist_wars.
+        // Only the mythology domain, whose collections have no prefix, worked.
+        //
+        // The allowed set is still a whitelist, so path traversal and injection
+        // are still prevented; it now just admits the separator the site's own
+        // collection names use.
+        //
+        // (A `validTypes` array used to sit here listing the mythology types.
+        // It was never referenced by anything — declared and dead — and would
+        // have rejected these same collections had it been wired up. Removed
+        // rather than extended: SPANavigation.ENTITY_COLLECTIONS and the domain
+        // registry are the real lists, and a third copy would drift from both.)
+        const sanitizedType = String(type || '').toLowerCase().replace(/[^a-z0-9_-]/g, '');
         const sanitizedId = String(id || '').replace(/[^a-zA-Z0-9_-]/g, '');
 
         if (!sanitizedType || !sanitizedId) {
@@ -715,7 +733,148 @@ class FirebaseEntityRenderer {
         const collection = String(entity.collection || entity.type || '')
             .toLowerCase()
             .replace(/[^a-z_-]/g, '');
-        return `<div class="entity-topic-slot" data-entity-id="${String(entity.id).replace(/"/g, '&quot;')}" data-collection="${collection}" hidden></div>`;
+        const id = String(entity.id).replace(/"/g, '&quot;');
+        return `<div class="entity-topic-slot" data-entity-id="${id}" data-collection="${collection}" hidden></div>`
+            + `<div class="entity-backlink-slot" data-entity-id="${id}" data-collection="${collection}" hidden></div>`;
+    }
+
+    /**
+     * Inbound links, fetched per collection and cached for the page.
+     *
+     * The entity itself cannot carry these: the renderer works from the card
+     * projection or Firestore, and neither holds `_backlinks` — it is attached
+     * by the export to `_all.json` only. static/_backlinks/<collection>.json
+     * exists for exactly this, and is fetched once per collection.
+     */
+    static _backlinkIndex = new Map();
+
+    /**
+     * Collection name for an entity whose `type` is singular.
+     *
+     * `entity.type` is "deity" where every published file is keyed "deities",
+     * so a slot built from the type asks for `_backlinks/deity.json` and gets a
+     * 404. The topic filler already carried this map privately; both need it,
+     * and two copies would drift.
+     */
+    static pluralCollection(word) {
+        const MAP = {
+            deity: 'deities', hero: 'heroes', creature: 'creatures', item: 'items',
+            place: 'places', text: 'texts', symbol: 'symbols', ritual: 'rituals',
+            concept: 'concepts', herb: 'herbs', archetype: 'archetypes',
+            being: 'beings', event: 'events', myth: 'myths', cosmology: 'cosmology',
+            magic: 'magic', mythology: 'mythologies', theory: 'con_theories'
+        };
+        const w = String(word || '').toLowerCase();
+        if (!w) return '';
+        if (MAP[w]) return MAP[w];
+        // Already plural, or a prefixed collection name that needs no change.
+        return w.endsWith('s') || /^(con|hist)_/.test(w) ? w : `${w}s`;
+    }
+
+    static loadBacklinks(collection) {
+        if (!FirebaseEntityRenderer._backlinkIndex.has(collection)) {
+            const promise = fetch(`/static/entities/_backlinks/${encodeURIComponent(collection)}.json`)
+                .then((r) => (r.ok ? r.json() : null))
+                .catch(() => null)
+                .then((data) => {
+                    // A failed fetch is not kept, so a later page can try again
+                    // rather than inheriting one bad request for the session.
+                    if (!data) FirebaseEntityRenderer._backlinkIndex.delete(collection);
+                    return data;
+                });
+            FirebaseEntityRenderer._backlinkIndex.set(collection, promise);
+        }
+        return FirebaseEntityRenderer._backlinkIndex.get(collection);
+    }
+
+    static async fillBacklinkSlots() {
+        const slots = document.querySelectorAll('.entity-backlink-slot:not([data-filled])');
+        for (const slot of slots) {
+            slot.dataset.filled = '1';
+            const { entityId, collection } = slot.dataset;
+            if (!entityId || !collection) continue;
+
+            let index;
+            try {
+                index = await FirebaseEntityRenderer.loadBacklinks(
+                    FirebaseEntityRenderer.pluralCollection(collection));
+            } catch (error) {
+                continue;
+            }
+            const raw = index && index[entityId];
+            if (!raw || !raw.length) continue;
+
+            const links = raw.map(([name, coll, id, relationship]) => ({ name, collection: coll, id, relationship }));
+            const html = FirebaseEntityRenderer.renderBacklinks(links);
+            if (!html) continue;
+            slot.innerHTML = html;
+            slot.hidden = false;
+        }
+    }
+
+    /**
+     * What else on the site points at this entity.
+     *
+     * The export builds a full backlink graph — 10,614 entities have inbound
+     * links — and until now nothing rendered it. Every reference was one-way:
+     * you could read from a theory to the deity it concerns, and the deity's
+     * page gave no sign the theory existed.
+     *
+     * Rendered from `_backlinks`, which the export attaches, so this needs no
+     * extra fetch. Grouped by the domain the link comes from, because "also
+     * discussed in a conspiracy theory" and "referenced by another deity" are
+     * different enough that running them together would mislead.
+     */
+    static renderBacklinks(links) {
+        if (!Array.isArray(links) || !links.length) return '';
+
+        const escape = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (c) => (
+            { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+        ));
+
+        const DOMAIN_LABEL = {
+            mythology: 'Elsewhere in mythology',
+            conspiracy: 'Discussed in claims and theories',
+            history: 'Referenced in history',
+            esoteric: 'Referenced in esoteric material'
+        };
+
+        // Same target twice is common where a page links a subject from several
+        // sections; the reader only needs the one link.
+        const seen = new Set();
+        const groups = {};
+        for (const link of links) {
+            const key = link.ref || `${link.collection}/${link.id}`;
+            if (!link || !key || seen.has(key)) continue;
+            seen.add(key);
+            const domain = link.domain
+                || (/^con_/.test(link.collection) ? 'conspiracy'
+                    : /^hist_/.test(link.collection) ? 'history' : 'mythology');
+            (groups[domain] = groups[domain] || []).push(link);
+        }
+
+        const sections = Object.entries(groups)
+            // Claims first: it is the least expected and the most worth flagging.
+            .sort((a, b) => (a[0] === 'conspiracy' ? -1 : b[0] === 'conspiracy' ? 1 : 0))
+            .map(([domain, list]) => `
+                <div class="entity-backlink-group">
+                    <h3 class="entity-backlink-head">${escape(DOMAIN_LABEL[domain] || 'Referenced by')}</h3>
+                    <div class="entity-backlink-row">
+                        ${list.slice(0, 12).map((l) => `
+                            <a class="entity-backlink" href="#/entity/${encodeURIComponent(l.collection)}/${encodeURIComponent(l.id || String(l.ref).split('/').pop())}">
+                                <span class="entity-backlink-name">${escape(l.name || l.ref)}</span>
+                                ${l.relationship ? `<span class="entity-backlink-why">${escape(l.relationship)}</span>` : ''}
+                            </a>
+                        `).join('')}
+                    </div>
+                    ${list.length > 12 ? `<p class="entity-backlink-more">and ${list.length - 12} more</p>` : ''}
+                </div>`).join('');
+
+        return `
+            <section class="entity-backlinks">
+                <h2 class="entity-backlinks-title">Referenced by</h2>
+                ${sections}
+            </section>`;
     }
 
     /**
@@ -730,12 +889,6 @@ class FirebaseEntityRenderer {
         const slots = document.querySelectorAll('.entity-topic-slot:not([data-filled])');
         if (!slots.length) return;
 
-        const plural = (word) => {
-            const map = { deity: 'deities', hero: 'heroes', creature: 'creatures', item: 'items', place: 'places', text: 'texts', symbol: 'symbols', ritual: 'rituals', concept: 'concepts', herb: 'herbs', archetype: 'archetypes' };
-            const w = String(word || '').toLowerCase();
-            return map[w] || (w.endsWith('s') ? w : `${w}s`);
-        };
-
         for (const slot of slots) {
             slot.dataset.filled = '1';
             const id = slot.dataset.entityId;
@@ -745,7 +898,7 @@ class FirebaseEntityRenderer {
             let topics = [];
             try {
                 topics = await TopicsService.topicsForEntity(raw, id);
-                if (!topics.length) topics = await TopicsService.topicsForEntity(plural(raw), id);
+                if (!topics.length) topics = await TopicsService.topicsForEntity(FirebaseEntityRenderer.pluralCollection(raw), id);
             } catch (error) {
                 continue;
             }
@@ -1832,6 +1985,51 @@ class FirebaseEntityRenderer {
         entity.type = entity.type || 'theory';
         // Theories use the full generic renderer which now handles all schema sections
         this.renderGenericEntity(entity, container);
+        FirebaseEntityRenderer.markSpeculative(entity);
+    }
+
+    /**
+     * Put a theory's status in front of the reader.
+     *
+     * A theory record carries `status` — "contested", "speculative",
+     * "debunked" — and often a `disclaimer` naming who is claiming what. None
+     * of it was rendered, so a page asserting that Thoth's name encodes thorium
+     * dioxide read exactly like a page stating Thoth was a god of writing.
+     *
+     * That is the one thing this content must not do. Someone arriving from a
+     * search engine sees a heading and a body; if the framing lives only in the
+     * database it does not exist. Rendered above the content, not below it.
+     */
+    static markSpeculative(entity) {
+        const status = String(entity.status || '').toLowerCase();
+        if (!status && !entity.disclaimer) return;
+
+        const LABELS = {
+            speculative: ['Speculative', 'An original interpretation, not an established finding.'],
+            contested: ['Contested', 'Disputed by mainstream scholarship.'],
+            debunked: ['Debunked', 'Investigated and found to be false.'],
+            fringe: ['Fringe', 'Outside mainstream scholarship.']
+        };
+        const [label, standard] = LABELS[status] || ['Claim', ''];
+        const detail = entity.disclaimer || standard;
+        if (!detail) return;
+
+        const main = document.getElementById('main-content');
+        const anchor = main && (main.querySelector('.entity-hero, .entity-header, h1'));
+        if (!anchor || main.querySelector('.theory-status-note')) return;
+
+        const escape = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, (c) => (
+            { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+        ));
+
+        const note = document.createElement('aside');
+        note.className = `theory-status-note theory-status-${escape(status || 'claim')}`;
+        note.setAttribute('role', 'note');
+        note.innerHTML = `<strong>${escape(label)}.</strong> ${escape(detail)}`
+            + (entity.origin ? `<span class="theory-status-origin">${escape(entity.origin)}</span>` : '');
+
+        const parent = anchor.closest('section, header, div') || anchor;
+        parent.parentNode.insertBefore(note, parent.nextSibling);
     }
 
     /**
@@ -3225,6 +3423,9 @@ if (typeof document !== 'undefined') {
     document.addEventListener('first-render-complete', () => {
         if (typeof FirebaseEntityRenderer.fillTopicSlots === 'function') {
             FirebaseEntityRenderer.fillTopicSlots().catch(() => { /* lateral links are an addition */ });
+        }
+        if (typeof FirebaseEntityRenderer.fillBacklinkSlots === 'function') {
+            FirebaseEntityRenderer.fillBacklinkSlots().catch(() => { /* inbound links are an addition */ });
         }
     });
 }
