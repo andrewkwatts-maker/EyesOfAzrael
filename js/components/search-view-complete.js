@@ -138,6 +138,12 @@ class SearchViewComplete {
             // Initialize components
             await this.init();
 
+            // Awaited, not fired and forgotten: an auto-triggered search runs a
+            // few lines below, and loading this afterwards would let the first
+            // result set through unfiltered and then quietly disagree with
+            // every later one.
+            await this._loadShadowedIds();
+
             // Activate corpus mode if requested
             if (initialMode === 'corpus') {
                 this._activateCorpusMode();
@@ -217,11 +223,28 @@ class SearchViewComplete {
             if (loader) {
                 const baseMap = await loader.load('mythologies', null);
                 if (baseMap && baseMap.size > 0) {
+                    const seen = new Set();
                     this.mythologies = Array.from(baseMap.entries())
-                        .map(([id, data]) => ({
-                            id: data.id || id,
-                            name: data.name || data.displayName || this.formatMythologyName(data.id || id)
-                        }))
+                        .map(([id, data]) => {
+                            // 123 of these records are `mythology-hub-<tradition>`
+                            // navigation stubs. Filtering on them found nothing,
+                            // because entities carry the plain tradition in their
+                            // `mythology` field, and the chip row read as a list of
+                            // "Aboriginal Mythology Collection" rather than the
+                            // tradition names anyone would look for.
+                            const rawId = String(data.id || id);
+                            const target = rawId.replace(/^mythology-hub-/, '');
+                            const fromHub = target !== rawId;
+                            const name = fromHub
+                                ? this.formatMythologyName(target)
+                                : (data.name || data.displayName || this.formatMythologyName(rawId));
+                            return { id: target, name };
+                        })
+                        .filter((m) => {
+                            if (!m.id || seen.has(m.id)) return false;
+                            seen.add(m.id);
+                            return true;
+                        })
                         .sort((a, b) => a.name.localeCompare(b.name));
                     try {
                         sessionStorage.setItem(CACHE_KEY, JSON.stringify(this.mythologies));
@@ -273,7 +296,9 @@ class SearchViewComplete {
      * on `.split` and take the whole result list with it.
      */
     formatMythologyName(id) {
-        return String(id ?? '').split('_').map(word =>
+        // Hyphens as well as underscores: tradition ids use both, and splitting
+        // on only one rendered "african-american" as "African-american".
+        return String(id ?? '').split(/[_-]+/).filter(Boolean).map(word =>
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
     }
@@ -1093,8 +1118,45 @@ class SearchViewComplete {
         return t + 's';
     }
 
+    /**
+     * Ids that a better record already covers, keyed "collection:id".
+     *
+     * Three "Ishtar" records survive in the data with distinct ids and no
+     * `duplicateOf` mark, so the duplicate filter cannot catch them; the list of
+     * which one to keep is computed once by scripts/build-topics.js and shared
+     * by the listings. Failure is not fatal — search then shows what it always
+     * showed.
+     */
+    async _loadShadowedIds() {
+        this._shadowedIds = new Set();
+        if (typeof TopicsService === 'undefined') return;
+        try {
+            const data = await TopicsService.load();
+            const shadowed = (data && data.shadowed) || {};
+            for (const [collection, ids] of Object.entries(shadowed)) {
+                for (const id of ids) this._shadowedIds.add(`${collection}:${id}`);
+            }
+        } catch (error) {
+            console.warn('[SearchView] Shadow list unavailable:', error.message);
+        }
+    }
+
     applyClientFilters(results) {
         return results.filter(entity => {
+            // Records merged into another, and records another record already
+            // says better.
+            //
+            // Searching "zeus" returned Zeus three times — greek_deity_zeus,
+            // greek_zeus and zeus-primary-deity — and all three links land on
+            // the same page, because two of them redirect to the first. Every
+            // listing on the site drops these; search was the one surface still
+            // showing them, so the most-searched subjects looked the most
+            // duplicated.
+            if (entity && entity.duplicateOf) return false;
+            if (entity && this._shadowedIds && this._shadowedIds.has(`${entity.collection}:${entity.id}`)) {
+                return false;
+            }
+
             // Entity type filter.
             //
             // The filter list is plural — deities, heroes, creatures — and it was
