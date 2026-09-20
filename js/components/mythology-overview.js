@@ -210,6 +210,22 @@ class MythologyOverview {
         if (this._countsCache.has(key)) return this._countsCache.get(key);
 
         const promise = (async () => {
+            // The published counts first: they exclude merged-away duplicates
+            // and shadowed records the same way the listings do, so the hero's
+            // Entries figure matches the grids below it. The Firestore field
+            // counts everything in the collection, which is why this page said
+            // 99 above a tradition blurb saying 97.
+            try {
+                if (typeof TopicsService !== 'undefined') {
+                    const published = await TopicsService.traditionCounts(key);
+                    if (published && Object.keys(published).length) {
+                        return { byType: published, facetValue: key };
+                    }
+                }
+            } catch (error) {
+                console.warn('[MythologyOverview] Published counts unavailable:', error.message);
+            }
+
             try {
                 const doc = await this.db.collection('mythologies').doc(key).get();
                 const data = doc.exists ? doc.data() : null;

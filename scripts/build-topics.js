@@ -68,7 +68,7 @@ const REPORT_ONLY = process.argv.includes('--report');
  * have made this file megabytes for no new information. Ids are cheap enough
  * that a topic can carry its whole membership and let the view page through it.
  */
-const TOPIC_MEMBER_CAP = 400;
+const TOPIC_MEMBER_CAP = 700;
 
 /**
  * Names that are not entity names.
@@ -446,6 +446,33 @@ function main() {
         hubTotal += hubs.length;
     }
     console.log(`  ${hubTotal} collection hubs hidden from listings (a heading filed as one of its own members)`);
+
+    // One set of per-tradition counts for everything that displays one.
+    //
+    // Three places were counting independently and disagreeing on the same
+    // page: the tradition blurb ("a collection of 97 entities"), the hero's
+    // Entries figure (99, read from a Firestore field that counts duplicates),
+    // and the category overviews. Computed once here, after the shadow lists
+    // are complete, so all three say the same thing — and so the hero stops
+    // spending a document read to fetch a number the base already knows.
+    const traditionCounts = {};
+    for (const collection of fs.readdirSync(BASE)) {
+        if (collection === 'mythologies') continue;
+        const file = path.join(BASE, collection, '_all.json');
+        if (!fs.existsSync(file)) continue;
+        const hidden = new Set((out.shadowed && out.shadowed[collection]) || []);
+        const raw = readJson(file);
+        for (const row of (Array.isArray(raw) ? raw : Object.values(raw))) {
+            if (!row || typeof row !== 'object' || !row.id) continue;
+            if (row.duplicateOf || hidden.has(row.id) || !row.mythology) continue;
+            if (isNotAName(row.name)) continue;
+            const key = traditionKey(row.mythology);
+            if (!traditionCounts[key]) traditionCounts[key] = {};
+            traditionCounts[key][collection] = (traditionCounts[key][collection] || 0) + 1;
+        }
+    }
+    out.traditionCounts = traditionCounts;
+    console.log(`  per-collection counts published for ${Object.keys(traditionCounts).length} traditions`);
 
     if (REPORT_ONLY) {
         console.log('\n--report: nothing written.');

@@ -37,6 +37,50 @@ const OUT = path.join(__dirname, '..', 'static', 'mythology-categories.json');
  */
 const FIELDS = ['id', 'mythology', 'category', 'name', 'description', 'icon', 'entityCount', 'route'];
 
+/**
+ * Entities per tradition-and-category, counted the way the page counts them.
+ *
+ * Mirrors what a listing actually renders: duplicates redirect so they are not
+ * shown, and the shadow list from scripts/build-topics.js holds back records
+ * another record already says better. A count that ignored either would be
+ * right about the database and wrong about the page.
+ */
+function countFromBase() {
+    const base = path.join(__dirname, '..', 'static', 'entities');
+    const counts = new Map();
+    if (!fs.existsSync(base)) return counts;
+
+    let shadowed = {};
+    const topicsFile = path.join(__dirname, '..', 'static', 'topics.json');
+    if (fs.existsSync(topicsFile)) {
+        try {
+            shadowed = JSON.parse(fs.readFileSync(topicsFile, 'utf8')).shadowed || {};
+        } catch (err) {
+            // Counting without it is still better than the stored number.
+        }
+    }
+
+    for (const collection of fs.readdirSync(base)) {
+        const file = path.join(base, collection, '_all.json');
+        if (!fs.existsSync(file)) continue;
+        const hidden = new Set(shadowed[collection] || []);
+        let rows;
+        try {
+            const raw = JSON.parse(fs.readFileSync(file, 'utf8'));
+            rows = Array.isArray(raw) ? raw : Object.values(raw);
+        } catch (err) {
+            continue;
+        }
+        for (const row of rows) {
+            if (!row || typeof row !== 'object' || !row.id) continue;
+            if (row.duplicateOf || hidden.has(row.id) || !row.mythology) continue;
+            const key = `${String(row.mythology).toLowerCase()}/${collection.toLowerCase()}`;
+            counts.set(key, (counts.get(key) || 0) + 1);
+        }
+    }
+    return counts;
+}
+
 async function main() {
     if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
         console.error('GOOGLE_APPLICATION_CREDENTIALS is not set.');
@@ -66,6 +110,34 @@ async function main() {
 
         (byMythology[myth] = byMythology[myth] || []).push(row);
     }
+
+    // Recount from the base rather than trusting the stored number.
+    //
+    // `entityCount` in Firestore was computed before the duplicate merge and
+    // before the base export stopped emitting repeated ids, so it drifted: the
+    // Japanese deities overview claimed 112 where the page rendered 94, and the
+    // page showed both numbers at once - the stale one in the prose, the real
+    // one in the stat block and the pager. Recomputing here means the figure
+    // corrects itself on every export instead of needing its own repair job.
+    const liveCounts = countFromBase();
+    let corrected = 0;
+    for (const rows of Object.values(byMythology)) {
+        for (const row of rows) {
+            const key = `${String(row.mythology).toLowerCase()}/${String(row.category).toLowerCase()}`;
+            const actual = liveCounts.get(key);
+            if (actual === undefined || actual === row.entityCount) continue;
+
+            // The number is written into the description too ("112 deities and
+            // divine beings catalogued in the Japanese tradition"), so fixing
+            // only the field would leave the sentence contradicting it.
+            if (typeof row.description === 'string') {
+                row.description = row.description.replace(/^\s*[\d,]+\b/, String(actual));
+            }
+            row.entityCount = actual;
+            corrected++;
+        }
+    }
+    if (corrected) console.log(`  recounted ${corrected} overview(s) that had drifted from the base`);
 
     // Busiest category first, matching the order the sibling links render in.
     for (const rows of Object.values(byMythology)) {

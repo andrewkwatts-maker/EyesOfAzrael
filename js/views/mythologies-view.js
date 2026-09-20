@@ -121,17 +121,42 @@ class MythologiesView {
                 .map(([id, data]) => ({ id: data.id || id, ...data }))
                 .filter((m) => !m.duplicateOf);
 
+            // Point the hub stubs at the tradition they describe.
+            //
+            // 123 of the 181 records here are `mythology-hub-<tradition>`
+            // stubs, and linking them by their own id sent visitors to a page
+            // reading "Entries 0" - two thirds of this index was a dead end.
+            // The tradition page is driven by the `mythology` field on entities,
+            // not by a record in this collection, so #/mythology/aboriginal has
+            // 99 entries while #/mythology/mythology-hub-aboriginal has none.
+            //
+            // Where a stub and a real record describe the same tradition, the
+            // real one wins and the stub is dropped, so the list stops offering
+            // the same tradition twice.
+            const seen = new Set();
+            const normalised = [];
+            for (const row of rows) {
+                const target = String(row.id).replace(/^mythology-hub-/, '');
+                const isStub = target !== row.id;
+                if (seen.has(target)) continue;
+                // A real record for this tradition later in the list should not
+                // be pre-empted by its stub.
+                if (isStub && rows.some((other) => other.id === target)) continue;
+                seen.add(target);
+                normalised.push(isStub ? { ...row, id: target, _fromHub: true } : row);
+            }
+
             // `order` drives the curated sequence on this page; anything without
             // one sorts after, alphabetically, rather than jumping to the front
             // on an undefined comparison.
-            rows.sort((a, b) => {
+            normalised.sort((a, b) => {
                 const ao = Number.isFinite(a.order) ? a.order : Number.MAX_SAFE_INTEGER;
                 const bo = Number.isFinite(b.order) ? b.order : Number.MAX_SAFE_INTEGER;
                 if (ao !== bo) return ao - bo;
                 return String(a.name || a.id).localeCompare(String(b.name || b.id));
             });
 
-            return rows.length ? rows : null;
+            return normalised.length ? normalised : null;
         } catch (error) {
             console.warn('[Mythologies View] Static base unavailable:', error.message);
             return null;

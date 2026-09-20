@@ -1273,6 +1273,15 @@ class SPANavigation {
                             'The requested mythology could not be found. Please check the URL and try again.'
                         );
                     }
+                } else if (/^mythology-hub-/.test(mythologyId)) {
+                    // The hub stubs render "Entries 0" because the tradition
+                    // page is built from the `mythology` field on entities and
+                    // nothing carries `mythology-hub-aboriginal` as its
+                    // tradition. The index no longer links here, but old links
+                    // and bookmarks do, so send them to the real tradition.
+                    spaLog('Mythology hub stub, redirecting to the tradition:', mythologyId);
+                    this.redirectTo(`#/mythology/${encodeURIComponent(mythologyId.replace(/^mythology-hub-/, ''))}`);
+                    return;
                 } else {
                     spaLog('Matched MYTHOLOGY route:', mythologyId);
                     await this.renderMythology(mythologyId);

@@ -99,6 +99,20 @@ class TopicsService {
         return (data && data.collections) || {};
     }
 
+    /**
+     * Per-collection entity counts for one tradition, or null when unknown.
+     *
+     * The single source for every count a tradition page shows. Keys tolerate
+     * the spelling differences in the data, so `native_american` and
+     * `native american` resolve to the same tradition.
+     */
+    static async traditionCounts(tradition) {
+        const data = await TopicsService.load();
+        const all = (data && data.traditionCounts) || {};
+        const key = String(tradition || '').toLowerCase().trim().replace(/[\s_-]+/g, ' ');
+        return all[key] || null;
+    }
+
     static async otherTraditions() {
         const data = await TopicsService.load();
         return (data && data.otherTraditions) || [];
@@ -326,7 +340,15 @@ class TopicView {
                     <div>
                         <h1>${TopicsUI.escape(topic.name)}</h1>
                         <p class="topic-standfirst">${TopicsUI.escape(topic.blurb || '')}</p>
-                        <p class="topic-meta">${topic.total} entries across ${groups.size} traditions</p>
+                        <p class="topic-meta">${
+                            // Say what is on the page, not what exists. The
+                            // member list is capped, and a header promising 522
+                            // above a grid of 400 is the page telling the reader
+                            // something they can check and find untrue.
+                            entities.length < topic.total
+                                ? `Showing ${entities.length} of ${topic.total} entries across ${groups.size} traditions`
+                                : `${topic.total} entries across ${groups.size} traditions`
+                        }</p>
                     </div>
                 </header>
 
