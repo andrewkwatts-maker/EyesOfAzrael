@@ -376,7 +376,7 @@ class SearchViewComplete {
                     <!-- Results Header -->
                     <div id="results-header" class="results-header" style="display: none;">
                         <div class="results-count-info">
-                            <span id="results-count" class="results-count" role="status" aria-live="polite"></span>
+                            <span id="results-count" class="results-count" role="status" aria-live="polite" data-visible-live></span>
                             <span id="pagination-info" class="pagination-info"></span>
                         </div>
                         <div class="results-controls">
@@ -409,7 +409,16 @@ class SearchViewComplete {
                     </div>
 
                     <!-- Results Container -->
-                    <div id="results-container" class="search-results" role="main" aria-live="polite">
+                    <!--
+                      data-visible-live is load-bearing here.
+
+                      The blanket [aria-live="polite"] rule in accessibility.css
+                      excludes the main ELEMENT, not role="main", so this div
+                      matched it and every search result was rendered at
+                      x=-10000. The results existed, the count said "Found 269
+                      results", and a visitor saw an empty page.
+                    -->
+                    <div id="results-container" class="search-results" role="main" aria-live="polite" data-visible-live>
                         ${this.getEmptyStateHTML()}
                     </div>
 
