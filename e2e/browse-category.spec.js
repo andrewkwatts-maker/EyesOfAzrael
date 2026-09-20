@@ -559,9 +559,24 @@ test.describe('Browse View Filters', () => {
         const sortOrder = page.locator('#sortOrder');
         await expect(sortOrder).toBeVisible({ timeout: 5000 });
 
-        // Default sort is "name" (A-Z) — verify the initial order is genuinely
-        // non-decreasing before changing anything, so the later "changed order"
-        // assertion has a real baseline rather than an assumed one.
+        // Select A-Z explicitly rather than assuming it is the default.
+        //
+        // The default is now "prominence" — how often the rest of the collection
+        // refers to an entity — because sorting by name opened every listing on
+        // entries beginning with A and buried Zeus ten pages down. This test is
+        // about whether changing the sort reorders the grid, so it establishes
+        // its own baseline instead of depending on which option happens to be
+        // selected first.
+        await sortOrder.selectOption('name');
+        await page.waitForFunction(() => {
+            const names = Array.from(document.querySelectorAll('.entity-card[data-entity-id] h3')).map(el => el.textContent.trim());
+            if (names.length < 2) return false;
+            for (let i = 1; i < names.length; i++) {
+                if (names[i - 1].localeCompare(names[i]) > 0) return false;
+            }
+            return true;
+        }, { timeout: 5000 });
+
         //
         // Scoped to `.entity-card[data-entity-id] h3` rather than plain
         // `.entity-card h3`: getAddNewCardHTML() (browse-category-view.js) always

@@ -1316,7 +1316,13 @@ class BrowseCategoryView {
                 ` : ''}
 
                 <!-- Active Filters Display -->
-                <div class="active-filters" id="activeFilters" style="display: none;" role="status" aria-live="polite">
+                <!--
+                  data-visible-live: this is a live region a visitor is meant to
+                  look at, not an announcer. Without it the blanket
+                  [aria-live="polite"] rule in css/accessibility.css parks it at
+                  x=-10000, so filters could be applied but never seen or cleared.
+                -->
+                <div class="active-filters" id="activeFilters" style="display: none;" role="status" aria-live="polite" data-visible-live>
                     <span class="active-filters-label">Active filters:</span>
                     <div class="active-filter-chips" aria-label="Currently active filters"></div>
                     <button type="button" class="clear-filters-btn" id="clearFiltersBtn" aria-label="Clear all active filters">Clear all</button>

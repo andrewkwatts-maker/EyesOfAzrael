@@ -18009,8 +18009,19 @@ textarea:focus-visible {
  *
  * A <nav> is a landmark meant to be looked at; it is never an announcer. The
  * specificity here is (0,8,1) from the :not() chain, so no ordinary component
- * rule could have overridden it — which is why this survived so long. */
-[aria-live="polite"]:not(nav):not(main):not(section):not(#main-content):not(.view-container):not(.loading-container):not(.entity-grid):not(.results-container) {
+ * rule could have overridden it — which is why this survived so long.
+ *
+ * It then did it again. #activeFilters — the bar showing which filters are on,
+ * with the button that clears them — is role="status" aria-live="polite", so it
+ * was parked off-screen too. The browse view set display:flex on it whenever a
+ * filter was applied and it dutifully appeared at x=-10000: a visitor could
+ * filter a listing but never see what they had filtered by, or clear it.
+ *
+ * Rather than add a ninth :not() and wait for the next one, [data-visible-live]
+ * is an opt-out any component can set on itself. Adding a blacklist entry needs
+ * an edit to this file by someone who knows this rule exists; the attribute
+ * needs only that the author knows their own element should be seen. */
+[aria-live="polite"]:not(nav):not(main):not(section):not([data-visible-live]):not(#main-content):not(.view-container):not(.loading-container):not(.entity-grid):not(.results-container) {
     position: absolute;
     left: -10000px;
     width: 1px;
