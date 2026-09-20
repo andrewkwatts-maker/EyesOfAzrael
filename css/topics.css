@@ -668,3 +668,32 @@
 [data-theme="day"] {
     --primary-gold: #8B6914;
 }
+
+/* ============================================
+   GLASS CARDS IN THE DAY THEME
+   ============================================
+
+   The glass cards are a near-white at 85% opacity, which works over the dark
+   ground the effect was designed for. In the day theme the page behind them is
+   a light blue shader wash, and 15% of it coming through lifts the effective
+   surface to #97aad0 — a mid blue-grey.
+
+   Nothing coloured reads on a mid-tone. A tradition's heading colour on that
+   ground measures 2.27:1 whichever direction it is pushed: darkening the gold
+   far enough to clear 4.5:1 there would take it to near-black and lose the
+   tradition's identity entirely, which is the thing these colours exist for.
+
+   Raising the opacity is the smaller change and fixes every label on the card
+   at once. 0.96 keeps the blur and a trace of what is behind, so the cards
+   still read as glass, while giving text a surface close enough to #f1f5f9
+   that the darkened accents clear AA against it.
+
+   Scoped to the light themes; the dark ones are untouched, and the effect was
+   always correct there. */
+
+[data-theme="day"] .glass-card,
+[data-theme="air"] .glass-card,
+body.shader-active.shader-rendering[data-theme="day"] .glass-card,
+[data-theme="day"] .extended-content-block {
+    background: rgba(248, 250, 252, 0.96);
+}
