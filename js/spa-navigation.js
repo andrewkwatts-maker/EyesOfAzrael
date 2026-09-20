@@ -297,6 +297,27 @@ class SPANavigation {
     }
 
     /**
+     * Is this a collection the site actually publishes?
+     *
+     * Broader than isEntityCollection, which covers only the mythology entity
+     * types: this accepts anything the domain registry knows about, including
+     * the history and conspiracy collections with their prefixes.
+     *
+     * Falls back to the entity list when the registry has not loaded, so a
+     * script-ordering problem degrades to "the common cases still work" rather
+     * than rejecting every browse URL on the site.
+     */
+    static isKnownCollection(segment) {
+        const name = String(segment || '').toLowerCase();
+        if (!name) return false;
+        const registry = (typeof window !== 'undefined') ? window.DOMAINS : null;
+        if (registry && typeof registry.allCollections === 'function') {
+            return registry.allCollections().some((c) => String(c).toLowerCase() === name);
+        }
+        return SPANavigation.isEntityCollection(name);
+    }
+
+    /**
      * Is this segment the id of a tradition?
      *
      * Read from the published `mythologies` base, so it costs no document reads
@@ -1221,6 +1242,26 @@ class SPANavigation {
                 return;
             } else if (this.routes.browse_category.test(path)) {
                 const match = path.match(this.routes.browse_category);
+
+                // Anything after /browse/ was taken as a collection name and a
+                // page built around it, so #/browse/notacollection produced a
+                // complete, plausible category page headed "Notacollection",
+                // reporting "0 notacollection" and inviting the reader to add
+                // an entry to it. A mistyped or stale URL should say it is
+                // wrong, not invent a section of the site.
+                if (!SPANavigation.isKnownCollection(match[1])) {
+                    spaWarn('Unknown collection in browse route:', match[1]);
+                    const mainContent = document.getElementById('main-content');
+                    if (mainContent) {
+                        mainContent.innerHTML = this.getErrorHTML(
+                            'Category Not Found',
+                            `There is no "${this.escapeHtml ? this.escapeHtml(match[1]) : match[1]}" category. ` +
+                            'It may have been renamed, or the link may be mistyped.'
+                        );
+                    }
+                    return;
+                }
+
                 spaLog('Matched BROWSE CATEGORY route:', match[1]);
                 await this.renderBrowseCategory(match[1]);
             } else if (this.routes.entity_simple.test(path)) {

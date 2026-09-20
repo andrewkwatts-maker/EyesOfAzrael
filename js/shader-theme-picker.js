@@ -28,6 +28,31 @@
     const DEFAULT_THEME = 'night';
     const TRANSITION_DURATION = 400; // ms
 
+    /**
+     * Set the theme on <html>, attribute and class together.
+     *
+     * The inline script in index.html writes both a data-theme attribute and a
+     * matching theme-<name> class before this file loads, defaulting to night.
+     * This module then resolves the real theme — from storage, or the system
+     * preference — and was updating only the attribute. On a machine preferring
+     * light with nothing saved, <html> ended up carrying data-theme="day" and
+     * class="theme-night" permanently, which is a confusing thing to find when
+     * debugging and a trap for anyone who writes a rule against the class.
+     *
+     * No stylesheet or script currently reads the class, so nothing was visibly
+     * broken by the mismatch. Keeping the two in step costs three lines and
+     * means the next person to use it gets the answer they expect.
+     */
+    function applyThemeToRoot(themeName) {
+        const root = document.documentElement;
+        if (!root || !themeName) return;
+        root.setAttribute('data-theme', themeName);
+        root.classList.forEach((name) => {
+            if (name.startsWith('theme-') && name !== 'theme-ready') root.classList.remove(name);
+        });
+        root.classList.add(`theme-${themeName}`);
+    }
+
     // Map theme names to shader files
     const SHADER_MAPPING = {
         // Featured themes
@@ -361,7 +386,7 @@
 
             if (document.documentElement) {
                 // Apply theme immediately to prevent FOUC
-                document.documentElement.setAttribute('data-theme', savedTheme);
+                applyThemeToRoot(savedTheme);
                 document.documentElement.classList.add('theme-ready');
 
                 // Set color-scheme for native elements
@@ -379,7 +404,7 @@
         } catch (error) {
             // Fallback to default theme on error
             if (document.documentElement) {
-                document.documentElement.setAttribute('data-theme', DEFAULT_THEME);
+                applyThemeToRoot(DEFAULT_THEME);
                 document.documentElement.classList.add('theme-ready');
             }
         }
@@ -527,7 +552,7 @@
      */
     function applyDefaultTheme() {
         document.body.setAttribute('data-theme', 'night');
-        document.documentElement.setAttribute('data-theme', 'night');
+        applyThemeToRoot('night');
         currentTheme = 'night';
     }
 

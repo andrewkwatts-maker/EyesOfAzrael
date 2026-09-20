@@ -301,9 +301,21 @@ class TopicsUI {
             </a>`;
     }
 
-    static empty(message) {
-        return `<div class="topic-empty"><p>${TopicsUI.escape(message)}</p>
-            <p><a href="#/mythologies">Browse traditions instead</a></p></div>`;
+    /**
+     * An empty or error state, with a heading.
+     *
+     * The h1 is not decoration. These states replace the whole view, so without
+     * one the page has no heading at all: a screen reader lands on a document
+     * with nothing to orient by, and the site's own route-announcer has nothing
+     * to read out. Every other route here renders an h1, and the failure cases
+     * are exactly the ones where knowing where you are matters most.
+     */
+    static empty(message, heading = 'Nothing here') {
+        return `<div class="topic-empty">
+            <h1>${TopicsUI.escape(heading)}</h1>
+            <p>${TopicsUI.escape(message)}</p>
+            <p><a href="#/explore">Back to Explore</a> · <a href="#/mythologies">Browse traditions</a></p>
+        </div>`;
     }
 }
 
@@ -327,7 +339,7 @@ class ExploreView {
         ]);
 
         if (!regions.length && !data) {
-            container.innerHTML = TopicsUI.empty('The topic index is not available yet.');
+            container.innerHTML = TopicsUI.empty('The topic index is not available yet.', 'Explore');
             return;
         }
 
@@ -408,7 +420,7 @@ class TopicView {
     async render(container, collection, slug) {
         container.innerHTML = '<div class="topic-loading">Loading…</div>';
 
-        // One retry, because a null here means the topic file did not arrive
+        // One retry, because a missing topic can mean the file did not arrive
         // rather than that the topic is unknown, and load() has already dropped
         // the failed promise so this attempt really does try again.
         let topic = await TopicsService.topic(collection, slug);
@@ -416,10 +428,24 @@ class TopicView {
             await new Promise((resolve) => setTimeout(resolve, 700));
             topic = await TopicsService.topic(collection, slug);
         }
+
         if (!topic) {
+            // Separate "we could not look" from "we looked and it is not there".
+            // Offering a Try again button for a topic that does not exist asks
+            // the reader to keep pressing it for something no amount of
+            // retrying will produce.
+            const index = await TopicsService.load();
+            if (index) {
+                container.innerHTML = TopicsUI.empty(
+                    `There is no "${slug}" topic in ${TopicsUI.titleCase(collection)}.`,
+                    'Topic not found'
+                );
+                return;
+            }
             container.innerHTML = `
                 <div class="topic-empty">
-                    <p>That topic could not be loaded.</p>
+                    <h1>Topic unavailable</h1>
+                    <p>The topic index could not be loaded.</p>
                     <p><button type="button" class="topic-retry" onclick="location.reload()">Try again</button></p>
                     <p><a href="#/explore">Back to Explore</a></p>
                 </div>`;
@@ -440,7 +466,8 @@ class TopicView {
         if (entities === null) {
             container.innerHTML = `
                 <div class="topic-empty">
-                    <p>${TopicsUI.escape(topic.name)} could not be loaded just now.</p>
+                    <h1>${TopicsUI.escape(topic.name)}</h1>
+                    <p>This topic could not be loaded just now.</p>
                     <p><button type="button" class="topic-retry" onclick="location.reload()">Try again</button></p>
                     <p><a href="#/explore">Back to Explore</a></p>
                 </div>`;
@@ -448,7 +475,7 @@ class TopicView {
         }
 
         if (!entities.length) {
-            container.innerHTML = TopicsUI.empty(`No entries resolved for ${topic.name}.`);
+            container.innerHTML = TopicsUI.empty(`No entries resolved for ${topic.name}.`, topic.name);
             return;
         }
 
@@ -630,7 +657,7 @@ class RegionView {
 
         const region = await TopicsService.region(slug);
         if (!region) {
-            container.innerHTML = TopicsUI.empty('That region does not exist.');
+            container.innerHTML = TopicsUI.empty('That region does not exist.', 'Region not found');
             return;
         }
 

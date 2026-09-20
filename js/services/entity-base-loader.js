@@ -34,6 +34,30 @@ class EntityBaseLoader {
         this._manifestPromise = null;
         this._loadPromises    = new Map();
 
+        /**
+         * Parsed collections held for the life of the page.
+         *
+         * `_loadPromises` only de-duplicates calls that overlap — it deletes its
+         * entry as soon as the fetch settles — and `_tryCache` refuses
+         * localStorage for anything over MAX_CACHE_BYTES, which the larger
+         * collections all exceed. So a second, later request for the same
+         * collection downloaded it again: one entity page fetched
+         * deities/_cards.json twice, 3.9 MB each time, 7.8 MB of a 14.7 MB page.
+         *
+         * Memory is the layer that was missing. localStorage cannot hold 3.9 MB
+         * but the page is already holding the parsed Map while it renders, so
+         * keeping it costs nothing extra until the tab closes.
+         */
+        this._memory = new Map();
+
+        /**
+         * How many collections to keep. Four covers a normal path through the
+         * site — a category, the entity's own collection, and whatever a topic
+         * page pulled in — without letting a long session hold every collection
+         * on the site in memory at once.
+         */
+        this.MAX_MEMORY_COLLECTIONS = 4;
+
         this.BASE_URL           = '/static/entities';
         this.CACHE_PREFIX       = 'eoa_base_';
         this.MANIFEST_CACHE_KEY = 'eoa_base_manifest';
@@ -100,9 +124,30 @@ class EntityBaseLoader {
      */
     async load(collection, mythology = null) {
         const key = `${collection}:${mythology || '_all'}`;
+
+        if (this._memory.has(key)) {
+            // Re-insert so the most recently used collection is evicted last.
+            const hit = this._memory.get(key);
+            this._memory.delete(key);
+            this._memory.set(key, hit);
+            return hit;
+        }
+
         if (this._loadPromises.has(key)) return this._loadPromises.get(key);
 
         const p = this._load(collection, mythology)
+            .then((map) => {
+                // Only successful loads are kept. A null means the caller is
+                // about to fall back to Firestore, and caching that would make
+                // one failed fetch permanent for the life of the page.
+                if (map) {
+                    this._memory.set(key, map);
+                    while (this._memory.size > this.MAX_MEMORY_COLLECTIONS) {
+                        this._memory.delete(this._memory.keys().next().value);
+                    }
+                }
+                return map;
+            })
             .finally(() => this._loadPromises.delete(key));
         this._loadPromises.set(key, p);
         return p;
