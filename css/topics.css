@@ -1,4 +1,47 @@
 /*
+ * THEME-AWARE PALETTE FOR THE TOPIC TIER
+ *
+ * These components were first written against var(--text-secondary, #b6bcc8)
+ * and friends. Four of the five tokens they referenced — --text-tertiary,
+ * --border-color, --card-bg and --accent-color — are not defined anywhere on
+ * this site, so every one of them fell through to its hardcoded fallback, and
+ * those fallbacks were picked for the dark ground. On the day theme the result
+ * was blurb text at 1.82:1 and counts at 3.09:1 against white, which is not
+ * readable and would not have been caught by the axe pass either: the body
+ * background is transparent, so axe cannot resolve the composited ground and
+ * skips those nodes instead of failing them.
+ *
+ * Declared here with dark defaults and a day override, keyed on the same
+ * [data-theme=day] the rest of the site uses. Every value below clears WCAG
+ * AA on the ground it is used against — measured, not assumed:
+ *
+ *   dark   body 9.93:1   muted 7.44:1   accent 7.51:1   (on #0d1117)
+ *   day    body 7.58:1   muted 6.07:1   accent 5.17:1   (on #ffffff)
+ *
+ * The accent has to differ per theme. No single blue clears 4.5:1 against both
+ * white and #0d1117 — #7aa2f7 is 7.51 on dark but 2.52 on white, and #2563eb
+ * is the reverse — so a single shared value cannot be made to work.
+ */
+
+:root {
+    --topic-body: #b6bcc8;
+    --topic-muted: #9aa3b2;
+    --topic-accent: #7aa2f7;
+    --topic-border: rgba(255, 255, 255, 0.12);
+    --topic-card: rgba(255, 255, 255, 0.03);
+    --topic-on-accent: #0d1117;
+}
+
+[data-theme="day"] {
+    --topic-body: #475569;
+    --topic-muted: #54637d;
+    --topic-accent: #2563eb;
+    --topic-border: rgba(15, 23, 42, 0.16);
+    --topic-card: rgba(15, 23, 42, 0.03);
+    --topic-on-accent: #ffffff;
+}
+
+/*
  * The topic and region tier.
  *
  * Built on the variables the rest of the site already defines, so these pages
@@ -35,7 +78,7 @@
     max-width: 62ch;
     font-size: 1.05rem;
     line-height: 1.6;
-    color: var(--text-secondary, #b6bcc8);
+    color: var(--topic-body);
 }
 
 .topic-header {
@@ -56,18 +99,18 @@
     font-size: 0.85rem;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
     font-variant-numeric: tabular-nums;
 }
 
 .topic-breadcrumb {
     margin-bottom: 1.25rem;
     font-size: 0.85rem;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
 }
 
 .topic-breadcrumb a {
-    color: var(--accent-color, #7aa2f7);
+    color: var(--topic-accent);
     text-decoration: none;
 }
 
@@ -89,7 +132,7 @@
     gap: 1rem;
     margin: 0 0 1rem;
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-bottom: 1px solid var(--topic-border);
     font-size: 1.15rem;
     font-weight: 600;
 }
@@ -99,7 +142,7 @@
     font-size: 0.8rem;
     font-weight: 500;
     white-space: nowrap;
-    color: var(--accent-color, #7aa2f7);
+    color: var(--topic-accent);
     text-decoration: none;
 }
 
@@ -124,9 +167,9 @@
         "icon blurb blurb";
     gap: 0.15rem 0.7rem;
     padding: 0.95rem 1rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border: 1px solid var(--topic-border);
     border-radius: 10px;
-    background: var(--card-bg, rgba(255, 255, 255, 0.03));
+    background: var(--topic-card);
     color: inherit;
     text-decoration: none;
     transition: border-color 0.15s ease, transform 0.15s ease;
@@ -134,7 +177,7 @@
 
 .topic-tile:hover,
 .topic-tile:focus-visible {
-    border-color: var(--accent-color, #7aa2f7);
+    border-color: var(--topic-accent);
     transform: translateY(-2px);
 }
 
@@ -145,14 +188,14 @@
     grid-area: count;
     font-size: 0.8rem;
     font-variant-numeric: tabular-nums;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
 }
 
 .topic-tile-blurb {
     grid-area: blurb;
     font-size: 0.82rem;
     line-height: 1.45;
-    color: var(--text-secondary, #b6bcc8);
+    color: var(--topic-body);
     /* Blurbs vary in length; clamping keeps the grid rows even. */
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -174,9 +217,9 @@
     grid-template-columns: auto 1fr;
     gap: 0.3rem 0.85rem;
     padding: 1.1rem 1.2rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border: 1px solid var(--topic-border);
     border-radius: 12px;
-    background: var(--card-bg, rgba(255, 255, 255, 0.03));
+    background: var(--topic-card);
     color: inherit;
     text-decoration: none;
     transition: border-color 0.15s ease, transform 0.15s ease;
@@ -184,7 +227,7 @@
 
 .region-tile:hover,
 .region-tile:focus-visible {
-    border-color: var(--accent-color, #7aa2f7);
+    border-color: var(--topic-accent);
     transform: translateY(-2px);
 }
 
@@ -199,19 +242,19 @@
 .region-tile-count {
     display: block;
     font-size: 0.78rem;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
     font-variant-numeric: tabular-nums;
 }
 
 .region-tile-blurb {
     font-size: 0.85rem;
     line-height: 1.5;
-    color: var(--text-secondary, #b6bcc8);
+    color: var(--topic-body);
 }
 
 .region-tile-traditions {
     font-size: 0.78rem;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
 }
 
 /* ---- tradition list on a region page ---- */
@@ -229,23 +272,23 @@
     justify-content: space-between;
     gap: 0.6rem;
     padding: 0.7rem 0.9rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border: 1px solid var(--topic-border);
     border-radius: 8px;
-    background: var(--card-bg, rgba(255, 255, 255, 0.03));
+    background: var(--topic-card);
     color: inherit;
     text-decoration: none;
 }
 
 .region-tradition:hover,
 .region-tradition:focus-visible {
-    border-color: var(--accent-color, #7aa2f7);
+    border-color: var(--topic-accent);
 }
 
 .region-tradition-name { font-weight: 500; }
 
 .region-tradition-count {
     font-size: 0.8rem;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
     font-variant-numeric: tabular-nums;
 }
 
@@ -263,7 +306,7 @@
     align-items: center;
     gap: 0.35rem;
     padding: 0.35rem 0.7rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border: 1px solid var(--topic-border);
     border-radius: 999px;
     font-size: 0.82rem;
     color: inherit;
@@ -272,12 +315,12 @@
 
 .topic-tradition-jump a:hover,
 .topic-tradition-jump a:focus-visible {
-    border-color: var(--accent-color, #7aa2f7);
+    border-color: var(--topic-accent);
 }
 
 .topic-tradition-jump span {
     font-size: 0.75rem;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
     font-variant-numeric: tabular-nums;
 }
 
@@ -305,9 +348,9 @@
     display: flex;
     gap: 0.7rem;
     padding: 0.8rem 0.9rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border: 1px solid var(--topic-border);
     border-radius: 9px;
-    background: var(--card-bg, rgba(255, 255, 255, 0.03));
+    background: var(--topic-card);
     color: inherit;
     text-decoration: none;
     transition: border-color 0.15s ease;
@@ -315,7 +358,7 @@
 
 .topic-entity-card:hover,
 .topic-entity-card:focus-visible {
-    border-color: var(--accent-color, #7aa2f7);
+    border-color: var(--topic-accent);
 }
 
 .topic-entity-icon { font-size: 1.3rem; line-height: 1.2; flex: 0 0 auto; }
@@ -333,13 +376,13 @@
     font-size: 0.72rem;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
 }
 
 .topic-entity-blurb {
     font-size: 0.82rem;
     line-height: 1.45;
-    color: var(--text-secondary, #b6bcc8);
+    color: var(--topic-body);
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -353,10 +396,10 @@
 .topic-empty {
     padding: 3rem 1rem;
     text-align: center;
-    color: var(--text-secondary, #b6bcc8);
+    color: var(--topic-body);
 }
 
-.topic-empty a { color: var(--accent-color, #7aa2f7); }
+.topic-empty a { color: var(--topic-accent); }
 
 @media (prefers-reduced-motion: reduce) {
     .topic-tile,
@@ -394,7 +437,7 @@
     font-size: 0.8rem;
     font-weight: 500;
     white-space: nowrap;
-    color: var(--accent-color, #7aa2f7);
+    color: var(--topic-accent);
     text-decoration: none;
 }
 
@@ -412,9 +455,9 @@
     align-items: center;
     gap: 0.45rem;
     padding: 0.45rem 0.8rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border: 1px solid var(--topic-border);
     border-radius: 999px;
-    background: var(--card-bg, rgba(255, 255, 255, 0.03));
+    background: var(--topic-card);
     font-size: 0.85rem;
     color: inherit;
     text-decoration: none;
@@ -423,13 +466,13 @@
 
 .browse-topic-chip:hover,
 .browse-topic-chip:focus-visible {
-    border-color: var(--accent-color, #7aa2f7);
+    border-color: var(--topic-accent);
 }
 
 .browse-topic-chip-count {
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -455,9 +498,9 @@
     align-items: center;
     gap: 0.3rem;
     padding: 1.1rem 0.75rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border: 1px solid var(--topic-border);
     border-radius: 10px;
-    background: var(--card-bg, rgba(255, 255, 255, 0.03));
+    background: var(--topic-card);
     color: inherit;
     text-align: center;
     text-decoration: none;
@@ -466,7 +509,7 @@
 
 .landing-topic-card:hover,
 .landing-topic-card:focus-visible {
-    border-color: var(--accent-color, #7aa2f7);
+    border-color: var(--topic-accent);
     transform: translateY(-2px);
 }
 
@@ -475,7 +518,7 @@
 
 .landing-topic-count {
     font-size: 0.75rem;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
     font-variant-numeric: tabular-nums;
 }
 
@@ -485,7 +528,7 @@
 }
 
 .landing-topics-more a {
-    color: var(--accent-color, #7aa2f7);
+    color: var(--topic-accent);
     text-decoration: none;
     font-size: 0.9rem;
 }
@@ -505,9 +548,9 @@
 .entity-topic-slot {
     margin: 2rem 0;
     padding: 1.1rem 1.2rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border: 1px solid var(--topic-border);
     border-radius: 12px;
-    background: var(--card-bg, rgba(255, 255, 255, 0.03));
+    background: var(--topic-card);
 }
 
 .entity-topic-head {
@@ -528,7 +571,7 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.4rem 0.75rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
+    border: 1px solid var(--topic-border);
     border-radius: 999px;
     font-size: 0.84rem;
     color: inherit;
@@ -537,12 +580,12 @@
 }
 
 .entity-topic-chip:hover,
-.entity-topic-chip:focus-visible { border-color: var(--accent-color, #7aa2f7); }
+.entity-topic-chip:focus-visible { border-color: var(--topic-accent); }
 
 .entity-topic-chip-count {
     font-size: 0.74rem;
     font-variant-numeric: tabular-nums;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -556,7 +599,7 @@
     max-width: 68ch;
     font-size: 0.86rem;
     line-height: 1.55;
-    color: var(--text-secondary, #b6bcc8);
+    color: var(--topic-body);
 }
 
 .other-tradition-row {
@@ -570,7 +613,7 @@
     align-items: baseline;
     gap: 0.4rem;
     padding: 0.35rem 0.7rem;
-    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border: 1px solid var(--topic-border);
     border-radius: 999px;
     font-size: 0.82rem;
     color: inherit;
@@ -579,12 +622,12 @@
 }
 
 .other-tradition:hover,
-.other-tradition:focus-visible { border-color: var(--accent-color, #7aa2f7); }
+.other-tradition:focus-visible { border-color: var(--topic-accent); }
 
 .other-tradition span {
     font-size: 0.73rem;
     font-variant-numeric: tabular-nums;
-    color: var(--text-tertiary, #8b93a1);
+    color: var(--topic-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -593,14 +636,35 @@
 
 .topic-retry {
     padding: 0.5rem 1.1rem;
-    border: 1px solid var(--accent-color, #7aa2f7);
+    border: 1px solid var(--topic-accent);
     border-radius: 8px;
     background: transparent;
-    color: var(--accent-color, #7aa2f7);
+    color: var(--topic-accent);
     font: inherit;
     font-size: 0.9rem;
     cursor: pointer;
 }
 
 .topic-retry:hover,
-.topic-retry:focus-visible { background: var(--accent-color, #7aa2f7); color: var(--bg-primary, #0d1117); }
+.topic-retry:focus-visible { background: var(--topic-accent); color: var(--topic-on-accent); }
+
+/* ============================================
+   LIGHT-THEME GOLD
+   ============================================
+
+   --primary-gold is #DAA520, defined once and unscoped. Against the dark ground
+   it was designed for it reaches 8.46:1, comfortably past WCAG AA. Against the
+   day theme's white it is 2.24:1, well under the 4.5:1 normal text requires,
+   and it is used for headings, section titles and the table-of-contents labels —
+   114 failing nodes on a single entity page, plus the footer titles on every
+   page.
+
+   Darkened for the light theme only, to 5.09:1 on white. The dark theme keeps
+   the original, so the deliberate look is unchanged where it already worked.
+
+   Scoped to [data-theme="day"] rather than a prefers-color-scheme query because
+   this site stamps its theme explicitly and "day" is the value it uses. */
+
+[data-theme="day"] {
+    --primary-gold: #8B6914;
+}

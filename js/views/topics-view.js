@@ -336,10 +336,10 @@ class ExploreView {
             const label = (collections[collection] && collections[collection].label) || TopicsUI.titleCase(collection);
             return `
                 <section class="topic-section">
-                    <h3 class="topic-section-head">
+                    <h2 class="topic-section-head">
                         ${TopicsUI.escape(label)}
                         <a class="topic-section-all" href="#/browse/${encodeURIComponent(collection)}">All ${collections[collection] ? collections[collection].total : ''} →</a>
-                    </h3>
+                    </h2>
                     <div class="topic-tile-grid">${topics.map(TopicsUI.topicTile).join('')}</div>
                 </section>`;
         }).join('');
@@ -355,16 +355,16 @@ class ExploreView {
                 </header>
 
                 <section class="topic-section">
-                    <h3 class="topic-section-head">
+                    <h2 class="topic-section-head">
                         By region
                         <a class="topic-section-all" href="#/mythologies">All traditions →</a>
-                    </h3>
+                    </h2>
                     <div class="region-tile-grid">${regions.map(TopicsUI.regionTile).join('')}</div>
                 </section>
 
                 ${others.length ? `
                     <section class="topic-section">
-                        <h3 class="topic-section-head">Smaller traditions</h3>
+                        <h2 class="topic-section-head">Smaller traditions</h2>
                         <p class="topic-section-note">
                             ${others.length} traditions that belong to no region above — some
                             recorded here under only a handful of entries, some named in ways
@@ -518,7 +518,7 @@ class TopicView {
 
                 ${siblings.length ? `
                     <section class="topic-section topic-siblings">
-                        <h3 class="topic-section-head">Related topics</h3>
+                        <h2 class="topic-section-head">Related topics</h2>
                         <div class="topic-tile-grid">${siblings.map(TopicsUI.topicTile).join('')}</div>
                     </section>` : ''}
             </div>`;
@@ -566,7 +566,7 @@ class RegionView {
                 </div>
 
                 <section class="topic-section">
-                    <h3 class="topic-section-head">Other regions</h3>
+                    <h2 class="topic-section-head">Other regions</h2>
                     <div class="region-tile-grid">${others.map(TopicsUI.regionTile).join('')}</div>
                 </section>
             </div>`;

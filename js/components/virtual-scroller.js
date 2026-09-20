@@ -73,6 +73,11 @@ class VirtualScroller {
         // Create viewport for visible items
         this.viewport = document.createElement('div');
         this.viewport.className = 'virtual-viewport';
+        // The rendered items carry role="listitem", which requires a list
+        // ancestor. Without this every card reports aria-required-parent and a
+        // screen reader gets list items belonging to no list. The viewport is
+        // the element that actually contains them.
+        this.viewport.setAttribute('role', 'list');
         this.viewport.style.position = 'absolute';
         this.viewport.style.top = '0';
         this.viewport.style.left = '0';

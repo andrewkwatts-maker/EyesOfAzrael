@@ -359,7 +359,13 @@ class SearchViewComplete {
 
                 <!-- Mythology Sub-filters -->
                 <div class="mythology-filters-container">
-                    <div class="mythology-filters-scroll">
+                    <!--
+                      role="tablist" is required by the role="tab" on every chip
+                      inside. Without it axe reports aria-required-parent on all
+                      174 of them, and a screen reader gets a row of tabs that
+                      belong to no tab set.
+                    -->
+                    <div class="mythology-filters-scroll" role="tablist" aria-label="Filter by tradition">
                         <button class="mythology-chip active" data-mythology="" role="tab" aria-selected="true">
                             All Mythologies
                         </button>
@@ -372,7 +378,12 @@ class SearchViewComplete {
                 </div>
 
                 <!-- Main Content Area -->
-                <main class="search-main">
+                <!--
+                  A section, not a <main>. This renders inside
+                  <main id="main-content">, and a main landmark nested in
+                  another is what axe reports as landmark-main-is-top-level.
+                -->
+                <section class="search-main" aria-label="Search">
                     <!-- Results Header -->
                     <div id="results-header" class="results-header" style="display: none;">
                         <div class="results-count-info">
@@ -417,14 +428,20 @@ class SearchViewComplete {
                       matched it and every search result was rendered at
                       x=-10000. The results existed, the count said "Found 269
                       results", and a visitor saw an empty page.
+
+                      role is "region", not "main": this sits inside
+                      <main id="main-content">, and a second main landmark
+                      nested in the first is what axe reports as
+                      landmark-no-duplicate-main and landmark-main-is-top-level.
+                      A labelled region is what a results area actually is.
                     -->
-                    <div id="results-container" class="search-results" role="main" aria-live="polite" data-visible-live>
+                    <div id="results-container" class="search-results" role="region" aria-label="Search results" aria-live="polite" data-visible-live>
                         ${this.getEmptyStateHTML()}
                     </div>
 
                     <!-- Pagination -->
                     <nav id="pagination" class="pagination" aria-label="Search results pagination" style="display: none;"></nav>
-                </main>
+                </section>
             </div>
         `;
     }

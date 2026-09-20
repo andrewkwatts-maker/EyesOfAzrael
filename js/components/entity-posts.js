@@ -61,14 +61,20 @@ class EntityPostsComponent {
 
                     <div class="entity-posts-controls">
                         <div class="entity-posts-sort">
-                            <select id="entityPostsSort" class="entity-posts-select">
+                            <!--
+                              Labelled because neither select has visible label
+                              text beside it, so a screen reader announced only
+                              "combo box" twice with nothing to distinguish
+                              them. axe reports this as select-name, critical.
+                            -->
+                            <select id="entityPostsSort" class="entity-posts-select" aria-label="Sort discussion posts">
                                 <option value="newest">Newest</option>
                                 <option value="votes">Highest Rated</option>
                                 <option value="discussed">Most Discussed</option>
                             </select>
                         </div>
                         <div class="entity-posts-filter">
-                            <select id="entityPostsFilter" class="entity-posts-select">
+                            <select id="entityPostsFilter" class="entity-posts-select" aria-label="Filter discussion posts by section">
                                 <option value="">All Sections</option>
                             </select>
                         </div>
