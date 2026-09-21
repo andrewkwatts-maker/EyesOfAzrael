@@ -56,6 +56,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const CleanCSS = require('clean-css');
 
 const ROOT = path.join(__dirname, '..');
 const MANIFEST_PATH = path.join(ROOT, 'css', 'bundle.manifest.json');
@@ -65,8 +66,20 @@ const OUTPUTS = {
     main: path.join(ROOT, 'css', 'bundle.css')
 };
 
-/** Matches `@import url(...)` and `@import "..."`, capturing the target. */
-const IMPORT_RE = /@import\s+(?:url\(\s*)?['"]?([^'")\s;]+)['"]?\s*\)?\s*;/gi;
+/**
+ * Matches `@import url(...)` and `@import "..."`, capturing the target in
+ * whichever of the three alternatives matched (single-quoted, double-quoted,
+ * or bare). The quoted alternatives capture up to their OWN closing quote,
+ * not up to the first `;` — a bare `[^'")\s;]+` stops at any `;`, which a
+ * real Google Fonts URL like `...wght@300;400;500;600;700&family=...`
+ * contains. That earlier version treated the URL's internal `;` as the
+ * statement terminator, left the rest of the URL (`400;500;600;700&family=
+ * ...');`) as literal text after the replacement, and that stray text then
+ * became an invalid selector prelude that swallowed the next real rule's
+ * block as its own — silently dropping it. `styles.css`'s multi-weight font
+ * import hit exactly this and ate the `:root` block right after it.
+ */
+const IMPORT_RE = /@import\s+(?:url\(\s*)?(?:'([^']*)'|"([^"]*)"|([^'")\s;]+))['"]?\s*\)?\s*;/gi;
 
 /** Matches every url(...) so relative asset references can be detected. */
 const URL_RE = /url\(\s*['"]?([^'")]+)['"]?\s*\)/gi;
@@ -102,7 +115,8 @@ function readWithImports(absPath, seen, remoteImports, warnings) {
     // rules, so an imported sheet always sits lower in the cascade than the file
     // importing it.
     let inlined = '';
-    const body = raw.replace(IMPORT_RE, (match, ref) => {
+    const body = raw.replace(IMPORT_RE, (match, single, double, bare) => {
+        const ref = single !== undefined ? single : (double !== undefined ? double : bare);
         if (isRemote(ref)) {
             remoteImports.add(ref);
             return `/* hoisted to top of bundle: ${ref} */`;
@@ -134,7 +148,11 @@ function readWithImports(absPath, seen, remoteImports, warnings) {
         }
     }
 
-    const header = `\n/* ==== ${rel} ==== */\n`;
+    // `/*!` (an "important" comment) is what tells clean-css's level 1 to
+    // keep this marker instead of stripping it as an ordinary comment —
+    // __tests__/css-loading.test.js greps the built bundle for these to
+    // confirm every manifested file actually made it in.
+    const header = `\n/*! ==== ${rel} ==== */\n`;
     return inlined + header + body + '\n';
 }
 
@@ -159,7 +177,24 @@ function buildBundle(files) {
         '   Edit the source stylesheets, then run: npm run build:css\n' +
         `   Sources (in cascade order): ${files.length} files */\n`;
 
-    return { css: banner + prelude + css, warnings };
+    // Level 1 only: whitespace/comment stripping and other transforms scoped
+    // to a single rule (lowercasing hex colours, trimming redundant zeros).
+    // Level 2 merges and reorders rules across the file, which is exactly
+    // what this bundle cannot allow — the cascade order IS the design (see
+    // file header). Every warning is a real parse problem in a source
+    // stylesheet, so those are surfaced as build warnings rather than
+    // silently swallowed.
+    // `inline: false` — every local @import was already inlined by hand above;
+    // the only @import left here is the hoisted remote Google Fonts one, and
+    // without this clean-css tries to fetch it itself to inline/optimise it,
+    // which fails with no network callback configured and emits a warning on
+    // every single build. It should pass through untouched either way.
+    const minified = new CleanCSS({ level: 1, inline: false }).minify(prelude + css);
+    for (const w of minified.warnings) {
+        warnings.push(`clean-css: ${w}`);
+    }
+
+    return { css: banner + minified.styles + '\n', warnings };
 }
 
 function loadManifest() {
