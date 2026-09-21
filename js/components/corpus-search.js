@@ -99,7 +99,71 @@ class CorpusSearch {
      * search must not silently return fewer results than it used to — and that
      * path keeps the 500-document cap it always had.
      */
+    /**
+     * The lean index, fetched once and grouped by collection.
+     *
+     * Pointing search at the static base removed its Firestore cost but left it
+     * downloading the card files — everything needed to DRAW a card — when all
+     * it needs is enough to MATCH and list one. Searching "zeus" pulled every
+     * collection's _cards.json, 20.5 MB over 32 requests, and twice over, since
+     * the loader's memory cache held fewer collections than a search touches.
+     *
+     * search-index.json carries id, name, type, collection, facet and a 110
+     * character blurb for all 12,810 entities in 2.3 MB — one request, a ninth
+     * of the bytes. The card files are still there for anything that renders a
+     * full card; search simply stops paying for them.
+     */
+    static _indexPromise = null;
+
+    static loadSearchIndex() {
+        if (!CorpusSearch._indexPromise) {
+            CorpusSearch._indexPromise = fetch('/static/entities/search-index.json')
+                .then((r) => (r.ok ? r.json() : null))
+                .then((data) => {
+                    if (!data || !Array.isArray(data.rows)) {
+                        CorpusSearch._indexPromise = null;
+                        return null;
+                    }
+                    const byCollection = new Map();
+                    for (const [id, name, type, collection, facet, blurb] of data.rows) {
+                        if (!byCollection.has(collection)) byCollection.set(collection, new Map());
+                        byCollection.get(collection).set(id, {
+                            id, name, type, collection,
+                            mythology: facet || null,
+                            description: blurb || ''
+                        });
+                    }
+                    return byCollection;
+                })
+                .catch(() => {
+                    // Not kept, so a later search retries rather than inheriting
+                    // one bad fetch for the session.
+                    CorpusSearch._indexPromise = null;
+                    return null;
+                });
+        }
+        return CorpusSearch._indexPromise;
+    }
+
     async _loadSearchable(collection, mythology) {
+        // Lean index first. It answers for every published collection, so the
+        // base loader below is reached only when it is unavailable.
+        try {
+            const index = await CorpusSearch.loadSearchIndex();
+            const rows = index && index.get(collection);
+            if (rows && rows.size) {
+                if (!mythology) return rows;
+                const facet = String(mythology).toLowerCase();
+                const filtered = new Map();
+                for (const [id, row] of rows) {
+                    if (String(row.mythology || '').toLowerCase() === facet) filtered.set(id, row);
+                }
+                if (filtered.size) return filtered;
+            }
+        } catch (error) {
+            // Fall through to the base loader.
+        }
+
         const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
 
         let published = null;

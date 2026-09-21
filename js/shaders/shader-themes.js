@@ -215,8 +215,25 @@ class ShaderThemeManager {
         const width = window.innerWidth;
         const height = window.innerHeight;
 
-        this.canvas.width = width * dpr;
-        this.canvas.height = height * dpr;
+        // Cap the drawing surface by total pixels, not by either dimension.
+        //
+        // A phone viewport is tall and narrow, so a per-axis limit lets the
+        // area grow anyway: an emulated Pixel 5 was drawing 589x1090 — 642,000
+        // fragments a frame — against 448x251, or 112,000, for a 1100x620
+        // desktop window. The device that can least afford it was rendering
+        // nearly six times the work.
+        //
+        // The canvas is stretched back over the viewport by its CSS size, so a
+        // capped buffer is a slightly softer background and nothing else. This
+        // is a diffuse gradient; the difference is not visible, and it is the
+        // cheapest large win available here.
+        const MAX_PIXELS = 1280 * 720;
+        let scale = 1;
+        const wanted = width * dpr * height * dpr;
+        if (wanted > MAX_PIXELS) scale = Math.sqrt(MAX_PIXELS / wanted);
+
+        this.canvas.width = Math.max(1, Math.round(width * dpr * scale));
+        this.canvas.height = Math.max(1, Math.round(height * dpr * scale));
         this.canvas.style.width = width + 'px';
         this.canvas.style.height = height + 'px';
 

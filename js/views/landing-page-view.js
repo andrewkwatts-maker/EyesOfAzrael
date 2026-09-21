@@ -2295,7 +2295,47 @@ Discover & Explore
      * @param {string} collectionName
      * @param {{limit: number, newestFirst?: boolean}} options
      */
+    /** Published picks, fetched once for every strip on the page. */
+    static _featuredPromise = null;
+
+    static loadFeatured() {
+        if (!LandingPageView._featuredPromise) {
+            LandingPageView._featuredPromise = fetch('/static/entities/featured.json')
+                .then((r) => (r.ok ? r.json() : null))
+                .then((d) => (d && d.byCollection ? d : null))
+                .catch(() => {
+                    LandingPageView._featuredPromise = null;
+                    return null;
+                });
+        }
+        return LandingPageView._featuredPromise;
+    }
+
     async _stripFromBase(collectionName, { limit, newestFirst = false } = {}) {
+        // A published shortlist first.
+        //
+        // This already avoided Firestore, but "read from the base" still meant
+        // downloading the whole collection: four of them, 8.5 MB, so the front
+        // page could show eight cards in two decorative strips. featured.json
+        // is 57 KB for every collection at once.
+        //
+        // The newest-first strip is served the same way. Sorting by date needs
+        // the whole collection, which is exactly why that strip kept pulling
+        // one, so the export does the sort once and publishes the result.
+        {
+            try {
+                const published = await LandingPageView.loadFeatured();
+                const source = published
+                    && (newestFirst ? published.recentByCollection : published.byCollection);
+                const picks = source && source[collectionName];
+                if (picks && picks.length) {
+                    return picks.slice(0, limit).map((p) => ({ ...p, type: collectionName }));
+                }
+            } catch (error) {
+                // Fall through to the base.
+            }
+        }
+
         const loader = (typeof window !== 'undefined') ? window.entityBaseLoader : null;
         if (!loader) return null;
 

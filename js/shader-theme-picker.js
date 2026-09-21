@@ -25,7 +25,20 @@
     const STORAGE_KEY = 'eoaplot-selected-theme';
     const SHADER_STORAGE_KEY = 'eoaplot-shader-enabled';
     const SYSTEM_PREF_KEY = 'eoaplot-respect-system-pref';
-    const DEFAULT_THEME = 'night';
+    /**
+     * `celestial`, not `night`.
+     *
+     * Night renders a near-black navy — the site opened on what reads as a
+     * black hole, which is a severe thing to greet a reader with and hides the
+     * one visual idea the shader layer exists to provide. Celestial is the same
+     * dark family, so every dark-theme rule still applies, but it is a warm
+     * purple nebula with visible depth.
+     *
+     * It is no more expensive: SHADER_MAPPING sends celestial to the `cosmic`
+     * shader, which has no loops at all, where `night` has none either. The
+     * cost of this layer is the full-viewport redraw, not the theme.
+     */
+    const DEFAULT_THEME = 'celestial';
     const TRANSITION_DURATION = 400; // ms
 
     /**
@@ -333,7 +346,11 @@
      */
     function getSystemPreferredTheme() {
         const scheme = getSystemColorScheme();
-        return scheme === 'light' ? 'day' : 'night';
+        // The dark answer is DEFAULT_THEME rather than a second hardcoded
+        // 'night', so changing the default changes it everywhere. This function
+        // is what most first-time visitors actually hit — a browser preferring
+        // dark got 'night' here no matter what the default said.
+        return scheme === 'light' ? 'day' : DEFAULT_THEME;
     }
 
     /**
@@ -534,14 +551,46 @@
     /**
      * Initialize WebGL shader manager
      */
+    /**
+     * What this device should start at, rather than what it might cope with.
+     *
+     * The shader is a full-viewport fragment program redrawn every frame, and
+     * it was starting at `high` — device pixel ratio up to 2 — on everything.
+     * On a phone at DPR 3 that is a surface several times the desktop one:
+     * measured here, a 1100x620 desktop window renders a 448x251 canvas while
+     * an emulated Pixel 5 renders 589x1090.
+     *
+     * Adaptive quality already drops the tier when frames are missed, but it
+     * can only react after they have been missed, and the first seconds are
+     * exactly when the page is parsing, fetching and rendering. Starting low on
+     * a phone and letting it climb is the right way round.
+     *
+     * Every signal here is advisory and missing on some browsers, so each is
+     * checked rather than assumed, and the fallback is the conservative tier.
+     */
+    function startingQuality() {
+        const coarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        const narrow = window.innerWidth <= 768;
+        const cores = navigator.hardwareConcurrency || 0;
+        const memory = navigator.deviceMemory || 0;
+        const saveData = navigator.connection && navigator.connection.saveData;
+
+        if (saveData) return 'low';
+        if (coarse || narrow) return 'low';
+        if (cores && cores <= 4) return 'medium';
+        if (memory && memory <= 4) return 'medium';
+        return 'high';
+    }
+
     function initShaderManager() {
         if (typeof ShaderThemeManager !== 'undefined') {
+            const quality = startingQuality();
             shaderManager = new ShaderThemeManager({
-                quality: 'high',
+                quality,
                 adaptiveQuality: true,
                 intensity: 1.0
             });
-            console.log('[Theme Picker] Shader manager initialized');
+            console.log('[Theme Picker] Shader manager initialized at quality:', quality);
         } else {
             console.warn('[Theme Picker] ShaderThemeManager not available');
         }

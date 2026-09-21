@@ -51,12 +51,19 @@ class EntityBaseLoader {
         this._memory = new Map();
 
         /**
-         * How many collections to keep. Four covers a normal path through the
-         * site — a category, the entity's own collection, and whatever a topic
-         * page pulled in — without letting a long session hold every collection
-         * on the site in memory at once.
+         * How much parsed data to keep, measured in rows rather than files.
+         *
+         * A four-collection limit looked prudent and was pathological for the
+         * one page that needs many: search touches eight, so each eviction was
+         * followed by a re-fetch of a file it had just discarded, and a single
+         * search downloaded 40 MB — every collection twice. Counting files
+         * ignores that deities is 3.9 MB and events is 200 bytes.
+         *
+         * A row budget keeps many small collections cheaply and evicts when the
+         * total actually gets large. 40,000 rows is comfortably every small
+         * collection plus the two big ones.
          */
-        this.MAX_MEMORY_COLLECTIONS = 4;
+        this.MAX_MEMORY_ROWS = 40000;
 
         this.BASE_URL           = '/static/entities';
         this.CACHE_PREFIX       = 'eoa_base_';
@@ -142,8 +149,16 @@ class EntityBaseLoader {
                 // one failed fetch permanent for the life of the page.
                 if (map) {
                     this._memory.set(key, map);
-                    while (this._memory.size > this.MAX_MEMORY_COLLECTIONS) {
-                        this._memory.delete(this._memory.keys().next().value);
+                    let rows = 0;
+                    for (const held of this._memory.values()) rows += held.size || 0;
+                    // Evict least-recently-used until within budget, but never
+                    // the entry just added: dropping it would guarantee the
+                    // re-fetch this cache exists to prevent.
+                    while (rows > this.MAX_MEMORY_ROWS && this._memory.size > 1) {
+                        const oldest = this._memory.keys().next().value;
+                        if (oldest === key) break;
+                        rows -= (this._memory.get(oldest).size || 0);
+                        this._memory.delete(oldest);
                     }
                 }
                 return map;

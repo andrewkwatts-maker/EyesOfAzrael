@@ -426,6 +426,84 @@ function main() {
     ensureDir(OUT_DIR);
     writeJson(path.join(OUT_DIR, 'manifest.json'), manifest);
 
+    // One lean index for search, and a short list for the landing page.
+    //
+    // Search was downloading every collection's _cards.json — 20.5 MB across
+    // 32 requests, and twice over, because the loader's memory cache holds four
+    // collections and search touches eight. The landing page was fetching four
+    // whole collections, 8.5 MB, to show eight cards in two decorative strips.
+    //
+    // Cards carry the fields needed to DRAW a card. Search needs the fields
+    // needed to MATCH and list one, which is a fifth of the bytes: dropping the
+    // long description, icons, symbols, domains and sort inputs takes the whole
+    // corpus to 2.3 MB in a single file. Rows are positional for the same
+    // reason topics.json uses tuples — at 13,632 rows the property names would
+    // outweigh the values.
+    const searchRows = [];
+    const featured = {};
+    const recent = {};
+    for (const [collection, entities] of byCollection) {
+        const live = entities.filter((e) => e && e.id && !e.duplicateOf);
+
+        for (const e of live) {
+            searchRows.push([
+                e.id,
+                e.name || e.id,
+                e.type || collection,
+                collection,
+                String(e.mythology || e.era || '').toLowerCase(),
+                String(e.shortDescription || e.description || '').replace(/\s+/g, ' ').slice(0, 110)
+            ]);
+        }
+
+        // The landing strips want a handful of well-formed entries each. Taking
+        // them here means the page fetches one small file instead of pulling
+        // whole collections and throwing away 99.9% of each.
+        const pick = live
+            .filter((e) => e.name && (e.icon || e.shortDescription || e.description))
+            .slice(0, 8)
+            .map((e) => ({
+                id: e.id,
+                name: e.name,
+                collection,
+                icon: e.icon || null,
+                mythology: e.mythology || null,
+                description: String(e.shortDescription || e.description || '').replace(/\s+/g, ' ').slice(0, 140)
+            }));
+        if (pick.length) featured[collection] = pick;
+
+        // And the newest few, for the "recently added" strip.
+        //
+        // Sorting by date needs the whole collection, which is exactly why that
+        // strip kept downloading one: four collections, 8.5 MB, to show eight
+        // cards. Doing the sort here once means the page does not have to.
+        const dated = live
+            .filter((e) => e.dateAdded || e.createdAt)
+            .sort((a, b) => new Date(b.dateAdded || b.createdAt) - new Date(a.dateAdded || a.createdAt))
+            .slice(0, 8)
+            .map((e) => ({
+                id: e.id,
+                name: e.name,
+                collection,
+                icon: e.icon || null,
+                mythology: e.mythology || null,
+                dateAdded: e.dateAdded || e.createdAt || null,
+                description: String(e.shortDescription || e.description || '').replace(/\s+/g, ' ').slice(0, 140)
+            }));
+        if (dated.length) recent[collection] = dated;
+    }
+
+    writeJson(path.join(OUT_DIR, 'search-index.json'), {
+        generatedAt,
+        fields: ['id', 'name', 'type', 'collection', 'facet', 'blurb'],
+        rows: searchRows
+    });
+    writeJson(path.join(OUT_DIR, 'featured.json'), { generatedAt, byCollection: featured, recentByCollection: recent });
+
+    const searchKb = Math.round(fs.statSync(path.join(OUT_DIR, 'search-index.json')).size / 1024);
+    const featuredKb = Math.round(fs.statSync(path.join(OUT_DIR, 'featured.json')).size / 1024);
+    console.log(`\n  🔎 search-index.json ${searchRows.length.toLocaleString()} rows (${searchKb} KB), featured.json (${featuredKb} KB)`);
+
     if (broken.length) {
         // Written rather than only logged: with four domains cross-linking, this
         // list is the only way to find a reference that points nowhere.

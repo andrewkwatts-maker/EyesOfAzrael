@@ -484,9 +484,14 @@
                     // Also set a class for CSS to use
                     document.documentElement.classList.add('theme-' + savedTheme);
                 } else {
-                    // Default to night theme
-                    document.documentElement.setAttribute('data-theme', 'night');
-                    document.documentElement.classList.add('theme-night');
+                    // Default to celestial, matching DEFAULT_THEME in
+                    // js/shader-theme-picker.js. These two must agree: this
+                    // script runs first to avoid a flash of the wrong theme,
+                    // and the picker resolves the real one a moment later, so
+                    // a disagreement here is visible as a flicker on every
+                    // first visit.
+                    document.documentElement.setAttribute('data-theme', 'celestial');
+                    document.documentElement.classList.add('theme-celestial');
                 }
             } catch (e) {
                 // Silent fail - shader-theme-picker.js will handle initialization
