@@ -562,14 +562,36 @@ class CorpusSearch {
     }
 
     /**
+     * `corpus.canonical` is an array on ~23,800 entities but a bare string on
+     * 26 (a data-shape bug scripts/validate-corpus-search.js now flags) -
+     * normalising here means every caller gets one shape instead of needing
+     * its own array/string branch, and instead of silently producing wrong
+     * results for whichever shape it didn't expect.
+     */
+    canonicalTerms(corpus) {
+        const canonical = corpus && corpus.canonical;
+        if (Array.isArray(canonical)) return canonical;
+        if (typeof canonical === 'string' && canonical) return [canonical];
+        return [];
+    }
+
+    /**
      * Calculate corpus term search score
      */
     calculateCorpusScore(corpus, searchTerm) {
         let score = 0;
 
-        // Canonical name exact match
-        if (corpus.canonical === searchTerm) score += 100;
-        else if (corpus.canonical?.includes(searchTerm)) score += 80;
+        // Canonical name exact match. `corpus.canonical === searchTerm` here
+        // used to compare the whole array to the search string, which is
+        // never true - this branch was dead code, and every canonical match
+        // (even an exact one) fell through to the 80-point substring branch
+        // below (or, on the 26 string-shaped records, did a genuine
+        // substring check instead of an exact-term check - a different bug
+        // masking this one). canonicalTerms() gives both shapes the same,
+        // correct, array-of-terms treatment.
+        const canonical = this.canonicalTerms(corpus);
+        if (canonical.includes(searchTerm)) score += 100;
+        else if (canonical.some((c) => c.includes(searchTerm))) score += 80;
 
         // Variants
         (corpus.variants || []).forEach(variant => {
@@ -693,9 +715,13 @@ class CorpusSearch {
             terms: []
         };
 
-        if (corpus.canonical === searchTerm) {
+        // Same array-vs-string fix as calculateCorpusScore(): comparing the
+        // raw `corpus.canonical` to a string was always false when it holds
+        // an array, so this branch never matched at all.
+        const canonicalTerms = this.canonicalTerms(corpus);
+        if (canonicalTerms.includes(searchTerm)) {
             matched.type = 'canonical';
-            matched.terms.push(corpus.canonical);
+            matched.terms.push(...canonicalTerms.filter((c) => c === searchTerm));
         }
 
         (corpus.variants || []).forEach(v => {

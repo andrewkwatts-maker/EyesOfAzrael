@@ -350,6 +350,13 @@
                 </div>
             </div>
 
+            <!-- Ancient Text Passages: real verse/passage-level matches, kept
+                 separate from the entity-search results below since it comes
+                 from a different data source (keyword -> passage indexes,
+                 not entity records) and must never block or replace them if
+                 it fails to load. Populated by js/services/corpus-passage-index.js. -->
+            <div class="corpus-passages-panel" id="corpus-passages-panel" hidden></div>
+
             <!-- Results Controls -->
             <div class="results-controls" id="results-controls" style="display: none;">
                 <div class="results-info">
@@ -455,6 +462,7 @@
     <script src="js/components/corpus-search.js"></script>
     <script src="js/components/corpus-search-enhanced.js"></script>
     <script src="js/components/virtual-scroller.js"></script>
+    <script src="js/services/corpus-passage-index.js"></script>
 
     <!-- Page Controller -->
     <script src="js/pages/corpus-explorer.js"></script>
@@ -465,24 +473,28 @@
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('[CorpusExplorer] Page loaded, initializing...');
 
-            // Wait for Firebase Auth
+            // Every collection this page searches (deities, heroes, texts,
+            // ...) has `allow read: if true;` in firestore.rules - reading
+            // them has never required auth. This used to redirect a signed-
+            // out visitor straight to index.html before any of that could
+            // run, which meant a reader clicking a keyword chip on an entity
+            // page (a page they can view perfectly well signed out) landed
+            // on a bounce instead of a search. Initialize for anyone; only
+            // sign-in-specific features (save query, vote) need to check
+            // auth themselves, same as elsewhere on the site.
             firebase.auth().onAuthStateChanged(async (user) => {
-                if (user) {
-                    console.log('[CorpusExplorer] User authenticated:', user.email);
+                console.log(user
+                    ? `[CorpusExplorer] User authenticated: ${user.email}`
+                    : '[CorpusExplorer] No user - initializing in read-only/guest mode');
 
-                    // Initialize the page controller
-                    const explorer = new CorpusExplorerPage();
+                const explorer = new CorpusExplorerPage();
+                window.corpusExplorerInstance = explorer;
 
-                    // Set global reference for onclick handlers in rendered HTML
-                    window.corpusExplorerInstance = explorer;
-
+                try {
                     await explorer.init();
-
                     console.log('[CorpusExplorer] Page initialized successfully');
-                } else {
-                    console.log('[CorpusExplorer] No user, redirecting to login...');
-                    // Redirect to main page for authentication
-                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('[CorpusExplorer] Initialization failed:', error);
                 }
             });
         });

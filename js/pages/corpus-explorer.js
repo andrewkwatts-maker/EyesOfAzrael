@@ -357,6 +357,12 @@ class CorpusExplorerPage {
         this.currentPage = options.page || 1;
         this.searchStartTime = performance.now();
 
+        // Runs independently of the entity search below - a different data
+        // source (keyword -> passage indexes, not entity records), so it is
+        // never awaited here and a failure here can't affect or delay the
+        // entity results a reader already relies on.
+        this.renderPassagesPanel(query);
+
         // Hide autocomplete
         this.hideAutocomplete();
 
@@ -960,7 +966,13 @@ class CorpusExplorerPage {
     handleURLParameters() {
         const params = new URLSearchParams(window.location.search);
 
-        const query = params.get('q');
+        // `term` is an alias for `q`. Every keyword chip a reader can click on
+        // an entity page - schema-section-renderer.js's renderCorpusSearch(),
+        // asset-corpus-search.js's "Show more" links - opens this page with
+        // `?term=<word>`, never `?q=`. This page only ever read `q`, so every
+        // one of those links landed on an empty, unfilled search box. `q`
+        // still wins if a link somehow supplies both.
+        const query = params.get('q') || params.get('term');
         if (query) {
             document.getElementById('corpus-search-input').value = query;
             this.performSearch(query);
@@ -1130,10 +1142,80 @@ class CorpusExplorerPage {
         if (resultsControls) resultsControls.style.display = 'none';
         if (pagination) pagination.style.display = 'none';
 
+        const passagesPanel = document.getElementById('corpus-passages-panel');
+        if (passagesPanel) {
+            passagesPanel.hidden = true;
+            passagesPanel.innerHTML = '';
+        }
+
         // Reset state
         this.currentResults = [];
         this.totalResults = 0;
         this.currentQuery = '';
+    }
+
+    /**
+     * Look up `query` in the keyword -> ancient-text-passage indexes
+     * (js/services/corpus-passage-index.js) and render whatever matches into
+     * #corpus-passages-panel. Entirely separate from, and never blocking,
+     * the entity search in performSearch() - see that method's comment.
+     */
+    async renderPassagesPanel(query) {
+        const panel = document.getElementById('corpus-passages-panel');
+        if (!panel) return;
+
+        if (typeof window.CorpusPassageIndex === 'undefined') {
+            panel.hidden = true;
+            return;
+        }
+
+        let passages;
+        try {
+            passages = await window.CorpusPassageIndex.search(query);
+        } catch (error) {
+            console.warn('[CorpusExplorerPage] Passage lookup failed:', error.message);
+            panel.hidden = true;
+            return;
+        }
+
+        // A stale, slower lookup resolving after a newer search started
+        // must not clobber what the reader is looking at now.
+        if (this.currentQuery !== query) return;
+
+        if (!passages.length) {
+            panel.hidden = true;
+            panel.innerHTML = '';
+            return;
+        }
+
+        const SHOWN = 10;
+        const shown = passages.slice(0, SHOWN);
+        const remaining = passages.length - shown.length;
+
+        panel.hidden = false;
+        panel.innerHTML = `
+            <h2 class="corpus-passages-heading">📜 Ancient Text Passages (${passages.length})</h2>
+            <p class="corpus-passages-note">
+                Verbatim passages that mention "${this.escapeHtml(query)}", from a small,
+                growing set of indexed texts - most keywords will not have a
+                passage match yet.
+            </p>
+            <ul class="corpus-passages-list">
+                ${shown.map((p) => `
+                    <li class="corpus-passage-card${p.demo ? ' corpus-passage-demo' : ''}">
+                        <div class="corpus-passage-source">
+                            ${this.escapeHtml(p.textName)}
+                            ${p.citation ? `<span class="corpus-passage-citation">${this.escapeHtml(p.citation)}</span>` : ''}
+                            ${p.demo ? '<span class="corpus-passage-demo-badge" title="Placeholder data, not a completed import">demo data</span>' : ''}
+                        </div>
+                        <blockquote class="corpus-passage-context">${this.escapeHtml(p.context)}</blockquote>
+                        ${p.translation ? `<p class="corpus-passage-translation">${this.escapeHtml(p.translation)}</p>` : ''}
+                        ${p.url ? `<a class="corpus-passage-link" href="${this.escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer">Source ↗</a>` : ''}
+                    </li>
+                `).join('')}
+            </ul>
+            ${remaining > 0 ? `<p class="corpus-passages-more">+ ${remaining} more not shown</p>` : ''}
+        `;
     }
 
     showError(message) {
