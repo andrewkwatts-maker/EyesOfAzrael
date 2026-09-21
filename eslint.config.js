@@ -88,6 +88,7 @@ module.exports = [
         HomeView: 'writable',
         BrowseCategoryView: 'writable',
         TopicsService: 'writable',
+        CorpusTermLookup: 'writable',
         TopicsUI: 'writable',
         ExploreView: 'writable',
         TopicView: 'writable',

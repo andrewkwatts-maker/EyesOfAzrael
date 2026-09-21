@@ -203,6 +203,12 @@ class FirebaseEntityRenderer {
             // Update page metadata
             this.updatePageMetadata(entity);
 
+            // Offer this entity's own search terms as primary-source lookups.
+            // Here rather than inside a per-type renderer: every type carries
+            // corpusSearch, and the switch above has seventeen branches that
+            // would each need the same line.
+            FirebaseEntityRenderer.fillCorpusSlot(entity);
+
         } catch (error) {
             console.error('Error loading entity:', error);
             this.renderError(container, `Failed to load entity: ${error.message}`);
@@ -734,7 +740,8 @@ class FirebaseEntityRenderer {
             .toLowerCase()
             .replace(/[^a-z_-]/g, '');
         const id = String(entity.id).replace(/"/g, '&quot;');
-        return `<div class="entity-topic-slot" data-entity-id="${id}" data-collection="${collection}" hidden></div>`
+        return '<div class="entity-corpus-slot" hidden></div>'
+            + `<div class="entity-topic-slot" data-entity-id="${id}" data-collection="${collection}" hidden></div>`
             + `<div class="entity-backlink-slot" data-entity-id="${id}" data-collection="${collection}" hidden></div>`;
     }
 
@@ -746,6 +753,22 @@ class FirebaseEntityRenderer {
      * by the export to `_all.json` only. static/_backlinks/<collection>.json
      * exists for exactly this, and is fetched once per collection.
      */
+    /**
+     * Offer the entity's own search terms as primary-source lookups.
+     *
+     * Needs the entity object (the terms live on it), so it is called from the
+     * render path rather than hung off the global render-complete event the
+     * other two slots use. Failure is silent by design: with no corpus index
+     * the strip simply does not appear, which is the honest outcome — a panel
+     * promising sources and delivering none would misrepresent the site.
+     */
+    static fillCorpusSlot(entity) {
+        if (typeof CorpusTermLookup === 'undefined') return;
+        const slot = document.querySelector('.entity-corpus-slot:not([data-filled])');
+        if (!slot) return;
+        CorpusTermLookup.fill(slot, entity).catch(() => { /* sources are an addition */ });
+    }
+
     static _backlinkIndex = new Map();
 
     /**

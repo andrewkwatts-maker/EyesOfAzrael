@@ -139,12 +139,25 @@
          * direction so a reader searching "buddha" still finds the "佛" entry
          * (english alias "buddha") and vice versa.
          */
-        async search(term) {
+        async search(term, options = {}) {
             const needle = String(term || '').trim().toLowerCase();
             if (!needle) return [];
 
             const entries = await this.load();
             const exact = entries.filter((e) => e.aliases.includes(needle));
+
+            // The substring fallback is right for a search box, where a reader
+            // typing "buddh" should still find 佛, and wrong for a strip of
+            // chips generated from an entity's own vocabulary. Those include
+            // long phrases — "Reckoner of Time", and at least one collapsed
+            // page title — and `needle.includes(a)` makes any of them match
+            // every short alias in the index. Thoth's page offered 36 Chinese
+            // sutra passages on that basis.
+            //
+            // So callers who generated their own term ask for exact, and the
+            // explorer keeps the forgiving behaviour it needs.
+            if (options.exact) return exact.flatMap((e) => e.passages);
+
             const partial = exact.length
                 ? []
                 : entries.filter((e) => e.aliases.some((a) => a.includes(needle) || needle.includes(a)));
