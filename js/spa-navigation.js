@@ -307,6 +307,61 @@ class SPANavigation {
      * script-ordering problem degrades to "the common cases still work" rather
      * than rejecting every browse URL on the site.
      */
+    /**
+     * Load a view's script the first time its route is visited.
+     *
+     * index.html loads 131 scripts, 4.2 MB, on every route — including the
+     * landing page, which needs none of the four below. The compare view, the
+     * dashboard, the entity form and the submission wizard are 367 KB that a
+     * reader who never opens those routes pays for anyway.
+     *
+     * Deliberately narrow. These four are unambiguously reached through one
+     * route each and expose one global apiece, so "is the global defined" is a
+     * complete readiness test. Anything with initialisation order to respect,
+     * or read by another module at load time, stays in index.html where its
+     * ordering is explicit — a smaller payload is not worth a race.
+     *
+     * Resolves false when the script cannot be fetched, so the caller renders
+     * its existing "component not loaded" message rather than a blank page.
+     */
+    static _scriptPromises = new Map();
+
+    static loadViewScript(globalName, src) {
+        if (typeof window !== 'undefined' && typeof window[globalName] !== 'undefined') {
+            return Promise.resolve(true);
+        }
+        if (!SPANavigation._scriptPromises.has(src)) {
+            SPANavigation._scriptPromises.set(src, new Promise((resolve) => {
+                let settled = false;
+                const finish = (ok) => {
+                    if (settled) return;
+                    settled = true;
+                    // A failure is not cached: a later visit should retry rather
+                    // than inherit one bad fetch for the life of the page.
+                    if (!ok) SPANavigation._scriptPromises.delete(src);
+                    resolve(ok);
+                };
+
+                // Bounded, because neither handler is guaranteed to fire. A
+                // blocked request, or an environment that does not execute
+                // injected scripts at all, would otherwise leave the route
+                // awaiting forever and the reader looking at a blank page —
+                // strictly worse than the "component not loaded" message this
+                // resolves into. jsdom is one such environment, which is how
+                // the existing fallback tests caught it.
+                const timer = setTimeout(() => finish(typeof window[globalName] !== 'undefined'), 5000);
+
+                const script = document.createElement('script');
+                script.src = src;
+                script.async = false;   // preserve execution order against anything else queued
+                script.onload = () => { clearTimeout(timer); finish(typeof window[globalName] !== 'undefined'); };
+                script.onerror = () => { clearTimeout(timer); finish(false); };
+                document.head.appendChild(script);
+            }));
+        }
+        return SPANavigation._scriptPromises.get(src);
+    }
+
     static isKnownCollection(segment) {
         const name = String(segment || '').toLowerCase();
         if (!name) return false;
@@ -2430,6 +2485,7 @@ class SPANavigation {
         try {
             const mainContent = document.getElementById('main-content');
 
+            await SPANavigation.loadViewScript('CompareView', '/js/components/compare-view.js');
             if (typeof CompareView === 'undefined') {
                 spaError('CompareView class not loaded');
                 mainContent.innerHTML = `
@@ -2490,6 +2546,7 @@ class SPANavigation {
                 return;
             }
 
+            await SPANavigation.loadViewScript('UserDashboard', '/js/views/user-dashboard-view.js');
             if (typeof UserDashboard === 'undefined') {
                 spaError('UserDashboard class not loaded');
                 mainContent.innerHTML = `
