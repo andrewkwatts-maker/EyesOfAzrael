@@ -45,7 +45,8 @@
  * `ashi` inside `Mashiach`. Word-boundary matching is what stops that.
  *
  * USAGE
- *   node scripts/build-topics.js            # writes static/topics.json
+ *   node scripts/build-topics.js            # writes static/topics.json and
+ *                                            # static/topics/<collection>.json
  *   node scripts/build-topics.js --report   # coverage only, writes nothing
  */
 
@@ -57,6 +58,7 @@ const BASE = path.join(ROOT, 'static', 'entities');
 const TAXONOMY = path.join(ROOT, 'data', 'topics', 'taxonomy.json');
 const REGIONS = path.join(ROOT, 'data', 'topics', 'regions.json');
 const OUT = path.join(ROOT, 'static', 'topics.json');
+const COLLECTIONS_DIR = path.join(ROOT, 'static', 'topics');
 
 const REPORT_ONLY = process.argv.includes('--report');
 
@@ -314,11 +316,24 @@ function main() {
     const out = {
         generatedAt: new Date().toISOString(),
         collections: {},
-        topics: {},
-        prominent: {},
+        // Header-only per-collection topic rows (no `members`) - every reader
+        // of the shared file (the home page's theme preview, /#/explore, an
+        // entity page's own topic badges) only ever needs slug/name/icon/total,
+        // never the membership list. The full rows, `members` included, live
+        // in per-collection files under static/topics/ (see perCollection
+        // below) and are fetched only by the one page that browses or reads
+        // that one collection.
+        topicsIndex: {},
         regions,
         otherTraditions: leftovers.map((t) => ({ id: t.label.toLowerCase(), name: t.label, total: t.total }))
     };
+
+    // Full topic rows (members included) and prominence scores, one file per
+    // collection. Splitting this out of the shared file is what stops a visit
+    // to /#/browse/deities downloading Creatures', Heroes', Items' and Places'
+    // topic memberships and prominence maps along with its own - previously
+    // every page that touched topics at all paid for all five collections.
+    const perCollection = {};
 
     console.log(`  regions    ${regions.length} regions over ${traditionCount} distinct tradition values`);
     console.log(`             ${regions.slice(0, 4).map((r) => `${r.name} (${r.total})`).join(', ')}`);
@@ -385,7 +400,9 @@ function main() {
         }
 
         topicRows.sort((a, b) => b.total - a.total);
-        out.topics[collection] = topicRows;
+        out.topicsIndex[collection] = topicRows.map(
+            ({ members, ...header }) => header
+        );
         totalTopics += topicRows.length;
 
         // Prominence as a plain id -> score map. The listing views already hold
@@ -397,7 +414,7 @@ function main() {
             const value = score.get(row.id) || 0;
             if (value > 0) scores[row.id] = Math.round(value * 10) / 10;
         }
-        out.prominent[collection] = scores;
+        perCollection[collection] = { topics: topicRows, prominent: scores };
 
         // The ids a listing should hide because a better record says the same
         // thing - same name, same tradition, lower score. Sent as a list so the
@@ -483,6 +500,22 @@ function main() {
     fs.writeFileSync(OUT, JSON.stringify(out));
     const kb = (fs.statSync(OUT).size / 1024).toFixed(0);
     console.log(`\n${totalTopics} topics, ${totalAssignments} assignments -> ${OUT} (${kb} KB)`);
+
+    fs.mkdirSync(COLLECTIONS_DIR, { recursive: true });
+    // Stale per-collection files (a collection dropped from the taxonomy since
+    // the last run) would otherwise keep being served forever - nothing else
+    // ever deletes them.
+    for (const file of fs.readdirSync(COLLECTIONS_DIR)) {
+        if (file.endsWith('.json') && !perCollection[file.slice(0, -'.json'.length)]) {
+            fs.unlinkSync(path.join(COLLECTIONS_DIR, file));
+        }
+    }
+    for (const [collection, data] of Object.entries(perCollection)) {
+        const file = path.join(COLLECTIONS_DIR, `${collection}.json`);
+        fs.writeFileSync(file, JSON.stringify(data));
+        const fileKb = (fs.statSync(file).size / 1024).toFixed(0);
+        console.log(`  ${path.relative(ROOT, file)} (${fileKb} KB)`);
+    }
 }
 
 main();

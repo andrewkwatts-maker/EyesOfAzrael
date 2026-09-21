@@ -26,10 +26,22 @@
  *
  * COST
  *
- * static/topics.json is one CDN fetch of about 400 KB, cached for the session,
- * and holds ids rather than records - the entity base is already in memory and
- * has every field the cards need. No Firestore document is read to render any
- * page in this file.
+ * static/topics.json is one CDN fetch of a few tens of KB, cached for the
+ * session, and holds only the header of each topic (slug/name/icon/total) -
+ * enough for every cross-collection view (the home page's theme preview,
+ * /#/explore) but not enough to list a topic's actual members.
+ *
+ * A topic's members, and a collection's prominence scores, live in
+ * static/topics/<collection>.json instead - one file per collection, fetched
+ * only by the page that is actually browsing or reading that collection.
+ * Splitting it out this way is what stops a visit to /#/browse/deities from
+ * downloading Creatures', Heroes', Items' and Places' topic memberships and
+ * prominence maps along with its own; before the split every page that
+ * touched topics at all paid for every collection, all the time.
+ *
+ * Ids rather than records either way - the entity base is already in memory
+ * and has every field the cards need. No Firestore document is read to
+ * render any page in this file.
  */
 
 class TopicsService {
@@ -42,8 +54,14 @@ class TopicsService {
      */
     static _loadPromise = null;
 
+    /** One promise per collection, same caching rationale as `_loadPromise`. */
+    static _collectionPromises = new Map();
+
+    /** One reverse (entityId -> topics) index per collection, built on first use. */
+    static _reverseIndexByCollection = new Map();
+
     /**
-     * Fetch the topic file once per page load.
+     * Fetch the shared topic index once per page load.
      *
      * A promise that did not produce data is not kept. Caching the promise is
      * what stops two panels fetching the file twice in the same frame, but
@@ -72,6 +90,31 @@ class TopicsService {
         return TopicsService._loadPromise;
     }
 
+    /**
+     * Fetch one collection's topics (with members) and prominence scores.
+     *
+     * Same promise-cache-that-forgets-failure shape as `load()`, keyed per
+     * collection so browsing deities then creatures in one session fetches
+     * each collection's file exactly once, not the whole topic corpus.
+     */
+    static loadCollection(collection) {
+        if (!collection) return Promise.resolve(null);
+        if (!TopicsService._collectionPromises.has(collection)) {
+            const attempt = Promise.race([
+                fetch(`/static/topics/${encodeURIComponent(collection)}.json`)
+                    .then((r) => (r.ok ? r.json() : null)),
+                new Promise((resolve) => setTimeout(() => resolve(null), 8000))
+            ])
+                .catch(() => null)
+                .then((data) => {
+                    if (!data) TopicsService._collectionPromises.delete(collection);
+                    return data;
+                });
+            TopicsService._collectionPromises.set(collection, attempt);
+        }
+        return TopicsService._collectionPromises.get(collection);
+    }
+
     static async regions() {
         const data = await TopicsService.load();
         return (data && data.regions) || [];
@@ -82,15 +125,24 @@ class TopicsService {
         return regions.find((r) => r.slug === slug) || null;
     }
 
+    /** Full topic rows (members included) for one collection. */
     static async topicsFor(collection) {
-        const data = await TopicsService.load();
-        return (data && data.topics && data.topics[collection]) || [];
+        const data = await TopicsService.loadCollection(collection);
+        return (data && data.topics) || [];
     }
 
+    /**
+     * Topic headers - no `members` - across every collection.
+     *
+     * This is the shape every cross-collection view actually renders (a tile:
+     * icon, name, count, blurb), so it is served from the small shared index
+     * rather than fetching every collection's full topic file just to throw
+     * away its membership lists.
+     */
     static async allTopics() {
         const data = await TopicsService.load();
-        if (!data || !data.topics) return [];
-        return Object.values(data.topics).flat();
+        if (!data || !data.topicsIndex) return [];
+        return Object.values(data.topicsIndex).flat();
     }
 
     static async topic(collection, slug) {
@@ -100,8 +152,8 @@ class TopicsService {
 
     /** id -> prominence score, for ordering a listing by something other than the alphabet. */
     static async prominence(collection) {
-        const data = await TopicsService.load();
-        return (data && data.prominent && data.prominent[collection]) || {};
+        const data = await TopicsService.loadCollection(collection);
+        return (data && data.prominent) || {};
     }
 
     /**
@@ -118,35 +170,35 @@ class TopicsService {
     /**
      * The topics one entity belongs to.
      *
-     * The reverse of the members lists, built once on first use: 10,700
-     * assignments is a single pass, and doing it per entity page would be a
-     * scan of every topic for every visit.
+     * The reverse of one collection's members lists, built once per collection
+     * on first use rather than for the whole topic corpus - an entity page
+     * only ever needs its own collection's assignments, and building the
+     * index from `topicsFor(collection)` means it shares that collection's
+     * already-cached fetch instead of pulling in the other collections' data
+     * just to index and ignore it.
      *
      * This is what makes the tier two-directional. Without it a reader can go
      * topic -> entity and no further sideways: Mjolnir's page carried two links
      * in total, so arriving there ended the journey.
      */
     static async topicsForEntity(collection, entityId) {
-        const data = await TopicsService.load();
-        if (!data || !data.topics) return [];
+        const topics = await TopicsService.topicsFor(collection);
+        if (!topics.length) return [];
 
-        if (!TopicsService._reverseIndex) {
+        if (!TopicsService._reverseIndexByCollection.has(collection)) {
             const index = new Map();
-            for (const [coll, topics] of Object.entries(data.topics)) {
-                for (const topic of topics) {
-                    for (const member of topic.members || []) {
-                        const key = `${coll}:${member[0]}`;
-                        if (!index.has(key)) index.set(key, []);
-                        index.get(key).push({
-                            slug: topic.slug, name: topic.name, icon: topic.icon, collection: coll, total: topic.total
-                        });
-                    }
+            for (const topic of topics) {
+                for (const member of topic.members || []) {
+                    if (!index.has(member[0])) index.set(member[0], []);
+                    index.get(member[0]).push({
+                        slug: topic.slug, name: topic.name, icon: topic.icon, collection, total: topic.total
+                    });
                 }
             }
-            TopicsService._reverseIndex = index;
+            TopicsService._reverseIndexByCollection.set(collection, index);
         }
 
-        const hits = TopicsService._reverseIndex.get(`${collection}:${entityId}`) || [];
+        const hits = TopicsService._reverseIndexByCollection.get(collection).get(entityId) || [];
         // Smallest topic first: "Dragons & Serpents" says more about a creature
         // than "Shapeshifters", which half the bestiary belongs to.
         return [...hits].sort((a, b) => a.total - b.total);
@@ -343,7 +395,7 @@ class ExploreView {
             return;
         }
 
-        const topicsByCollection = (data && data.topics) || {};
+        const topicsByCollection = (data && data.topicsIndex) || {};
         const sections = Object.entries(topicsByCollection).map(([collection, topics]) => {
             const label = (collections[collection] && collections[collection].label) || TopicsUI.titleCase(collection);
             return `
@@ -434,7 +486,7 @@ class TopicView {
             // Offering a Try again button for a topic that does not exist asks
             // the reader to keep pressing it for something no amount of
             // retrying will produce.
-            const index = await TopicsService.load();
+            const index = await TopicsService.loadCollection(collection);
             if (index) {
                 container.innerHTML = TopicsUI.empty(
                     `There is no "${slug}" topic in ${TopicsUI.titleCase(collection)}.`,
