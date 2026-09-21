@@ -53,11 +53,51 @@ const BUDDHIST_FIXTURE = {
     }
 };
 
+const EGYPTIAN_SPARSE_FIXTURE = {
+    thoth: [
+        // Every optional field absent, to exercise the `|| fallback` side of
+        // each one - the fixtures above only ever exercise the "field is
+        // present" side.
+        { text_id: 'REAL099' }
+    ]
+};
+
+const BUDDHIST_SPARSE_FIXTURE = {
+    terms: {
+        // No pinyin, no english - only the raw key is a usable alias.
+        法: {
+            chinese: '法',
+            occurrences: [
+                // No title_pinyin, no line_number, no version, no context,
+                // no pinyin_line - exercises every fallback in one entry.
+                { sutra_name: '無題經', chinese_line: '法無定法' }
+            ]
+        }
+    }
+};
+
 describe('normalizeEgyptian()', () => {
     test('one entry per term, aliases lowercased', () => {
         const entries = normalizeEgyptian(EGYPTIAN_FIXTURE);
         expect(entries).toHaveLength(2);
         expect(entries.map((e) => e.aliases[0]).sort()).toEqual(['osiris', 'ra']);
+    });
+
+    test('falls back to defaults for every optional field when absent', () => {
+        const [entry] = normalizeEgyptian(EGYPTIAN_SPARSE_FIXTURE);
+        const passage = entry.passages[0];
+        expect(passage.textName).toBe('Untitled text');
+        expect(passage.citation).toBeNull();
+        expect(passage.context).toBe('');
+        expect(passage.translation).toBeNull();
+        expect(passage.language).toBe('egyptian');
+        expect(passage.url).toBeNull();
+        expect(passage.demo).toBe(false); // REAL099 does not start with "DEMO"
+    });
+
+    test('entries is coerced to an empty passage list when not an array', () => {
+        const entries = normalizeEgyptian({ broken: 'not-an-array' });
+        expect(entries[0].passages).toEqual([]);
     });
 
     test('flags DEMO-prefixed text_id as demo data, real ids as not', () => {
@@ -95,6 +135,24 @@ describe('normalizeBuddhist()', () => {
     test('returns an empty array when "terms" is missing', () => {
         expect(normalizeBuddhist({})).toEqual([]);
         expect(normalizeBuddhist(null)).toEqual([]);
+    });
+
+    test('falls back to defaults for every optional field when absent', () => {
+        const [entry] = normalizeBuddhist(BUDDHIST_SPARSE_FIXTURE);
+        // No pinyin/english to filter(Boolean) in - only the Chinese key survives.
+        expect(entry.aliases).toEqual(['法']);
+
+        const passage = entry.passages[0];
+        expect(passage.textName).toBe('無題經'); // falls back to sutra_name
+        expect(passage.citation).toBeNull(); // no line_number, no version
+        expect(passage.context).toBe('法無定法'); // falls back to chinese_line
+        expect(passage.translation).toBeNull();
+        expect(passage.matchedTerm).toBe('法'); // falls back to the Chinese key itself
+    });
+
+    test('occurrences is coerced to an empty passage list when not an array', () => {
+        const entries = normalizeBuddhist({ terms: { x: { pinyin: 'x' } } });
+        expect(entries[0].passages).toEqual([]);
     });
 });
 
@@ -161,5 +219,32 @@ describe('CorpusPassageIndex.search() (via a stubbed fetch)', () => {
         await CorpusPassageIndex.search('buddha');
         await CorpusPassageIndex.search('osiris');
         expect(global.fetch).toHaveBeenCalledTimes(2); // one egyptian + one buddhist fetch, ever
+    });
+
+    test('an empty or whitespace-only term returns an empty array without fetching anything', async () => {
+        expect(await CorpusPassageIndex.search('')).toEqual([]);
+        expect(await CorpusPassageIndex.search('   ')).toEqual([]);
+        expect(await CorpusPassageIndex.search(undefined)).toEqual([]);
+        expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    test('a substring-only match (no exact alias) still returns the passage', async () => {
+        // "budd" is not itself an alias of the 佛/fo/Buddha entry, but it is a
+        // substring of "buddha" - this is the fallback-to-partial-match path,
+        // never reached in the exact-match tests above.
+        const results = await CorpusPassageIndex.search('budd');
+        expect(results).toHaveLength(1);
+        expect(results[0].source).toBe('buddhist');
+    });
+
+    test('a non-ok fetch response for one source is treated the same as a network failure', async () => {
+        global.fetch = jest.fn((url) => {
+            if (url.includes('egyptian')) return Promise.resolve({ ok: false });
+            return Promise.resolve({ ok: true, json: () => Promise.resolve(BUDDHIST_FIXTURE) });
+        });
+        jest.resetModules();
+        require('../../js/services/corpus-passage-index.js');
+        expect(await window.CorpusPassageIndex.search('ra')).toEqual([]);
+        expect(await window.CorpusPassageIndex.search('buddha')).toHaveLength(1);
     });
 });

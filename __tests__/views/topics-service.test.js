@@ -97,6 +97,34 @@ describe('TopicsService', () => {
             expect(fetchMock).toHaveBeenCalledTimes(1);
             expect(fetchMock).toHaveBeenCalledWith('/static/topics.json');
         });
+
+        test('collections() returns the shared collections map', async () => {
+            expect(await TopicsService.collections()).toEqual(sharedIndex.collections);
+        });
+
+        test('otherTraditions() returns the shared leftover-traditions list', async () => {
+            expect(await TopicsService.otherTraditions()).toEqual(sharedIndex.otherTraditions);
+        });
+
+        test('traditionCounts() looks up a tradition case- and separator-insensitively', async () => {
+            const [key] = Object.keys(sharedIndex.traditionCounts);
+            const expected = sharedIndex.traditionCounts[key];
+
+            expect(await TopicsService.traditionCounts(key)).toEqual(expected);
+            expect(await TopicsService.traditionCounts(key.toUpperCase())).toEqual(expected);
+            expect(await TopicsService.traditionCounts(key.replace(/ /g, '_'))).toEqual(expected);
+        });
+
+        test('traditionCounts() returns null for a tradition with no recorded counts', async () => {
+            expect(await TopicsService.traditionCounts('no-such-tradition-at-all')).toBeNull();
+        });
+
+        test('collections()/otherTraditions()/traditionCounts() all share one fetch of the shared index', async () => {
+            await TopicsService.collections();
+            await TopicsService.otherTraditions();
+            await TopicsService.traditionCounts('greek');
+            expect(fetchMock.mock.calls.filter(([url]) => url === '/static/topics.json').length).toBe(1);
+        });
     });
 
     describe('per-collection files (static/topics/<collection>.json)', () => {
