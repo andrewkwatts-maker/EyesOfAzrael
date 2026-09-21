@@ -1,0 +1,23 @@
+{
+  "purpose": "Re-verification of data/legacy-port/suspect-names.json against the entity base as it stands today. Reporting only -- nothing in this pass renamed or altered any entity.",
+  "verifiedAt": "2026-09-21",
+  "sourceTotal": 81,
+  "summary": {
+    "unchanged": 62,
+    "idMoved": 1,
+    "stillBadDifferentName": 6,
+    "arguablyResolvedAsHubTitle": 2,
+    "genuinelyFixedSincePreviousPass": 1,
+    "truncationArtifactOnly": 9
+  },
+  "notes": [
+    "62 of 81 entries are byte-for-byte unchanged: still exactly the bad names the original pass recorded. No repair has happened for these.",
+    "9 entries (all jewish_* comparative-essay ids) only *look* changed because suspect-names.json stored a ~50-character truncated preview of the name, not the full string. The full names were always fine and match the file's own generatedNote, which already flagged this bucket as false positives. Not a data change, not a bug -- a reporting artifact of how the original file was generated.",
+    "deities/tarot_high-priestess no longer exists under that id -- it was re-slugged to deities/high-priestess at some point after this report was generated (unrelated to the name problem). The name itself, 'Guardian of Hidden Knowledge' (a description of the tarot card's meaning, not a name), is UNCHANGED and still wrong. This is a live gap in suspect-names.json: its `id` field can go stale independently of whether the underlying problem is fixed, so a future re-run of whatever generated it should re-key on something more durable than id, or re-resolve by title before concluding a record disappeared.",
+    "deities/ptah is the one entry genuinely fixed since the original pass, exactly as the file's own generatedNote already claimed ('Creator God & Master Craftsman | Egyptian Mytholog...' -> 'Ptah').",
+    "6 entries (japanese_creation-of-japan, christian_creation, hindu_creation, islamic_creation, persian_creation, roman_creation) changed from a bare 'Creation' to a mythology-label name ('Christian Mythology', 'Persian Mythology', 'Hindu Creation Cosmology', ...). These are NOT fixed -- they traded one bad-name pattern (a generic single word) for another (the tradition's own label standing in for a subject). scripts/audit-entity-names.js's independent 'mythologyAsName' check catches several of these under its own, much larger count (103 records site-wide, not limited to this list) -- the two audits are looking for overlapping but not identical problems and neither supersedes the other.",
+    "2 entries (sumerian_creatures -> 'Sumerian Mythological Creatures', egyptian_creation-myths -> 'Egyptian Cosmology') read as legitimate collection-hub titles now, though both are still filed as members of their own collection rather than being pure navigation hubs, so a human should confirm before clearing them off the list.",
+    "deities/alliances-ogun-fierce-rivalry is unchanged in substance (still a 'heading + subheading' concatenation) -- only the separator character changed ('|' -> a literal newline) as an incidental side effect of unrelated data formatting."
+  ],
+  "recommendation": "No auto-fix applied, per instruction. Of the 81, 68 are confirmed still-bad (62 unchanged + 6 relabeled-but-still-bad) and belong in front of a person: most are multi-entity list records (a single record standing in for several real subjects, e.g. 'Cronus, Zeus, Perseus, Hermes') that a rename cannot repair because the record itself conflates multiple entities -- the generatedNote's own conclusion still holds. 9 are false positives from truncated display text and can be dropped from the list outright. 1 (tarot_high-priestess/high-priestess) needs its id corrected before it can be tracked at all. 1 (ptah) is done. 2 are borderline and worth a second look rather than an automatic close."
+}
