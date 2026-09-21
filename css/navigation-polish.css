@@ -452,7 +452,21 @@
     gap: 0.375rem;
 }
 
-.footer-section-link {
+/* Qualified with .site-footer, not just `.footer-section-link` on its own:
+   css/accessibility.css's `.site-footer a { color: inherit; }` is (0,1,1) -
+   one class plus the `a` type selector - which beats a bare one-class
+   `.footer-section-link` (0,1,0) regardless of which rule comes later in the
+   bundle. Losing that war left every footer sitemap link (Home, Explore,
+   Mythologies, ...) rendering in `<body>`'s inherited colour instead of the
+   theme's --color-text-secondary - and body's colour, per
+   accessibility.css's `prefers-color-scheme` blocks, is black on a
+   light-mode OS and white on a dark-mode one, entirely independent of which
+   in-app shader theme (Night, Cosmic, Fire, ...) is active. A visitor on a
+   light-mode OS using the app's own default Night theme got literal
+   rgb(0,0,0) text over the Night shader's near-black canvas - contrast
+   ratio ~1.1:1 against a 4.5:1 AA requirement, on every link in the footer.
+   Adding the ancestor class makes this (0,2,0), which wins. */
+.site-footer .footer-section-link {
     color: var(--color-text-secondary, #adb5bd);
     text-decoration: none;
     font-size: 0.875rem;
@@ -669,7 +683,9 @@
     gap: 0.75rem;
 }
 
-.footer-social-link {
+/* Same specificity fix as .footer-section-link above, same reason: a bare
+   one-class selector cannot beat accessibility.css's `.site-footer a`. */
+.site-footer .footer-social-link {
     width: 36px;
     height: 36px;
     display: flex;
