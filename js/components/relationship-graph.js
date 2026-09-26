@@ -197,12 +197,13 @@
                 const items = Array.isArray(relData) ? relData : [relData];
                 items.forEach(item => {
                     if (item && (typeof item === 'string' || item.name || item.id)) {
+                        const resolved = this.resolveRelationshipType(relType, item);
                         nodes.push({
                             id: item.id || this.slugify(typeof item === 'string' ? item : item.name),
                             name: typeof item === 'string' ? item : (item.name || item.id),
-                            type: item.type || this.inferTypeFromRelationship(relType),
+                            type: item.type || this.inferTypeFromRelationship(resolved),
                             icon: item.icon,
-                            relationshipType: relType,
+                            relationshipType: resolved,
                             url: item.url,
                             isCentral: false
                         });
@@ -363,7 +364,7 @@
          */
         renderNode(node, extraClass = '') {
             const icon = this.getNodeIcon(node);
-            const relConfig = this.relationshipTypes[node.relationshipType] || this.relationshipTypes.default;
+            const relConfig = this.relationshipConfig(node.relationshipType);
             const isClickable = this.options.interactive && (node.url || this.options.onEntityClick);
 
             const tag = isClickable ? 'a' : 'div';
@@ -385,6 +386,30 @@
                     <span class="rg-node-rel-label">${relConfig.label}</span>
                 </${tag}>
             `;
+        }
+
+        /**
+         * Icon, colour and label for a relationship.
+         *
+         * One place, because the node and the legend must agree: the node
+         * resolved an unnamed relationship to its own word while the legend
+         * still read it straight out of relationshipTypes, so a "protector"
+         * node sat under a "Connected" legend entry -- and two different
+         * unnamed relationships produced two identical "Connected" rows.
+         */
+        relationshipConfig(type) {
+            const known = this.relationshipTypes[type];
+            if (known) return known;
+            // An unrecognised relationship still reads better as the word the
+            // source used ("Protector") than as "Connected".
+            return { ...this.relationshipTypes.default, label: this.titleCaseRelationship(type) };
+        }
+
+        /** A relationship key as a readable label. */
+        titleCaseRelationship(value) {
+            const text = String(value || '').replace(/[_-]+/g, ' ').trim();
+            if (!text) return this.relationshipTypes.default.label;
+            return text.replace(/\b\w/g, (c) => c.toUpperCase());
         }
 
         /**
@@ -485,7 +510,7 @@
                     <h5 class="rg-legend-title">Legend</h5>
                     <div class="rg-legend-items">
                         ${usedTypes.map(type => {
-                            const config = this.relationshipTypes[type] || this.relationshipTypes.default;
+                            const config = this.relationshipConfig(type);
                             return `
                                 <div class="rg-legend-item" style="--rel-color: ${config.color}">
                                     <span class="rg-legend-icon">${config.icon}</span>
@@ -665,6 +690,57 @@
         /**
          * Infer entity type from relationship type
          */
+        /**
+         * The relationship this node stands in to the central entity.
+         *
+         * Two things were losing the taxonomy. The container key is plural in
+         * the data -- `companions`, `enemies`, `allies` -- while
+         * this.relationshipTypes is keyed singular, so every node missed and
+         * fell through to `default`: one grey "Connected" label and one colour
+         * for every relationship on the site. And each stored item carries its
+         * own, more specific `relationship` ("protector", "animal", "ally"),
+         * which was read by nothing at all.
+         *
+         * The item's own value wins; otherwise the container key is matched
+         * singular or plural.
+         */
+        resolveRelationshipType(relType, item) {
+            const clean = (value) => String(value == null ? '' : value).trim().toLowerCase();
+
+            // Plural container keys: `companions` -> companion, but also
+            // `enemies` -> enemy, which trimming a trailing "s" gets wrong.
+            // extractRelationships collects `children` and `parents`; -ies/-s
+            // handles the rest.
+            const irregular = { children: 'child', people: 'person' };
+
+            const known = (value) => {
+                const key = clean(value);
+                if (!key) return null;
+                if (this.relationshipTypes[key]) return key;
+                if (irregular[key] && this.relationshipTypes[irregular[key]]) return irregular[key];
+                if (key.endsWith('ies') && this.relationshipTypes[`${key.slice(0, -3)}y`]) {
+                    return `${key.slice(0, -3)}y`;
+                }
+                if (key.endsWith('s') && this.relationshipTypes[key.slice(0, -1)]) {
+                    return key.slice(0, -1);
+                }
+                return null;
+            };
+
+            const fromItem = item && typeof item === 'object' ? clean(item.relationship) : '';
+
+            // The item's own word is the real datum and always wins, named by
+            // the taxonomy or not: across the corpus these are 25,344 values
+            // over 826 distinct words, and "protector", "helper", "animal" and
+            // "mount" -- none of them in the taxonomy -- are among the most
+            // common. Collapsing them into the container's "companion" would
+            // throw away the specific relationship in favour of the generic
+            // bucket it happens to be stored in. An unnamed one keeps the
+            // default colour and is labelled with its own word.
+            if (fromItem) return known(fromItem) || fromItem;
+            return known(relType) || clean(relType);
+        }
+
         inferTypeFromRelationship(relType) {
             const familyRels = ['father', 'mother', 'parent', 'child', 'sibling', 'spouse', 'consort', 'offspring'];
             if (familyRels.includes(relType)) return 'deity';

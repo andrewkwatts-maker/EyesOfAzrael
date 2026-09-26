@@ -528,6 +528,12 @@ class MobileGestures {
         // Create pull-to-refresh indicator
         const indicator = document.createElement('div');
         indicator.className = 'pull-to-refresh-indicator';
+        // role="status" for the text this element exists to report -- it changes
+        // between "Pull to refresh", "Release to refresh" and "Refreshing...",
+        // and nothing announced those. It also settles an axe `region`
+        // violation: the indicator is inserted as a direct child of <body>, so
+        // its text sat outside every landmark on every mobile page.
+        indicator.setAttribute('role', 'status');
         indicator.innerHTML = `
             <div class="ptr-progress">
                 <div class="ptr-arrow">

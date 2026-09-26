@@ -634,26 +634,23 @@ test.describe('View Mode Toggle', () => {
         await expect(listBtn).toBeVisible({ timeout: 5000 });
 
         const grid = page.locator('.entity-grid, #entityGrid').first();
+        const firstCard = page.locator('.entity-card').first();
 
         // Verify grid view is active (default)
         await expect(grid).toHaveClass(/grid-view/);
-        const gridColumns = await grid.evaluate(el => window.getComputedStyle(el).gridTemplateColumns);
+        await expect(firstCard).toHaveCSS('flex-direction', 'column');
 
         // Switch to list view
         await listBtn.click();
 
-        // Verify list view class applied and the layout genuinely changed:
-        // .entity-grid.list-view sets grid-template-columns: 1fr
-        // (js/views/browse-category-view.js getStyles()), a real, checkable
-        // difference from grid view's multi-column auto-fill layout.
+        // The card's axis is what distinguishes the two modes, and it is the
+        // one signal that holds at every width. Column count does not: below
+        // 768px both modes are a single column by design, so a
+        // grid-template-columns comparison -- what this used to assert -- can
+        // only pass on a wide viewport. A list row stacked like a grid card is
+        // exactly the bug this now catches.
         await expect(grid).toHaveClass(/list-view/);
-        await page.waitForFunction((prevColumns) => {
-            const el = document.querySelector('.entity-grid, #entityGrid');
-            return !!el && window.getComputedStyle(el).gridTemplateColumns !== prevColumns;
-        }, gridColumns, { timeout: 2000 });
-
-        const listColumns = await grid.evaluate(el => window.getComputedStyle(el).gridTemplateColumns);
-        expect(listColumns).not.toBe(gridColumns);
+        await expect(firstCard).toHaveCSS('flex-direction', 'row');
 
         // Switch back to grid view
         await gridBtn.click();
