@@ -461,6 +461,9 @@
                     <!-- Chronology, when the entity has dates -->
                     ${this.renderTimeline(entity)}
 
+                    <!-- Named companions, allies, enemies and kin -->
+                    ${this.renderRelationshipGraph(entity)}
+
                     <!-- Outbound links and "what links here", across all four datasets -->
                     ${this.renderConnections(entity, entityType)}
 
@@ -547,6 +550,9 @@
 
                         <!-- Chronology, when the entity has dates -->
                         ${this.renderTimeline(entity)}
+
+                        <!-- Named companions, allies, enemies and kin -->
+                        ${this.renderRelationshipGraph(entity)}
 
                         <!-- Outbound links and "what links here" -->
                         ${this.renderConnections(entity, entityType)}
@@ -665,6 +671,36 @@
             } catch (err) {
                 // A malformed date must not take down the rest of the entity.
                 console.warn('[EntityDetailView] Timeline failed to render:', err.message);
+                return '';
+            }
+        }
+
+        /**
+         * Render the entity's relationship graph, when it has relationships.
+         *
+         * Distinct from renderConnections(), which lists links between entity
+         * pages from relatedEntities. This draws the named beings an entity
+         * stands in a relationship to -- companions, allies, enemies, kin --
+         * which are stored with their own relationship word and description and
+         * were shown nowhere. Returns '' below two nodes so an entity with no
+         * relationships gains no empty panel.
+         */
+        renderRelationshipGraph(entity) {
+            const Graph = (typeof window !== 'undefined' && window.RelationshipGraph) || null;
+            if (!Graph || !entity) return '';
+
+            try {
+                if (!this._relationshipGraph) this._relationshipGraph = new Graph();
+                const markup = this._relationshipGraph.render(entity);
+                if (!markup || markup.includes('No relationships to display')) return '';
+                return `
+                    <section class="edv-relationships-section" aria-labelledby="edv-relationships-heading">
+                        <h2 id="edv-relationships-heading">Relationships</h2>
+                        ${markup}
+                    </section>
+                `;
+            } catch (err) {
+                console.warn('[EntityDetailView] Relationship graph failed to render:', err.message);
                 return '';
             }
         }
