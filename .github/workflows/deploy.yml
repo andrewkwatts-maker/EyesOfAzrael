@@ -88,6 +88,18 @@ jobs:
     needs: test
     if: github.event_name == 'pull_request'
 
+    # action-hosting-deploy opens a "Deploy Preview" check run and comments the
+    # preview URL on the pull request. The workflow declared no permissions at
+    # all, so the job ran with the repository default -- read-only -- and the
+    # action died on POST /check-runs with "Resource not accessible by
+    # integration" (403, x-accepted-github-permissions: checks=write) before it
+    # ever reached Firebase. Granted here rather than at workflow level so the
+    # test and production-deploy jobs keep the read-only token.
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
+
     steps:
       - uses: actions/checkout@v4
 

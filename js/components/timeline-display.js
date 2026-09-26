@@ -221,6 +221,29 @@
         buildTimelineData(entity, temporal) {
             const events = [];
 
+            // entity.timeline is where the corpus actually keeps its
+            // chronology: an array of { date, event }, present on 4,965 of
+            // 13,585 entities and carrying 17,243 events between them. Every
+            // other source below reads entity.temporal, which 76 entities have.
+            // Nothing read entity.timeline at all, so the richest field in the
+            // data contributed nothing and most entities produced the empty
+            // state.
+            if (Array.isArray(entity.timeline)) {
+                entity.timeline.forEach((item) => {
+                    if (!item) return;
+                    // The stored key is `event` and holds the description of
+                    // what happened, which is this renderer's `title`.
+                    const title = typeof item === 'string' ? item : item.event || item.title;
+                    if (!title) return;
+                    events.push({
+                        type: item.type || 'default',
+                        date: typeof item === 'string' ? null : item.date,
+                        title,
+                        description: item.description || item.significance || ''
+                    });
+                });
+            }
+
             // Add first attestation
             if (temporal.firstAttestation) {
                 events.push({
@@ -254,6 +277,28 @@
                 });
             }
 
+            // historicalDate is on all 76 entities that carry `temporal` --
+            // every one of them -- and was the only such field nothing read.
+            if (temporal.historicalDate) {
+                const span = temporal.historicalDate;
+                if (span.start) {
+                    events.push({
+                        type: 'default',
+                        date: span.start,
+                        title: 'Earliest attested use',
+                        description: span.display || ''
+                    });
+                }
+                if (span.end) {
+                    events.push({
+                        type: 'default',
+                        date: span.end,
+                        title: 'Latest attested use',
+                        description: ''
+                    });
+                }
+            }
+
             // Add mythological dates
             if (temporal.mythologicalDate) {
                 events.push({
@@ -266,7 +311,11 @@
 
             return {
                 events: this.sortEvents(events),
+                // timelinePosition is a string in the corpus ("Medieval/
+                // Classical"), not the object with keyMoments that the branch
+                // above looks for, so it is an era label and nothing else.
                 era: temporal.culturalPeriod || temporal.era
+                    || (typeof temporal.timelinePosition === 'string' ? temporal.timelinePosition : null)
             };
         }
 
@@ -277,6 +326,13 @@
             return events.sort((a, b) => {
                 const yearA = this.getYear(a.date);
                 const yearB = this.getYear(b.date);
+                // An undated event ("Various") has no place in the sequence, so
+                // it goes after the dated ones rather than landing at year 0 in
+                // the middle of the BCE entries.
+                if (yearA === 0 || yearB === 0) {
+                    if (yearA === yearB) return 0;
+                    return yearA === 0 ? 1 : -1;
+                }
                 return yearA - yearB;
             });
         }
@@ -287,12 +343,64 @@
         getYear(dateObj) {
             if (!dateObj) return 0;
             if (typeof dateObj === 'number') return dateObj;
-            if (typeof dateObj === 'string') {
-                const match = dateObj.match(/-?\d+/);
-                return match ? parseInt(match[0]) : 0;
-            }
+            if (typeof dateObj === 'string') return this.parseYearString(dateObj);
             if (dateObj.year !== undefined) return dateObj.year;
-            if (dateObj.start !== undefined) return dateObj.start;
+            if (dateObj.start !== undefined) return this.getYear(dateObj.start);
+            return 0;
+        }
+
+        /**
+         * Year for a human-written date string.
+         *
+         * `entity.timeline` dates are prose, not structured values, and taking
+         * the first run of digits -- which is what this used to do -- gets the
+         * common forms wrong in ways that reorder the timeline: "c. 3000 BCE"
+         * read as +3000 and sorted after the 20th century, "Early 20th Century"
+         * read as year 20, "April 20, 2010" read as year 20, and "Present" read
+         * as year 0 and sorted before everything. Between them those forms are
+         * about a third of the 17,000 dates in the corpus.
+         *
+         * Returns 0 for a string carrying no year ("Various"). 0 is the
+         * established "no year" signal here: the scale already filters it out,
+         * and there is no year zero in historical dating for it to collide with.
+         */
+        parseYearString(value) {
+            const text = String(value).trim();
+            if (!text) return 0;
+            const lower = text.toLowerCase();
+
+            // "Present" is a real position on the timeline -- now -- not a
+            // missing date. Giving it the current year sorts it last and lets
+            // it bound the scale, instead of dropping it at year 0.
+            if (/\b(present|today|ongoing|current|now)\b/.test(lower)) {
+                return new Date().getFullYear();
+            }
+
+            const isBCE = /\b(bce|bc)\b|\bb\.\s*c/.test(lower);
+            const sign = isBCE ? -1 : 1;
+
+            // "Early 20th Century", "1st-3rd Century CE" -- take the first
+            // ordinal and place it within its hundred years.
+            const century = lower.match(/(\d+)\s*(?:st|nd|rd|th)?\s*[-–]?\s*(?:\d+\s*(?:st|nd|rd|th)?\s*)?centur/);
+            if (century) {
+                const n = parseInt(century[1], 10);
+                if (n > 0) {
+                    const base = (n - 1) * 100;
+                    const offset = /\bearly\b/.test(lower) ? 10
+                        : /\b(late|end)\b/.test(lower) ? 90
+                            : 50;
+                    return sign * (base + offset);
+                }
+            }
+
+            // Prefer a four-digit year, so "April 20, 2010" is 2010 rather than
+            // 20 and "1950s-1970s" is 1950.
+            const four = text.match(/\d{4}/);
+            if (four) return sign * parseInt(four[0], 10);
+
+            const any = text.match(/\d+/);
+            if (any) return sign * parseInt(any[0], 10);
+
             return 0;
         }
 
