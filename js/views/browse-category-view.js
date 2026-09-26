@@ -162,6 +162,20 @@ class BrowseCategoryView {
         this.mythology = options.mythology;
         this.container = container;
 
+        // The router builds a new BrowseCategoryView per navigation, but every
+        // one of them writes to the same mount point, and this method awaits a
+        // network load that can take seconds. Moving from #/browse/deities to
+        // #/browse/creatures therefore leaves two renders in flight, and the
+        // one that resolves last owns the page -- so the slower, abandoned
+        // deities load would paint deities over the creatures the visitor asked
+        // for, header and grid together, with no error anywhere.
+        //
+        // The sequence is static because the race is between instances. A
+        // render claims the mount point by taking the next number, and stops at
+        // the next checkpoint once a newer render has taken one.
+        const renderSeq = ++BrowseCategoryView._renderSeq;
+        const superseded = () => renderSeq !== BrowseCategoryView._renderSeq;
+
         console.log(`[Browse View] Rendering ${this.category}${this.mythology ? ` (${this.mythology})` : ''}`);
 
         // Show loading state with skeleton
@@ -178,6 +192,11 @@ class BrowseCategoryView {
                 )
             ]);
 
+            if (superseded()) {
+                console.log(`[Browse View] Abandoning ${this.category}: superseded by a newer route`);
+                return;
+            }
+
             // Fade out loading before replacing content
             const loadingEl = container.querySelector('.loading-container');
             if (loadingEl) {
@@ -185,6 +204,11 @@ class BrowseCategoryView {
                 loadingEl.style.opacity = '0';
                 loadingEl.style.transition = 'opacity 0.2s ease-out';
                 await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            if (superseded()) {
+                console.log(`[Browse View] Abandoning ${this.category}: superseded by a newer route`);
+                return;
             }
 
             // Render content
@@ -209,6 +233,7 @@ class BrowseCategoryView {
 
             // Trigger fade-in animation
             requestAnimationFrame(() => {
+                if (superseded()) return;
                 const content = container.firstElementChild;
                 if (content) {
                     content.classList.add('content-loaded');
@@ -229,6 +254,10 @@ class BrowseCategoryView {
 
         } catch (error) {
             console.error('[Browse View] Error:', error);
+            // An abandoned render's failure is not this page's failure. Without
+            // this, a timeout on the route the visitor already left replaces the
+            // route they are on with an error screen.
+            if (superseded()) return;
             this.showError(container, error);
 
             // Emit error event
@@ -4217,6 +4246,13 @@ class BrowseCategoryView {
                 /* List View Adjustments */
                 .entity-grid.list-view .entity-card {
                     display: flex;
+                    /* .entity-card is flex-direction: column, and this rule never
+                       overrode it, so a "list" row stacked exactly like a grid
+                       card -- while the max-width / flex: 1 below only mean
+                       anything across a row. List view has never actually been a
+                       list. On desktop the column count still dropped to 1fr, so
+                       something changed and the break stayed hidden. */
+                    flex-direction: row;
                     align-items: center;
                     gap: var(--spacing-lg, 1.5rem);
                 }
@@ -4649,24 +4685,35 @@ class BrowseCategoryView {
                         gap: var(--spacing-md, 1rem);
                     }
 
+                    /* Below 768px both view modes are a single column, so the
+                       card is the only thing that can distinguish them. This
+                       block used to set flex-direction: column and a full-width
+                       header -- which is precisely a grid card -- so the two
+                       modes rendered identically on a phone and the toggle did
+                       nothing its user could see. A narrow thumbnail beside the
+                       text is the point of a list: more rows per screen. */
                     .entity-grid.list-view .entity-card {
-                        flex-direction: column;
-                        align-items: stretch;
-                        gap: var(--spacing-md, 1rem);
+                        flex-direction: row;
+                        align-items: center;
+                        gap: var(--spacing-sm, 0.75rem);
+                        min-height: 0;
+                        padding: 0.75rem;
                     }
 
                     .entity-grid.list-view .entity-card-header {
-                        max-width: 100%;
-                        width: 100%;
+                        flex: 0 0 5rem;
+                        max-width: 5rem;
+                        width: auto;
                     }
 
                     .entity-grid.list-view .entity-description {
                         -webkit-line-clamp: 2;
                     }
 
+                    /* Tags wrap the row onto a second and third line on a 360px
+                       screen, spending the density the list exists to buy. */
                     .entity-grid.list-view .entity-tags {
-                        max-width: 100%;
-                        justify-content: flex-start;
+                        display: none;
                     }
 
                     .view-label {
@@ -5083,6 +5130,13 @@ class BrowseCategoryView {
  * the boundary and so it is tunable in one place.
  */
 BrowseCategoryView.EARLY_COLLECTION_THRESHOLD = 24;
+
+/**
+ * Monotonic render counter shared by every instance. See render(): the router
+ * makes one view per navigation and they all target the same mount point, so
+ * "am I still the newest render?" cannot be answered from instance state.
+ */
+BrowseCategoryView._renderSeq = 0;
 
 // Global export for non-module script loading
 // Note: ES module export removed to prevent SyntaxError in non-module context

@@ -132,6 +132,13 @@ class BottomNavigation {
      * Render the bottom navigation
      */
     render() {
+        // These items carry no role. They used to be role="menuitem", which axe
+        // reports as a critical aria-required-parent violation on every page:
+        // menuitem is only valid inside role="menu"/"menubar", and the parent
+        // here is a nav landmark. The role also promised a menu widget's
+        // arrow-key handling, which was never implemented. Links inside a
+        // labelled <nav> are already the right semantics for a nav bar.
+
         // Remove existing if present
         const existing = document.getElementById('bottom-nav');
         if (existing) existing.remove();
@@ -147,8 +154,7 @@ class BottomNavigation {
             <a href="${item.route}"
                class="bottom-nav-item"
                data-nav-id="${item.id}"
-               aria-label="${item.label}"
-               role="menuitem">
+               aria-label="${item.label}">
                 <span class="nav-icon" aria-hidden="true">${item.icon}</span>
                 <span class="nav-label">${item.label}</span>
                 ${this.options.showBadges && item.badge ? `
